@@ -14,5 +14,5 @@ public interface IComandoReserva
         int usuarioId,
         CancellationToken cancellationToken);
 
-    Task RegistrarMovimientoAsync(int reservaId, DateTime fecha, int usuarioId, string operacion, CancellationToken cancellationToken);
+    Task RegistrarMovimientoAsync(int reservaId, DateTime fecha, int usuarioId, string operacion, int campamentoId, CancellationToken cancellationToken);
 }

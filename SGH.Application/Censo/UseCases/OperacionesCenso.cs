@@ -1,5 +1,6 @@
 using SGH.Application.Censo.DTOs;
 using SGH.Application.Censo.Interfaces;
+using SGH.Application.Sesion;
 using SGH.Domain.Censo;
 using SGH.Domain.Censo.Entities;
 using SGH.Domain.Censo.Interfaces;
@@ -20,6 +21,21 @@ public sealed class BuscarCensos : IBuscarCensos
         var mensaje = ReglasCenso.ValidarBusqueda(solicitud.Fecha, solicitud.Turno);
         if (mensaje is not null)
             return new ResultadoBusquedaCenso.Rechazada(mensaje);
+
+        if (!AlcanceSesion.TieneCampamento(solicitud.CampamentoId))
+            return new ResultadoBusquedaCenso.Rechazada(AlcanceSesion.SinCampamento);
+
+        if (solicitud.ModuloId > 0 || solicitud.PisoId > 0 || solicitud.HabitacionId > 0)
+        {
+            var propio = await _consulta.FiltroEstaEnCampamentoAsync(
+                solicitud.CampamentoId,
+                solicitud.ModuloId,
+                solicitud.PisoId,
+                solicitud.HabitacionId,
+                cancellationToken);
+            if (!propio)
+                return new ResultadoBusquedaCenso.Rechazada(ReglasCenso.FiltroAjeno);
+        }
 
         var filas = await _consulta.BuscarAsync(new FiltroCenso(
             solicitud.EmpresaMandanteId,
@@ -55,13 +71,16 @@ public sealed class ObtenerCatalogoCenso : IObtenerCatalogoCenso
         _consulta = consulta;
     }
 
-    public async Task<CatalogoCensoDto> EjecutarAsync(int campamentoId, CancellationToken cancellationToken)
+    public async Task<ResultadoCatalogoCenso> EjecutarAsync(int campamentoId, CancellationToken cancellationToken)
     {
+        if (!AlcanceSesion.TieneCampamento(campamentoId))
+            return new ResultadoCatalogoCenso.Rechazado(AlcanceSesion.SinCampamento);
+
         var catalogo = await _consulta.ObtenerCatalogoAsync(campamentoId, cancellationToken);
-        return new CatalogoCensoDto(
+        return new ResultadoCatalogoCenso.Listo(new CatalogoCensoDto(
             ADto(catalogo.Modulos),
             ADto(catalogo.Pisos),
-            ADto(catalogo.Habitaciones));
+            ADto(catalogo.Habitaciones)));
     }
 
     private static List<OpcionCensoDto> ADto(IReadOnlyList<OpcionCenso> opciones) =>
@@ -71,16 +90,21 @@ public sealed class ObtenerCatalogoCenso : IObtenerCatalogoCenso
 public sealed class GuardarCensos : IGuardarCensos
 {
     private readonly IComandoCenso _comando;
+    private readonly IConsultaCenso _consulta;
 
-    public GuardarCensos(IComandoCenso comando)
+    public GuardarCensos(IComandoCenso comando, IConsultaCenso consulta)
     {
         _comando = comando;
+        _consulta = consulta;
     }
 
     public async Task<ResultadoGuardadoCenso> EjecutarAsync(SolicitudGuardarCensos solicitud, CancellationToken cancellationToken)
     {
         if (solicitud.UsuarioId <= 0)
             return new ResultadoGuardadoCenso.Rechazado("La sesión no tiene un usuario.");
+
+        if (!AlcanceSesion.TieneCampamento(solicitud.CampamentoId))
+            return new ResultadoGuardadoCenso.Rechazado(AlcanceSesion.SinCampamento);
 
         if (solicitud.Filas.Count == 0)
             return new ResultadoGuardadoCenso.Rechazado("No hay censos para guardar.");
@@ -100,11 +124,24 @@ public sealed class GuardarCensos : IGuardarCensos
                 continue;
             }
 
+            var propia = await _consulta.FiltroEstaEnCampamentoAsync(
+                solicitud.CampamentoId,
+                0,
+                0,
+                fila.HabitacionId,
+                cancellationToken);
+            if (!propia)
+            {
+                errores.Add(ReglasCenso.HabitacionAjena);
+                continue;
+            }
+
             var turno = string.IsNullOrWhiteSpace(fila.Turno) ? ReglasCenso.TurnoDia : fila.Turno;
             var resultado = await _comando.GuardarAsync(
                 new FilaCensoGuardar(fila.Id ?? string.Empty, fila.HabitacionId, cantidad, turno),
                 solicitud.Fecha,
                 solicitud.UsuarioId,
+                solicitud.CampamentoId,
                 cancellationToken);
 
             if (ReglasCenso.EsErrorDeFila(resultado.Resultado))

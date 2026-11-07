@@ -62,7 +62,11 @@ BEGIN
         u.Password AS HashContrasena,
         u.PerfilId,
         u.EmpresaMandanteId,
-        ISNULL(u.Md5Retirado, 0) AS Md5Retirado
+        ISNULL(u.Md5Retirado, 0) AS Md5Retirado,
+        CASE
+            WHEN u.BloqueadaHasta IS NOT NULL AND u.BloqueadaHasta > GETDATE() THEN 1
+            ELSE 0
+        END AS Bloqueada
     FROM dbo.Usuarios AS u
     WHERE u.Rut = @Rut;
     */
@@ -110,5 +114,62 @@ BEGIN
     SET NOCOUNT ON;
     SET @Ret = -1;
     RAISERROR('BORRADOR: sp_Usuario_RetirarMd5 no persiste hasta crear la columna Md5Retirado. Ver Docs/login-pendiente-revision-base-de-datos.md', 16, 1);
+END
+GO
+
+/* Bloqueo temporal. Los números 5 y 30 son ReglasCuenta.IntentosAntesDeBloquear
+   y ReglasCuenta.MinutosBloqueo. Crear antes estas columnas en la tabla de usuarios
+   (el nombre dbo.Usuarios es hipótesis, igual que Password y Md5Retirado):
+
+   ALTER TABLE dbo.Usuarios ADD
+       IntentosFallidos int NOT NULL
+           CONSTRAINT DF_Usuarios_IntentosFallidos DEFAULT (0),
+       BloqueadaHasta datetime NULL;
+*/
+CREATE OR ALTER PROCEDURE dbo.sp_Usuario_RegistrarIntentoFallido
+    @Rut varchar(20),
+    @Intentos int OUTPUT,
+    @Bloqueada bit OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Usuarios
+    SET IntentosFallidos = 0,
+        BloqueadaHasta = NULL
+    WHERE Rut = @Rut
+      AND BloqueadaHasta IS NOT NULL
+      AND BloqueadaHasta <= GETDATE();
+
+    UPDATE dbo.Usuarios
+    SET IntentosFallidos = IntentosFallidos + 1,
+        BloqueadaHasta = CASE
+            WHEN IntentosFallidos + 1 >= 5 THEN DATEADD(minute, 30, GETDATE())
+            ELSE NULL
+        END
+    WHERE Rut = @Rut
+      AND (BloqueadaHasta IS NULL OR BloqueadaHasta <= GETDATE());
+
+    SELECT
+        @Intentos = ISNULL(IntentosFallidos, 0),
+        @Bloqueada = CASE
+            WHEN BloqueadaHasta IS NOT NULL AND BloqueadaHasta > GETDATE() THEN 1
+            ELSE 0
+        END
+    FROM dbo.Usuarios
+    WHERE Rut = @Rut;
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ReiniciarIntentos
+    @Rut varchar(20)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Usuarios
+    SET IntentosFallidos = 0,
+        BloqueadaHasta = NULL
+    WHERE Rut = @Rut;
 END
 GO

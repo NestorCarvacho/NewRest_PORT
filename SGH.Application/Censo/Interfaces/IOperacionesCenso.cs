@@ -9,7 +9,7 @@ public interface IBuscarCensos
 
 public interface IObtenerCatalogoCenso
 {
-    Task<CatalogoCensoDto> EjecutarAsync(int campamentoId, CancellationToken cancellationToken);
+    Task<ResultadoCatalogoCenso> EjecutarAsync(int campamentoId, CancellationToken cancellationToken);
 }
 
 public interface IGuardarCensos

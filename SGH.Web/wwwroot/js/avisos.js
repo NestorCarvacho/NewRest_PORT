@@ -1,28 +1,30 @@
 (function () {
-    document.querySelectorAll(".aviso").forEach(function (aviso) {
-        var temporizador;
-
-        function ocultar() {
-            if (aviso.classList.contains("aviso-sale")) return;
-            aviso.classList.add("aviso-sale");
-            aviso.addEventListener("animationend", function () { aviso.remove(); }, { once: true });
+    function ocultar(aviso) {
+        if (!aviso || !aviso.isConnected || aviso.classList.contains("aviso-sale")) return;
+        aviso.classList.add("aviso-sale");
+        var quitado = false;
+        function quitar() {
+            if (quitado) return;
+            quitado = true;
+            aviso.remove();
         }
+        aviso.addEventListener("animationend", quitar, { once: true });
+        window.setTimeout(quitar, 500);
+    }
 
-        function programar() {
-            window.clearTimeout(temporizador);
-            temporizador = window.setTimeout(ocultar, 3000);
-        }
+    document.querySelectorAll(".aviso-sale").forEach(function (aviso) {
+        window.setTimeout(function () { aviso.remove(); }, 500);
+    });
 
-        var cerrar = aviso.querySelector(".aviso-cerrar");
-        if (cerrar) {
-            cerrar.addEventListener("click", function () {
-                window.clearTimeout(temporizador);
-                ocultar();
-            });
-        }
+    document.querySelectorAll(".aviso[data-espera]").forEach(function (aviso) {
+        var espera = parseInt(aviso.getAttribute("data-espera"), 10);
+        if (isNaN(espera) || espera < 0) espera = 3000;
+        window.setTimeout(function () { ocultar(aviso); }, espera);
+    });
 
-        aviso.addEventListener("mouseenter", function () { window.clearTimeout(temporizador); });
-        aviso.addEventListener("mouseleave", programar);
-        programar();
+    document.querySelectorAll(".aviso-cerrar").forEach(function (cerrar) {
+        cerrar.addEventListener("click", function () {
+            ocultar(cerrar.closest(".aviso"));
+        });
     });
 })();

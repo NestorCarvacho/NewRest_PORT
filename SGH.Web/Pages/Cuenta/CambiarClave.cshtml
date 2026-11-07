@@ -13,7 +13,6 @@
 
 @if (Model.Actualizada)
 {
-    ViewData["AvisoExito"] = "La clave fue actualizada.";
     <div class="login-links">
         <a class="login-link" asp-page="/Cuenta/Login">Ir al ingreso</a>
     </div>
@@ -55,7 +54,7 @@ else
                 </button>
             </div>
         </div>
-        <button type="submit" class="login-submit">Guardar</button>
+        <partial name="_BotonEspera" model="@("Guardar")" />
         <div class="login-links">
             <a class="login-link" asp-page="/Cuenta/Login">Volver al ingreso</a>
         </div>

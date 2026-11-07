@@ -1,0 +1,12 @@
+@model string
+@{
+    var espera = ViewData["SegundosEspera"] is int segundos ? segundos : 0;
+}
+@if (espera > 0)
+{
+    <button type="submit" class="login-submit" data-etiqueta="@Model" disabled data-espera-segundos="@espera">@Model</button>
+}
+else
+{
+    <button type="submit" class="login-submit" data-etiqueta="@Model">@Model</button>
+}

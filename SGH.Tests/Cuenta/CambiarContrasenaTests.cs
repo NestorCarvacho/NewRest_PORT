@@ -45,7 +45,8 @@ public class CambiarContrasenaTests
             CancellationToken.None);
 
         var rechazo = Assert.IsType<ResultadoCambioContrasena.Rechazado>(resultado);
-        Assert.Equal(ReglasCuenta.CredencialesInvalidas, rechazo.Mensaje);
+        Assert.Equal(ReglasCuenta.MensajeIntentosRestantes(4), rechazo.Mensaje);
+        Assert.Equal(1, _repositorio.Intentos);
     }
 
     [Fact]

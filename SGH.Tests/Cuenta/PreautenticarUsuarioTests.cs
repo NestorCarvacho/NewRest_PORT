@@ -21,8 +21,9 @@ public class PreautenticarUsuarioTests
         var resultado = await Crear().EjecutarAsync(new SolicitudPreautenticacion("12345678-9", "otra123"), CancellationToken.None);
 
         var rechazo = Assert.IsType<ResultadoPreautenticacion.Rechazado>(resultado);
-        Assert.Equal(ReglasCuenta.CredencialesInvalidas, rechazo.Mensaje);
+        Assert.Equal(ReglasCuenta.MensajeIntentosRestantes(4), rechazo.Mensaje);
         Assert.Equal(0, _repositorio.ConsultasEstado);
+        Assert.Equal(1, _repositorio.Intentos);
     }
 
     [Fact]
@@ -90,6 +91,44 @@ public class PreautenticarUsuarioTests
         Assert.IsType<ResultadoPreautenticacion.Listo>(resultado);
         Assert.Equal(0, _repositorio.Reemplazos);
         Assert.Equal(0, _repositorio.Retiros);
+        Assert.Equal(1, _repositorio.Reinicios);
+    }
+
+    [Fact]
+    public async Task RutDesconocidoNoCuentaIntento()
+    {
+        var resultado = await Crear().EjecutarAsync(new SolicitudPreautenticacion("999999999", "abc123"), CancellationToken.None);
+
+        var rechazo = Assert.IsType<ResultadoPreautenticacion.Rechazado>(resultado);
+        Assert.Equal(ReglasCuenta.CredencialesInvalidas, rechazo.Mensaje);
+        Assert.Equal(0, _repositorio.Intentos);
+    }
+
+    [Fact]
+    public async Task QuintoIntentoBloqueaLaCuenta()
+    {
+        _repositorio.Usuario = Usuario("abc123");
+
+        ResultadoPreautenticacion? ultimo = null;
+        for (var i = 0; i < ReglasCuenta.IntentosAntesDeBloquear; i++)
+            ultimo = await Crear().EjecutarAsync(new SolicitudPreautenticacion("123456789", "otra123"), CancellationToken.None);
+
+        var rechazo = Assert.IsType<ResultadoPreautenticacion.Rechazado>(ultimo);
+        Assert.Equal(ReglasCuenta.MensajeCuentaBloqueada, rechazo.Mensaje);
+        Assert.Equal(MotivoRechazo.CuentaBloqueada, rechazo.Motivo);
+    }
+
+    [Fact]
+    public async Task CuentaBloqueadaNoSigueContando()
+    {
+        _repositorio.Usuario = new UsuarioLogin(3, "123456789", "Ana", "Soto", _verificador.CrearHuellaMd5Legado("abc123"), 2, 9, false, true);
+
+        var resultado = await Crear().EjecutarAsync(new SolicitudPreautenticacion("123456789", "abc123"), CancellationToken.None);
+
+        var rechazo = Assert.IsType<ResultadoPreautenticacion.Rechazado>(resultado);
+        Assert.Equal(ReglasCuenta.MensajeCuentaBloqueada, rechazo.Mensaje);
+        Assert.Equal(0, _repositorio.Intentos);
+        Assert.Equal(0, _repositorio.ConsultasEstado);
     }
 
     private PreautenticarUsuario Crear() =>

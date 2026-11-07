@@ -68,6 +68,24 @@ public sealed class ConsultaCenso : IConsultaCenso
         return new CatalogoCenso(ALista(modulos), ALista(pisos), ALista(habitaciones));
     }
 
+    public async Task<bool> FiltroEstaEnCampamentoAsync(int campamentoId, int moduloId, int pisoId, int habitacionId, CancellationToken cancellationToken)
+    {
+        using var conexion = _fabrica.Crear();
+        var marca = await conexion.QuerySingleAsync<MarcaPertenece>(
+            new CommandDefinition(
+                "sp_Censo_FiltroPertenece",
+                new
+                {
+                    CampamentoId = campamentoId,
+                    ModuloId = moduloId,
+                    PisoId = pisoId,
+                    HabitacionId = habitacionId
+                },
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken));
+        return marca.Pertenece;
+    }
+
     private static List<OpcionCenso> ALista(IEnumerable<OpcionFila> filas) =>
         filas.Select(fila => new OpcionCenso(fila.Id, fila.Etiqueta ?? string.Empty, fila.PadreId)).ToList();
 
@@ -85,6 +103,11 @@ public sealed class ConsultaCenso : IConsultaCenso
         public string? CamasOcupadas { get; set; }
         public string? CamasCheckIn { get; set; }
         public string? Turno { get; set; }
+    }
+
+    private sealed class MarcaPertenece
+    {
+        public bool Pertenece { get; set; }
     }
 
     private sealed class OpcionFila

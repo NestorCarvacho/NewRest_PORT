@@ -12,13 +12,14 @@ Los AS-IS no se copian. Se leyeron desde `C:\Users\nesto\Downloads\SGH_old-main\
 4. Si `Md5Retirado` es 0 y el hash es MD5 (32 hex, ASCII, minúsculas), la clave se verifica con esa huella y se llama a `sp_Usuario_ReemplazarHash`, que guarda BCrypt y deja la flag en 1. Si el reemplazo falla, el ingreso sigue y la fila permanece en MD5.
 5. Si el hash ya es BCrypt y la flag sigue en 0, se verifica solo con BCrypt y se llama a `sp_Usuario_RetirarMd5` para dejar la flag en 1, sin reescribir la clave.
 6. Si `Md5Retirado` ya es 1, no se calcula MD5. Una fila marcada y que todavía tenga un hash de 32 hex no entra.
-7. El segundo «Entrar» es obligatorio aunque haya cero o un campamento/perfil, y también para `ideauno`. El combo «Seleccione Campamento/Perfil» aparece solo si la lista tiene filas y parte en `0`. Con `0` o lista vacía se usa el `PerfilId` de la ficha. Un id que no está en la lista responde «Credenciales inválidas». La cookie no guarda la clave. La lista queda 5 minutos en TempData; la clave se reenvía en el segundo post.
+7. El segundo «Entrar» es obligatorio aunque haya cero o un campamento/perfil, y también para `ideauno`. El combo «Seleccione Campamento/Perfil» aparece solo si la lista tiene filas y parte en `0`. Si hay filas y el envío sigue en `0`, responde «Seleccione Campamento/Perfil». Con lista vacía se usa el `PerfilId` de la ficha y campamento `0`. Un id que no está en la lista responde «Credenciales inválidas». La cookie no guarda la clave. La lista y la clave quedan 5 minutos: la lista en TempData y la clave solo en memoria del servidor. El segundo paso muestra una máscara, no la clave.
 8. El valor del combo es el `Id` de la fila campamento-perfil, igual que `Login.js` (`value: a.id`), no el `PerfilId`.
 9. El RUT `767095309` fuerza el perfil `11` antes de resolver el campamento.
 10. El nombre `ideauno` entra con rol `ideauno` y sin campamento, recién en el segundo envío. No está el contrato externo que devolvía solo RUT y token.
 11. Perfiles `4` y `5` usan `Sesion:MinutosOperaciones`. El resto usa `Sesion:MinutosPorDefecto`. En `appsettings.json` quedaron 480 y 60 porque el legado leía esos minutos desde `AppSettings` y ese archivo no está en el código.
 12. Cambio de clave: formato de `PasswordService`, confirmación con el texto «Password debe ser la misma», rechazo de la clave vigente y del código `-3`.
 13. La clave nueva se guarda con BCrypt y el procedimiento deja `Md5Retirado = 1`. La huella MD5 de la clave nueva se envía solo cuando la fila todavía está en MD5, para comparar el histórico viejo. Con la flag en 1, `@HuellaMd5` va en NULL.
+14. Cinco claves incorrectas del mismo RUT bloquean la cuenta 30 minutos. El aviso dice cuántos intentos quedan (`Clave incorrecta. Quedan N intentos.` y, si queda uno, `Queda 1 intento.`). En el quinto: `La cuenta quedó bloqueada por 30 minutos.` Un RUT que no existe sigue en `Credenciales inválidas`, sin contador. Una clave correcta, o el vencimiento de los 30 minutos, vuelve el contador a cero. El ingreso y el cambio de clave usan el mismo contador. Mientras está bloqueada, ni la clave correcta entra.
 
 Mensajes de formato que devuelve el código, copiados del API y no de la pantalla React (esa pantalla decía «Contraseña dede tener…» y «letras»):
 
@@ -45,21 +46,24 @@ Sin esa clave, el ingreso responde que falta `ConnectionStrings:Hoteldb`. No hay
 |---|---|---|
 | `sp_Usuario_ValidarEstado` | Una fila con columna `Estado`. El borrador ya llama a `USU_ValidaEstadoUsuario @rut, @ret OUTPUT`. | Confirmar que `@ret` es `0`, `-2` u otro entero. |
 | `sp_Usuario_ObtenerCampamentosYPerfiles` | El borrador ejecuta `USU_ObtieneCampamentosYPerfilesUsuario @UsuarioRut`. | Confirmar columnas `Id`, `PerfilId`, `PerfilNombre`, `CampamentoId`, `CampamentoNombre`, `EmpresaMandanteId`, `EmpresaMandanteNombre`, `CampamentoPerfil`. `Id` es el valor del combo. |
-| `sp_Usuario_ObtenerParaLogin` | Hoy hace `RAISERROR` y no lee tablas. Al habilitarlo: una fila con alias `Id`, `Rut`, `Nombre`, `Apellidos`, `HashContrasena`, `PerfilId`, `EmpresaMandanteId`, `Md5Retirado`. | `USU_ObtieneUsuarioByRutAndPass` compara la clave dentro de SQL y no sirve para traer el hash. Hay que leer la columna real. |
+| `sp_Usuario_ObtenerParaLogin` | Hoy hace `RAISERROR` y no lee tablas. Al habilitarlo: una fila con alias `Id`, `Rut`, `Nombre`, `Apellidos`, `HashContrasena`, `PerfilId`, `EmpresaMandanteId`, `Md5Retirado`, `Bloqueada`. `Bloqueada` es 1 solo si `BloqueadaHasta` es posterior a `GETDATE()`. | `USU_ObtieneUsuarioByRutAndPass` compara la clave dentro de SQL y no sirve para traer el hash. Hay que leer la columna real. |
 | `sp_Usuario_ActualizarPassword` | Hoy hace `RAISERROR`. Parámetros `@Rut`, `@PasswordHash` (BCrypt), `@HuellaMd5` (NULL si MD5 ya está retirado), `@Ret OUTPUT`. Deja `Md5Retirado = 1`. Códigos: `0` bien, `-3` clave ya usada, otro valor se muestra como credencial inválida. | `USU_CambiaPasswordUsuario` y `USU_insertaHistoricoPassword`. |
 | `sp_Usuario_ReemplazarHash` | Hoy hace `RAISERROR`. Parámetros `@Rut`, `@PasswordHash`, `@Ret OUTPUT`. Guarda BCrypt de la misma clave y deja `Md5Retirado = 1`, sin control de reutilización. | No usar el cambio de clave legado para este reemplazo. |
 | `sp_Usuario_RetirarMd5` | Hoy hace `RAISERROR`. Parámetros `@Rut`, `@Ret OUTPUT`. Solo pone `Md5Retirado = 1` cuando el hash ya es BCrypt. | La columna no existe en el legado. |
+| `sp_Usuario_RegistrarIntentoFallido` | El script ya trae el cuerpo. Parámetros `@Rut`, `@Intentos OUTPUT`, `@Bloqueada OUTPUT`. Si el bloqueo venció, pone el contador en 0. Después suma 1. Al llegar a 5 guarda `BloqueadaHasta = DATEADD(minute, 30, GETDATE())`. | No existe en el legado. Hay que crear `IntentosFallidos` y `BloqueadaHasta` antes de ejecutarlo. |
+| `sp_Usuario_ReiniciarIntentos` | El script ya trae el cuerpo. `@Rut`. Deja `IntentosFallidos = 0` y `BloqueadaHasta = NULL`. Se llama al acertar la clave. | No existe en el legado. |
 
 ## Hipótesis que hay que confirmar el lunes
 
 1. La clave está en una columna recuperable por RUT. En el script comentado se asumió `dbo.Usuarios.Password`. El nombre de tabla y de columna puede ser otro. El alias hacia `HashContrasena` se mantiene.
 2. Esa columna mide 32 caracteres, el largo del MD5. BCrypt ocupa 60. Hay que ampliarla a `varchar(200)` antes de guardar el primer hash nuevo. Si no cabe, el reemplazo falla y el usuario sigue entrando con MD5.
 3. Hay que agregar `Md5Retirado bit NOT NULL` con default `0` en la tabla de usuarios. El nombre físico de la tabla sigue pendiente. `0` permite el puente MD5. `1` apaga MD5 para esa fila. Los tres procedimientos de escritura la dejan en `1`.
-4. El `-3` sale de un histórico. `USU_insertaHistoricoPassword @rut, @usuario` se usa en el alta y en la edición de usuario, no en `CambiaPassword`. Hay que ver si el histórico guarda MD5, la clave en claro o las dos cosas. `@HuellaMd5` existe para comparar esas filas viejas y solo se envía mientras la fila sigue en MD5. `USU_CambiaPasswordUsuario` no debe volver a hashear: si lo hace, el procedimiento nuevo escribe la columna directo.
-5. `USU_ObtieneUsuarioAuth` recibe `@LoginInterno`. La web manda `0` y este código también. `USU_ObtieneUsuarioByRutAndPass` no recibe ese parámetro. Si un valor distinto de `0` cambia el usuario encontrado, hay que aplicarlo dentro de `sp_Usuario_ObtenerParaLogin`. El parámetro ya llega al procedimiento.
-6. Los minutos reales de `defaultSessionTime` y `operationsSessionTime` en el `AppSettings` del API. Ajustar `Sesion` en configuración, sin tocar casos de uso.
-7. El estado del usuario puede depender de vigencia, bloqueo o clave vencida por fecha, todo dentro de `USU_ValidaEstadoUsuario`. No reimplementar esa regla en C# si el envoltorio ya devuelve el entero.
-8. Usuarios con más de una fila para el mismo RUT. El borrador comentado usa `TOP (1)` sin `ORDER BY`. Definir cuál fila es la de ingreso.
+4. Hay que agregar `IntentosFallidos int NOT NULL` con default `0` y `BloqueadaHasta datetime NULL` en esa misma tabla. El cuerpo ya está en `sp_Usuario_RegistrarIntentoFallido` y `sp_Usuario_ReiniciarIntentos`. Los números 5 y 30 están escritos en ese script y en `ReglasCuenta`; si uno cambia, el otro también. Al habilitar el `SELECT` de `sp_Usuario_ObtenerParaLogin`, el alias `Bloqueada` tiene que salir de `BloqueadaHasta > GETDATE()`.
+5. El `-3` sale de un histórico. `USU_insertaHistoricoPassword @rut, @usuario` se usa en el alta y en la edición de usuario, no en `CambiaPassword`. Hay que ver si el histórico guarda MD5, la clave en claro o las dos cosas. `@HuellaMd5` existe para comparar esas filas viejas y solo se envía mientras la fila sigue en MD5. `USU_CambiaPasswordUsuario` no debe volver a hashear: si lo hace, el procedimiento nuevo escribe la columna directo.
+6. `USU_ObtieneUsuarioAuth` recibe `@LoginInterno`. La web manda `0` y este código también. `USU_ObtieneUsuarioByRutAndPass` no recibe ese parámetro. Si un valor distinto de `0` cambia el usuario encontrado, hay que aplicarlo dentro de `sp_Usuario_ObtenerParaLogin`. El parámetro ya llega al procedimiento.
+7. Los minutos reales de `defaultSessionTime` y `operationsSessionTime` en el `AppSettings` del API. Ajustar `Sesion` en configuración, sin tocar casos de uso.
+8. El estado del usuario puede depender de vigencia, bloqueo o clave vencida por fecha, todo dentro de `USU_ValidaEstadoUsuario`. No reimplementar esa regla en C# si el envoltorio ya devuelve el entero.
+9. Usuarios con más de una fila para el mismo RUT. El borrador comentado usa `TOP (1)` sin `ORDER BY`. Definir cuál fila es la de ingreso.
 
 ## Qué no quedó en este corte
 
@@ -75,9 +79,10 @@ Sigue vigente en el AS-IS y no tiene pantalla ni procedimiento nuevo:
 ## Orden sugerido el lunes
 
 1. Abrir los cinco procedimientos `USU_*` y `POL_*` citados arriba y anotar tabla, columna de clave, largo y tabla de histórico.
-2. Completar el `SELECT` de `sp_Usuario_ObtenerParaLogin` con los alias de este documento.
-3. Definir el cuerpo de `sp_Usuario_ActualizarPassword` y `sp_Usuario_ReemplazarHash`.
-4. Ampliar la columna si mide menos de 60.
-5. Ejecutar los cinco `CREATE OR ALTER` en un ambiente de prueba.
-6. Cargar la cadena con user-secrets y probar: clave MD5 vigente, clave caducada, dos perfiles, RUT `767095309`, cambio de clave y clave repetida.
-7. Si una columna viene con otro nombre y no se puede aliasar en SQL, el único cambio de C# es la clase fila al final de `ConsultaAutenticacion`.
+2. Crear `IntentosFallidos` y `BloqueadaHasta` con el `ALTER` comentado en `001_sp_login_borrador.sql`, en la tabla real de usuarios.
+3. Completar el `SELECT` de `sp_Usuario_ObtenerParaLogin` con los alias de este documento, incluido `Bloqueada`.
+4. Definir el cuerpo de `sp_Usuario_ActualizarPassword` y `sp_Usuario_ReemplazarHash`.
+5. Ampliar la columna si mide menos de 60.
+6. Ejecutar los `CREATE OR ALTER` en un ambiente de prueba, incluidos `sp_Usuario_RegistrarIntentoFallido` y `sp_Usuario_ReiniciarIntentos`.
+7. Cargar la cadena con user-secrets y probar: clave MD5 vigente, clave caducada, dos perfiles, RUT `767095309`, cambio de clave, clave repetida, cuatro claves incorrectas con el aviso de intentos y la quinta con el bloqueo de 30 minutos.
+8. Si una columna viene con otro nombre y no se puede aliasar en SQL, el único cambio de C# es la clase fila al final de `ConsultaAutenticacion`.

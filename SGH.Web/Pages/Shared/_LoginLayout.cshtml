@@ -1,3 +1,4 @@
+@using SGH.Web.Cuenta
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -60,7 +61,7 @@
         document.querySelectorAll("[data-toggle-password]").forEach(function (boton) {
             boton.addEventListener("click", function () {
                 var campo = document.getElementById(boton.getAttribute("data-toggle-password"));
-                if (!campo) return;
+                if (!campo || campo.hasAttribute("data-clave-enmascarada")) return;
                 var visible = campo.type === "password";
                 campo.type = visible ? "text" : "password";
                 boton.setAttribute("aria-pressed", visible ? "true" : "false");
@@ -68,41 +69,76 @@
             });
         });
 
+        document.querySelectorAll("[data-espera-segundos]").forEach(function (boton) {
+            var segundos = parseInt(boton.getAttribute("data-espera-segundos"), 10);
+            if (!segundos || segundos < 1) return;
+            var etiqueta = boton.getAttribute("data-etiqueta") || "Entrar";
+            var hasta = Date.now() + segundos * 1000;
+            var formulario = boton.form;
+            if (formulario) {
+                formulario.addEventListener("submit", function (evento) {
+                    if (boton.disabled) evento.preventDefault();
+                });
+            }
+
+            function pintar() {
+                var resta = Math.max(0, Math.ceil((hasta - Date.now()) / 1000));
+                if (resta <= 0) {
+                    window.clearInterval(reloj);
+                    boton.disabled = false;
+                    boton.textContent = etiqueta;
+                    boton.removeAttribute("data-espera-segundos");
+                    return;
+                }
+                var minutos = Math.floor(resta / 60);
+                var sobra = resta % 60;
+                boton.textContent = "Espere " + minutos + ":" + String(sobra).padStart(2, "0");
+            }
+
+            var reloj = window.setInterval(pintar, 1000);
+            pintar();
+        });
     </script>
     <script src="~/js/transicion-tarjeta.js" asp-append-version="true"></script>
     <script src="~/js/aviso-cookies.js" asp-append-version="true"></script>
     @{
-        var errores = ViewData.ModelState.Values
-            .Where(entrada => entrada != null)
-            .SelectMany(entrada => entrada!.Errors)
-            .Select(error => error.ErrorMessage)
-            .Where(mensaje => !string.IsNullOrWhiteSpace(mensaje))
-            .Distinct()
-            .ToList();
+        var pila = Context.Items[PilaAvisos.ClaveLista] as IReadOnlyList<PilaAvisos.AvisoGuardado> ?? PilaAvisos.Leer(Context.Request);
+        var sale = Context.Items[PilaAvisos.ClaveSale] as string;
+        var nuevos = Context.Items[PilaAvisos.ClaveNuevos] is int cantidad ? cantidad : 0;
         var exito = ViewData["AvisoExito"] as string;
+        var ahoraAvisos = PilaAvisos.Ahora();
+        if (pila.Count == 0 && !string.IsNullOrWhiteSpace(exito))
+            pila = [new PilaAvisos.AvisoGuardado(exito, ahoraAvisos, ahoraAvisos + PilaAvisos.VidaMs)];
     }
-    @if (errores.Count > 0 || !string.IsNullOrWhiteSpace(exito))
+    @if (pila.Count > 0 || !string.IsNullOrWhiteSpace(sale))
     {
         <ul class="avisos">
-            @foreach (var mensaje in errores)
+            @if (!string.IsNullOrWhiteSpace(sale))
             {
-                <li class="aviso aviso-error" role="alert">
+                <li class="aviso aviso-error aviso-sale" role="alert">
                     <span class="aviso-icono" aria-hidden="true">
                         <svg viewBox="0 0 24 24"><path d="m15 9-6 6" /><path d="M2.586 16.726A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2h6.624a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586z" /><path d="m9 9 6 6" /></svg>
                     </span>
-                    <p class="aviso-texto">@mensaje</p>
-                    <button type="button" class="aviso-cerrar" aria-label="Cerrar">
-                        <svg viewBox="0 0 24 24"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                    </button>
+                    <p class="aviso-texto">@sale</p>
                 </li>
             }
-            @if (!string.IsNullOrWhiteSpace(exito))
+            @for (var i = 0; i < pila.Count; i++)
             {
-                <li class="aviso aviso-exito" role="status">
+                var reciente = i >= pila.Count - nuevos;
+                var esExito = pila[i].Texto == exito;
+                var espera = PilaAvisos.EsperaMs(pila, i, ahoraAvisos);
+                <li class="aviso @(esExito ? "aviso-exito" : "aviso-error")@(reciente ? " aviso-nuevo" : "")" role="@(esExito ? "status" : "alert")" data-espera="@espera">
                     <span class="aviso-icono" aria-hidden="true">
-                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
+                        @if (esExito)
+                        {
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>
+                        }
+                        else
+                        {
+                            <svg viewBox="0 0 24 24"><path d="m15 9-6 6" /><path d="M2.586 16.726A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2h6.624a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586z" /><path d="m9 9 6 6" /></svg>
+                        }
                     </span>
-                    <p class="aviso-texto">@exito</p>
+                    <p class="aviso-texto">@pila[i].Texto</p>
                     <button type="button" class="aviso-cerrar" aria-label="Cerrar">
                         <svg viewBox="0 0 24 24"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                     </button>

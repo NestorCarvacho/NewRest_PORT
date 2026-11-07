@@ -16,6 +16,17 @@ public static class ReglasCuenta
     public const string ClaveReutilizada = "Contraseña no debe haber sido usada con anterioridad";
     public const string ErrorEstado = "Se ha producido un error al validar el estado del usuario";
     public const string PerfilNoPermitido = "El perfil seleccionado no corresponde al usuario.";
+    public const string SeleccionePerfil = "Seleccione Campamento/Perfil";
+    public const int IntentosAntesDeBloquear = 5;
+    public const int MinutosBloqueo = 30;
+
+    public static string MensajeCuentaBloqueada =>
+        $"La cuenta quedó bloqueada por {MinutosBloqueo} minutos.";
+
+    public static string MensajeIntentosRestantes(int restantes) =>
+        restantes == 1
+            ? "Clave incorrecta. Queda 1 intento."
+            : $"Clave incorrecta. Quedan {restantes} intentos.";
 
     public static bool FuerzaPerfil(string rutNormalizado) =>
         string.Equals(rutNormalizado, RutPerfilForzado, StringComparison.Ordinal);

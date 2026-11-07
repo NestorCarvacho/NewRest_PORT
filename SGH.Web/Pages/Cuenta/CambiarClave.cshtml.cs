@@ -1,12 +1,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
 using SGH.Application.Cuenta.DTOs;
 using SGH.Application.Cuenta.Interfaces;
+using SGH.Web.Cuenta;
 
 namespace SGH.Web.Pages.Cuenta;
 
 [AllowAnonymous]
+[EnableRateLimiting("ingreso")]
 public class CambiarClaveModel : PageModel
 {
     private readonly ICambiarContrasena _cambiar;
@@ -43,6 +46,8 @@ public class CambiarClaveModel : PageModel
 
         if (TempData["MensajeClave"] is string mensaje)
             Mensaje = mensaje;
+
+        LimiteIngreso.PublicarEspera(this);
     }
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
@@ -60,6 +65,7 @@ public class CambiarClaveModel : PageModel
             }
 
             Actualizada = true;
+            ViewData["AvisoExito"] = "La clave fue actualizada.";
             return Page();
         }
         catch (Exception ex)

@@ -39,7 +39,12 @@ public class DatosModel : PageModel
         try
         {
             var catalogo = await _catalogo.EjecutarAsync(sesion.EmpresaMandanteId, sesion.CampamentoId, cancellationToken);
-            return new JsonResult(catalogo);
+            return catalogo switch
+            {
+                ResultadoCatalogoReserva.Listo listo => new JsonResult(listo.Catalogo),
+                ResultadoCatalogoReserva.Rechazado rechazado => RespuestaJson.Mensaje(rechazado.Mensaje),
+                _ => RespuestaJson.Mensaje("No se pudo consultar el catálogo.")
+            };
         }
         catch (Exception ex)
         {
@@ -67,7 +72,7 @@ public class DatosModel : PageModel
         var sesion = LectorSesion.Leer(User);
         try
         {
-            var filas = await _buscar.EjecutarAsync(new SolicitudBuscarReservas(
+            var resultado = await _buscar.EjecutarAsync(new SolicitudBuscarReservas(
                 sesion.CampamentoId,
                 id,
                 areaId,
@@ -82,7 +87,12 @@ public class DatosModel : PageModel
                 pasajeroId,
                 habitacionId,
                 string.IsNullOrWhiteSpace(tieneAgua) ? "0" : tieneAgua), cancellationToken);
-            return new JsonResult(new { filas });
+            return resultado switch
+            {
+                ResultadoBusquedaReservas.Lista lista => new JsonResult(new { filas = lista.Filas }),
+                ResultadoBusquedaReservas.Rechazada rechazada => RespuestaJson.Mensaje(rechazada.Mensaje),
+                _ => RespuestaJson.Mensaje("No se pudo consultar las reservas.")
+            };
         }
         catch (Exception ex)
         {
@@ -143,7 +153,8 @@ public class DatosModel : PageModel
                 movimiento.ReservaId,
                 fecha.Value,
                 sesion.UsuarioId,
-                movimiento.Operacion ?? string.Empty), cancellationToken);
+                movimiento.Operacion ?? string.Empty,
+                sesion.CampamentoId), cancellationToken);
 
             return resultado switch
             {

@@ -9,6 +9,7 @@ public static class ReglasReserva
     public const string OrigenManual = "R";
     public const string CheckIn = "I";
     public const string CheckOut = "O";
+    public const string ReservaAjena = "La reserva no corresponde al campamento de la sesión.";
 
     public static string? ValidarAlta(int areaId, int turnoId, DateTime llegada, DateTime? salida)
     {

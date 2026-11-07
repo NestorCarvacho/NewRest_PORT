@@ -7,7 +7,8 @@ public enum MotivoRechazo
     EstadoInvalido,
     FormatoContrasena,
     ClaveReutilizada,
-    PerfilNoPermitido
+    PerfilNoPermitido,
+    CuentaBloqueada
 }
 
 public sealed record OpcionPerfilDto(

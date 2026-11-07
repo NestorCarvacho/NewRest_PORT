@@ -53,7 +53,7 @@ public sealed class CompletarSesion : ICompletarSesion
                 false));
         }
 
-        if (solicitud.AsignacionPerfilId == 0 || perfiles.Count == 0)
+        if (perfiles.Count == 0)
         {
             return new ResultadoAutenticacion.Aceptado(CrearSesion(
                 usuario,
@@ -63,6 +63,9 @@ public sealed class CompletarSesion : ICompletarSesion
                 0,
                 false));
         }
+
+        if (solicitud.AsignacionPerfilId == 0)
+            return new ResultadoAutenticacion.Rechazado(ReglasCuenta.SeleccionePerfil, MotivoRechazo.PerfilNoPermitido);
 
         var elegido = perfiles.FirstOrDefault(perfil => perfil.Id == solicitud.AsignacionPerfilId);
         if (elegido is null)

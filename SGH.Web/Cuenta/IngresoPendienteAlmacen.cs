@@ -13,6 +13,8 @@ public sealed class OpcionPerfilVista
 public sealed class IngresoPendiente
 {
     public string Rut { get; set; } = string.Empty;
+    public string ClaveId { get; set; } = string.Empty;
+    public int LargoClave { get; set; }
     public DateTime ExpiraUtc { get; set; }
     public bool EsIntegracion { get; set; }
     public List<OpcionPerfilVista> Perfiles { get; set; } = [];
