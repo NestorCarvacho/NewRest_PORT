@@ -1,0 +1,235 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gestión Hotelera</title>
+    <partial name="_Favicon" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/escritorio.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/cookies.css" asp-append-version="true" />
+</head>
+<body class="app-body">
+    <header class="app-cromo">
+        <div class="navbar-app">
+            <a class="marca" asp-page="/Index">
+                <img src="~/img/logo-sgh.png" alt="" />
+                <span>Gestión Hotelera</span>
+            </a>
+            <div class="buscador">
+                <input id="buscar-modulo" type="search" placeholder="Buscar módulo" autocomplete="off" />
+                <ul id="buscar-resultados" class="buscador-lista" hidden></ul>
+            </div>
+            <div class="usuario">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <button type="button" class="usuario-boton" aria-expanded="false" aria-label="Cuenta">
+                        <svg viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0" /><circle cx="12" cy="7" r="4" /></svg>
+                        <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>
+                    </button>
+                    <div class="usuario-menu" hidden>
+                        <p>@User.Identity.Name</p>
+                        <p class="version">versión @Configuracion["Aplicacion:Version"]</p>
+                        <button type="button" data-preferencias-cookies>Preferencias de cookies</button>
+                        <form method="post" asp-page="/Cuenta/Salir">
+                            <button type="submit">Salir</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <a class="usuario-boton" asp-page="/Cuenta/Login">Ingresar</a>
+                }
+            </div>
+        </div>
+        <nav class="menu-app" aria-label="Módulos">
+            <div class="menu-grupo">
+                <div class="menu-item">
+                    <button type="button" class="menu-boton" aria-expanded="false">
+                        Gestión
+                        <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>
+                    </button>
+                    <div class="menu-desplegable">
+                        <div class="menu-panel">
+                            <div class="menu-columna">
+                                <h2>Alojamiento</h2>
+                                <button type="button">Solicitud alojamiento</button>
+                                <button type="button">Pasajeros de solicitud</button>
+                                <button type="button" data-modulo="reserva">Reserva</button>
+                                <button type="button">Reserva por solicitud</button>
+                                <button type="button">Reserva de instalaciones</button>
+                                <button type="button">Asignación</button>
+                                <button type="button">Liberación</button>
+                                <button type="button" data-modulo="checkin">Check In</button>
+                                <button type="button" data-modulo="checkout">Check Out</button>
+                                <button type="button" data-modulo="censo">Censo</button>
+                                <button type="button">Desalojos</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <button type="button" class="menu-boton" aria-expanded="false">
+                        Informes
+                        <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>
+                    </button>
+                    <div class="menu-desplegable">
+                        <div class="menu-panel">
+                            <div class="menu-columna">
+                                <h2>Informes</h2>
+                                <button type="button">Desviaciones</button>
+                                <button type="button">Habitaciones</button>
+                                <button type="button">Ocupabilidad</button>
+                                <button type="button">Pabellones</button>
+                                <button type="button">Disponibilidad</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <button type="button" class="menu-boton" aria-expanded="false">
+                        Inventario
+                        <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>
+                    </button>
+                    <div class="menu-desplegable">
+                        <div class="menu-panel">
+                            <div class="menu-columna">
+                                <h2>Artículos</h2>
+                                <button type="button">Grupos de artículos</button>
+                                <button type="button">Artículos</button>
+                                <button type="button">Estados de artículo</button>
+                                <button type="button">Precios</button>
+                                <button type="button">Registro de artículos</button>
+                                <button type="button">Registro por habitación</button>
+                                <button type="button">Inventarios de habitación</button>
+                                <button type="button">Ítems de inventario</button>
+                                <button type="button">Activos</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <button type="button" class="menu-boton" aria-expanded="false">
+                        Aseo
+                        <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>
+                    </button>
+                    <div class="menu-desplegable">
+                        <div class="menu-panel">
+                            <div class="menu-columna">
+                                <h2>Aseo</h2>
+                                <button type="button">Grupos y actividades de aseo</button>
+                                <button type="button">Aseo y checklists</button>
+                                <button type="button">Supervisión de aseo</button>
+                                <button type="button">Estándares de habitación</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <button type="button" class="menu-boton" aria-expanded="false">
+                        EPP
+                        <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>
+                    </button>
+                    <div class="menu-desplegable">
+                        <div class="menu-panel">
+                            <div class="menu-columna">
+                                <h2>Casilleros</h2>
+                                <button type="button">Áreas de casilleros</button>
+                                <button type="button">Secciones de casilleros</button>
+                                <button type="button">Casilleros EPP</button>
+                                <button type="button">Inventario EPP</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="menu-item">
+                    <button type="button" class="menu-boton" aria-expanded="false">
+                        Operación
+                        <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>
+                    </button>
+                    <div class="menu-desplegable">
+                        <div class="menu-panel">
+                            <div class="menu-columna">
+                                <h2>Servicio</h2>
+                                <button type="button">Mantenciones</button>
+                                <button type="button">Órdenes de servicio</button>
+                                <button type="button">Órdenes de trabajo</button>
+                                <button type="button">No conformidad</button>
+                                <button type="button">Propuestas de no conformidad</button>
+                                <button type="button">Seguimiento de no conformidad</button>
+                                <button type="button">ESS comentarios</button>
+                                <button type="button">Valijas</button>
+                                <button type="button">Entregas de valija</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="menu-grupo">
+                <div class="menu-item menu-config">
+                    <button type="button" class="menu-boton" aria-expanded="false" aria-label="Configuración">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 .6 1.65 1.65 0 0 1-2.84 0 1.65 1.65 0 0 0-1-.6 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-.6-1 1.65 1.65 0 0 1 0-2.84 1.65 1.65 0 0 0 .6-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-.6 1.65 1.65 0 0 1 2.84 0 1.65 1.65 0 0 0 1 .6 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.31.22.65.22 1a1.65 1.65 0 0 0 .6 1 1.65 1.65 0 0 1 0 2.84 1.65 1.65 0 0 0-.82 1.16z" /></svg>
+                        <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>
+                    </button>
+                    <div class="menu-desplegable">
+                        <div class="menu-panel">
+                            <div class="menu-columna">
+                                <h2>Campamento</h2>
+                                <button type="button">Campamentos</button>
+                                <button type="button">Empresas</button>
+                                <button type="button">Departamentos, divisiones y UN</button>
+                                <button type="button">Listas</button>
+                                <button type="button">Proyectos, grupos y actividades</button>
+                                <button type="button">Pabellones</button>
+                                <button type="button">Tipos de módulo</button>
+                                <button type="button">Módulos</button>
+                            </div>
+                            <div class="menu-columna">
+                                <h2>Ubicación y acceso</h2>
+                                <button type="button">Tipos de instalación</button>
+                                <button type="button">Habitaciones</button>
+                                <button type="button">Plantillas de ubicación</button>
+                                <button type="button">Trabajadores</button>
+                                <button type="button">Códigos QR</button>
+                                <button type="button">Usuarios</button>
+                                <button type="button">Perfiles</button>
+                                <button type="button">Turnos</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="contenido">
+        <div class="solapas" id="solapas" hidden></div>
+        <div id="vista-inicial" class="vista-inicial">
+            @RenderBody()
+        </div>
+        <div id="paneles"></div>
+    </main>
+
+    <div id="velo" class="velo" hidden></div>
+    <aside id="panel-lateral" class="panel-lateral" hidden aria-labelledby="panel-titulo">
+        <div class="panel-cabeza">
+            <h2 id="panel-titulo"></h2>
+            <button type="button" id="panel-cerrar" class="panel-cerrar" aria-label="Cerrar">×</button>
+        </div>
+        <div id="panel-cuerpo" class="panel-cuerpo"></div>
+    </aside>
+
+    <form id="antifalsificacion" hidden method="post">
+        @Html.AntiForgeryToken()
+    </form>
+    <partial name="_AvisoCookies" />
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
+    <script src="~/js/escritorio.js" asp-append-version="true"></script>
+    <script src="~/js/aviso-cookies.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

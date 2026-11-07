@@ -1,0 +1,28 @@
+<div class="aviso-cookies" id="aviso-cookies" hidden role="dialog" aria-labelledby="aviso-cookies-titulo">
+    <h2 id="aviso-cookies-titulo">Cookies</h2>
+    <p>Gestión Hotelera usa cookies necesarias para la sesión. Las analíticas y las de publicidad o perfilamiento siguen apagadas hasta que usted las acepte. Seguir en el sitio no cuenta como aceptación.</p>
+    <p class="aviso-cookies-enlaces">
+        <a asp-page="/Privacy">Política de privacidad</a>
+        <a asp-page="/Cookies">Detalle de cookies</a>
+    </p>
+    <div class="aviso-cookies-acciones">
+        <button type="button" id="cookies-rechazar">Rechazar</button>
+        <button type="button" id="cookies-aceptar">Aceptar</button>
+    </div>
+    <button type="button" class="aviso-cookies-config" id="cookies-configurar" aria-expanded="false" aria-controls="cookies-categorias">Configurar</button>
+    <div class="aviso-cookies-categorias" id="cookies-categorias" hidden>
+        <label>
+            <input type="checkbox" checked disabled />
+            <span><strong>Necesarias.</strong> Sesión y el recuerdo de esta elección. Siempre activas, porque el ingreso no funciona sin ellas.</span>
+        </label>
+        <label>
+            <input type="checkbox" id="cookies-analiticas" />
+            <span><strong>Analíticas.</strong> Medir el uso del sitio. Hoy no hay una herramienta de medición cargada.</span>
+        </label>
+        <label>
+            <input type="checkbox" id="cookies-publicidad" />
+            <span><strong>Publicidad y perfilamiento.</strong> Hoy no se usan. Puede rechazarlas y seguir usando el sitio.</span>
+        </label>
+        <button type="button" id="cookies-guardar">Guardar selección</button>
+    </div>
+</div>
