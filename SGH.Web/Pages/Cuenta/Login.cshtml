@@ -1,0 +1,61 @@
+@page
+@model SGH.Web.Pages.Cuenta.LoginModel
+@{
+    Layout = "_LoginLayout";
+    ViewData["Title"] = "Ingreso";
+    ViewData["PanelTitle"] = "Gestión Hotelera";
+}
+
+<form method="post" class="login-form" novalidate>
+    <input type="hidden" asp-for="ReturnUrl" />
+    <input type="hidden" asp-for="Paso" />
+
+    <div class="login-field">
+        <label class="login-label" for="Rut">Rut/Dni</label>
+        @if (Model.Paso == "perfil")
+        {
+            <input class="login-input" id="Rut" name="Rut" value="@Model.Rut" readonly maxlength="25" />
+        }
+        else
+        {
+            <input class="login-input" id="Rut" name="Rut" value="@Model.Rut" maxlength="25" placeholder="Rut/Dni" autofocus />
+        }
+    </div>
+
+    <div class="login-field">
+        <label class="login-label" for="Contrasena">Contraseña</label>
+        <div class="login-control">
+            @if (Model.Paso == "perfil")
+            {
+                <input class="login-input has-action" id="Contrasena" name="Contrasena" type="password" value="@Model.Contrasena" readonly autocomplete="current-password" />
+            }
+            else
+            {
+                <input class="login-input has-action" id="Contrasena" name="Contrasena" value="@Model.Contrasena" type="password" placeholder="Contraseña" autocomplete="current-password" />
+            }
+            <button type="button" class="login-icon-button" data-toggle-password="Contrasena" aria-pressed="false" aria-label="Mostrar contraseña">
+                <svg class="login-glyph when-hidden"><use href="#i-eye" /></svg>
+                <svg class="login-glyph when-shown"><use href="#i-eye-off" /></svg>
+            </button>
+        </div>
+    </div>
+
+    @if (Model.Paso == "perfil" && Model.Perfiles.Count > 0)
+    {
+        <div class="login-field">
+            <label class="login-label" for="AsignacionPerfilId">Seleccione Campamento/Perfil</label>
+            <select class="login-select" asp-for="AsignacionPerfilId">
+                <option value="0">Seleccione Campamento/Perfil</option>
+                @foreach (var perfil in Model.Perfiles)
+                {
+                    <option value="@perfil.Id">@perfil.Etiqueta</option>
+                }
+            </select>
+        </div>
+    }
+
+    <button type="submit" class="login-submit">Entrar</button>
+    <div class="login-links">
+        <a class="login-link" asp-page="/Cuenta/CambiarClave">Cambiar Contraseña</a>
+    </div>
+</form>

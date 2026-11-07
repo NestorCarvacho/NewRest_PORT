@@ -1,0 +1,26 @@
+﻿@page
+@model PrivacyModel
+@{
+    Layout = "_LoginLayout";
+    ViewData["Title"] = "Política de privacidad";
+    ViewData["PanelTitle"] = "Política de privacidad";
+    ViewData["Documento"] = true;
+}
+
+<article class="login-texto">
+    <p>El responsable del tratamiento es Gestión Hotelera. Los datos de la cuenta se usan para identificar a la persona y abrir su sesión. No se elaboran perfiles publicitarios ni se envían estas cookies a otro país.</p>
+    <h2>Qué datos se usan</h2>
+    <ul>
+        <li>El Rut o Dni y la contraseña, para comprobar el ingreso.</li>
+        <li>El campamento y el perfil elegidos, para armar la sesión.</li>
+        <li>La dirección IP y el navegador, cuando corresponda registrar una aceptación.</li>
+    </ul>
+    <h2>Cómo se guarda la contraseña</h2>
+    <p>La contraseña no se conserva en claro. Se compara con el hash guardado. Si ese hash todavía es el legado, se reemplaza por uno nuevo en el mismo ingreso.</p>
+    <h2>Cuánto dura la sesión</h2>
+    <p>La sesión vive en una cookie necesaria del sitio. Caduca al cerrar el navegador o al cumplirse el tiempo del perfil. La elección sobre las demás cookies se conserva un año y se puede cambiar con la misma facilidad con la que se otorgó, desde Preferencias.</p>
+    <div class="login-acciones">
+        <a class="login-boton" asp-page="/Cookies">Ver el detalle de las cookies</a>
+        <a class="login-boton login-boton-secundario" asp-page="/Cuenta/Login">Volver al ingreso</a>
+    </div>
+</article>

@@ -1,0 +1,25 @@
+@page
+@model SGH.Web.Pages.CookiesModel
+@{
+    Layout = "_LoginLayout";
+    ViewData["Title"] = "Cookies";
+    ViewData["PanelTitle"] = "Cookies";
+    ViewData["Documento"] = true;
+}
+
+<article class="login-texto">
+    <p>Solo la cookie de sesión es necesaria para entrar. Las demás categorías permanecen apagadas hasta una aceptación previa, específica y revocable. Seguir navegando no las activa.</p>
+    <h2>Necesarias</h2>
+    <ul>
+        <li>Cookie de autenticación. Mantiene el ingreso. Caduca al cerrar el navegador o al cumplirse el tiempo del perfil. Un script de la página no puede leerla.</li>
+        <li><code>sgh.cookies</code>. Recuerda la elección. Dura un año. Es necesaria para no volver a preguntar y para poder cambiarla.</li>
+    </ul>
+    <h2>Analíticas</h2>
+    <p>Servirían para medir el uso del sitio. Hoy no hay ninguna herramienta de medición cargada. Si más adelante se agrega, solo parte después de aceptarla.</p>
+    <h2>Publicidad y perfilamiento</h2>
+    <p>Hoy no se usan. Rechazarlas no impide usar Gestión Hotelera. No hay cesión de estas cookies fuera de Chile.</p>
+    <div class="login-acciones">
+        <button type="button" class="login-boton" data-preferencias-cookies>Cambiar preferencias</button>
+        <a class="login-boton login-boton-secundario" asp-page="/Cuenta/Login">Volver al ingreso</a>
+    </div>
+</article>

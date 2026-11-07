@@ -1,0 +1,128 @@
+.aviso-cookies {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 60;
+  box-sizing: border-box;
+  width: min(36rem, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 1rem 1.05rem 0.9rem;
+  border: 1px solid #e0dfda;
+  border-radius: 1rem;
+  background: #fff;
+  color: #050503;
+  box-shadow: 0 16px 40px rgba(5, 5, 3, 0.16);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.aviso-cookies[hidden] {
+  display: none !important;
+}
+
+.aviso-cookies h2 {
+  margin: 0 0 0.35rem;
+  color: #651c32;
+  font-size: 1rem;
+}
+
+.aviso-cookies p {
+  margin: 0 0 0.55rem;
+}
+
+.aviso-cookies-enlaces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.85rem;
+}
+
+.aviso-cookies-enlaces a {
+  color: #651c32;
+  font-weight: 650;
+}
+
+.aviso-cookies-acciones {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+}
+
+.aviso-cookies-acciones button,
+.aviso-cookies-categorias button {
+  box-sizing: border-box;
+  height: 2.4rem;
+  border-radius: 0.65rem;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+#cookies-rechazar,
+#cookies-aceptar {
+  width: 100%;
+}
+
+#cookies-rechazar {
+  border: 1px solid #651c32;
+  background: #fff;
+  color: #651c32;
+}
+
+#cookies-aceptar,
+#cookies-guardar {
+  border: 0;
+  background: linear-gradient(180deg, #ff9853 0%, #db6f16 100%);
+  color: #fff;
+}
+
+.aviso-cookies-config {
+  display: block;
+  width: 100%;
+  margin-top: 0.45rem;
+  padding: 0.35rem;
+  border: 0;
+  background: transparent;
+  color: #651c32;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.aviso-cookies-categorias {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid #e0dfda;
+}
+
+.aviso-cookies-categorias[hidden] {
+  display: none !important;
+}
+
+.aviso-cookies-categorias label {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  color: #050503;
+  font-weight: 450;
+}
+
+.aviso-cookies-categorias input {
+  margin-top: 0.2rem;
+  accent-color: #651c32;
+}
+
+body.con-aviso-cookies .login-page {
+  padding-bottom: 13.5rem;
+}
+
+body.con-aviso-cookies .avisos {
+  bottom: 15rem;
+}

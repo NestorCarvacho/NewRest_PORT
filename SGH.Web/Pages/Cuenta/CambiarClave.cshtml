@@ -1,0 +1,63 @@
+@page
+@model SGH.Web.Pages.Cuenta.CambiarClaveModel
+@{
+    Layout = "_LoginLayout";
+    ViewData["Title"] = "Cambiar contraseña";
+    ViewData["PanelTitle"] = "Cambiar contraseña";
+}
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    <p class="login-note">@Model.Mensaje</p>
+}
+
+@if (Model.Actualizada)
+{
+    ViewData["AvisoExito"] = "La clave fue actualizada.";
+    <div class="login-links">
+        <a class="login-link" asp-page="/Cuenta/Login">Ir al ingreso</a>
+    </div>
+}
+else
+{
+    <form method="post" class="login-form" novalidate>
+        <div class="login-field">
+            <label class="login-label" for="Rut">Rut/Dni</label>
+            <input class="login-input" id="Rut" name="Rut" value="@Model.Rut" autocomplete="username" placeholder="Rut/Dni" />
+        </div>
+        <div class="login-field">
+            <label class="login-label" for="ContrasenaActual">Contraseña actual</label>
+            <div class="login-control">
+                <input class="login-input has-action" id="ContrasenaActual" name="ContrasenaActual" value="@Model.ContrasenaActual" type="password" autocomplete="current-password" />
+                <button type="button" class="login-icon-button" data-toggle-password="ContrasenaActual" aria-pressed="false" aria-label="Mostrar contraseña">
+                    <svg class="login-glyph when-hidden"><use href="#i-eye" /></svg>
+                    <svg class="login-glyph when-shown"><use href="#i-eye-off" /></svg>
+                </button>
+            </div>
+        </div>
+        <div class="login-field">
+            <label class="login-label" for="ContrasenaNueva">Contraseña nueva</label>
+            <div class="login-control">
+                <input class="login-input has-action" id="ContrasenaNueva" name="ContrasenaNueva" value="@Model.ContrasenaNueva" type="password" autocomplete="new-password" />
+                <button type="button" class="login-icon-button" data-toggle-password="ContrasenaNueva" aria-pressed="false" aria-label="Mostrar contraseña">
+                    <svg class="login-glyph when-hidden"><use href="#i-eye" /></svg>
+                    <svg class="login-glyph when-shown"><use href="#i-eye-off" /></svg>
+                </button>
+            </div>
+        </div>
+        <div class="login-field">
+            <label class="login-label" for="Confirmacion">Repetir contraseña</label>
+            <div class="login-control">
+                <input class="login-input has-action" id="Confirmacion" name="Confirmacion" value="@Model.Confirmacion" type="password" autocomplete="new-password" />
+                <button type="button" class="login-icon-button" data-toggle-password="Confirmacion" aria-pressed="false" aria-label="Mostrar contraseña">
+                    <svg class="login-glyph when-hidden"><use href="#i-eye" /></svg>
+                    <svg class="login-glyph when-shown"><use href="#i-eye-off" /></svg>
+                </button>
+            </div>
+        </div>
+        <button type="submit" class="login-submit">Guardar</button>
+        <div class="login-links">
+            <a class="login-link" asp-page="/Cuenta/Login">Volver al ingreso</a>
+        </div>
+    </form>
+}

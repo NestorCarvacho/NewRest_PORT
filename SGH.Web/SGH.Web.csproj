@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SGH.Application\SGH.Application.csproj" />
+    <ProjectReference Include="..\SGH.Infrastructure\SGH.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>e8399be1-6c27-42d4-8293-eef7187e6d2d</UserSecretsId>
+  </PropertyGroup>
+
+</Project>
