@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using SGH.Application.Cuenta.DTOs;
 using SGH.Application.Cuenta.Interfaces;
 using SGH.Domain.Cuenta;
+using SGH.Domain.Cuenta.Entities;
 using SGH.Domain.Cuenta.Interfaces;
 
 namespace SGH.Application.Cuenta.UseCases;
@@ -38,10 +39,13 @@ public sealed class VerificacionClaveUsuario : IVerificacionClaveUsuario
         }
 
         var usuario = await _consulta.ObtenerParaLoginAsync(rutNormalizado, loginInterno, cancellationToken);
-        if (usuario is null || !_verificador.Coincide(contrasena, usuario.HashContrasena, usuario.Md5Retirado))
-        {
-            return new ResultadoVerificacionClave.Rechazada(ReglasCuenta.CredencialesInvalidas, MotivoRechazo.CredencialesInvalidas);
-        }
+        var rechazo = await RechazoDeClaveAsync(
+            usuario,
+            usuario is not null && _verificador.Coincide(contrasena, usuario.HashContrasena, usuario.Md5Retirado),
+            rutNormalizado,
+            cancellationToken);
+        if (rechazo is not null || usuario is null)
+            return rechazo ?? new ResultadoVerificacionClave.Rechazada(ReglasCuenta.CredencialesInvalidas, MotivoRechazo.CredencialesInvalidas);
 
         var estado = await _consulta.ObtenerEstadoAsync(rutNormalizado, cancellationToken);
         if (estado == CodigoEstadoUsuario.ClaveCaducada)
@@ -64,6 +68,32 @@ public sealed class VerificacionClaveUsuario : IVerificacionClaveUsuario
         }
 
         return new ResultadoVerificacionClave.Valida(usuario, rutNormalizado);
+    }
+
+    private async Task<ResultadoVerificacionClave?> RechazoDeClaveAsync(
+        UsuarioLogin? usuario,
+        bool claveCoincide,
+        string rut,
+        CancellationToken cancellationToken)
+    {
+        if (usuario is null)
+            return new ResultadoVerificacionClave.Rechazada(ReglasCuenta.CredencialesInvalidas, MotivoRechazo.CredencialesInvalidas);
+
+        if (usuario.Bloqueada)
+            return new ResultadoVerificacionClave.Rechazada(ReglasCuenta.MensajeCuentaBloqueada, MotivoRechazo.CuentaBloqueada);
+
+        if (!claveCoincide)
+        {
+            var intento = await _comando.RegistrarIntentoFallidoAsync(rut, cancellationToken);
+            var mensaje = intento.Bloqueada
+                ? ReglasCuenta.MensajeCuentaBloqueada
+                : ReglasCuenta.MensajeIntentosRestantes(ReglasCuenta.IntentosAntesDeBloquear - intento.IntentosFallidos);
+            var motivo = intento.Bloqueada ? MotivoRechazo.CuentaBloqueada : MotivoRechazo.CredencialesInvalidas;
+            return new ResultadoVerificacionClave.Rechazada(mensaje, motivo);
+        }
+
+        await _comando.ReiniciarIntentosAsync(rut, cancellationToken);
+        return null;
     }
 
     private async Task MarcarMd5RetiradoAsync(int usuarioId, string rut, CancellationToken cancellationToken)

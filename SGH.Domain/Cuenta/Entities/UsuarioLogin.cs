@@ -10,7 +10,8 @@ public sealed class UsuarioLogin
         string hashContrasena,
         int perfilId,
         int? empresaMandanteId,
-        bool md5Retirado)
+        bool md5Retirado,
+        bool bloqueada = false)
     {
         Id = id;
         Rut = rut;
@@ -20,6 +21,7 @@ public sealed class UsuarioLogin
         PerfilId = perfilId;
         EmpresaMandanteId = empresaMandanteId;
         Md5Retirado = md5Retirado;
+        Bloqueada = bloqueada;
     }
 
     public int Id { get; }
@@ -30,6 +32,7 @@ public sealed class UsuarioLogin
     public int PerfilId { get; }
     public int? EmpresaMandanteId { get; }
     public bool Md5Retirado { get; }
+    public bool Bloqueada { get; }
 
     public string NombreParaMostrar
     {

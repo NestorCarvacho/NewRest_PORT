@@ -1,3 +1,4 @@
+using SGH.Domain.Cuenta;
 using SGH.Domain.Cuenta.Entities;
 using SGH.Domain.Cuenta.Interfaces;
 
@@ -14,6 +15,8 @@ internal sealed class RepositorioFalso : IConsultaAutenticacion, IComandoAutenti
     public int Reemplazos { get; private set; }
     public int Retiros { get; private set; }
     public int Actualizaciones { get; private set; }
+    public int Intentos { get; private set; }
+    public int Reinicios { get; private set; }
     public int LoginInternoRecibido { get; private set; }
     public string? HashGuardado { get; private set; }
     public string? HuellaGuardada { get; private set; }
@@ -34,6 +37,19 @@ internal sealed class RepositorioFalso : IConsultaAutenticacion, IComandoAutenti
     public Task<IReadOnlyList<PerfilCampamentoUsuario>> ObtenerCampamentosYPerfilesAsync(string rut, CancellationToken cancellationToken)
     {
         return Task.FromResult<IReadOnlyList<PerfilCampamentoUsuario>>(Perfiles);
+    }
+
+    public Task<ResultadoIntentoClave> RegistrarIntentoFallidoAsync(string rut, CancellationToken cancellationToken)
+    {
+        Intentos++;
+        return Task.FromResult(new ResultadoIntentoClave(Intentos, Intentos >= ReglasCuenta.IntentosAntesDeBloquear));
+    }
+
+    public Task ReiniciarIntentosAsync(string rut, CancellationToken cancellationToken)
+    {
+        Reinicios++;
+        Intentos = 0;
+        return Task.CompletedTask;
     }
 
     public Task<int> ActualizarPasswordAsync(string rut, string hashBcrypt, string? huellaMd5, CancellationToken cancellationToken)

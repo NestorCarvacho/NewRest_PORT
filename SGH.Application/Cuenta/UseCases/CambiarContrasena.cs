@@ -30,10 +30,23 @@ public sealed class CambiarContrasena : ICambiarContrasena
 
         var rut = NormalizadorRut.Normalizar(solicitud.Rut);
         var usuario = await _consulta.ObtenerParaLoginAsync(rut, loginInterno: 0, cancellationToken);
-        if (usuario is null || !_verificador.Coincide(solicitud.ContrasenaActual, usuario.HashContrasena, usuario.Md5Retirado))
-        {
+        if (usuario is null)
             return new ResultadoCambioContrasena.Rechazado(ReglasCuenta.CredencialesInvalidas, MotivoRechazo.CredencialesInvalidas);
+
+        if (usuario.Bloqueada)
+            return new ResultadoCambioContrasena.Rechazado(ReglasCuenta.MensajeCuentaBloqueada, MotivoRechazo.CuentaBloqueada);
+
+        if (!_verificador.Coincide(solicitud.ContrasenaActual, usuario.HashContrasena, usuario.Md5Retirado))
+        {
+            var intento = await _comando.RegistrarIntentoFallidoAsync(rut, cancellationToken);
+            var aviso = intento.Bloqueada
+                ? ReglasCuenta.MensajeCuentaBloqueada
+                : ReglasCuenta.MensajeIntentosRestantes(ReglasCuenta.IntentosAntesDeBloquear - intento.IntentosFallidos);
+            var motivo = intento.Bloqueada ? MotivoRechazo.CuentaBloqueada : MotivoRechazo.CredencialesInvalidas;
+            return new ResultadoCambioContrasena.Rechazado(aviso, motivo);
         }
+
+        await _comando.ReiniciarIntentosAsync(rut, cancellationToken);
 
         if (string.Equals(solicitud.ContrasenaActual, solicitud.ContrasenaNueva, StringComparison.Ordinal))
         {

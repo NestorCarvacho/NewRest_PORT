@@ -47,7 +47,7 @@ public sealed class ComandoReserva : IComandoReserva
         return id.Value is int creado ? creado : 0;
     }
 
-    public async Task RegistrarMovimientoAsync(int reservaId, DateTime fecha, int usuarioId, string operacion, CancellationToken cancellationToken)
+    public async Task RegistrarMovimientoAsync(int reservaId, DateTime fecha, int usuarioId, string operacion, int campamentoId, CancellationToken cancellationToken)
     {
         var ret = new SqlParameter("@Ret", SqlDbType.Int) { Direction = ParameterDirection.Output };
         await _db.Database.ExecuteSqlInterpolatedAsync(
@@ -57,6 +57,7 @@ public sealed class ComandoReserva : IComandoReserva
                 @Fecha={fecha},
                 @UsuarioId={usuarioId},
                 @Operacion={operacion},
+                @CampamentoId={campamentoId},
                 @Ret={ret} OUT
             """,
             cancellationToken);

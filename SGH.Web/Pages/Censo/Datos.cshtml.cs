@@ -36,7 +36,12 @@ public class DatosModel : PageModel
         try
         {
             var catalogo = await _catalogo.EjecutarAsync(sesion.CampamentoId, cancellationToken);
-            return new JsonResult(catalogo);
+            return catalogo switch
+            {
+                ResultadoCatalogoCenso.Listo listo => new JsonResult(listo.Catalogo),
+                ResultadoCatalogoCenso.Rechazado rechazado => RespuestaJson.Mensaje(rechazado.Mensaje),
+                _ => RespuestaJson.Mensaje("No se pudo consultar el catálogo.")
+            };
         }
         catch (Exception ex)
         {
@@ -94,7 +99,7 @@ public class DatosModel : PageModel
                 fila.Turno)).ToList();
 
             var resultado = await _guardar.EjecutarAsync(
-                new SolicitudGuardarCensos(sesion.UsuarioId, fecha, filas),
+                new SolicitudGuardarCensos(sesion.UsuarioId, sesion.CampamentoId, fecha, filas),
                 cancellationToken);
 
             return resultado switch

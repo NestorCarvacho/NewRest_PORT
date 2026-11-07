@@ -19,6 +19,7 @@ public sealed class ComandoCenso : IComandoCenso
         FilaCensoGuardar fila,
         DateTime fecha,
         int usuarioId,
+        int campamentoId,
         CancellationToken cancellationToken)
     {
         using var conexion = _fabrica.Crear();
@@ -32,7 +33,8 @@ public sealed class ComandoCenso : IComandoCenso
                     fila.Cantidad,
                     Fecha = fecha,
                     fila.Turno,
-                    UsuarioId = usuarioId
+                    UsuarioId = usuarioId,
+                    CampamentoId = campamentoId
                 },
                 commandType: CommandType.StoredProcedure,
                 cancellationToken: cancellationToken));

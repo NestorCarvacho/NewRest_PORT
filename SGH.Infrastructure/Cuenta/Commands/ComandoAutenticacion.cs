@@ -1,6 +1,8 @@
+using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SGH.Domain.Cuenta;
+using SGH.Domain.Cuenta.Entities;
 using SGH.Domain.Cuenta.Interfaces;
 using SGH.Infrastructure.Persistence;
 
@@ -14,6 +16,22 @@ public sealed class ComandoAutenticacion : IComandoAutenticacion
     {
         _db = db;
     }
+
+    public async Task<ResultadoIntentoClave> RegistrarIntentoFallidoAsync(string rut, CancellationToken cancellationToken)
+    {
+        var intentos = new SqlParameter("@Intentos", SqlDbType.Int) { Direction = ParameterDirection.Output };
+        var bloqueada = new SqlParameter("@Bloqueada", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+        await _db.Database.ExecuteSqlInterpolatedAsync(
+            $"EXEC sp_Usuario_RegistrarIntentoFallido @Rut={rut}, @Intentos={intentos} OUT, @Bloqueada={bloqueada} OUT",
+            cancellationToken);
+        var cantidad = intentos.Value is int numero ? numero : 0;
+        return new ResultadoIntentoClave(cantidad, EsVerdadero(bloqueada.Value));
+    }
+
+    public Task ReiniciarIntentosAsync(string rut, CancellationToken cancellationToken) =>
+        _db.Database.ExecuteSqlInterpolatedAsync(
+            $"EXEC sp_Usuario_ReiniciarIntentos @Rut={rut}",
+            cancellationToken);
 
     public async Task<int> ActualizarPasswordAsync(string rut, string hashBcrypt, string? huellaMd5, CancellationToken cancellationToken)
     {
@@ -51,4 +69,9 @@ public sealed class ComandoAutenticacion : IComandoAutenticacion
 
     private static int LeerCodigo(SqlParameter ret) =>
         ret.Value is int codigo ? codigo : CodigoCambioClave.NoActualizada;
+
+    private static bool EsVerdadero(object valor) =>
+        valor is bool bandera && bandera
+        || valor is byte octeto && octeto != 0
+        || valor is int numero && numero != 0;
 }

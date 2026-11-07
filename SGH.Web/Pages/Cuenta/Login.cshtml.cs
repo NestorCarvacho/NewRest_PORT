@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
 using SGH.Application.Cuenta.DTOs;
 using SGH.Application.Cuenta.Interfaces;
 using SGH.Web.Cuenta;
@@ -8,11 +9,13 @@ using SGH.Web.Cuenta;
 namespace SGH.Web.Pages.Cuenta;
 
 [AllowAnonymous]
+[EnableRateLimiting("ingreso")]
 public class LoginModel : PageModel
 {
     private readonly IPreautenticarUsuario _preautenticar;
     private readonly ICompletarSesion _completar;
     private readonly EmisorCookieSesion _emisor;
+    private readonly ClavePendienteAlmacen _claves;
     private readonly IWebHostEnvironment _ambiente;
     private readonly ILogger<LoginModel> _logger;
 
@@ -20,12 +23,14 @@ public class LoginModel : PageModel
         IPreautenticarUsuario preautenticar,
         ICompletarSesion completar,
         EmisorCookieSesion emisor,
+        ClavePendienteAlmacen claves,
         IWebHostEnvironment ambiente,
         ILogger<LoginModel> logger)
     {
         _preautenticar = preautenticar;
         _completar = completar;
         _emisor = emisor;
+        _claves = claves;
         _ambiente = ambiente;
         _logger = logger;
     }
@@ -53,6 +58,7 @@ public class LoginModel : PageModel
             return Redirigir(returnUrl);
 
         ReturnUrl = returnUrl;
+        LimiteIngreso.PublicarEspera(this);
         return Page();
     }
 
@@ -86,16 +92,27 @@ public class LoginModel : PageModel
 
             var listo = (ResultadoPreautenticacion.Listo)resultado;
             var perfiles = AVista(listo.Perfiles);
+            var anterior = IngresoPendienteAlmacen.Leer(TempData);
+            if (anterior is not null)
+                _claves.Descartar(anterior.ClaveId);
+
+            var expira = DateTime.UtcNow.AddMinutes(5);
+            var claveId = Guid.NewGuid().ToString("N");
+            _claves.Guardar(claveId, Contrasena, expira);
             Paso = "perfil";
             Perfiles = perfiles;
             AsignacionPerfilId = 0;
-            IngresoPendienteAlmacen.Guardar(TempData, new IngresoPendiente
+            var pendiente = new IngresoPendiente
             {
                 Rut = listo.Rut,
-                ExpiraUtc = DateTime.UtcNow.AddMinutes(5),
+                ClaveId = claveId,
+                LargoClave = Contrasena.Length,
+                ExpiraUtc = expira,
                 EsIntegracion = listo.EsIntegracion,
                 Perfiles = perfiles
-            });
+            };
+            IngresoPendienteAlmacen.Guardar(TempData, pendiente);
+            Enmascarar(pendiente);
             return Page();
         }
         catch (Exception ex)
@@ -117,10 +134,23 @@ public class LoginModel : PageModel
 
         Perfiles = pendiente.Perfiles;
         Paso = "perfil";
+        Enmascarar(pendiente);
+
+        var clave = _claves.Leer(pendiente.ClaveId);
+        if (clave is null)
+        {
+            _claves.Descartar(pendiente.ClaveId);
+            IngresoPendienteAlmacen.Descartar(TempData);
+            Paso = "credenciales";
+            Contrasena = string.Empty;
+            ModelState.Remove(nameof(Contrasena));
+            ModelState.AddModelError(string.Empty, "El ingreso pendiente venció. Vuelva a identificarse.");
+            return Page();
+        }
 
         try
         {
-            return await EmitirAsync(pendiente.Rut, Contrasena, AsignacionPerfilId, cancellationToken);
+            return await EmitirAsync(pendiente.Rut, clave, AsignacionPerfilId, pendiente, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -129,22 +159,36 @@ public class LoginModel : PageModel
         }
     }
 
-    private async Task<IActionResult> EmitirAsync(string rut, string contrasena, int asignacionPerfilId, CancellationToken cancellationToken)
+    private async Task<IActionResult> EmitirAsync(
+        string rut,
+        string contrasena,
+        int asignacionPerfilId,
+        IngresoPendiente pendiente,
+        CancellationToken cancellationToken)
     {
         var resultado = await _completar.EjecutarAsync(new SolicitudCompletarSesion(rut, contrasena, asignacionPerfilId), cancellationToken);
         if (resultado is ResultadoAutenticacion.Rechazado rechazado)
         {
+            Enmascarar(pendiente);
             ModelState.AddModelError(string.Empty, rechazado.Mensaje);
             return Page();
         }
 
+        _claves.Descartar(pendiente.ClaveId);
         IngresoPendienteAlmacen.Descartar(TempData);
         await _emisor.EmitirAsync(HttpContext, ((ResultadoAutenticacion.Aceptado)resultado).Sesion);
         return Redirigir(ReturnUrl);
     }
 
+    private void Enmascarar(IngresoPendiente pendiente)
+    {
+        ModelState.Remove(nameof(Contrasena));
+        Contrasena = new string('•', Math.Max(pendiente.LargoClave, 0));
+    }
+
     private IActionResult Redirigir(string? returnUrl)
     {
+        PilaAvisos.Limpiar(HttpContext);
         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             return LocalRedirect(returnUrl);
 

@@ -27,7 +27,7 @@
         <div class="login-control">
             @if (Model.Paso == "perfil")
             {
-                <input class="login-input has-action" id="Contrasena" name="Contrasena" type="password" value="@Model.Contrasena" readonly autocomplete="current-password" />
+                <input class="login-input has-action" id="Contrasena" name="Contrasena" type="password" value="@Model.Contrasena" readonly data-clave-enmascarada autocomplete="off" />
             }
             else
             {
@@ -54,7 +54,7 @@
         </div>
     }
 
-    <button type="submit" class="login-submit">Entrar</button>
+    <partial name="_BotonEspera" model="@("Entrar")" />
     <div class="login-links">
         <a class="login-link" asp-page="/Cuenta/CambiarClave">Cambiar Contraseña</a>
     </div>

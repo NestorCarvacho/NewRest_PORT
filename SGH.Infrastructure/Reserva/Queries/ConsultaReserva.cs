@@ -80,6 +80,18 @@ public sealed class ConsultaReserva : IConsultaReserva
             turnos.Select(fila => new TurnoDisponible(fila.Id, fila.Nombre ?? string.Empty, fila.TipoTurno ?? string.Empty)).ToList());
     }
 
+    public async Task<bool> ReservaEstaEnCampamentoAsync(int reservaId, int campamentoId, CancellationToken cancellationToken)
+    {
+        using var conexion = _fabrica.Crear();
+        var marca = await conexion.QuerySingleAsync<MarcaPertenece>(
+            new CommandDefinition(
+                "sp_Reserva_EstaEnCampamento",
+                new { ReservaId = reservaId, CampamentoId = campamentoId },
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken));
+        return marca.Pertenece;
+    }
+
     private sealed class ReservaFila
     {
         public int Id { get; set; }
@@ -104,6 +116,11 @@ public sealed class ConsultaReserva : IConsultaReserva
     {
         public string? Id { get; set; }
         public string? Etiqueta { get; set; }
+    }
+
+    private sealed class MarcaPertenece
+    {
+        public bool Pertenece { get; set; }
     }
 
     private sealed class TurnoFila

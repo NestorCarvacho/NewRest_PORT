@@ -222,6 +222,13 @@ body.login-body {
   filter: brightness(0.96);
 }
 
+.login-submit:disabled {
+  background: var(--blizzard);
+  color: var(--gray);
+  cursor: not-allowed;
+  filter: none;
+}
+
 .login-submit:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgba(219, 111, 22, 0.45);
@@ -390,7 +397,8 @@ html.tarjeta-crece .login-card {
   bottom: 2rem;
   z-index: 20;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
+  justify-content: flex-end;
   gap: 0.875rem;
   width: min(22.25rem, calc(100vw - 4rem));
   margin: 0;
@@ -418,7 +426,6 @@ body.con-aviso-cookies .avisos {
   font-size: 13px;
   font-weight: 500;
   line-height: 1.5;
-  animation: aviso-entra 400ms ease;
 }
 
 .aviso-error {
@@ -490,26 +497,26 @@ body.con-aviso-cookies .avisos {
   background: color-mix(in srgb, var(--aviso-tono) 16%, var(--white));
 }
 
+.aviso-nuevo {
+  animation: aviso-entra 400ms ease;
+}
+
 .aviso-sale {
-  animation: aviso-sale 200ms ease forwards;
+  animation: aviso-sale 400ms ease forwards;
 }
 
 @keyframes aviso-entra {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes aviso-sale {
-  to {
-    opacity: 0;
-    transform: translateY(12px);
-  }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aviso,
+  .aviso-nuevo,
   .aviso-sale {
     animation: none;
   }

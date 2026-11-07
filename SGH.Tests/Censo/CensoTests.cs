@@ -1,5 +1,6 @@
 using SGH.Application.Censo.DTOs;
 using SGH.Application.Censo.UseCases;
+using SGH.Application.Sesion;
 using SGH.Domain.Censo;
 using SGH.Domain.Censo.Entities;
 using SGH.Domain.Censo.Interfaces;
@@ -29,10 +30,11 @@ public class GuardarCensosTests
             habitacion == 2
                 ? new ResultadoFilaCenso(1, "Habitación 2 rechazada.")
                 : new ResultadoFilaCenso(0, null));
-        var caso = new GuardarCensos(comando);
+        var caso = new GuardarCensos(comando, new ConsultaCensoFalsa());
 
         var resultado = await caso.EjecutarAsync(new SolicitudGuardarCensos(
             4,
+            20,
             new DateTime(2026, 11, 7),
             [
                 new FilaGuardarCensoDto("1", 1, "2", "D"),
@@ -48,14 +50,59 @@ public class GuardarCensosTests
     public async Task GuardaCuandoTodasLasFilasDevuelvenCero()
     {
         var comando = new ComandoCensoFalso(_ => new ResultadoFilaCenso(0, null));
-        var caso = new GuardarCensos(comando);
+        var caso = new GuardarCensos(comando, new ConsultaCensoFalsa());
 
         var resultado = await caso.EjecutarAsync(new SolicitudGuardarCensos(
             4,
+            20,
             new DateTime(2026, 11, 7),
             [new FilaGuardarCensoDto("1", 9, "3", "N")]), CancellationToken.None);
 
         Assert.IsType<ResultadoGuardadoCenso.Guardado>(resultado);
+    }
+
+    [Fact]
+    public async Task HabitacionDeOtroCampamentoNoSeEnviaAlProcedimiento()
+    {
+        var comando = new ComandoCensoFalso(_ => new ResultadoFilaCenso(0, null));
+        var consulta = new ConsultaCensoFalsa { HabitacionesPropias = [9] };
+        var caso = new GuardarCensos(comando, consulta);
+
+        var resultado = await caso.EjecutarAsync(new SolicitudGuardarCensos(
+            4,
+            20,
+            new DateTime(2026, 11, 7),
+            [
+                new FilaGuardarCensoDto("1", 9, "3", "D"),
+                new FilaGuardarCensoDto("2", 4, "1", "D")
+            ]), CancellationToken.None);
+
+        var rechazado = Assert.IsType<ResultadoGuardadoCenso.Rechazado>(resultado);
+        Assert.Equal(ReglasCenso.HabitacionAjena, rechazado.Mensaje);
+        Assert.Equal(1, comando.Llamadas);
+        Assert.Equal(9, comando.Habitaciones[0]);
+    }
+
+    [Fact]
+    public async Task SinCampamentoNoBuscaNiGuarda()
+    {
+        var comando = new ComandoCensoFalso(_ => new ResultadoFilaCenso(0, null));
+        var consulta = new ConsultaCensoFalsa();
+        var guardar = new GuardarCensos(comando, consulta);
+        var buscar = new BuscarCensos(consulta);
+        var fecha = new DateTime(2026, 11, 7);
+
+        var guardado = await guardar.EjecutarAsync(new SolicitudGuardarCensos(
+            4,
+            0,
+            fecha,
+            [new FilaGuardarCensoDto("1", 9, "3", "D")]), CancellationToken.None);
+        var busqueda = await buscar.EjecutarAsync(new SolicitudBuscarCensos(9, 0, 0, 0, 0, fecha, "D"), CancellationToken.None);
+
+        Assert.Equal(AlcanceSesion.SinCampamento, Assert.IsType<ResultadoGuardadoCenso.Rechazado>(guardado).Mensaje);
+        Assert.Equal(AlcanceSesion.SinCampamento, Assert.IsType<ResultadoBusquedaCenso.Rechazada>(busqueda).Mensaje);
+        Assert.Equal(0, comando.Llamadas);
+        Assert.Equal(0, consulta.Busquedas);
     }
 
     private sealed class ComandoCensoFalso : IComandoCenso
@@ -69,10 +116,32 @@ public class GuardarCensosTests
 
         public int Llamadas { get; private set; }
 
-        public Task<ResultadoFilaCenso> GuardarAsync(FilaCensoGuardar fila, DateTime fecha, int usuarioId, CancellationToken cancellationToken)
+        public List<int> Habitaciones { get; } = [];
+
+        public Task<ResultadoFilaCenso> GuardarAsync(FilaCensoGuardar fila, DateTime fecha, int usuarioId, int campamentoId, CancellationToken cancellationToken)
         {
             Llamadas++;
+            Habitaciones.Add(fila.HabitacionId);
             return Task.FromResult(_respuesta(fila.HabitacionId));
         }
+    }
+
+    private sealed class ConsultaCensoFalsa : IConsultaCenso
+    {
+        public HashSet<int>? HabitacionesPropias { get; init; }
+
+        public int Busquedas { get; private set; }
+
+        public Task<IReadOnlyList<CensoListado>> BuscarAsync(FiltroCenso filtro, CancellationToken cancellationToken)
+        {
+            Busquedas++;
+            return Task.FromResult<IReadOnlyList<CensoListado>>([]);
+        }
+
+        public Task<CatalogoCenso> ObtenerCatalogoAsync(int campamentoId, CancellationToken cancellationToken) =>
+            Task.FromResult(new CatalogoCenso([], [], []));
+
+        public Task<bool> FiltroEstaEnCampamentoAsync(int campamentoId, int moduloId, int pisoId, int habitacionId, CancellationToken cancellationToken) =>
+            Task.FromResult(HabitacionesPropias is null || HabitacionesPropias.Contains(habitacionId));
     }
 }

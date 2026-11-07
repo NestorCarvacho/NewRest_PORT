@@ -52,7 +52,29 @@ public sealed record SolicitudCrearReserva(
     DateTime? FechaSalida,
     string? Observacion);
 
-public sealed record SolicitudMovimientoReserva(int ReservaId, DateTime Fecha, int UsuarioId, string Operacion);
+public sealed record SolicitudMovimientoReserva(int ReservaId, DateTime Fecha, int UsuarioId, string Operacion, int CampamentoId);
+
+public abstract record ResultadoBusquedaReservas
+{
+    private ResultadoBusquedaReservas()
+    {
+    }
+
+    public sealed record Lista(IReadOnlyList<ReservaFilaDto> Filas) : ResultadoBusquedaReservas;
+
+    public sealed record Rechazada(string Mensaje) : ResultadoBusquedaReservas;
+}
+
+public abstract record ResultadoCatalogoReserva
+{
+    private ResultadoCatalogoReserva()
+    {
+    }
+
+    public sealed record Listo(CatalogoReservaDto Catalogo) : ResultadoCatalogoReserva;
+
+    public sealed record Rechazado(string Mensaje) : ResultadoCatalogoReserva;
+}
 
 public abstract record ResultadoAltaReserva
 {

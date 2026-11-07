@@ -41,10 +41,22 @@ public class CompletarSesionTests
     }
 
     [Fact]
-    public async Task SinPerfilSeleccionadoUsaElPerfilDeLaFicha()
+    public async Task SinPerfilSeleccionadoPideElegirCampamento()
     {
         Preparar();
         _repositorio.Perfiles.Add(Perfil(8, ReglasCuenta.PerfilOperacionesA));
+
+        var resultado = await Crear().EjecutarAsync(new SolicitudCompletarSesion("123456789", Clave, 0), CancellationToken.None);
+
+        var rechazo = Assert.IsType<ResultadoAutenticacion.Rechazado>(resultado);
+        Assert.Equal(MotivoRechazo.PerfilNoPermitido, rechazo.Motivo);
+        Assert.Equal(ReglasCuenta.SeleccionePerfil, rechazo.Mensaje);
+    }
+
+    [Fact]
+    public async Task SinPerfilesEntraConElPerfilDeLaFicha()
+    {
+        Preparar();
 
         var resultado = await Crear().EjecutarAsync(new SolicitudCompletarSesion("123456789", Clave, 0), CancellationToken.None);
 

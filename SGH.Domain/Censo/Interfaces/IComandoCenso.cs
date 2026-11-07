@@ -8,5 +8,6 @@ public interface IComandoCenso
         FilaCensoGuardar fila,
         DateTime fecha,
         int usuarioId,
+        int campamentoId,
         CancellationToken cancellationToken);
 }

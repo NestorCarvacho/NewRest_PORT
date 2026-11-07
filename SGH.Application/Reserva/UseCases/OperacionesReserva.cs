@@ -1,5 +1,6 @@
 using SGH.Application.Reserva.DTOs;
 using SGH.Application.Reserva.Interfaces;
+using SGH.Application.Sesion;
 using SGH.Domain.Reserva;
 using SGH.Domain.Reserva.Interfaces;
 
@@ -14,8 +15,11 @@ public sealed class BuscarReservas : IBuscarReservas
         _consulta = consulta;
     }
 
-    public async Task<IReadOnlyList<ReservaFilaDto>> EjecutarAsync(SolicitudBuscarReservas solicitud, CancellationToken cancellationToken)
+    public async Task<ResultadoBusquedaReservas> EjecutarAsync(SolicitudBuscarReservas solicitud, CancellationToken cancellationToken)
     {
+        if (!AlcanceSesion.TieneCampamento(solicitud.CampamentoId))
+            return new ResultadoBusquedaReservas.Rechazada(AlcanceSesion.SinCampamento);
+
         var filas = await _consulta.BuscarAsync(new FiltroReserva(
             solicitud.CampamentoId,
             solicitud.Id,
@@ -32,7 +36,7 @@ public sealed class BuscarReservas : IBuscarReservas
             solicitud.HabitacionId,
             string.IsNullOrWhiteSpace(solicitud.TieneAgua) ? "0" : solicitud.TieneAgua), cancellationToken);
 
-        return filas.Select(fila => new ReservaFilaDto(
+        return new ResultadoBusquedaReservas.Lista(filas.Select(fila => new ReservaFilaDto(
             fila.Id,
             fila.GrupoEmpresa,
             fila.Pasajero,
@@ -42,7 +46,7 @@ public sealed class BuscarReservas : IBuscarReservas
             fila.Llegada,
             fila.Salida,
             fila.CheckIn,
-            fila.CheckOut)).ToList();
+            fila.CheckOut)).ToList());
     }
 }
 
@@ -55,15 +59,18 @@ public sealed class ObtenerCatalogoReserva : IObtenerCatalogoReserva
         _consulta = consulta;
     }
 
-    public async Task<CatalogoReservaDto> EjecutarAsync(int empresaMandanteId, int campamentoId, CancellationToken cancellationToken)
+    public async Task<ResultadoCatalogoReserva> EjecutarAsync(int empresaMandanteId, int campamentoId, CancellationToken cancellationToken)
     {
+        if (!AlcanceSesion.TieneCampamento(campamentoId))
+            return new ResultadoCatalogoReserva.Rechazado(AlcanceSesion.SinCampamento);
+
         var catalogo = await _consulta.ObtenerCatalogoAsync(empresaMandanteId, campamentoId, cancellationToken);
-        return new CatalogoReservaDto(
+        return new ResultadoCatalogoReserva.Listo(new CatalogoReservaDto(
             catalogo.Grupos.Select(opcion => new OpcionDto(opcion.Id, opcion.Etiqueta)).ToList(),
             catalogo.Origenes.Select(opcion => new OpcionTextoDto(opcion.Id, opcion.Etiqueta)).ToList(),
             catalogo.Pasajeros.Select(opcion => new OpcionDto(opcion.Id, opcion.Etiqueta)).ToList(),
             catalogo.Habitaciones.Select(opcion => new OpcionDto(opcion.Id, opcion.Etiqueta)).ToList(),
-            catalogo.Turnos.Select(turno => new TurnoDto(turno.Id, turno.Nombre, turno.TipoTurno)).ToList());
+            catalogo.Turnos.Select(turno => new TurnoDto(turno.Id, turno.Nombre, turno.TipoTurno)).ToList()));
     }
 }
 
@@ -81,8 +88,8 @@ public sealed class CrearReserva : ICrearReserva
         if (solicitud.UsuarioId <= 0)
             return new ResultadoAltaReserva.Rechazada("La sesión no tiene un usuario.");
 
-        if (solicitud.CampamentoId <= 0 || solicitud.EmpresaMandanteId <= 0)
-            return new ResultadoAltaReserva.Rechazada("La sesión no tiene un campamento.");
+        if (!AlcanceSesion.TieneCampamento(solicitud.CampamentoId) || solicitud.EmpresaMandanteId <= 0)
+            return new ResultadoAltaReserva.Rechazada(AlcanceSesion.SinCampamento);
 
         var mensaje = ReglasReserva.ValidarAlta(solicitud.AreaId, solicitud.TurnoId, solicitud.FechaLlegada, solicitud.FechaSalida);
         if (mensaje is not null)
@@ -110,10 +117,12 @@ public sealed class CrearReserva : ICrearReserva
 public sealed class RegistrarMovimientoReserva : IRegistrarMovimientoReserva
 {
     private readonly IComandoReserva _comando;
+    private readonly IConsultaReserva _consulta;
 
-    public RegistrarMovimientoReserva(IComandoReserva comando)
+    public RegistrarMovimientoReserva(IComandoReserva comando, IConsultaReserva consulta)
     {
         _comando = comando;
+        _consulta = consulta;
     }
 
     public async Task<ResultadoMovimientoReserva> EjecutarAsync(SolicitudMovimientoReserva solicitud, CancellationToken cancellationToken)
@@ -121,11 +130,24 @@ public sealed class RegistrarMovimientoReserva : IRegistrarMovimientoReserva
         if (solicitud.UsuarioId <= 0)
             return new ResultadoMovimientoReserva.Rechazado("La sesión no tiene un usuario.");
 
+        if (!AlcanceSesion.TieneCampamento(solicitud.CampamentoId))
+            return new ResultadoMovimientoReserva.Rechazado(AlcanceSesion.SinCampamento);
+
         var mensaje = ReglasReserva.ValidarMovimiento(solicitud.ReservaId, solicitud.Fecha, solicitud.Operacion);
         if (mensaje is not null)
             return new ResultadoMovimientoReserva.Rechazado(mensaje);
 
-        await _comando.RegistrarMovimientoAsync(solicitud.ReservaId, solicitud.Fecha, solicitud.UsuarioId, solicitud.Operacion, cancellationToken);
+        var propia = await _consulta.ReservaEstaEnCampamentoAsync(solicitud.ReservaId, solicitud.CampamentoId, cancellationToken);
+        if (!propia)
+            return new ResultadoMovimientoReserva.Rechazado(ReglasReserva.ReservaAjena);
+
+        await _comando.RegistrarMovimientoAsync(
+            solicitud.ReservaId,
+            solicitud.Fecha,
+            solicitud.UsuarioId,
+            solicitud.Operacion,
+            solicitud.CampamentoId,
+            cancellationToken);
         return new ResultadoMovimientoReserva.Registrado();
     }
 }

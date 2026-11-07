@@ -32,7 +32,18 @@ public sealed record SolicitudBuscarCensos(
 
 public sealed record FilaGuardarCensoDto(string? Id, int HabitacionId, string? Cantidad, string? Turno);
 
-public sealed record SolicitudGuardarCensos(int UsuarioId, DateTime Fecha, IReadOnlyList<FilaGuardarCensoDto> Filas);
+public sealed record SolicitudGuardarCensos(int UsuarioId, int CampamentoId, DateTime Fecha, IReadOnlyList<FilaGuardarCensoDto> Filas);
+
+public abstract record ResultadoCatalogoCenso
+{
+    private ResultadoCatalogoCenso()
+    {
+    }
+
+    public sealed record Listo(CatalogoCensoDto Catalogo) : ResultadoCatalogoCenso;
+
+    public sealed record Rechazado(string Mensaje) : ResultadoCatalogoCenso;
+}
 
 public abstract record ResultadoBusquedaCenso
 {

@@ -44,7 +44,7 @@ BEGIN
     LEFT JOIN dbo.Usuarios AS u ON u.Id = r.PasajeroId
     LEFT JOIN dbo.Habitaciones AS h ON h.Id = r.HabitacionId
     LEFT JOIN dbo.Listas AS le ON le.IdTabla = r.EstadoTabla AND le.Valor1 = r.Estado
-    WHERE (@CampamentoId = 0 OR r.CampamentoId = @CampamentoId)
+    WHERE r.CampamentoId = @CampamentoId
       AND (@Id = 0 OR r.Id = @Id)
       AND (@AreaId = 0 OR r.AreaEmpresaContratistaId = @AreaId)
       AND (@Origen = '0' OR r.OrigenReserva = @Origen)
@@ -143,6 +143,16 @@ BEGIN
         RETURN;
     END
 
+    IF NOT EXISTS (
+        SELECT 1
+        FROM dbo.EmpresasMandanteAreasEmpresaContratista
+        WHERE EmpresaMandanteId = @EmpresaMandanteId
+          AND AreaEmpresaContratistaId = @AreaId)
+    BEGIN
+        RAISERROR('El área no corresponde a la empresa de la sesión.', 16, 1);
+        RETURN;
+    END
+
     INSERT INTO dbo.Reservas (
         EmpresaMandanteId,
         CampamentoId,
@@ -190,15 +200,42 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE dbo.sp_Reserva_EstaEnCampamento
+    @ReservaId int,
+    @CampamentoId int
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT CAST(CASE WHEN EXISTS (
+        SELECT 1
+        FROM dbo.Reservas
+        WHERE Id = @ReservaId
+          AND CampamentoId = @CampamentoId
+    ) THEN 1 ELSE 0 END AS bit) AS Pertenece;
+END
+GO
+
 CREATE OR ALTER PROCEDURE dbo.sp_Reserva_RegistrarMovimiento
     @ReservaId int,
     @Fecha datetime2,
     @UsuarioId int,
     @Operacion char(1),
+    @CampamentoId int,
     @Ret int OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM dbo.Reservas
+        WHERE Id = @ReservaId
+          AND CampamentoId = @CampamentoId)
+    BEGIN
+        RAISERROR('La reserva no corresponde al campamento de la sesión.', 16, 1);
+        RETURN;
+    END
+
     EXEC dbo.RES_RealizaCheckX
         @reservaId = @ReservaId,
         @fecha = @Fecha,
