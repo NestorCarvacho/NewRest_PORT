@@ -7,6 +7,13 @@ public interface IBuscarCensos
     Task<ResultadoBusquedaCenso> EjecutarAsync(SolicitudBuscarCensos solicitud, CancellationToken cancellationToken);
 }
 
+public interface IBuscarMisCensos
+{
+    Task<ResultadoBusquedaMisCensos> EjecutarAsync(
+        SolicitudBuscarMisCensos solicitud,
+        CancellationToken cancellationToken);
+}
+
 public interface IObtenerCatalogoCenso
 {
     Task<ResultadoCatalogoCenso> EjecutarAsync(int campamentoId, CancellationToken cancellationToken);

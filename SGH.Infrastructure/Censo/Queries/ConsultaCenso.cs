@@ -51,6 +51,41 @@ public sealed class ConsultaCenso : IConsultaCenso
             string.IsNullOrWhiteSpace(fila.Turno) ? filtro.Turno : fila.Turno)).ToList();
     }
 
+    public async Task<IReadOnlyList<CensoUsuarioListado>> BuscarPorUsuarioAsync(
+        int empresaMandanteId,
+        int campamentoId,
+        DateTime fecha,
+        int usuarioId,
+        CancellationToken cancellationToken)
+    {
+        using var conexion = _fabrica.Crear();
+        var filas = await conexion.QueryAsync<CensoUsuarioFila>(
+            new CommandDefinition(
+                "sp_Censo_BuscarPorUsuario",
+                new
+                {
+                    EmpresaMandanteId = empresaMandanteId,
+                    CampamentoId = campamentoId,
+                    Fecha = fecha,
+                    UsuarioId = usuarioId
+                },
+                commandType: CommandType.StoredProcedure,
+                commandTimeout: 120,
+                cancellationToken: cancellationToken));
+
+        return filas.Select(fila => new CensoUsuarioListado(
+            fila.Id,
+            fila.FechaCenso ?? string.Empty,
+            fila.CampamentoNombre ?? string.Empty,
+            fila.PabellonNombre ?? string.Empty,
+            fila.ModuloNombre ?? string.Empty,
+            fila.HabitacionNombre ?? string.Empty,
+            fila.NumeroCamas ?? string.Empty,
+            fila.CamasOcupadas ?? string.Empty,
+            fila.Turno ?? string.Empty,
+            fila.TurnoNombre ?? string.Empty)).ToList();
+    }
+
     public async Task<CatalogoCenso> ObtenerCatalogoAsync(int campamentoId, CancellationToken cancellationToken)
     {
         using var conexion = _fabrica.Crear();
@@ -103,6 +138,20 @@ public sealed class ConsultaCenso : IConsultaCenso
         public string? CamasOcupadas { get; set; }
         public string? CamasCheckIn { get; set; }
         public string? Turno { get; set; }
+    }
+
+    private sealed class CensoUsuarioFila
+    {
+        public int Id { get; set; }
+        public string? FechaCenso { get; set; }
+        public string? CampamentoNombre { get; set; }
+        public string? PabellonNombre { get; set; }
+        public string? ModuloNombre { get; set; }
+        public string? HabitacionNombre { get; set; }
+        public string? NumeroCamas { get; set; }
+        public string? CamasOcupadas { get; set; }
+        public string? Turno { get; set; }
+        public string? TurnoNombre { get; set; }
     }
 
     private sealed class MarcaPertenece

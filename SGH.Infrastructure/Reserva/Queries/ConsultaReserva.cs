@@ -31,6 +31,8 @@ public sealed class ConsultaReserva : IConsultaReserva
                     filtro.SolicitudId,
                     filtro.Estado,
                     filtro.FechaReserva,
+                    filtro.FechaReservaDesde,
+                    filtro.FechaReservaHasta,
                     filtro.FechaLlegada,
                     filtro.FechaSalida,
                     filtro.CheckIn,
@@ -45,11 +47,16 @@ public sealed class ConsultaReserva : IConsultaReserva
 
         return filas.Select(fila => new ReservaListada(
             fila.Id,
+            fila.AreaId,
+            fila.PasajeroId ?? 0,
+            fila.HabitacionId ?? 0,
+            fila.TurnoId,
             fila.GrupoEmpresa ?? string.Empty,
             fila.Pasajero ?? string.Empty,
             fila.Habitacion ?? string.Empty,
             fila.Estado ?? string.Empty,
             fila.EstadoNumero ?? string.Empty,
+            fila.FechaReserva ?? string.Empty,
             fila.Llegada ?? string.Empty,
             fila.Salida ?? string.Empty,
             fila.CheckIn,
@@ -95,11 +102,16 @@ public sealed class ConsultaReserva : IConsultaReserva
     private sealed class ReservaFila
     {
         public int Id { get; set; }
+        public int AreaId { get; set; }
+        public int? PasajeroId { get; set; }
+        public int? HabitacionId { get; set; }
+        public int TurnoId { get; set; }
         public string? GrupoEmpresa { get; set; }
         public string? Pasajero { get; set; }
         public string? Habitacion { get; set; }
         public string? Estado { get; set; }
         public string? EstadoNumero { get; set; }
+        public string? FechaReserva { get; set; }
         public string? Llegada { get; set; }
         public string? Salida { get; set; }
         public string? CheckIn { get; set; }

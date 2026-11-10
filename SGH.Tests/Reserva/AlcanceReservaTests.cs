@@ -17,7 +17,7 @@ public class AlcanceReservaTests
         var catalogo = new ObtenerCatalogoReserva(consulta);
 
         var busqueda = await buscar.EjecutarAsync(new SolicitudBuscarReservas(
-            0, 0, 0, "0", 0, "0", null, null, null, null, null, 0, 0, "0"), CancellationToken.None);
+            0, 0, 0, "0", 0, "0", null, null, null, null, null, null, null, 0, 0, "0"), CancellationToken.None);
         var listado = await catalogo.EjecutarAsync(9, 0, CancellationToken.None);
 
         Assert.Equal(AlcanceSesion.SinCampamento, Assert.IsType<ResultadoBusquedaReservas.Rechazada>(busqueda).Mensaje);
@@ -100,5 +100,10 @@ public class AlcanceReservaTests
             Reservas.Add(reservaId);
             return Task.CompletedTask;
         }
+
+        public Task ActualizarAsync(int reservaId, int empresaMandanteId, int campamentoId, int areaId,
+            DateTime fechaReserva, DateTime fechaLlegada, DateTime? fechaSalida, string? observacion,
+            int turnoId, int? pasajeroId, int? habitacionId, string estado, bool tieneAgua,
+            int usuarioId, CancellationToken cancellationToken) => Task.CompletedTask;
     }
 }

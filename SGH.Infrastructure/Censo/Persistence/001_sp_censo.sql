@@ -57,6 +57,23 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE dbo.sp_Censo_BuscarPorUsuario
+    @EmpresaMandanteId int,
+    @CampamentoId int,
+    @Fecha date,
+    @UsuarioId int
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    EXEC dbo.CSO_ObtieneCensoByUser
+        @empresaMandante = @EmpresaMandanteId,
+        @campamento = @CampamentoId,
+        @fecha = @Fecha,
+        @usuario = @UsuarioId;
+END
+GO
+
 CREATE OR ALTER PROCEDURE dbo.sp_Censo_ListarCatalogo
     @CampamentoId int
 AS

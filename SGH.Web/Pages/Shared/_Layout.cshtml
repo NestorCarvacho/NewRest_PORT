@@ -1,27 +1,40 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+@using SGH.Web.Cuenta
+@{
+    var nombreEmpresa = User.FindFirstValue(ClaimsSesion.EmpresaMandanteNombre);
+    nombreEmpresa = string.IsNullOrWhiteSpace(nombreEmpresa)
+        ? "Gestión Hotelera"
+        : nombreEmpresa.Length > 30 ? nombreEmpresa[..30] : nombreEmpresa;
+}
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Gestión Hotelera</title>
     <partial name="_Favicon" />
+    <script src="~/js/core/tema.js" asp-append-version="true"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" />
     <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/escritorio.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/cookies.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/tema.css" asp-append-version="true" />
 </head>
 <body class="app-body">
     <header class="app-cromo">
         <div class="navbar-app">
             <a class="marca" asp-page="/Index">
                 <img src="~/img/logo-sgh.png" alt="" />
-                <span>Gestión Hotelera</span>
+                <span title="Gestión Hotelera - @nombreEmpresa">Gestión Hotelera - @nombreEmpresa</span>
             </a>
             <div class="buscador">
                 <input id="buscar-modulo" type="search" placeholder="Buscar módulo" autocomplete="off" />
                 <ul id="buscar-resultados" class="buscador-lista" hidden></ul>
             </div>
+            <partial name="_SelectorIdioma" />
+            <partial name="_SelectorTema" />
             <div class="usuario">
                 @if (User.Identity?.IsAuthenticated == true)
                 {
@@ -65,6 +78,8 @@
                                 <button type="button" data-modulo="checkin">Check In</button>
                                 <button type="button" data-modulo="checkout">Check Out</button>
                                 <button type="button" data-modulo="censo">Censo</button>
+                                <button type="button" data-modulo="censoQr">Censo QR</button>
+                                <button type="button" data-modulo="misCensos">Mis Censos</button>
                                 <button type="button">Desalojos</button>
                             </div>
                         </div>
@@ -193,7 +208,10 @@
                                 <button type="button">Plantillas de ubicación</button>
                                 <button type="button">Trabajadores</button>
                                 <button type="button">Códigos QR</button>
-                                <button type="button">Usuarios</button>
+                                @if (!User.HasClaim("tipoPerfil", "pasajero"))
+                                {
+                                    <button type="button">Usuarios</button>
+                                }
                                 <button type="button">Perfiles</button>
                                 <button type="button">Turnos</button>
                             </div>
@@ -225,10 +243,13 @@
         @Html.AntiForgeryToken()
     </form>
     <partial name="_AvisoCookies" />
+    <div id="avisos-escritorio" class="avisos-escritorio" aria-live="polite"></div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
-    <script src="~/js/escritorio.js" asp-append-version="true"></script>
+    <script src="~/js/core/idioma.js" asp-append-version="true"></script>
+    <script type="module" src="~/js/escritorio.js" asp-append-version="true"></script>
     <script src="~/js/aviso-cookies.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

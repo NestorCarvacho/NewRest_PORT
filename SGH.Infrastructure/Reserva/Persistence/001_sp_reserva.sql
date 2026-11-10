@@ -13,6 +13,8 @@ CREATE OR ALTER PROCEDURE dbo.sp_Reserva_Buscar
     @SolicitudId int = 0,
     @Estado varchar(2) = '0',
     @FechaReserva date = NULL,
+    @FechaReservaDesde date = NULL,
+    @FechaReservaHasta date = NULL,
     @FechaLlegada date = NULL,
     @FechaSalida date = NULL,
     @CheckIn date = NULL,
@@ -26,24 +28,29 @@ BEGIN
 
     SELECT
         r.Id,
-        ISNULL(e.Nombre, '') + ' - ' + ISNULL(a.Nombre, '') AS GrupoEmpresa,
+        r.AreaEmpresaContratistaId AS AreaId,
+        r.PasajeroId,
+        r.HabitacionId,
+        r.TurnoId,
+        RTRIM(ISNULL(e.Nombre, '')) + ' - ' + RTRIM(ISNULL(a.Nombre, '')) AS GrupoEmpresa,
         LTRIM(RTRIM(ISNULL(u.Nombre, '') + ' ' + ISNULL(u.Apellidos, ''))) AS Pasajero,
-        ISNULL(h.Nombre, '') AS Habitacion,
-        ISNULL(le.Descripcion, r.Estado) AS Estado,
-        r.Estado AS EstadoNumero,
-        CONVERT(varchar(10), r.FechaLlegada, 103) AS Llegada,
+        RTRIM(ISNULL(h.Nombre, '')) AS Habitacion,
+        RTRIM(ISNULL(le.Descripcion, r.Estado)) AS Estado,
+        RTRIM(r.Estado) AS EstadoNumero,
+        CONVERT(varchar(10), r.FechaReserva, 103) AS FechaReserva,
+        CONVERT(varchar(10), r.FechaLlegada, 103) + ' ' + CONVERT(varchar(5), r.FechaLlegada, 108) AS Llegada,
         CASE
             WHEN r.FechaSalida IS NULL THEN '<Sin Asignar>'
-            ELSE CONVERT(varchar(10), r.FechaSalida, 103)
+            ELSE CONVERT(varchar(10), r.FechaSalida, 103) + ' ' + CONVERT(varchar(5), r.FechaSalida, 108)
         END AS Salida,
-        CASE WHEN r.CheckIn IS NULL THEN NULL ELSE CONVERT(varchar(10), r.CheckIn, 103) END AS CheckIn,
-        CASE WHEN r.CheckOut IS NULL THEN NULL ELSE CONVERT(varchar(10), r.CheckOut, 103) END AS CheckOut
-    FROM dbo.Reservas AS r
-    LEFT JOIN dbo.AreasEmpresa AS a ON a.Id = r.AreaEmpresaContratistaId
-    LEFT JOIN dbo.Empresas AS e ON e.Id = a.EmpresaId
-    LEFT JOIN dbo.Usuarios AS u ON u.Id = r.PasajeroId
-    LEFT JOIN dbo.Habitaciones AS h ON h.Id = r.HabitacionId
-    LEFT JOIN dbo.Listas AS le ON le.IdTabla = r.EstadoTabla AND le.Valor1 = r.Estado
+        CASE WHEN r.CheckIn IS NULL THEN NULL ELSE CONVERT(varchar(10), r.CheckIn, 103) + ' ' + CONVERT(varchar(5), r.CheckIn, 108) END AS CheckIn,
+        CASE WHEN r.CheckOut IS NULL THEN NULL ELSE CONVERT(varchar(10), r.CheckOut, 103) + ' ' + CONVERT(varchar(5), r.CheckOut, 108) END AS CheckOut
+    FROM dbo.Reservas AS r WITH (NOLOCK)
+    LEFT JOIN dbo.AreasEmpresa AS a WITH (NOLOCK) ON a.Id = r.AreaEmpresaContratistaId
+    LEFT JOIN dbo.Empresas AS e WITH (NOLOCK) ON e.Id = a.EmpresaId
+    LEFT JOIN dbo.Usuarios AS u WITH (NOLOCK) ON u.Id = r.PasajeroId
+    LEFT JOIN dbo.Habitaciones AS h WITH (NOLOCK) ON h.Id = r.HabitacionId
+    LEFT JOIN dbo.Listas AS le WITH (NOLOCK) ON le.IdTabla = r.EstadoTabla AND le.Valor1 = r.Estado
     WHERE r.CampamentoId = @CampamentoId
       AND (@Id = 0 OR r.Id = @Id)
       AND (@AreaId = 0 OR r.AreaEmpresaContratistaId = @AreaId)
@@ -57,7 +64,14 @@ BEGIN
             OR (@Estado = 'N' AND r.Estado = 'N')
             OR (@Estado = 'F' AND r.Estado = 'F')
           )
-      AND (@FechaReserva IS NULL OR CONVERT(date, r.FechaReserva) = @FechaReserva)
+      AND (
+            (@FechaReservaDesde IS NOT NULL AND r.FechaReserva >= @FechaReservaDesde
+                AND (@FechaReservaHasta IS NULL OR r.FechaReserva < DATEADD(day, 1, @FechaReservaHasta)))
+            OR (@FechaReservaDesde IS NULL AND @FechaReserva IS NULL)
+            OR (@FechaReservaDesde IS NULL AND @FechaReserva IS NOT NULL
+                AND r.FechaReserva >= @FechaReserva
+                AND r.FechaReserva < DATEADD(day, 1, @FechaReserva))
+          )
       AND (@FechaLlegada IS NULL OR CONVERT(date, r.FechaLlegada) = @FechaLlegada)
       AND (@FechaSalida IS NULL OR CONVERT(date, r.FechaSalida) = @FechaSalida)
       AND (@CheckIn IS NULL OR CONVERT(date, r.CheckIn) = @CheckIn)
@@ -69,7 +83,8 @@ BEGIN
             OR (@TieneAgua = '1' AND r.TieneAgua = 1)
             OR (@TieneAgua <> '0' AND @TieneAgua <> '1' AND r.TieneAgua = 0)
           )
-    ORDER BY r.FechaLlegada, h.Nombre;
+    ORDER BY r.Id DESC
+    OPTION (RECOMPILE);
 END
 GO
 
@@ -81,34 +96,35 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT a.Id, e.Nombre + ' - ' + a.Nombre AS Etiqueta
-    FROM dbo.EmpresasMandanteAreasEmpresaContratista AS rel
-    INNER JOIN dbo.AreasEmpresa AS a ON a.Id = rel.AreaEmpresaContratistaId
-    INNER JOIN dbo.Empresas AS e ON e.Id = a.EmpresaId
+    FROM dbo.EmpresasMandanteAreasEmpresaContratista AS rel WITH (NOLOCK)
+    INNER JOIN dbo.AreasEmpresa AS a WITH (NOLOCK) ON a.Id = rel.AreaEmpresaContratistaId
+    INNER JOIN dbo.Empresas AS e WITH (NOLOCK) ON e.Id = a.EmpresaId
     WHERE rel.EmpresaMandanteId = @EmpresaMandanteId
       AND a.IsActive = 1
     ORDER BY Etiqueta;
 
     SELECT Valor1 AS Id, Descripcion AS Etiqueta
-    FROM dbo.Listas
+    FROM dbo.Listas WITH (NOLOCK)
     WHERE IdTabla = 5
     ORDER BY Orden, Descripcion;
 
-    SELECT DISTINCT u.Id, LTRIM(RTRIM(u.Nombre + ' ' + u.Apellidos)) AS Etiqueta
-    FROM dbo.Reservas AS r
-    INNER JOIN dbo.Usuarios AS u ON u.Id = r.PasajeroId
-    WHERE @CampamentoId = 0 OR r.CampamentoId = @CampamentoId
+    SELECT u.Id, LTRIM(RTRIM(ISNULL(u.Rut, '') + ' - ' + u.Nombre + ' ' + u.Apellidos)) AS Etiqueta
+    FROM dbo.Usuarios AS u WITH (NOLOCK)
+    WHERE u.EmpresaMandanteId = @EmpresaMandanteId
+      AND u.IsActive = 1
     ORDER BY Etiqueta;
 
     SELECT h.Id, h.Nombre AS Etiqueta
-    FROM dbo.Habitaciones AS h
-    INNER JOIN dbo.Modulos AS m ON m.Id = h.ModuloId
-    INNER JOIN dbo.Pabellones AS p ON p.Id = m.PabellonId
+    FROM dbo.Habitaciones AS h WITH (NOLOCK)
+    INNER JOIN dbo.Modulos AS m WITH (NOLOCK) ON m.Id = h.ModuloId
+    INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
     WHERE h.IsActive = 1
+      AND h.IsReservable = 1
       AND (@CampamentoId = 0 OR p.CampamentoId = @CampamentoId)
     ORDER BY h.Nombre;
 
     SELECT Id, Nombre, TipoTurno
-    FROM dbo.Turnos
+    FROM dbo.Turnos WITH (NOLOCK)
     WHERE EmpresaMandanteId = @EmpresaMandanteId
       AND IsActive = 1
     ORDER BY Nombre;
@@ -119,9 +135,9 @@ CREATE OR ALTER PROCEDURE dbo.sp_Reserva_Crear
     @EmpresaMandanteId int,
     @CampamentoId int,
     @AreaId int,
-    @FechaReserva date,
-    @FechaLlegada date,
-    @FechaSalida date = NULL,
+    @FechaReserva datetime2,
+    @FechaLlegada datetime2,
+    @FechaSalida datetime2 = NULL,
     @Observacion nvarchar(200) = NULL,
     @TurnoId int,
     @UsuarioId int,
@@ -132,7 +148,7 @@ BEGIN
 
     DECLARE @TipoTurno varchar(20);
     SELECT @TipoTurno = TipoTurno
-    FROM dbo.Turnos
+    FROM dbo.Turnos WITH (NOLOCK)
     WHERE Id = @TurnoId
       AND EmpresaMandanteId = @EmpresaMandanteId
       AND IsActive = 1;
@@ -145,7 +161,7 @@ BEGIN
 
     IF NOT EXISTS (
         SELECT 1
-        FROM dbo.EmpresasMandanteAreasEmpresaContratista
+        FROM dbo.EmpresasMandanteAreasEmpresaContratista WITH (NOLOCK)
         WHERE EmpresaMandanteId = @EmpresaMandanteId
           AND AreaEmpresaContratistaId = @AreaId)
     BEGIN
@@ -187,7 +203,7 @@ BEGIN
         @Observacion,
         6,
         'P',
-        NULL,
+        @UsuarioId,
         @TurnoId,
         10,
         @TipoTurno,
@@ -208,10 +224,74 @@ BEGIN
     SET NOCOUNT ON;
     SELECT CAST(CASE WHEN EXISTS (
         SELECT 1
-        FROM dbo.Reservas
+        FROM dbo.Reservas WITH (NOLOCK)
         WHERE Id = @ReservaId
           AND CampamentoId = @CampamentoId
     ) THEN 1 ELSE 0 END AS bit) AS Pertenece;
+END
+GO
+
+CREATE OR ALTER PROCEDURE dbo.sp_Reserva_Actualizar
+    @ReservaId int,
+    @EmpresaMandanteId int,
+    @CampamentoId int,
+    @AreaId int,
+    @FechaReserva datetime2,
+    @FechaLlegada datetime2,
+    @FechaSalida datetime2 = NULL,
+    @Observacion nvarchar(200) = NULL,
+    @TurnoId int,
+    @PasajeroId int = NULL,
+    @HabitacionId int = NULL,
+    @Estado char(1),
+    @TieneAgua bit,
+    @UsuarioId int
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM dbo.Reservas WITH (NOLOCK) WHERE Id = @ReservaId AND CampamentoId = @CampamentoId)
+        THROW 51020, 'La reserva no corresponde al campamento.', 1;
+    IF NOT EXISTS (SELECT 1 FROM dbo.Turnos WITH (NOLOCK) WHERE Id = @TurnoId AND EmpresaMandanteId = @EmpresaMandanteId AND IsActive = 1)
+        THROW 51021, 'El turno no corresponde a la empresa.', 1;
+    IF NOT EXISTS (SELECT 1 FROM dbo.EmpresasMandanteAreasEmpresaContratista WITH (NOLOCK)
+                   WHERE EmpresaMandanteId = @EmpresaMandanteId AND AreaEmpresaContratistaId = @AreaId)
+        THROW 51022, 'El área no corresponde a la empresa.', 1;
+    IF @FechaSalida IS NOT NULL AND @FechaSalida < @FechaLlegada
+        THROW 51023, 'La fecha de salida no puede ser anterior a la llegada.', 1;
+    IF @HabitacionId IS NOT NULL
+       AND EXISTS (
+           SELECT 1
+           FROM dbo.Habitaciones AS h WITH (NOLOCK)
+           WHERE h.Id = @HabitacionId
+             AND h.CantidadCamas IS NOT NULL
+             AND (
+                 SELECT COUNT_BIG(1)
+                 FROM dbo.Reservas AS r2 WITH (NOLOCK)
+                 WHERE r2.HabitacionId = @HabitacionId
+                   AND r2.Id <> @ReservaId
+                   AND r2.Estado NOT IN ('N', 'F')
+                   AND r2.FechaLlegada <= ISNULL(@FechaSalida, @FechaLlegada)
+                   AND ISNULL(r2.FechaSalida, r2.FechaLlegada) >= @FechaLlegada
+             ) >= h.CantidadCamas
+       )
+        THROW 51024, 'La habitacion no tiene camas disponibles para el periodo indicado.', 1;
+
+    UPDATE dbo.Reservas
+    SET EmpresaMandanteId = @EmpresaMandanteId,
+        AreaEmpresaContratistaId = @AreaId,
+        FechaReserva = @FechaReserva,
+        FechaLlegada = @FechaLlegada,
+        FechaSalida = @FechaSalida,
+        Observacion = @Observacion,
+        TurnoId = @TurnoId,
+        PasajeroId = @PasajeroId,
+        HabitacionId = @HabitacionId,
+        Estado = @Estado,
+        TieneAgua = @TieneAgua,
+        UsuarioActualizacionId = @UsuarioId,
+        FechaActualizacion = GETDATE()
+    WHERE Id = @ReservaId AND CampamentoId = @CampamentoId;
 END
 GO
 
@@ -228,7 +308,7 @@ BEGIN
 
     IF NOT EXISTS (
         SELECT 1
-        FROM dbo.Reservas
+        FROM dbo.Reservas WITH (NOLOCK)
         WHERE Id = @ReservaId
           AND CampamentoId = @CampamentoId)
     BEGIN

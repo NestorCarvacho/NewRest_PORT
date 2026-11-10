@@ -87,6 +87,46 @@ public sealed class ObtenerCatalogoCenso : IObtenerCatalogoCenso
         opciones.Select(opcion => new OpcionCensoDto(opcion.Id, opcion.Etiqueta, opcion.PadreId)).ToList();
 }
 
+public sealed class BuscarMisCensos : IBuscarMisCensos
+{
+    private readonly IConsultaCenso _consulta;
+
+    public BuscarMisCensos(IConsultaCenso consulta)
+    {
+        _consulta = consulta;
+    }
+
+    public async Task<ResultadoBusquedaMisCensos> EjecutarAsync(
+        SolicitudBuscarMisCensos solicitud,
+        CancellationToken cancellationToken)
+    {
+        if (solicitud.UsuarioId <= 0)
+            return new ResultadoBusquedaMisCensos.Rechazada("La sesión no tiene un usuario.");
+
+        if (!AlcanceSesion.TieneCampamento(solicitud.CampamentoId))
+            return new ResultadoBusquedaMisCensos.Rechazada(AlcanceSesion.SinCampamento);
+
+        var filas = await _consulta.BuscarPorUsuarioAsync(
+            solicitud.EmpresaMandanteId,
+            solicitud.CampamentoId,
+            solicitud.Fecha.Date,
+            solicitud.UsuarioId,
+            cancellationToken);
+
+        return new ResultadoBusquedaMisCensos.Lista(filas.Select(fila => new CensoUsuarioFilaDto(
+            fila.Id,
+            fila.Fecha,
+            fila.Campamento,
+            fila.Modulo,
+            fila.Piso,
+            fila.Habitacion,
+            fila.NumeroCamas,
+            fila.CamasOcupadas,
+            fila.Turno,
+            fila.TurnoNombre)).ToList());
+    }
+}
+
 public sealed class GuardarCensos : IGuardarCensos
 {
     private readonly IComandoCenso _comando;

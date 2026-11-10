@@ -8,6 +8,8 @@ public sealed record FiltroReserva(
     int SolicitudId,
     string Estado,
     DateTime? FechaReserva,
+    DateTime? FechaReservaDesde,
+    DateTime? FechaReservaHasta,
     DateTime? FechaLlegada,
     DateTime? FechaSalida,
     DateTime? CheckIn,

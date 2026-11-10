@@ -18,10 +18,10 @@ public static class ReglasCuenta
     public const string PerfilNoPermitido = "El perfil seleccionado no corresponde al usuario.";
     public const string SeleccionePerfil = "Seleccione Campamento/Perfil";
     public const int IntentosAntesDeBloquear = 5;
-    public const int MinutosBloqueo = 30;
+    public const int SegundosBloqueo = 600;
 
     public static string MensajeCuentaBloqueada =>
-        $"La cuenta quedó bloqueada por {MinutosBloqueo} minutos.";
+        $"La cuenta quedó bloqueada por {SegundosBloqueo} segundos.";
 
     public static string MensajeIntentosRestantes(int restantes) =>
         restantes == 1

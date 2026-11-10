@@ -119,6 +119,23 @@ public class PreautenticarUsuarioTests
     }
 
     [Fact]
+    public async Task FlujoDeDemostracionBloqueaTrasIntentosIncorrectos()
+    {
+        _repositorio.Usuario = Usuario("abc123");
+
+        ResultadoPreautenticacion? resultado = null;
+        for (var i = 0; i < ReglasCuenta.IntentosAntesDeBloquear; i++)
+            resultado = await Crear().EjecutarAsync(
+                new SolicitudPreautenticacion("123456789", "clave-incorrecta"),
+                CancellationToken.None);
+
+        var rechazo = Assert.IsType<ResultadoPreautenticacion.Rechazado>(resultado);
+        Assert.Equal(ReglasCuenta.MensajeCuentaBloqueada, rechazo.Mensaje);
+        Assert.Equal(MotivoRechazo.CuentaBloqueada, rechazo.Motivo);
+        Assert.Equal(ReglasCuenta.IntentosAntesDeBloquear, _repositorio.Intentos);
+    }
+
+    [Fact]
     public async Task CuentaBloqueadaNoSigueContando()
     {
         _repositorio.Usuario = new UsuarioLogin(3, "123456789", "Ana", "Soto", _verificador.CrearHuellaMd5Legado("abc123"), 2, 9, false, true);
@@ -138,5 +155,5 @@ public class PreautenticarUsuarioTests
         new(3, "123456789", "Ana", "Soto", _verificador.CrearHuellaMd5Legado(clave), 2, 9, false);
 
     private static PerfilCampamentoUsuario Perfil(int id, int perfilId) =>
-        new(id, perfilId, "Operaciones", 20, "Campamento", 9, "Mandante", "Campamento - Operaciones");
+        new(id, perfilId, "Operaciones", 20, "Campamento", 9, "Mandante", "Campamento - Operaciones", 3, "Ana Soto");
 }

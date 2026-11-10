@@ -10,7 +10,9 @@ public sealed class PerfilCampamentoUsuario
         string campamentoNombre,
         int empresaMandanteId,
         string empresaMandanteNombre,
-        string campamentoPerfil)
+        string campamentoPerfil,
+        int usuarioId,
+        string usuarioNombre)
     {
         Id = id;
         PerfilId = perfilId;
@@ -20,6 +22,8 @@ public sealed class PerfilCampamentoUsuario
         EmpresaMandanteId = empresaMandanteId;
         EmpresaMandanteNombre = empresaMandanteNombre;
         CampamentoPerfil = campamentoPerfil;
+        UsuarioId = usuarioId;
+        UsuarioNombre = usuarioNombre;
     }
 
     public int Id { get; }
@@ -30,6 +34,8 @@ public sealed class PerfilCampamentoUsuario
     public int EmpresaMandanteId { get; }
     public string EmpresaMandanteNombre { get; }
     public string CampamentoPerfil { get; }
+    public int UsuarioId { get; }
+    public string UsuarioNombre { get; }
 
     public string Etiqueta =>
         string.IsNullOrWhiteSpace(CampamentoPerfil)

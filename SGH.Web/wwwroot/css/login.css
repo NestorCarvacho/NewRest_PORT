@@ -521,3 +521,151 @@ body.con-aviso-cookies .avisos {
     animation: none;
   }
 }
+
+html:not([data-tema="claro"]) {
+  background:
+    radial-gradient(900px 650px at 0% 0%, rgba(175, 97, 22, 0.6), transparent 62%),
+    radial-gradient(800px 700px at 100% 100%, rgba(175, 97, 22, 0.4), transparent 62%),
+    radial-gradient(600px 500px at 90% 0%, rgba(217, 133, 50, 0.18), transparent 60%),
+    #0f0d0c;
+}
+
+html:not([data-tema="claro"]) .login-card {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+}
+
+html:not([data-tema="claro"]) .login-title,
+html:not([data-tema="claro"]) .login-label,
+html:not([data-tema="claro"]) .login-texto,
+html:not([data-tema="claro"]) .login-texto h2 {
+  color: #fff;
+}
+
+html:not([data-tema="claro"]) .login-meta,
+html:not([data-tema="claro"]) .login-note,
+html:not([data-tema="claro"]) .login-texto p,
+html:not([data-tema="claro"]) .login-texto li {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+html:not([data-tema="claro"]) .login-input,
+html:not([data-tema="claro"]) .login-select {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+html:not([data-tema="claro"]) .login-select {
+  color-scheme: dark;
+}
+
+html:not([data-tema="claro"]) .login-select option {
+  background: #28201c;
+  color: #fff;
+}
+
+html[data-tema="claro"] .login-select {
+  color-scheme: light;
+}
+
+html[data-tema="claro"] .login-select option {
+  background: #fff;
+  color: #050503;
+}
+
+html:not([data-tema="claro"]) .login-input::placeholder {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+html:not([data-tema="claro"]) .login-input[readonly] {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+html:not([data-tema="claro"]) .login-icon-button {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+html:not([data-tema="claro"]) .login-icon-button:hover,
+html:not([data-tema="claro"]) .login-link,
+html:not([data-tema="claro"]) .login-legal a,
+html:not([data-tema="claro"]) .login-legal button {
+  color: #d98532;
+}
+
+html:not([data-tema="claro"]) .login-note {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+html:not([data-tema="claro"]) .login-note-ok {
+  border-left: 3px solid #4a9f4f;
+  background: rgba(74, 159, 79, 0.14);
+}
+
+html:not([data-tema="claro"]) .login-submit,
+html:not([data-tema="claro"]) .login-boton:not(.login-boton-secundario) {
+  background: linear-gradient(135deg, #d98532, #8e4e12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 6px 18px rgba(175, 97, 22, 0.35);
+}
+
+html:not([data-tema="claro"]) .login-boton-secundario {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+html:not([data-tema="claro"]) .login-boton-secundario:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+html:not([data-tema="claro"]) .login-legal a:hover,
+html:not([data-tema="claro"]) .login-legal button:hover,
+html:not([data-tema="claro"]) .login-link:hover {
+  color: #fff;
+}
+
+html:not([data-tema="claro"]) .aviso {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(40, 32, 28, 0.94);
+  color: #fff;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+html:not([data-tema="claro"]) .aviso-error { border-left: 3px solid #c8102e; }
+html:not([data-tema="claro"]) .aviso-warning { border-left: 3px solid #d48820; }
+html:not([data-tema="claro"]) .aviso-exito { border-left: 3px solid #4a9f4f; }
+html:not([data-tema="claro"]) .aviso-info { border-left: 3px solid #2d7a9a; }
+
+.login-card > .selector-idioma-wrap {
+  justify-content: flex-end;
+  margin-bottom: 0.25rem;
+}
+
+.selector-idioma-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.selector-idioma {
+  height: 2rem;
+  padding: 0 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.selector-idioma option {
+  background: #28201c;
+  color: #fff;
+}

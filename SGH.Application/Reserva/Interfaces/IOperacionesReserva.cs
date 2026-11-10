@@ -21,3 +21,8 @@ public interface IRegistrarMovimientoReserva
 {
     Task<ResultadoMovimientoReserva> EjecutarAsync(SolicitudMovimientoReserva solicitud, CancellationToken cancellationToken);
 }
+
+public interface IActualizarReserva
+{
+    Task<ResultadoActualizacionReserva> EjecutarAsync(SolicitudActualizarReserva solicitud, CancellationToken cancellationToken);
+}

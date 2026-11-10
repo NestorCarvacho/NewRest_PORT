@@ -64,6 +64,36 @@ public class CambiarContrasenaTests
     }
 
     [Fact]
+    public async Task RepetirUnaClaveBcryptDelHistorialSeRechaza()
+    {
+        _repositorio.Usuario = Usuario("abc123");
+        _repositorio.HistorialContrasenas.Add(_verificador.CrearHashBcrypt("old123"));
+
+        var resultado = await Crear().EjecutarAsync(
+            new SolicitudCambioContrasena("123456789", "abc123", "old123", "old123"),
+            CancellationToken.None);
+
+        var rechazo = Assert.IsType<ResultadoCambioContrasena.Rechazado>(resultado);
+        Assert.Equal(MotivoRechazo.ClaveReutilizada, rechazo.Motivo);
+        Assert.Equal(0, _repositorio.Actualizaciones);
+    }
+
+    [Fact]
+    public async Task RepetirUnaClaveMd5DelHistorialSeRechaza()
+    {
+        _repositorio.Usuario = Usuario("abc123");
+        _repositorio.HistorialContrasenas.Add(_verificador.CrearHuellaMd5Legado("old123"));
+
+        var resultado = await Crear().EjecutarAsync(
+            new SolicitudCambioContrasena("123456789", "abc123", "old123", "old123"),
+            CancellationToken.None);
+
+        var rechazo = Assert.IsType<ResultadoCambioContrasena.Rechazado>(resultado);
+        Assert.Equal(MotivoRechazo.ClaveReutilizada, rechazo.Motivo);
+        Assert.Equal(0, _repositorio.Actualizaciones);
+    }
+
+    [Fact]
     public async Task CodigoMenosTresInformaClaveReutilizada()
     {
         _repositorio.Usuario = Usuario("abc123");

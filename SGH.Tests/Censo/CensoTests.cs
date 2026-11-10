@@ -138,6 +138,14 @@ public class GuardarCensosTests
             return Task.FromResult<IReadOnlyList<CensoListado>>([]);
         }
 
+        public Task<IReadOnlyList<CensoUsuarioListado>> BuscarPorUsuarioAsync(
+            int empresaMandanteId,
+            int campamentoId,
+            DateTime fecha,
+            int usuarioId,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyList<CensoUsuarioListado>>([]);
+
         public Task<CatalogoCenso> ObtenerCatalogoAsync(int campamentoId, CancellationToken cancellationToken) =>
             Task.FromResult(new CatalogoCenso([], [], []));
 
