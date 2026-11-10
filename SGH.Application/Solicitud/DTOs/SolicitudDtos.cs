@@ -25,6 +25,11 @@ public sealed record GuardarPasajeroSolicitudDto(
     int SolicitudId, int PasajeroId, int UsuarioPasajeroId, int EmpresaMandanteId,
     int CampamentoId, int UsuarioId, DateTime FechaCheckIn, DateTime? FechaCheckOut);
 
+public sealed record FilaCargaPasajeroDto(
+    int NumeroFila, string Identificador, string TipoIdentificador, string Nombres, string Apellidos, string Genero);
+public sealed record ResultadoCargaPasajeroDto(int NumeroFila, bool Procesada, string Mensaje);
+public sealed record ResultadoProcedimientoCargaDto(bool Procesada, string? Mensaje);
+
 public sealed record HabitacionDisponibleSolicitudDto(
     int PabellonId, string? PabellonName, int ModuloId, string? ModuloName,
     int HabitacionId, string? HabitacionName, int TotalCamas, string? Sexo,

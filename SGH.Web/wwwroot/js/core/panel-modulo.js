@@ -13,7 +13,11 @@ export function crearPanelModulo(dependencias) {
         barra.append(dependencias.boton("Filtros", "boton-secundario", function () {
             dependencias.prepararCatalogo(modulo.modo).then(function () {
                 dependencias.abrirPanel("Filtros de " + modulo.titulo, dependencias.formulario(
-                    dependencias.contenido(modulo.filtros),
+                    dependencias.contenido(modulo.filtros).map(function (grupo) {
+                        return { titulo: grupo.titulo, campos: grupo.campos.map(function (campo) {
+                            return Object.assign({}, campo, { valor: nodo._filtro[campo.nombre] });
+                        }) };
+                    }),
                     "Aplicar",
                     false,
                     function (datos) {
@@ -23,6 +27,11 @@ export function crearPanelModulo(dependencias) {
                 ));
             }).catch(function (error) { dependencias.mostrarEstado(nodo, error.message); });
         }));
+        if (modulo.modo === "solicitud") {
+            barra.append(dependencias.boton("Nueva solicitud", "boton-primario", function () {
+                dependencias.solicitud.abrirNueva();
+            }));
+        }
         if (modulo.accion && modulo.modo === "reserva") {
             barra.append(dependencias.boton(modulo.accion.boton, "boton-primario", function () {
                 dependencias.prepararCatalogo(modulo.modo).then(function () {

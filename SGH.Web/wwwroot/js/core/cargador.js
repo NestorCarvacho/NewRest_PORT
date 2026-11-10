@@ -18,6 +18,7 @@ export function crearCargador(dependencias) {
     }
 
     function obtenerUrl(modo, filtro) {
+        if (modo === "solicitud") return dependencias.solicitud.urlBuscar(filtro);
         if (modo === "censo") return dependencias.censo.urlBuscar(filtro);
         if (modo === "misCensos") return dependencias.censo.urlMisCensos(filtro);
         return dependencias.reserva.urlBuscar(filtro);

@@ -85,6 +85,64 @@ public sealed class GestionSolicitudes(IConsultaSolicitudAlojamiento consulta, I
         return comando.GenerarReservasAsync(id, empresaMandanteId, campamentoId, usuarioId, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<ResultadoCargaPasajeroDto>> CargarPasajerosAsync(
+        int id, int empresaMandanteId, int campamentoId, int usuarioId, IReadOnlyList<FilaCargaPasajeroDto> filas, CancellationToken cancellationToken)
+    {
+        ValidarSesion(empresaMandanteId, campamentoId);
+        if (id <= 0 || usuarioId <= 0)
+            throw new ArgumentException("Indique una solicitud y un usuario válidos.");
+        var resultados = new List<ResultadoCargaPasajeroDto>();
+        foreach (var fila in filas)
+        {
+            var tipo = fila.TipoIdentificador.Trim().ToLowerInvariant();
+            var identificador = fila.Identificador.Trim();
+            if (tipo == "rut")
+                identificador = identificador.Replace(".", "").Replace("-", "").TrimStart('0');
+            var genero = fila.Genero.Trim().ToUpperInvariant();
+            var error = ValidarFilaCarga(fila, tipo, identificador, genero);
+            if (error is not null)
+            {
+                resultados.Add(new(fila.NumeroFila, false, error));
+                continue;
+            }
+            var resultado = await comando.CargarPasajeroAsync(id, empresaMandanteId, campamentoId, usuarioId,
+                fila with { TipoIdentificador = tipo, Identificador = identificador, Genero = genero }, cancellationToken);
+            resultados.Add(new(fila.NumeroFila, resultado.Procesada,
+                resultado.Mensaje ?? (resultado.Procesada ? "Procesada" : "El procedimiento rechazó la fila sin indicar el motivo.")));
+        }
+        return resultados;
+    }
+
+    private static string? ValidarFilaCarga(FilaCargaPasajeroDto fila, string tipo, string identificador, string genero)
+    {
+        if (tipo is not ("rut" or "dni"))
+            return "Tipo de identificador inválido.";
+        if (tipo == "rut" ? !RutValido(identificador) : identificador.Length is < 2 or > 25)
+            return "Identificador inválido.";
+        if (string.IsNullOrWhiteSpace(fila.Nombres) || fila.Nombres.Length > 100 ||
+            string.IsNullOrWhiteSpace(fila.Apellidos) || fila.Apellidos.Length > 100)
+            return "Nombres y apellidos son obligatorios y no pueden superar 100 caracteres.";
+        return genero is "M" or "F" ? null : "Género debe ser M o F.";
+    }
+
+    private static bool RutValido(string rut)
+    {
+        if (rut.Length is < 8 or > 9)
+            return false;
+        var suma = 0;
+        var multiplicador = 2;
+        for (var i = rut.Length - 2; i >= 0; i--)
+        {
+            if (rut[i] is < '0' or > '9')
+                return false;
+            suma += (rut[i] - '0') * multiplicador;
+            multiplicador = multiplicador == 7 ? 2 : multiplicador + 1;
+        }
+        var digito = 11 - suma % 11;
+        var esperado = digito == 11 ? '0' : digito == 10 ? 'K' : (char)('0' + digito);
+        return char.ToUpperInvariant(rut[^1]) == esperado;
+    }
+
     public Task AsignarHabitacionAsync(int id, int pasajeroId, int habitacionId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
     {
         ValidarSesion(empresaMandanteId, campamentoId);

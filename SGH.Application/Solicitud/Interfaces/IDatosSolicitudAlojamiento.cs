@@ -16,6 +16,7 @@ public interface IComandoSolicitudAlojamiento
 {
     Task AgregarCuposAsync(int solicitudId, int empresaMandanteId, int campamentoId, int usuarioId, int cantidad, CancellationToken cancellationToken);
     Task<int> GuardarPasajeroAsync(GuardarPasajeroSolicitudDto pasajero, CancellationToken cancellationToken);
+    Task<ResultadoProcedimientoCargaDto> CargarPasajeroAsync(int solicitudId, int empresaMandanteId, int campamentoId, int usuarioId, FilaCargaPasajeroDto fila, CancellationToken cancellationToken);
     Task<int> GenerarReservasAsync(int solicitudId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken);
     Task AsignarHabitacionAsync(int solicitudId, int pasajeroId, int habitacionId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken);
     Task EliminarPasajeroAsync(int solicitudId, int pasajeroId, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken);

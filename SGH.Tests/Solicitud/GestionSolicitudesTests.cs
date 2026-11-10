@@ -114,6 +114,25 @@ public class GestionSolicitudesTests
         Assert.Equal((42, 9, 10, 2, 3, 7), _falso.Asignacion);
     }
 
+    [Fact]
+    public async Task CargaNormalizaRutYReportaRechazoPorFila()
+    {
+        var filas = new[]
+        {
+            new FilaCargaPasajeroDto(2, "12.345.678-5", "RUT", "Ana", "Pérez", "f"),
+            new FilaCargaPasajeroDto(3, "12.345.678-0", "RUT", "Ana", "Pérez", "F"),
+            new FilaCargaPasajeroDto(4, "AB12", "dni", "Luis", "Pérez", "M")
+        };
+        var resultado = await Caso.CargarPasajerosAsync(42, 2, 3, 7, filas, CancellationToken.None);
+        Assert.True(resultado[0].Procesada);
+        Assert.False(resultado[1].Procesada);
+        Assert.True(resultado[2].Procesada);
+        Assert.Equal("123456785", _falso.FilasCargadas[0].Identificador);
+        Assert.Equal("rut", _falso.FilasCargadas[0].TipoIdentificador);
+        Assert.Equal("F", _falso.FilasCargadas[0].Genero);
+        Assert.Equal(2, _falso.FilasCargadas.Count);
+    }
+
     private static DatosSolicitudDto Crear() => new(
         0, 2, 3, 7, new DateTime(2026, 11, 10), new DateTime(2026, 11, 11),
         null, 4, null, false, 8, null, null, null, "contacto@example.com",
@@ -132,6 +151,7 @@ public class GestionSolicitudesTests
         public GuardarPasajeroSolicitudDto? PasajeroGuardado { get; private set; }
         public (int, int, int, int) Generacion { get; private set; }
         public (int, int, int, int, int, int) Asignacion { get; private set; }
+        public List<FilaCargaPasajeroDto> FilasCargadas { get; } = [];
 
         public Task<IReadOnlyList<SolicitudListadaDto>> BuscarAsync(FiltroSolicitudesDto filtro, CancellationToken cancellationToken)
         {
@@ -177,6 +197,13 @@ public class GestionSolicitudesTests
         {
             PasajeroGuardado = pasajero;
             return Task.FromResult(9);
+        }
+
+        public Task<ResultadoProcedimientoCargaDto> CargarPasajeroAsync(int id, int empresa, int campamento,
+            int usuario, FilaCargaPasajeroDto fila, CancellationToken cancellationToken)
+        {
+            FilasCargadas.Add(fila);
+            return Task.FromResult(new ResultadoProcedimientoCargaDto(true, "OK"));
         }
 
         public Task<int> GenerarReservasAsync(int id, int empresa, int campamento, int usuario, CancellationToken cancellationToken)
