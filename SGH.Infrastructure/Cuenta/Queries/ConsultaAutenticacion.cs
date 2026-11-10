@@ -74,7 +74,22 @@ public sealed class ConsultaAutenticacion : IConsultaAutenticacion
             fila.CampamentoNombre ?? string.Empty,
             fila.EmpresaMandanteId,
             fila.EmpresaMandanteNombre ?? string.Empty,
-            fila.CampamentoPerfil ?? string.Empty)).ToList();
+            fila.CampamentoPerfil ?? string.Empty,
+            fila.UsuarioId,
+            fila.UsuarioNombre ?? string.Empty)).ToList();
+    }
+
+    public async Task<IReadOnlyList<string>> ObtenerHistorialContrasenasAsync(string rut, CancellationToken cancellationToken)
+    {
+        using var conexion = _fabrica.Crear();
+        var hashes = await conexion.QueryAsync<string>(
+            new CommandDefinition(
+                "sp_Usuario_ObtenerHistorialContrasenas",
+                new { Rut = rut },
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken));
+
+        return hashes.AsList();
     }
 
     private sealed class UsuarioLoginFila
@@ -98,6 +113,8 @@ public sealed class ConsultaAutenticacion : IConsultaAutenticacion
     private sealed class PerfilCampamentoFila
     {
         public int Id { get; set; }
+        public int UsuarioId { get; set; }
+        public string? UsuarioNombre { get; set; }
         public int PerfilId { get; set; }
         public string? PerfilNombre { get; set; }
         public int CampamentoId { get; set; }

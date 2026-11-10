@@ -6,9 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Gestión Hotelera</title>
     <partial name="_Favicon" />
+    <script src="~/js/core/tema.js" asp-append-version="true"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" />
     <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/cookies.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/tema.css" asp-append-version="true" />
     <script>
         (function () {
             try {
@@ -44,10 +46,14 @@
     </svg>
     <main class="login-page">
         <section class="login-card">
+            <div class="selectores-apariencia">
+                <partial name="_SelectorIdioma" />
+                <partial name="_SelectorTema" />
+            </div>
             <img class="login-logo" src="~/img/logo-sgh.png" alt="SGH" />
             <h1 class="login-title">@ViewData["PanelTitle"]</h1>
             @RenderBody()
-            <img class="login-company" src="~/img/logo-compass.png" alt="Compass Group" />
+            <img class="login-company" src="~/img/logo-Newrest.png" alt="Compass Group" />
             <p class="login-meta">versión @Configuracion["Aplicacion:Version"]</p>
             <nav class="login-legal" aria-label="Información legal">
                 <a asp-page="/Privacy">Política de privacidad</a>
@@ -110,6 +116,7 @@
         if (pila.Count == 0 && !string.IsNullOrWhiteSpace(exito))
             pila = [new PilaAvisos.AvisoGuardado(exito, ahoraAvisos, ahoraAvisos + PilaAvisos.VidaMs)];
     }
+    <script src="~/js/core/idioma.js" asp-append-version="true"></script>
     @if (pila.Count > 0 || !string.IsNullOrWhiteSpace(sale))
     {
         <ul class="avisos">

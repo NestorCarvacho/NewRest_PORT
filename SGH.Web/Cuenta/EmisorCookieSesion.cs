@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using SGH.Application.Cuenta.DTOs;
+using SGH.Domain.Cuenta;
 
 namespace SGH.Web.Cuenta;
 
@@ -11,8 +12,11 @@ public static class ClaimsSesion
     public const string PerfilId = "perfilId";
     public const string CampamentoId = "campamentoId";
     public const string EmpresaMandanteId = "empresaMandanteId";
+    public const string EmpresaMandanteNombre = "empresaMandanteNombre";
     public const string AsignacionPerfilId = "asignacionPerfilId";
     public const string Sistema = "sistema";
+    public const string Capacidad = "capacidad";
+    public const string TipoPerfil = "tipoPerfil";
 }
 
 public sealed class EmisorCookieSesion
@@ -28,9 +32,19 @@ public sealed class EmisorCookieSesion
             new(ClaimsSesion.PerfilId, sesion.PerfilId.ToString()),
             new(ClaimsSesion.CampamentoId, sesion.CampamentoId.ToString()),
             new(ClaimsSesion.EmpresaMandanteId, sesion.EmpresaMandanteId.ToString()),
+            new(ClaimsSesion.EmpresaMandanteNombre, sesion.EmpresaMandanteNombre),
             new(ClaimsSesion.AsignacionPerfilId, sesion.AsignacionPerfilId.ToString()),
             new(ClaimsSesion.Sistema, sesion.Sistema)
         };
+
+        var esPasajero = MatrizPerfiles.EsPasajero(sesion.PerfilId);
+        claims.Add(new Claim(ClaimsSesion.TipoPerfil, esPasajero ? "pasajero" : "operador"));
+        if (!esPasajero)
+        {
+            claims.Add(new Claim(ClaimsSesion.Capacidad, "gestionar-reservas"));
+            claims.Add(new Claim(ClaimsSesion.Capacidad, "ejecutar-checkin-checkout"));
+            claims.Add(new Claim(ClaimsSesion.Capacidad, "gestionar-censos"));
+        }
 
         var identidad = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identidad);

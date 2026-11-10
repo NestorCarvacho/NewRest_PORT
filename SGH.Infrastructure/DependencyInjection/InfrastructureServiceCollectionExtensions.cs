@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SGH.Application.DependencyInjection;
 using SGH.Application.Cuenta.Opciones;
+using SGH.Application.Reserva.Interfaces;
 using SGH.Domain.Censo.Interfaces;
 using SGH.Domain.Cuenta.Interfaces;
 using SGH.Domain.Reserva.Interfaces;
@@ -13,7 +14,11 @@ using SGH.Infrastructure.Cuenta.Commands;
 using SGH.Infrastructure.Cuenta.Queries;
 using SGH.Infrastructure.Cuenta.Security;
 using SGH.Infrastructure.Reserva.Commands;
+using SGH.Infrastructure.Reserva.Planillas;
 using SGH.Infrastructure.Reserva.Queries;
+using SGH.Application.Solicitud.Interfaces;
+using SGH.Infrastructure.Solicitud.Commands;
+using SGH.Infrastructure.Solicitud.Queries;
 
 namespace SGH.Infrastructure.DependencyInjection;
 
@@ -45,8 +50,13 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IVerificadorContrasena, VerificadorContrasena>();
         services.AddScoped<IConsultaReserva, ConsultaReserva>();
         services.AddScoped<IComandoReserva, ComandoReserva>();
+        services.AddScoped<IConsultaSolicitudAlojamiento, ConsultaSolicitudAlojamiento>();
+        services.AddScoped<IComandoSolicitudAlojamiento, ComandoSolicitudAlojamiento>();
+        services.AddScoped<IPlanillaReservaExcel, PlanillaReservaExcel>();
         services.AddScoped<IConsultaCenso, ConsultaCenso>();
         services.AddScoped<IComandoCenso, ComandoCenso>();
+        services.AddScoped<IInformesCenso, InformesCenso>();
+        services.AddScoped<IInformesEstadoPago, InformesEstadoPago>();
         return services;
     }
 }

@@ -100,6 +100,7 @@ public class LoginModel : PageModel
             var claveId = Guid.NewGuid().ToString("N");
             _claves.Guardar(claveId, Contrasena, expira);
             Paso = "perfil";
+            ModelState.Remove(nameof(Paso));
             Perfiles = perfiles;
             AsignacionPerfilId = 0;
             var pendiente = new IngresoPendiente

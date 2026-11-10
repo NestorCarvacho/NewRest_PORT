@@ -126,3 +126,38 @@ body.con-aviso-cookies .login-page {
 body.con-aviso-cookies .avisos {
   bottom: 15rem;
 }
+
+html:not([data-tema="claro"]) .aviso-cookies {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: linear-gradient(145deg, rgba(48, 39, 34, 0.97), rgba(22, 18, 16, 0.97));
+  color: #fff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+}
+
+html:not([data-tema="claro"]) .aviso-cookies h2,
+html:not([data-tema="claro"]) .aviso-cookies-enlaces a,
+html:not([data-tema="claro"]) .aviso-cookies-config {
+  color: #d98532;
+}
+
+html:not([data-tema="claro"]) .aviso-cookies-categorias {
+  border-top-color: rgba(255, 255, 255, 0.14);
+}
+
+html:not([data-tema="claro"]) .aviso-cookies-categorias label {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+html:not([data-tema="claro"]) #cookies-rechazar {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+html:not([data-tema="claro"]) #cookies-aceptar,
+html:not([data-tema="claro"]) #cookies-guardar {
+  background: linear-gradient(135deg, #d98532, #8e4e12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 6px 18px rgba(175, 97, 22, 0.35);
+}

@@ -28,6 +28,8 @@ public sealed class BuscarReservas : IBuscarReservas
             solicitud.SolicitudId,
             string.IsNullOrWhiteSpace(solicitud.Estado) ? "0" : solicitud.Estado,
             solicitud.FechaReserva,
+            solicitud.FechaReservaDesde,
+            solicitud.FechaReservaHasta,
             solicitud.FechaLlegada,
             solicitud.FechaSalida,
             solicitud.CheckIn,
@@ -38,11 +40,16 @@ public sealed class BuscarReservas : IBuscarReservas
 
         return new ResultadoBusquedaReservas.Lista(filas.Select(fila => new ReservaFilaDto(
             fila.Id,
+            fila.AreaId,
+            fila.PasajeroId,
+            fila.HabitacionId,
+            fila.TurnoId,
             fila.GrupoEmpresa,
             fila.Pasajero,
             fila.Habitacion,
             fila.Estado,
             fila.EstadoNumero,
+            fila.FechaReserva,
             fila.Llegada,
             fila.Salida,
             fila.CheckIn,
@@ -102,9 +109,9 @@ public sealed class CrearReserva : ICrearReserva
             solicitud.EmpresaMandanteId,
             solicitud.CampamentoId,
             solicitud.AreaId,
-            solicitud.FechaReserva.Date,
-            solicitud.FechaLlegada.Date,
-            solicitud.FechaSalida?.Date,
+            solicitud.FechaReserva,
+            solicitud.FechaLlegada,
+            solicitud.FechaSalida,
             solicitud.Observacion,
             solicitud.TurnoId,
             solicitud.UsuarioId,
@@ -149,5 +156,32 @@ public sealed class RegistrarMovimientoReserva : IRegistrarMovimientoReserva
             solicitud.CampamentoId,
             cancellationToken);
         return new ResultadoMovimientoReserva.Registrado();
+    }
+
+    public sealed class ActualizarReserva : IActualizarReserva
+    {
+        private readonly IComandoReserva _comando;
+
+        public ActualizarReserva(IComandoReserva comando) => _comando = comando;
+
+        public async Task<ResultadoActualizacionReserva> EjecutarAsync(
+            SolicitudActualizarReserva solicitud, CancellationToken cancellationToken)
+        {
+            var mensaje = ReglasReserva.ValidarAlta(
+                solicitud.AreaId, solicitud.TurnoId, solicitud.FechaLlegada, solicitud.FechaSalida);
+            if (mensaje is not null)
+                return new ResultadoActualizacionReserva.Rechazada(mensaje);
+            if (solicitud.ReservaId <= 0 || solicitud.CampamentoId <= 0 || solicitud.UsuarioId <= 0)
+                return new ResultadoActualizacionReserva.Rechazada("La reserva no tiene datos de sesión válidos.");
+            if (solicitud.Estado is not ("P" or "A" or "F" or "N"))
+                return new ResultadoActualizacionReserva.Rechazada("El estado de la reserva no es válido.");
+
+            await _comando.ActualizarAsync(
+                solicitud.ReservaId, solicitud.EmpresaMandanteId, solicitud.CampamentoId, solicitud.AreaId,
+                solicitud.FechaReserva, solicitud.FechaLlegada, solicitud.FechaSalida,
+                solicitud.Observacion, solicitud.TurnoId, solicitud.PasajeroId, solicitud.HabitacionId,
+                solicitud.Estado, solicitud.TieneAgua, solicitud.UsuarioId, cancellationToken);
+            return new ResultadoActualizacionReserva.Actualizada();
+        }
     }
 }

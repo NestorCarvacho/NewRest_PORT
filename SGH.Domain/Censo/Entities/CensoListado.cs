@@ -14,6 +14,18 @@ public sealed record CensoListado(
     string CamasCheckIn,
     string Turno);
 
+public sealed record CensoUsuarioListado(
+    int Id,
+    string Fecha,
+    string Campamento,
+    string Modulo,
+    string Piso,
+    string Habitacion,
+    string NumeroCamas,
+    string CamasOcupadas,
+    string Turno,
+    string TurnoNombre);
+
 public sealed record OpcionCenso(int Id, string Etiqueta, int PadreId);
 
 public sealed record CatalogoCenso(

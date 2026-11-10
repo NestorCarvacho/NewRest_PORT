@@ -62,4 +62,22 @@ public sealed class ComandoReserva : IComandoReserva
             """,
             cancellationToken);
     }
+
+    public Task ActualizarAsync(int reservaId, int empresaMandanteId, int campamentoId, int areaId,
+        DateTime fechaReserva, DateTime fechaLlegada, DateTime? fechaSalida, string? observacion,
+        int turnoId, int? pasajeroId, int? habitacionId, string estado, bool tieneAgua,
+        int usuarioId, CancellationToken cancellationToken)
+    {
+        return _db.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+            EXEC dbo.sp_Reserva_Actualizar
+                @ReservaId={reservaId}, @EmpresaMandanteId={empresaMandanteId},
+                @CampamentoId={campamentoId}, @AreaId={areaId},
+                @FechaReserva={fechaReserva}, @FechaLlegada={fechaLlegada},
+                @FechaSalida={fechaSalida}, @Observacion={observacion},
+                @TurnoId={turnoId}, @PasajeroId={pasajeroId}, @HabitacionId={habitacionId},
+                @Estado={estado}, @TieneAgua={tieneAgua}, @UsuarioId={usuarioId}
+            """,
+            cancellationToken);
+    }
 }

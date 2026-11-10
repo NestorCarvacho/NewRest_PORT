@@ -53,6 +53,12 @@ public sealed class CambiarContrasena : ICambiarContrasena
             return new ResultadoCambioContrasena.Rechazado(ReglasCuenta.ClaveReutilizada, MotivoRechazo.ClaveReutilizada);
         }
 
+        var historial = await _consulta.ObtenerHistorialContrasenasAsync(rut, cancellationToken);
+        if (historial.Any(hash => _verificador.Coincide(solicitud.ContrasenaNueva, hash, md5Retirado: false)))
+        {
+            return new ResultadoCambioContrasena.Rechazado(ReglasCuenta.ClaveReutilizada, MotivoRechazo.ClaveReutilizada);
+        }
+
         var huellaMd5 = !usuario.Md5Retirado && _verificador.EsHashMd5Legado(usuario.HashContrasena)
             ? _verificador.CrearHuellaMd5Legado(solicitud.ContrasenaNueva)
             : null;

@@ -1,0 +1,25 @@
+@page
+@model SGH.Web.Pages.Censo.EstadoPagoModel
+<section aria-labelledby="estado-pago">
+    <h1 id="estado-pago">Estado de pago</h1>
+    <p>Consulte el estado de pago consolidado o por servicio.</p>
+    <form method="get">
+        <label>Desde <input name="desde" type="date" /></label>
+        <label>Hasta <input name="hasta" type="date" /></label>
+        <label>Minera <input name="mineraId" type="number" min="0" value="0" /></label>
+        <button formaction="?handler=Consultar">Consultar</button>
+        <button formaction="?handler=Descargar">Descargar Excel</button>
+    </form>
+    <h2>Estado de pago por servicio</h2>
+    <form method="get">
+        <label>Desde <input name="desde" type="date" /></label>
+        <label>Hasta <input name="hasta" type="date" /></label>
+        <label>Habitación <input name="habitacionId" type="number" value="0" min="0" /></label>
+        <label>Módulo <input name="moduloId" type="number" value="0" min="0" /></label>
+        <label>Piso <input name="pisoId" type="number" value="0" min="0" /></label>
+        <label>Servicio <input name="servicio" value="F" required /></label>
+        <label>Minera <input name="mineraId" type="number" min="0" value="0" /></label>
+        <button formaction="?handler=ConsultarServicio">Consultar</button>
+        <button formaction="?handler=DescargarServicio">Descargar Excel</button>
+    </form>
+</section>

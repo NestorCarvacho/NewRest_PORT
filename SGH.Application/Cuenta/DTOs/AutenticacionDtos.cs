@@ -28,6 +28,7 @@ public sealed record UsuarioSesionDto(
     int PerfilId,
     int CampamentoId,
     int EmpresaMandanteId,
+    string EmpresaMandanteNombre,
     int AsignacionPerfilId,
     string Rol,
     string Sistema,

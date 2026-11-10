@@ -9,4 +9,6 @@ public interface IConsultaAutenticacion
     Task<int> ObtenerEstadoAsync(string rut, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<PerfilCampamentoUsuario>> ObtenerCampamentosYPerfilesAsync(string rut, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<string>> ObtenerHistorialContrasenasAsync(string rut, CancellationToken cancellationToken);
 }

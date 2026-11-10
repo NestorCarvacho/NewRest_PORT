@@ -22,26 +22,26 @@ public sealed class CompletarSesion : ICompletarSesion
 
     public async Task<ResultadoAutenticacion> EjecutarAsync(SolicitudCompletarSesion solicitud, CancellationToken cancellationToken)
     {
-        var verificacion = await _verificacion.EjecutarAsync(
-            solicitud.Rut,
-            solicitud.Contrasena,
+        var rutNormalizado = NormalizadorRut.Normalizar(solicitud.Rut);
+        var usuario = await _consulta.ObtenerParaLoginAsync(
+            rutNormalizado,
             solicitud.LoginInterno,
             cancellationToken);
-        if (verificacion is ResultadoVerificacionClave.Rechazada rechazada)
-        {
-            return new ResultadoAutenticacion.Rechazado(rechazada.Mensaje, rechazada.Motivo);
-        }
+        if (usuario is null)
+            return new ResultadoAutenticacion.Rechazado(ReglasCuenta.CredencialesInvalidas, MotivoRechazo.CredencialesInvalidas);
 
-        var valida = (ResultadoVerificacionClave.Valida)verificacion;
-        var usuario = valida.Usuario;
-        var perfiles = await _consulta.ObtenerCampamentosYPerfilesAsync(valida.Rut, cancellationToken);
+        var estado = await _consulta.ObtenerEstadoAsync(rutNormalizado, cancellationToken);
+        if (estado != CodigoEstadoUsuario.Vigente)
+            return new ResultadoAutenticacion.Rechazado(ReglasCuenta.ErrorEstado, MotivoRechazo.EstadoInvalido);
+
+        var perfiles = await _consulta.ObtenerCampamentosYPerfilesAsync(rutNormalizado, cancellationToken);
 
         if (ReglasCuenta.EsIntegracion(usuario.Nombre))
         {
             return new ResultadoAutenticacion.Aceptado(CrearSesion(usuario, usuario.PerfilId, 0, usuario.EmpresaMandanteId ?? 0, 0, true));
         }
 
-        if (ReglasCuenta.FuerzaPerfil(valida.Rut))
+        if (ReglasCuenta.FuerzaPerfil(rutNormalizado))
         {
             var coincidencia = perfiles.FirstOrDefault(perfil => perfil.PerfilId == ReglasCuenta.PerfilForzado);
             return new ResultadoAutenticacion.Aceptado(CrearSesion(
@@ -50,7 +50,8 @@ public sealed class CompletarSesion : ICompletarSesion
                 coincidencia?.CampamentoId ?? 0,
                 coincidencia?.EmpresaMandanteId ?? usuario.EmpresaMandanteId ?? 0,
                 coincidencia?.Id ?? 0,
-                false));
+                false,
+                coincidencia));
         }
 
         if (perfiles.Count == 0)
@@ -79,7 +80,8 @@ public sealed class CompletarSesion : ICompletarSesion
             elegido.CampamentoId,
             elegido.EmpresaMandanteId,
             elegido.Id,
-            false));
+            false,
+            elegido));
     }
 
     private UsuarioSesionDto CrearSesion(
@@ -88,15 +90,19 @@ public sealed class CompletarSesion : ICompletarSesion
         int campamentoId,
         int empresaMandanteId,
         int asignacionPerfilId,
-        bool esIntegracion)
+        bool esIntegracion,
+        PerfilCampamentoUsuario? asignacion = null)
     {
         return new UsuarioSesionDto(
-            usuario.Id,
+            asignacion?.UsuarioId > 0 ? asignacion.UsuarioId : usuario.Id,
             usuario.Rut,
-            usuario.NombreParaMostrar,
+            string.IsNullOrWhiteSpace(asignacion?.UsuarioNombre)
+                ? usuario.NombreParaMostrar
+                : asignacion.UsuarioNombre,
             perfilId,
             campamentoId,
             empresaMandanteId,
+            asignacion?.EmpresaMandanteNombre ?? string.Empty,
             asignacionPerfilId,
             esIntegracion ? ReglasCuenta.RolIntegracion : ReglasCuenta.RolGeneral,
             ReglasCuenta.Sistema,

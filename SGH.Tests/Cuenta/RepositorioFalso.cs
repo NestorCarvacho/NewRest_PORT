@@ -9,6 +9,7 @@ internal sealed class RepositorioFalso : IConsultaAutenticacion, IComandoAutenti
     public UsuarioLogin? Usuario { get; set; }
     public int Estado { get; set; }
     public List<PerfilCampamentoUsuario> Perfiles { get; } = [];
+    public List<string> HistorialContrasenas { get; } = [];
     public int CodigoActualizacion { get; set; }
     public int CodigoReemplazo { get; set; } = -1;
     public int ConsultasEstado { get; private set; }
@@ -37,6 +38,11 @@ internal sealed class RepositorioFalso : IConsultaAutenticacion, IComandoAutenti
     public Task<IReadOnlyList<PerfilCampamentoUsuario>> ObtenerCampamentosYPerfilesAsync(string rut, CancellationToken cancellationToken)
     {
         return Task.FromResult<IReadOnlyList<PerfilCampamentoUsuario>>(Perfiles);
+    }
+
+    public Task<IReadOnlyList<string>> ObtenerHistorialContrasenasAsync(string rut, CancellationToken cancellationToken)
+    {
+        return Task.FromResult<IReadOnlyList<string>>(HistorialContrasenas);
     }
 
     public Task<ResultadoIntentoClave> RegistrarIntentoFallidoAsync(string rut, CancellationToken cancellationToken)

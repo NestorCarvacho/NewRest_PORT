@@ -45,3 +45,40 @@ dotnet run --project SGH.Web
 ```
 
 En GitHub Actions, `CI` compila la solución y `Tests` ejecuta las pruebas por separado. El workflow de tests se activa en pushes, pull requests y manualmente; incluye una prueba temporal sencilla para comprobar su funcionamiento.
+
+## Idioma e importación de reservas
+
+La interfaz ofrece español, inglés, portugués y francés. Inicialmente usa el idioma preferido del navegador; el selector de idioma está disponible en el acceso y en la aplicación, y recuerda la elección.
+
+El interruptor con sol y luna permite elegir entre tema claro y oscuro tanto en el acceso como en la aplicación. La elección se guarda en el navegador; si no existe una preferencia, se usa el tema oscuro.
+
+En **Reserva**, **Importar Excel** permite descargar una plantilla `.xlsx` y cargar varias reservas. La hoja debe incluir `Grupo Empresa`, `Turno`, `Fecha Reserva` y `Fecha Llegada`; `Fecha Salida` y `Observación` son opcionales. Los nombres de grupo y turno deben coincidir con los catálogos disponibles, y las fechas deben ser celdas de fecha o usar `yyyy-MM-dd` o `yyyy-MM-dd HH:mm`. Se importan las filas válidas y se informa el número y motivo de cada fila rechazada. No hay un límite adicional de filas impuesto por la aplicación; el tamaño práctico depende de los límites de la solicitud y de los recursos disponibles.
+
+## Backend de solicitudes de alojamiento
+
+El backend de solicitudes dispone de los handlers autenticados de Razor Pages en `/Solicitud/Datos`:
+
+- `GET ?handler=Buscar`: filtros `desde`, `hasta`, `grupoId`, `solicitanteId`, `estado` y `numero`. Las fechas son obligatorias; `0` significa sin filtro en grupo, solicitante, estado y número.
+- `GET ?handler=Detalle&id=...`: detalle de la solicitud.
+- `GET ?handler=Pasajeros&id=...`: pasajeros de una solicitud perteneciente al mandante y campamento de la sesión.
+- `GET ?handler=HabitacionesDisponibles&id=...`: disponibilidad calculada por el procedimiento legado para las fechas, empresa y campamento de la solicitud.
+- `POST ?handler=AgregarCupos`: cuerpo JSON con `id` de solicitud y `cantidad` entre 1 y 999; crea cupos sin pasajero usando las fechas de la solicitud.
+- `POST ?handler=EliminarPasajero`: cuerpo JSON con `id` de solicitud y `pasajeroId`; rechaza pasajeros de otras solicitudes. Ambas operaciones rechazan solicitudes reservadas o anuladas.
+- `POST ?handler=GuardarPasajero`: cuerpo JSON con `solicitudId`, `pasajeroId` (`0` para alta), `usuarioPasajeroId`, `fechaCheckIn` y `fechaCheckOut` opcional. El usuario debe pertenecer al catálogo activo del grupo.
+- `POST ?handler=AsignarHabitacion`: cuerpo JSON con `solicitudId`, `pasajeroId` y `habitacionId`. Comprueba la disponibilidad legada y descuenta las asignaciones pendientes de la misma solicitud.
+- `POST ?handler=GenerarReservas`: cuerpo JSON con `id` de solicitud. Exige solicitud pendiente, al menos un pasajero o cupo y habitación para cada uno; vuelve a consultar disponibilidad, ejecuta la validación legada y, si no hay conflictos, genera las reservas en una transacción.
+- `GET ?handler=Catalogo&grupoId=...`: grupos, estados, solicitantes activos y turnos. El grupo incluye su turno, unidad de negocio y contrato por defecto; `grupoId=0` consulta los solicitantes sin restringir por grupo.
+- `GET ?handler=Organizacion&unidadId=...&divisionId=...`: unidades de negocio de la minera del mandante, divisiones de la unidad y departamentos de la división. Use `0` cuando aún no se ha seleccionado unidad o división.
+- `POST ?handler=Crear`, `Actualizar` y `Anular`: cuerpos JSON; la actualización y la anulación requieren el `id`. Los POST de Razor Pages requieren el token antifalsificación.
+
+El mandante, campamento y usuario se toman de la sesión, no del cuerpo. Las consultas y modificaciones se limitan al mandante y campamento de la sesión, una restricción adicional respecto del listado legado, que filtraba solo por mandante. La anulación conserva el cambio al estado `A` del legado. El alta requiere correo válido, grupo con turno por defecto y fecha de salida cuando se usan turnos; la unidad, división y departamento pueden ser obligatorios según la configuración del grupo. En edición, el procedimiento legado modifica los campos de contacto y organización, pero no las fechas, el grupo ni el turno.
+
+Antes de usar estos handlers, ejecutar en la base de destino el script [001_sp_solicitud.sql](SGH.Infrastructure/Solicitud/Persistence/001_sp_solicitud.sql). Este reutiliza `SOL_GuardaSolicitudAlojamiento`; el detalle y los solicitantes reutilizan `SOL_ObtieneSolicitudAlojamiento` y `USU_ObtieneUsuarios`. Los catálogos organizacionales reutilizan `UNG_ObtieneUnidadesNegocio`, `DIV_ObtieneDivisiones` y `DEP_ObtieneDepartamentos`. El listado, la anulación, la primera reserva generada y la comprobación transaccional de alcance requieren procedimientos nuevos porque el legado hacía esas operaciones directamente sobre entidades. Verificar los contratos y permisos de los procedimientos legados en cada base antes del despliegue.
+
+Esta entrega no incluye pantalla ni carga masiva. La generación requiere que las habitaciones estén asignadas previamente.
+
+Para consultar pasajeros, ejecutar también [002_sp_pasajeros_solicitud.sql](SGH.Infrastructure/Solicitud/Persistence/002_sp_pasajeros_solicitud.sql). Este procedimiento comprueba el alcance y reutiliza `SOL_ObtienePasajerosSolicitudAlojamiento`.
+
+Para guardar pasajeros identificados y generar reservas, ejecutar [003_sp_guardar_pasajero.sql](SGH.Infrastructure/Solicitud/Persistence/003_sp_guardar_pasajero.sql), [005_sp_habitaciones_solicitud.sql](SGH.Infrastructure/Solicitud/Persistence/005_sp_habitaciones_solicitud.sql) y [004_sp_generar_reservas.sql](SGH.Infrastructure/Solicitud/Persistence/004_sp_generar_reservas.sql). Reutilizan `SOL_GuardaPasajeroSolicitudAlojamiento`, `HAB_ValidaCreacionReserva_Solicitud` y `RES_CreaReserva`, respectivamente. La generación informa el primer conflicto legado y no incluye el envío de correo que efectúa el controlador legado.
+
+Para consultar y asignar habitaciones, ejecutar [005_sp_habitaciones_solicitud.sql](SGH.Infrastructure/Solicitud/Persistence/005_sp_habitaciones_solicitud.sql), que reutiliza `HAB_ObtieneHabitacionesDisponiblesV2` y `SOL_AsignaHabitacionPasajeroSolicitudEmpresa`. El cálculo legado no cuenta asignaciones pendientes de otras solicitudes de alojamiento; el bloqueo de la nueva aplicación solo coordina sus propias asignaciones y generaciones, no escrituras realizadas por otros sistemas.

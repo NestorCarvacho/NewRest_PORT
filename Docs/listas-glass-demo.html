@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo · Listados Glass Futuristas</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+/* ───────── Variables: las mismas que inyecta _Layout desde el módulo Estilos ─────────
+   Cambiar --nr-orange (color principal) recolorea TODO. Aquí se pueden probar con el panel superior. */
+:root{
+  --nr-orange:#AF6116; --nr-orange-lt:#D98532; --nr-orange-dk:#8e4e12;
+  --nr-brown-dk:#28201c;            /* color del menú lateral */
+  --c-green:#4A9F4F; --c-amber:#D48820; --c-red:#C8102E; --c-grey:#9AA0A6;
+  --g-text:#fff; --g-dim:rgba(255,255,255,.66); --g-line:rgba(255,255,255,.14);
+  --g-glass:rgba(255,255,255,.07); --g-glass-hi:rgba(255,255,255,.13);
+  --font-head:"Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--g-text);font-family:"Segoe UI",system-ui,sans-serif;font-size:14px;
+  background:
+   radial-gradient(900px 650px at 0% 0%,color-mix(in srgb,var(--nr-orange) 60%,transparent),transparent 62%),
+   radial-gradient(800px 700px at 100% 100%,color-mix(in srgb,var(--nr-orange) 40%,transparent),transparent 62%),
+   radial-gradient(600px 500px at 90% 0%,color-mix(in srgb,var(--nr-orange-lt) 18%,transparent),transparent 60%),
+   #0f0d0c;
+  background-attachment:fixed;overflow-x:hidden}
+/* rejilla tenue "tech" */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:44px 44px;mask-image:radial-gradient(ellipse at 50% 30%,#000 30%,transparent 80%)}
+.wrap{position:relative;max-width:1240px;margin:0 auto;padding:22px 20px 60px}
+
+/* ───────── Barra de demo ───────── */
+.demo-bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;
+  padding:12px 18px;border-radius:18px;margin-bottom:26px}
+.brand{font-family:var(--font-head);font-weight:800;letter-spacing:.18em;text-transform:uppercase;font-size:.85rem;
+  background:linear-gradient(90deg,#fff,var(--nr-orange-lt) 60%,var(--nr-orange));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.tag{font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--g-dim);
+  border-left:2px solid var(--nr-orange-lt);padding-left:7px;margin-top:3px}
+.swatches{display:flex;gap:8px;align-items:center;font-size:.72rem;color:var(--g-dim)}
+.sw{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.4);cursor:pointer;transition:transform .15s}
+.sw:hover{transform:scale(1.2)}
+
+/* ───────── Vidrio base (mismo lenguaje del login .nw-card) ───────── */
+.glass{
+  background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.05));
+  -webkit-backdrop-filter:blur(22px) saturate(160%);backdrop-filter:blur(22px) saturate(160%);
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 24px 60px rgba(0,0,0,.40),inset 0 1px 0 rgba(255,255,255,.35)}
+
+h2.sec{font-family:var(--font-head);font-size:.74rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;
+  margin:34px 0 12px;display:flex;align-items:center;gap:10px;color:#fff}
+h2.sec::before{content:"";width:26px;height:2px;background:linear-gradient(90deg,var(--nr-orange),transparent);box-shadow:0 0 10px var(--nr-orange)}
+h2.sec small{font-family:var(--mono);font-weight:500;letter-spacing:.1em;color:var(--g-dim);text-transform:none}
+
+/* ───────── Barra de herramientas ───────── */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px;border-radius:20px 20px 0 0;
+  border-bottom:1px solid var(--g-line)}
+.title{font-weight:700;font-size:.95rem}
+.count{font-family:var(--mono);font-size:.7rem;padding:2px 9px;border-radius:999px;background:color-mix(in srgb,var(--nr-orange) 35%,transparent);
+  border:1px solid color-mix(in srgb,var(--nr-orange-lt) 60%,transparent)}
+.sp{flex:1}
+.search{display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.22);transition:box-shadow .2s,border-color .2s;min-width:220px}
+.search:focus-within{border-color:var(--nr-orange-lt);box-shadow:0 0 0 .22rem color-mix(in srgb,var(--nr-orange) 40%,transparent)}
+.search input{background:none;border:0;outline:0;color:#fff;width:100%;font-size:.82rem}
+.search input::placeholder{color:var(--g-dim)}
+.pills{display:inline-flex;gap:4px;padding:3px;border-radius:999px;background:rgba(0,0,0,.25);border:1px solid var(--g-line)}
+.pill{border:0;background:none;color:var(--g-dim);padding:4px 13px;border-radius:999px;font-size:.76rem;cursor:pointer;transition:.2s}
+.pill:hover{color:#fff}
+.pill.on{color:#fff;font-weight:700;background:linear-gradient(135deg,color-mix(in srgb,var(--nr-orange) 85%,transparent),color-mix(in srgb,var(--nr-orange) 35%,transparent));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 4px 14px color-mix(in srgb,var(--nr-orange) 35%,transparent)}
+.btn-g{border:0;border-radius:999px;padding:7px 16px;font-weight:700;font-size:.8rem;color:#fff;cursor:pointer;
+  background:linear-gradient(135deg,var(--nr-orange-lt),var(--nr-orange-dk));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 18px color-mix(in srgb,var(--nr-orange) 45%,transparent);transition:transform .12s,filter .2s}
+.btn-g:hover{filter:brightness(1.12)}.btn-g:active{transform:translateY(1px)}
+.ico-btn{width:30px;height:30px;border-radius:10px;border:1px solid var(--g-line);background:rgba(255,255,255,.07);color:var(--g-dim);
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s}
+.ico-btn:hover{color:#fff;background:color-mix(in srgb,var(--nr-orange) 45%,transparent);border-color:var(--nr-orange-lt);box-shadow:0 0 14px color-mix(in srgb,var(--nr-orange) 50%,transparent)}
+
+/* ───────── 1 · Tabla ───────── */
+.tbl-card{border-radius:20px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{font-family:var(--mono);font-size:.64rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;text-align:left;
+  color:var(--g-dim);padding:12px 16px;background:rgba(0,0,0,.22);border-bottom:1px solid var(--g-line);white-space:nowrap;cursor:pointer;user-select:none}
+thead th i{opacity:.35;margin-left:5px;font-size:.8em}
+thead th:hover{color:#fff}
+tbody tr{--rc:var(--c-grey);position:relative;transition:background .2s,transform .2s}
+tbody tr.green{--rc:var(--c-green)}tbody tr.amber{--rc:var(--c-amber)}tbody tr.red{--rc:var(--c-red)}
+tbody td{padding:11px 16px;border-bottom:1px solid rgba(255,255,255,.07);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--rc) 14%,transparent),transparent 65%)}
+tbody td:first-child{box-shadow:inset 3px 0 0 var(--rc);font-family:var(--mono);color:var(--g-dim);font-size:.78rem}
+tbody tr:hover td{background:linear-gradient(90deg,color-mix(in srgb,var(--rc) 26%,transparent),rgba(255,255,255,.07) 75%)}
+tbody tr:hover td:first-child{box-shadow:inset 3px 0 0 var(--rc),0 0 18px color-mix(in srgb,var(--rc) 55%,transparent)}
+tbody tr:last-child td{border-bottom:0}
+.who{display:flex;align-items:center;gap:10px}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;
+  background:linear-gradient(135deg,var(--nr-orange-lt),var(--nr-orange));border:2px solid rgba(255,255,255,.35)}
+.who b{display:block;font-weight:600}.who small{color:var(--g-dim);font-size:.72rem}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 11px;border-radius:999px;font-size:.72rem;font-weight:600;
+  color:#fff;background:color-mix(in srgb,var(--rc,var(--c-grey)) 30%,transparent);border:1px solid color-mix(in srgb,var(--rc,var(--c-grey)) 65%,transparent)}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--rc,var(--c-grey));box-shadow:0 0 8px var(--rc,var(--c-grey))}
+.act{display:flex;gap:6px;justify-content:flex-end}
+.foot{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-top:1px solid var(--g-line);
+  background:rgba(0,0,0,.18);font-family:var(--mono);font-size:.7rem;color:var(--g-dim)}
+.pg{display:flex;gap:4px}.pg button{width:28px;height:28px;border-radius:9px;border:1px solid var(--g-line);background:rgba(255,255,255,.06);color:var(--g-dim);cursor:pointer}
+.pg button.on{color:#fff;background:linear-gradient(135deg,var(--nr-orange),color-mix(in srgb,var(--nr-orange) 40%,transparent));border-color:var(--nr-orange-lt)}
+
+/* ───────── 2 · Tarjetas ───────── */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{--rc:var(--c-grey);position:relative;overflow:hidden;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px;cursor:pointer;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--rc) 24%,transparent),rgba(255,255,255,.05));
+  -webkit-backdrop-filter:blur(18px) saturate(170%);backdrop-filter:blur(18px) saturate(170%);
+  border:1px solid color-mix(in srgb,var(--rc) 45%,rgba(255,255,255,.3));
+  box-shadow:0 10px 30px color-mix(in srgb,var(--rc) 20%,rgba(0,0,0,.3)),inset 0 1px 0 rgba(255,255,255,.35);
+  transition:transform .2s,box-shadow .2s}
+.card.green{--rc:var(--c-green)}.card.amber{--rc:var(--c-amber)}.card.red{--rc:var(--c-red)}
+.card::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.16) 50%,transparent 65%);
+  transform:translateX(-120%);transition:transform .7s}
+.card:hover{transform:translateY(-4px);box-shadow:0 18px 44px color-mix(in srgb,var(--rc) 38%,rgba(0,0,0,.3)),inset 0 1px 0 rgba(255,255,255,.45)}
+.card:hover::after{transform:translateX(120%)}
+.card-top{display:flex;justify-content:space-between;align-items:center}
+.card-id{font-family:var(--mono);font-size:.7rem;color:var(--g-dim);letter-spacing:.1em}
+.card h4{margin:0;font-size:.95rem}
+.card p{margin:0;color:var(--g-dim);font-size:.78rem;line-height:1.45}
+.bar{height:5px;border-radius:9px;background:rgba(255,255,255,.12);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--rc),color-mix(in srgb,var(--rc) 40%,#fff));box-shadow:0 0 10px var(--rc)}
+.card-foot{display:flex;justify-content:space-between;align-items:center;padding-top:10px;margin-top:auto;border-top:1px solid color-mix(in srgb,var(--rc) 30%,rgba(255,255,255,.2));font-size:.72rem;color:var(--g-dim)}
+
+/* ───────── 3 · Lista compacta (filas flotantes) ───────── */
+.rows{display:flex;flex-direction:column;gap:8px}
+.row{--rc:var(--c-grey);display:grid;grid-template-columns:44px 1.6fr 1fr 1fr auto;gap:14px;align-items:center;padding:10px 16px 10px 12px;border-radius:16px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--rc) 16%,transparent),rgba(255,255,255,.05) 55%);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.14);border-left:3px solid var(--rc);box-shadow:inset 0 1px 0 rgba(255,255,255,.2);
+  transition:transform .2s,box-shadow .2s,background .2s}
+.row.green{--rc:var(--c-green)}.row.amber{--rc:var(--c-amber)}.row.red{--rc:var(--c-red)}
+.row:hover{transform:translateX(5px);box-shadow:0 8px 26px color-mix(in srgb,var(--rc) 30%,transparent),inset 0 1px 0 rgba(255,255,255,.3)}
+.row .cell small{display:block;font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--g-dim)}
+.row .cell b{font-weight:600}
+.hex{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--rc) 80%,#fff),var(--rc))}
+
+/* ───────── 4 · Línea de tiempo / feed ───────── */
+.feed{border-radius:20px;padding:18px 22px;position:relative}
+.ev{--rc:var(--c-grey);position:relative;display:flex;gap:14px;padding:0 0 18px 26px}
+.ev.green{--rc:var(--c-green)}.ev.amber{--rc:var(--c-amber)}.ev.red{--rc:var(--c-red)}
+.ev::before{content:"";position:absolute;left:5px;top:14px;bottom:-4px;width:2px;background:linear-gradient(var(--rc),transparent)}
+.ev:last-child::before{display:none}
+.ev::after{content:"";position:absolute;left:0;top:4px;width:12px;height:12px;border-radius:50%;background:var(--rc);
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--rc) 25%,transparent),0 0 14px var(--rc)}
+.ev time{font-family:var(--mono);font-size:.68rem;color:var(--g-dim);min-width:48px;padding-top:3px}
+.ev .body{flex:1;padding:8px 14px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);transition:.2s}
+.ev .body:hover{background:color-mix(in srgb,var(--rc) 16%,rgba(255,255,255,.06));border-color:color-mix(in srgb,var(--rc) 50%,transparent)}
+.ev .body b{display:block}.ev .body span{font-size:.76rem;color:var(--g-dim)}
+
+/* ───────── 5 · KPI strip ───────── */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.kpi{--rc:var(--nr-orange);padding:14px 18px;border-radius:18px}
+.kpi small{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--g-dim)}
+.kpi strong{display:block;font-family:var(--font-head);font-size:1.9rem;font-weight:900;line-height:1.1;margin:4px 0;
+  color:color-mix(in srgb,var(--rc) 60%,#fff);text-shadow:0 0 18px color-mix(in srgb,var(--rc) 70%,transparent)}
+
+@media (max-width:760px){
+  .row{grid-template-columns:40px 1fr auto}.row .cell:nth-child(3),.row .cell:nth-child(4){display:none}
+  .hide-m{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="demo-bar glass">
+    <div><div class="brand">Monitor · Listados Glass</div><div class="tag">Propuesta visual — misma estética del login</div></div>
+    <div class="swatches">Color del módulo Estilos:
+      <span class="sw" style="background:#AF6116" data-c="#AF6116" data-lt="#D98532" data-dk="#8e4e12" title="Newrest (actual)"></span>
+      <span class="sw" style="background:#2D7A9A" data-c="#2D7A9A" data-lt="#4FA3C4" data-dk="#1F5870"></span>
+      <span class="sw" style="background:#4A9F4F" data-c="#4A9F4F" data-lt="#6FBF74" data-dk="#357339"></span>
+      <span class="sw" style="background:#7B4FD1" data-c="#7B4FD1" data-lt="#A27FEA" data-dk="#5733A0"></span>
+      <span class="sw" style="background:#C8102E" data-c="#C8102E" data-lt="#E5405A" data-dk="#900B20"></span>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi glass"><small>Registros hoy</small><strong>1.284</strong><span class="badge" style="--rc:var(--c-green)">+8,2%</span></div>
+    <div class="kpi glass" style="--rc:var(--c-amber)"><small>Pendientes</small><strong>37</strong><span class="badge" style="--rc:var(--c-amber)">Revisar</span></div>
+    <div class="kpi glass" style="--rc:var(--c-red)"><small>Incoherencias</small><strong>12</strong><span class="badge" style="--rc:var(--c-red)">Crítico</span></div>
+    <div class="kpi glass" style="--rc:var(--c-green)"><small>Conciliados</small><strong>96%</strong><span class="badge" style="--rc:var(--c-green)">OK</span></div>
+  </div>
+
+  <!-- ═════ 1 · TABLA ═════ -->
+  <h2 class="sec">01 · Tabla de datos <small>catálogos, usuarios, reservas, consumos…</small></h2>
+  <div class="tbl-card glass">
+    <div class="toolbar">
+      <span class="title">Habitantes</span><span class="count">8 / 214</span>
+      <span class="sp"></span>
+      <label class="search"><i class="bi bi-search"></i><input placeholder="Buscar…" id="q"></label>
+      <div class="pills" id="pills"><button class="pill on" data-f="">Todos</button><button class="pill" data-f="green">Activos</button><button class="pill" data-f="amber">Pendientes</button><button class="pill" data-f="red">Con error</button></div>
+      <button class="btn-g"><i class="bi bi-plus-circle me-1"></i> Agregar</button>
+    </div>
+    <table id="t">
+      <thead><tr><th>ID<i class="bi bi-arrow-down-up"></i></th><th>Nombre<i class="bi bi-arrow-down-up"></i></th><th class="hide-m">Empresa<i class="bi bi-arrow-down-up"></i></th><th class="hide-m">Habitación<i class="bi bi-arrow-down-up"></i></th><th>Estado<i class="bi bi-arrow-down-up"></i></th><th style="text-align:right;cursor:default">Acciones</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="foot"><span>Mostrando 8 de 214 · 10 por página</span><div class="pg"><button><i class="bi bi-chevron-left"></i></button><button class="on">1</button><button>2</button><button>3</button><button><i class="bi bi-chevron-right"></i></button></div></div>
+  </div>
+
+  <!-- ═════ 2 · TARJETAS ═════ -->
+  <h2 class="sec">02 · Vista de tarjetas <small>reflejo luminoso al pasar el cursor</small></h2>
+  <div class="cards">
+    <div class="card green"><div class="card-top"><span class="card-id">#REQ-1042</span><span class="badge" style="--rc:var(--c-green)">Aprobado</span></div><h4>Mantención sala de máquinas</h4><p>Reemplazo de válvulas y revisión del circuito de agua caliente del módulo B.</p><div class="bar"><i style="width:92%"></i></div><div class="card-foot"><span><i class="bi bi-person"></i> M. Rojas</span><span>92%</span></div></div>
+    <div class="card amber"><div class="card-top"><span class="card-id">#REQ-1043</span><span class="badge" style="--rc:var(--c-amber)">Pendiente</span></div><h4>Cambio de turno extraordinario</h4><p>Solicitud para reasignar la cuadrilla de lavandería durante el fin de semana.</p><div class="bar"><i style="width:48%"></i></div><div class="card-foot"><span><i class="bi bi-person"></i> C. Soto</span><span>48%</span></div></div>
+    <div class="card red"><div class="card-top"><span class="card-id">#REQ-1044</span><span class="badge" style="--rc:var(--c-red)">Rechazado</span></div><h4>Compra de insumos fuera de lista</h4><p>El monto excede el presupuesto aprobado para el período vigente.</p><div class="bar"><i style="width:15%"></i></div><div class="card-foot"><span><i class="bi bi-person"></i> A. Pinto</span><span>15%</span></div></div>
+    <div class="card"><div class="card-top"><span class="card-id">#REQ-1045</span><span class="badge">Borrador</span></div><h4>Actualización de catálogo</h4><p>Alta de nuevas unidades y cargos para la próxima carga masiva.</p><div class="bar"><i style="width:30%"></i></div><div class="card-foot"><span><i class="bi bi-person"></i> F. Palacios</span><span>30%</span></div></div>
+  </div>
+
+  <!-- ═════ 3 · FILAS FLOTANTES ═════ -->
+  <h2 class="sec">03 · Lista de filas flotantes <small>reservas, eventos, matriz diaria</small></h2>
+  <div class="rows">
+    <div class="row green"><div class="hex"><i class="bi bi-door-open"></i></div><div class="cell"><small>Reserva</small><b>SGH-20481 · Camp. Norte</b></div><div class="cell"><small>Ingreso</small><b>05/11/2026</b></div><div class="cell"><small>Habitación</small><b>B-214</b></div><span class="badge" style="--rc:var(--c-green)">Confirmada</span></div>
+    <div class="row amber"><div class="hex"><i class="bi bi-hourglass-split"></i></div><div class="cell"><small>Reserva</small><b>SGH-20482 · Camp. Sur</b></div><div class="cell"><small>Ingreso</small><b>06/11/2026</b></div><div class="cell"><small>Habitación</small><b>—</b></div><span class="badge" style="--rc:var(--c-amber)">Sin asignar</span></div>
+    <div class="row red"><div class="hex"><i class="bi bi-exclamation-triangle"></i></div><div class="cell"><small>Reserva</small><b>SGH-20483 · Camp. Norte</b></div><div class="cell"><small>Ingreso</small><b>04/11/2026</b></div><div class="cell"><small>Habitación</small><b>A-102</b></div><span class="badge" style="--rc:var(--c-red)">Duplicada</span></div>
+    <div class="row"><div class="hex"><i class="bi bi-archive"></i></div><div class="cell"><small>Reserva</small><b>SGH-20470 · Camp. Sur</b></div><div class="cell"><small>Ingreso</small><b>01/11/2026</b></div><div class="cell"><small>Habitación</small><b>C-310</b></div><span class="badge">Cerrada</span></div>
+  </div>
+
+  <!-- ═════ 4 · TIMELINE ═════ -->
+  <h2 class="sec">04 · Línea de tiempo <small>eventos Webcontrol, auditoría, cargas</small></h2>
+  <div class="feed glass">
+    <div class="ev green"><time>08:42</time><div class="body"><b>Carga de lote #482 finalizada</b><span>12.340 registros importados sin errores</span></div></div>
+    <div class="ev amber"><time>08:15</time><div class="body"><b>Evento de ingreso sin marca de salida</b><span>3 trabajadores · Unidad Norte</span></div></div>
+    <div class="ev red"><time>07:58</time><div class="body"><b>Incoherencia detectada en consumos GECO</b><span>Regla R-014 · requiere revisión</span></div></div>
+    <div class="ev"><time>07:30</time><div class="body"><b>Sesión iniciada</b><span>francisco.marcotti · Chrome / Windows</span></div></div>
+  </div>
+
+</div>
+
+<script>
+const data=[
+ [1021,'Ana Contreras','AC','Newrest','B-214','green','Activo'],
+ [1022,'Bruno Salinas','BS','Contratista X','A-102','amber','Pendiente'],
+ [1023,'Carla Mena','CM','Newrest','C-310','green','Activo'],
+ [1024,'Diego Fuentes','DF','Minera Y','B-105','red','Con error'],
+ [1025,'Elena Vargas','EV','Newrest','A-220','green','Activo'],
+ [1026,'Felipe Rojas','FR','Contratista Z','—','amber','Pendiente'],
+ [1027,'Gloria Pinto','GP','Newrest','C-118','grey','Inactivo'],
+ [1028,'Hugo Araya','HA','Minera Y','B-301','green','Activo']];
+const tb=document.querySelector('#t tbody');
+function render(f,q){
+  tb.innerHTML=data.filter(r=>(!f||r[5]===f)&&(!q||r.join(' ').toLowerCase().includes(q))).map(r=>
+  `<tr class="${r[5]}"><td>#${r[0]}</td><td><div class="who"><span class="av">${r[2]}</span><div><b>${r[1]}</b><small>${r[1].split(' ')[0].toLowerCase()}@demo.cl</small></div></div></td>
+   <td class="hide-m">${r[3]}</td><td class="hide-m" style="font-family:var(--mono)">${r[4]}</td><td><span class="badge">${r[6]}</span></td>
+   <td><div class="act"><span class="ico-btn"><i class="bi bi-eye"></i></span><span class="ico-btn"><i class="bi bi-pencil"></i></span><span class="ico-btn"><i class="bi bi-trash"></i></span></div></td></tr>`).join('');
+}
+let F='',Q='';render();
+document.getElementById('pills').onclick=e=>{const b=e.target.closest('.pill');if(!b)return;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('on',p===b));F=b.dataset.f;render(F,Q)};
+document.getElementById('q').oninput=e=>{Q=e.target.value.toLowerCase();render(F,Q)};
+document.querySelectorAll('.sw').forEach(s=>s.onclick=()=>{const r=document.documentElement.style;
+  r.setProperty('--nr-orange',s.dataset.c);r.setProperty('--nr-orange-lt',s.dataset.lt);r.setProperty('--nr-orange-dk',s.dataset.dk)});
+</script>
+</body>
+</html>

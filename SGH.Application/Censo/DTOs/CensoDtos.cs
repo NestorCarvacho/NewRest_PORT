@@ -14,6 +14,18 @@ public sealed record CensoFilaDto(
     string CamasCheckIn,
     string Turno);
 
+public sealed record CensoUsuarioFilaDto(
+    int Id,
+    string Fecha,
+    string Campamento,
+    string Modulo,
+    string Piso,
+    string Habitacion,
+    string NumeroCamas,
+    string CamasOcupadas,
+    string Turno,
+    string TurnoNombre);
+
 public sealed record OpcionCensoDto(int Id, string Etiqueta, int PadreId);
 
 public sealed record CatalogoCensoDto(
@@ -29,6 +41,12 @@ public sealed record SolicitudBuscarCensos(
     int HabitacionId,
     DateTime? Fecha,
     string? Turno);
+
+public sealed record SolicitudBuscarMisCensos(
+    int EmpresaMandanteId,
+    int CampamentoId,
+    DateTime Fecha,
+    int UsuarioId);
 
 public sealed record FilaGuardarCensoDto(string? Id, int HabitacionId, string? Cantidad, string? Turno);
 
@@ -54,6 +72,17 @@ public abstract record ResultadoBusquedaCenso
     public sealed record Lista(IReadOnlyList<CensoFilaDto> Filas) : ResultadoBusquedaCenso;
 
     public sealed record Rechazada(string Mensaje) : ResultadoBusquedaCenso;
+}
+
+public abstract record ResultadoBusquedaMisCensos
+{
+    private ResultadoBusquedaMisCensos()
+    {
+    }
+
+    public sealed record Lista(IReadOnlyList<CensoUsuarioFilaDto> Filas) : ResultadoBusquedaMisCensos;
+
+    public sealed record Rechazada(string Mensaje) : ResultadoBusquedaMisCensos;
 }
 
 public abstract record ResultadoGuardadoCenso

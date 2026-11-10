@@ -2,11 +2,16 @@ namespace SGH.Application.Reserva.DTOs;
 
 public sealed record ReservaFilaDto(
     int Id,
+    int AreaId,
+    int PasajeroId,
+    int HabitacionId,
+    int TurnoId,
     string GrupoEmpresa,
     string Pasajero,
     string Habitacion,
     string Estado,
     string EstadoNumero,
+    string FechaReserva,
     string Llegada,
     string Salida,
     string? CheckIn,
@@ -33,6 +38,8 @@ public sealed record SolicitudBuscarReservas(
     int SolicitudId,
     string Estado,
     DateTime? FechaReserva,
+    DateTime? FechaReservaDesde,
+    DateTime? FechaReservaHasta,
     DateTime? FechaLlegada,
     DateTime? FechaSalida,
     DateTime? CheckIn,
@@ -53,6 +60,12 @@ public sealed record SolicitudCrearReserva(
     string? Observacion);
 
 public sealed record SolicitudMovimientoReserva(int ReservaId, DateTime Fecha, int UsuarioId, string Operacion, int CampamentoId);
+
+public sealed record SolicitudActualizarReserva(
+    int ReservaId, int EmpresaMandanteId, int CampamentoId, int AreaId,
+    DateTime FechaReserva, DateTime FechaLlegada, DateTime? FechaSalida,
+    string? Observacion, int TurnoId, int? PasajeroId, int? HabitacionId,
+    string Estado, bool TieneAgua, int UsuarioId);
 
 public abstract record ResultadoBusquedaReservas
 {
@@ -96,4 +109,15 @@ public abstract record ResultadoMovimientoReserva
     public sealed record Registrado : ResultadoMovimientoReserva;
 
     public sealed record Rechazado(string Mensaje) : ResultadoMovimientoReserva;
+}
+
+public abstract record ResultadoActualizacionReserva
+{
+    private ResultadoActualizacionReserva()
+    {
+    }
+
+    public sealed record Actualizada : ResultadoActualizacionReserva;
+
+    public sealed record Rechazada(string Mensaje) : ResultadoActualizacionReserva;
 }

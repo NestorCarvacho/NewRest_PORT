@@ -16,15 +16,14 @@ public class CompletarSesionTests
     private const string Clave = "abc123";
 
     [Fact]
-    public async Task ClaveIncorrectaNoAbreSesion()
+    public async Task SegundoPasoNoRevalidaLaClave()
     {
         Preparar();
 
         var resultado = await Crear().EjecutarAsync(new SolicitudCompletarSesion("123456789", "otra123", 8), CancellationToken.None);
 
-        var rechazo = Assert.IsType<ResultadoAutenticacion.Rechazado>(resultado);
-        Assert.Equal(MotivoRechazo.CredencialesInvalidas, rechazo.Motivo);
-        Assert.Equal(0, _repositorio.ConsultasEstado);
+        Assert.IsType<ResultadoAutenticacion.Aceptado>(resultado);
+        Assert.Equal(1, _repositorio.ConsultasEstado);
     }
 
     [Fact]
@@ -78,6 +77,8 @@ public class CompletarSesionTests
         Assert.Equal(480, aceptado.Sesion.MinutosVigencia);
         Assert.Equal(ReglasCuenta.RolGeneral, aceptado.Sesion.Rol);
         Assert.Equal(20, aceptado.Sesion.CampamentoId);
+        Assert.Equal(25, aceptado.Sesion.UsuarioId);
+        Assert.Equal("Ana Soto", aceptado.Sesion.NombreParaMostrar);
     }
 
     [Fact]
@@ -85,13 +86,15 @@ public class CompletarSesionTests
     {
         _repositorio.Usuario = UsuarioDe(ReglasCuenta.RutPerfilForzado, "Ana", 2);
         _repositorio.Perfiles.Add(Perfil(8, 2));
-        _repositorio.Perfiles.Add(new PerfilCampamentoUsuario(11, ReglasCuenta.PerfilForzado, "Forzado", 30, "Otro", 4, "Mandante", "Otro - Forzado"));
+        _repositorio.Perfiles.Add(new PerfilCampamentoUsuario(11, ReglasCuenta.PerfilForzado, "Forzado", 30, "Otro", 4, "Mandante", "Otro - Forzado", 42, "Usuario asignado"));
 
         var resultado = await Crear().EjecutarAsync(new SolicitudCompletarSesion(ReglasCuenta.RutPerfilForzado, Clave, 8), CancellationToken.None);
 
         var aceptado = Assert.IsType<ResultadoAutenticacion.Aceptado>(resultado);
         Assert.Equal(ReglasCuenta.PerfilForzado, aceptado.Sesion.PerfilId);
         Assert.Equal(30, aceptado.Sesion.CampamentoId);
+        Assert.Equal(42, aceptado.Sesion.UsuarioId);
+        Assert.Equal("Usuario asignado", aceptado.Sesion.NombreParaMostrar);
     }
 
     [Fact]
@@ -124,5 +127,5 @@ public class CompletarSesionTests
         new(3, rut, nombre, "Soto", _verificador.CrearHashBcrypt(Clave), perfilId, 9, true);
 
     private static PerfilCampamentoUsuario Perfil(int id, int perfilId) =>
-        new(id, perfilId, "Operaciones", 20, "Campamento", 9, "Mandante", "Campamento - Operaciones");
+        new(id, perfilId, "Operaciones", 20, "Campamento", 9, "Mandante", "Campamento - Operaciones", 25, "Ana Soto");
 }
