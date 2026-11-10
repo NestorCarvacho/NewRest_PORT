@@ -9,6 +9,24 @@ namespace SGH.Infrastructure.Solicitud.Commands;
 
 public sealed class ComandoSolicitudAlojamiento(HotelDbContext db) : IComandoSolicitudAlojamiento
 {
+    public async Task<ResultadoProcedimientoCargaDto> CargarPasajeroAsync(int solicitudId, int empresaMandanteId, int campamentoId,
+        int usuarioId, FilaCargaPasajeroDto fila, CancellationToken cancellationToken)
+    {
+        var ret = new SqlParameter("@Ret", SqlDbType.Int) { Direction = ParameterDirection.Output };
+        var mensaje = new SqlParameter("@Mensaje", SqlDbType.VarChar, 1000) { Direction = ParameterDirection.Output };
+        await db.Database.ExecuteSqlInterpolatedAsync(
+            $"""
+            EXEC dbo.sp_Solicitud_CargarPasajero @SolicitudId={solicitudId},
+                @EmpresaMandanteId={empresaMandanteId}, @CampamentoId={campamentoId}, @UsuarioId={usuarioId},
+                @Identificador={fila.Identificador}, @TipoIdentificador={fila.TipoIdentificador},
+                @Nombres={fila.Nombres}, @Apellidos={fila.Apellidos}, @Genero={fila.Genero},
+                @Ret={ret} OUTPUT, @Mensaje={mensaje} OUTPUT
+            """, cancellationToken);
+        if (ret.Value is not int resultado)
+            throw new InvalidOperationException("El procedimiento de carga no devolvió un resultado.");
+        return new ResultadoProcedimientoCargaDto(resultado > 0, mensaje.Value is string texto ? texto : null);
+    }
+
     public async Task AsignarHabitacionAsync(int solicitudId, int pasajeroId, int habitacionId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
     {
         await db.Database.ExecuteSqlInterpolatedAsync(

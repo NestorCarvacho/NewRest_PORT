@@ -4,6 +4,7 @@ import { inicializarCuenta } from "./modulos/cuenta.js";
 import { crearCensoQr } from "./modulos/censo-qr.js";
 import { crearCenso } from "./modulos/censo.js";
 import { crearReserva } from "./modulos/reserva.js";
+import { crearSolicitud } from "./modulos/solicitud.js";
 import { crearMovimientosReserva } from "./modulos/movimientos-reserva.js";
 import { crearTablas } from "./core/tablas.js";
 import { crearFormularios } from "./core/formularios.js";
@@ -67,6 +68,12 @@ import { crearRenderizadorModulos } from "./core/renderizador-modulos.js";
         mostrarAviso: mostrarAviso,
         consulta: consulta
     });
+    var solicitud = crearSolicitud({
+        pedir: pedir, enviar: enviar, enviarArchivo: api.enviarArchivo, consulta: consulta, campo: campo,
+        obtenerCatalogo: catalogos.obtenerSolicitud, prepararCatalogo: prepararCatalogo,
+        abrirPanel: abrirPanel, cerrarPanel: cerrarPanel, cargar: cargar,
+        mostrarAviso: mostrarAviso, fechaActual: fechaActual, rangoInicial: rangoReservaInicial
+    });
     var movimientosReserva = crearMovimientosReserva({
         boton: boton,
         prepararCatalogo: prepararCatalogo,
@@ -102,11 +109,12 @@ import { crearRenderizadorModulos } from "./core/renderizador-modulos.js";
         abrirPanel: abrirPanel,
         boton: boton
     });
-    var modulos = crearDefinicionPantallas(reserva, censo);
+    var modulos = crearDefinicionPantallas(reserva, censo, solicitud);
     var renderizador = crearRenderizadorModulos({
         tablas: tablas,
         censo: censo,
         reserva: reserva,
+        solicitud: solicitud,
         movimientosReserva: movimientosReserva
     });
 
@@ -123,6 +131,7 @@ import { crearRenderizadorModulos } from "./core/renderizador-modulos.js";
         cargar: cargar,
         mostrarEstado: mostrarEstado,
         reserva: reserva,
+        solicitud: solicitud,
         censo: censo,
         censoQr: censoQr,
         crearTabla: tablas.crear
@@ -148,6 +157,7 @@ import { crearRenderizadorModulos } from "./core/renderizador-modulos.js";
         pedir: pedir,
         censo: censo,
         reserva: reserva,
+        solicitud: solicitud,
         mostrarEstado: mostrarEstado,
         pintar: renderizador.pintar
     });

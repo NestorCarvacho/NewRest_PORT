@@ -1,9 +1,17 @@
-export function crearDefinicionPantallas(reserva, censo) {
+export function crearDefinicionPantallas(reserva, censo, solicitud) {
     function pantalla(titulo, columnas, filtros, secciones, accion, modo) {
         return { titulo: titulo, columnas: columnas, filtros: filtros, secciones: secciones, accion: accion, modo: modo };
     }
 
     var modulos = {
+        solicitud: pantalla(
+            "Solicitud alojamiento",
+            ["Acciones", "N°", "Fecha", "Grupo empresa", "Solicitante", "Estado"],
+            solicitud.filtros,
+            null,
+            { titulo: "Nueva solicitud", boton: "Nueva solicitud" },
+            "solicitud"
+        ),
         reserva: pantalla(
             "Reserva",
             ["Acciones", "N°", "Fecha Reserva", "Grupo Empresa", "Pasajero", "Habitación", "Estado", "Llegada", "Salida"],
@@ -46,6 +54,7 @@ export function crearDefinicionPantallas(reserva, censo) {
         )
     };
     modulos.reserva.filtroInicial = function () { return reserva.filtroInicial("reserva"); };
+    modulos.solicitud.filtroInicial = solicitud.filtroInicial;
     modulos.checkin.filtroInicial = function () { return reserva.filtroInicial("checkin"); };
     modulos.checkout.filtroInicial = function () { return reserva.filtroInicial("checkout"); };
     modulos.censo.filtroInicial = function () { return censo.filtroInicial("censo"); };

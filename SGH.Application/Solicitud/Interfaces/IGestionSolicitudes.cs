@@ -10,6 +10,7 @@ public interface IGestionSolicitudes
     Task<IReadOnlyList<HabitacionDisponibleSolicitudDto>> HabitacionesDisponiblesAsync(int id, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken);
     Task AgregarCuposAsync(int id, int empresaMandanteId, int campamentoId, int usuarioId, int cantidad, CancellationToken cancellationToken);
     Task<int> GuardarPasajeroAsync(GuardarPasajeroSolicitudDto pasajero, CancellationToken cancellationToken);
+    Task<IReadOnlyList<ResultadoCargaPasajeroDto>> CargarPasajerosAsync(int id, int empresaMandanteId, int campamentoId, int usuarioId, IReadOnlyList<FilaCargaPasajeroDto> filas, CancellationToken cancellationToken);
     Task<int> GenerarReservasAsync(int id, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken);
     Task AsignarHabitacionAsync(int id, int pasajeroId, int habitacionId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken);
     Task EliminarPasajeroAsync(int id, int pasajeroId, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken);

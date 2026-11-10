@@ -9,10 +9,43 @@ namespace SGH.Web.Pages.Solicitud;
 
 public sealed class DatosModel(
     IGestionSolicitudes gestion,
+    INotificadorSolicitud notificador,
+    IPlanillaPasajeros planilla,
     IWebHostEnvironment ambiente,
     ILogger<DatosModel> logger) : PageModel
 {
     public IActionResult OnGet() => RedirectToPage("/Index");
+
+    public IActionResult OnGetPlantillaPasajeros() => File(planilla.CrearPlantilla(),
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "PlantillaPasajeros.xlsx");
+
+    public async Task<IActionResult> OnPostCargarPasajerosAsync(int id, IFormFile? archivo, CancellationToken cancellationToken)
+    {
+        if (id <= 0 || archivo is null || archivo.Length == 0 ||
+            !string.Equals(Path.GetExtension(archivo.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
+            return RespuestaJson.Mensaje("Seleccione una solicitud y una planilla .xlsx válida.");
+        var sesion = LectorSesion.Leer(User);
+        try
+        {
+            await using var contenido = archivo.OpenReadStream();
+            var filas = planilla.Leer(contenido);
+            var resultados = await gestion.CargarPasajerosAsync(id, sesion.EmpresaMandanteId,
+                sesion.CampamentoId, sesion.UsuarioId, filas, cancellationToken);
+            return new JsonResult(new { filas = resultados });
+        }
+        catch (InvalidDataException ex) { return RespuestaJson.Mensaje(ex.Message); }
+        catch (ArgumentException ex) { return RespuestaJson.Mensaje(ex.Message); }
+        catch (SqlException ex) when (ex.Number is 51030 or 51043)
+        {
+            logger.LogWarning(ex, "No se pudo importar pasajeros en la solicitud {SolicitudId}.", id);
+            return RespuestaJson.Mensaje(ex.Message, ex.Number == 51030 ? 404 : 400);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "Falló la carga masiva de pasajeros de la solicitud {SolicitudId}.", id);
+            return RespuestaJson.Mensaje("La carga se interrumpió. Algunas filas pueden haberse procesado; revise los pasajeros antes de volver a intentarlo.", 500);
+        }
+    }
 
     public async Task<IActionResult> OnGetCatalogoAsync(int grupoId, CancellationToken cancellationToken)
     {
@@ -245,14 +278,16 @@ public sealed class DatosModel(
 
     public async Task<IActionResult> OnPostGenerarReservasAsync([FromBody] AnulacionVista? vista, CancellationToken cancellationToken)
     {
-        if (vista is null || !ModelState.IsValid)
+        if (vista is null || !ModelState.IsValid || vista.Id <= 0)
             return RespuestaJson.Mensaje("Seleccione una solicitud válida.");
         var sesion = LectorSesion.Leer(User);
         try
         {
             var id = await gestion.GenerarReservasAsync(vista.Id, sesion.EmpresaMandanteId,
                 sesion.CampamentoId, sesion.UsuarioId, cancellationToken);
-            return new JsonResult(new { primeraReservaId = id });
+            var advertenciaCorreo = await NotificarAsync(vista.Id, sesion.EmpresaMandanteId,
+                sesion.CampamentoId, cancellationToken);
+            return new JsonResult(new { primeraReservaId = id, advertenciaCorreo });
         }
         catch (ArgumentException ex) { return RespuestaJson.Mensaje(ex.Message); }
         catch (SqlException ex) when (ex.Number is 51030 or 51049 or 51050 or 51051 or 51052 or 51053 or 51054 or 51055 or 51056)
@@ -264,6 +299,33 @@ public sealed class DatosModel(
         {
             logger.LogError(ex, "Falló la generación de reservas para la solicitud {SolicitudId}.", vista.Id);
             return RespuestaJson.DeFallo(ex, ambiente.IsDevelopment());
+        }
+    }
+
+    public async Task<IActionResult> OnPostNotificarReservasAsync([FromBody] AnulacionVista? vista, CancellationToken cancellationToken)
+    {
+        if (vista is null || !ModelState.IsValid || vista.Id <= 0)
+            return RespuestaJson.Mensaje("Seleccione una solicitud válida.");
+        var sesion = LectorSesion.Leer(User);
+        var error = await NotificarAsync(vista.Id, sesion.EmpresaMandanteId, sesion.CampamentoId, cancellationToken);
+        return error is null ? new JsonResult(new { listo = true }) : RespuestaJson.Mensaje(error);
+    }
+
+    private async Task<string?> NotificarAsync(int id, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var solicitud = await gestion.ObtenerAsync(id, empresaMandanteId, campamentoId, cancellationToken);
+            if (solicitud is null || solicitud.Estado != "R")
+                return "La solicitud no existe en la sesión o no tiene reservas generadas.";
+            var pasajeros = await gestion.ListarPasajerosAsync(id, empresaMandanteId, campamentoId, cancellationToken);
+            await notificador.EnviarReservasGeneradasAsync(solicitud, pasajeros, cancellationToken);
+            return null;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "Falló la notificación de reservas de la solicitud {SolicitudId}.", id);
+            return "Las reservas están generadas, pero no se pudo enviar el correo. Revise la configuración y vuelva a intentarlo.";
         }
     }
 

@@ -19,6 +19,8 @@ using SGH.Infrastructure.Reserva.Queries;
 using SGH.Application.Solicitud.Interfaces;
 using SGH.Infrastructure.Solicitud.Commands;
 using SGH.Infrastructure.Solicitud.Queries;
+using SGH.Infrastructure.Solicitud.Services;
+using SGH.Infrastructure.Solicitud.Planillas;
 
 namespace SGH.Infrastructure.DependencyInjection;
 
@@ -52,6 +54,8 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IComandoReserva, ComandoReserva>();
         services.AddScoped<IConsultaSolicitudAlojamiento, ConsultaSolicitudAlojamiento>();
         services.AddScoped<IComandoSolicitudAlojamiento, ComandoSolicitudAlojamiento>();
+        services.AddScoped<INotificadorSolicitud, NotificadorSolicitudSmtp>();
+        services.AddScoped<IPlanillaPasajeros, PlanillaPasajerosExcel>();
         services.AddScoped<IPlanillaReservaExcel, PlanillaReservaExcel>();
         services.AddScoped<IConsultaCenso, ConsultaCenso>();
         services.AddScoped<IComandoCenso, ComandoCenso>();

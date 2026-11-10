@@ -1,11 +1,13 @@
 export function crearRenderizadorModulos(dependencias) {
     function fila(filaOrigen, modo) {
+        if (modo === "solicitud") return dependencias.solicitud.fila(filaOrigen);
         if (modo === "censo") return dependencias.censo.filaCenso(filaOrigen);
         if (modo === "misCensos") return dependencias.censo.filaMisCensos(filaOrigen);
         return dependencias.reserva.fila(filaOrigen);
     }
 
     function columnas(modo) {
+        if (modo === "solicitud") return dependencias.solicitud.columnas();
         var columnasCenso = dependencias.censo.columnas(modo);
         if (columnasCenso) return columnasCenso;
         return dependencias.reserva.columnas(modo, dependencias.movimientosReserva.crearAcciones);
