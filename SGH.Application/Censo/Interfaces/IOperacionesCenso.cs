@@ -16,7 +16,7 @@ public interface IBuscarMisCensos
 
 public interface IObtenerCatalogoCenso
 {
-    Task<ResultadoCatalogoCenso> EjecutarAsync(int campamentoId, CancellationToken cancellationToken);
+    Task<ResultadoCatalogoCenso> EjecutarAsync(int empresaMandanteId, int campamentoId, CancellationToken cancellationToken);
 }
 
 public interface IGuardarCensos

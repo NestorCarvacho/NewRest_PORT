@@ -21,7 +21,8 @@ export function crearMovimientosReserva(dependencias) {
                     dependencias.campo("fecha", "Fecha", "datetime-local", [], { requerido: true, valor: dependencias.momentoLocal(true) })
                 ])
             ], "Continuar", true, function (datos) {
-                return dependencias.enviar("/Reserva/Datos?handler=Movimiento", {
+                return dependencias.enviar("/Reserva/Mid/MidReservas.cs", {
+                    opcion: "movimiento",
                     reservaId: reservaId,
                     fecha: datos.fecha,
                     operacion: operacion

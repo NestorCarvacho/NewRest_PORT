@@ -65,10 +65,21 @@ public sealed class CompletarSesion : ICompletarSesion
                 false));
         }
 
-        if (solicitud.AsignacionPerfilId == 0)
+        var asignacionId = solicitud.AsignacionPerfilId;
+        if (asignacionId == 0)
+        {
+            var automatica = ReglasCuenta.ResolverAsignacionAutomatica(
+                perfiles.Count,
+                perfiles.Select(perfil => perfil.CampamentoId).Distinct().Count(),
+                perfiles[0].Id);
+            if (automatica is int id)
+                asignacionId = id;
+        }
+
+        if (asignacionId == 0)
             return new ResultadoAutenticacion.Rechazado(ReglasCuenta.SeleccionePerfil, MotivoRechazo.PerfilNoPermitido);
 
-        var elegido = perfiles.FirstOrDefault(perfil => perfil.Id == solicitud.AsignacionPerfilId);
+        var elegido = perfiles.FirstOrDefault(perfil => perfil.Id == asignacionId);
         if (elegido is null)
         {
             return new ResultadoAutenticacion.Rechazado(ReglasCuenta.CredencialesInvalidas, MotivoRechazo.PerfilNoPermitido);

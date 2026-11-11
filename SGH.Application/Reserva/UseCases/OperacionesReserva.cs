@@ -17,8 +17,9 @@ public sealed class BuscarReservas : IBuscarReservas
 
     public async Task<ResultadoBusquedaReservas> EjecutarAsync(SolicitudBuscarReservas solicitud, CancellationToken cancellationToken)
     {
-        if (!AlcanceSesion.TieneCampamento(solicitud.CampamentoId))
-            return new ResultadoBusquedaReservas.Rechazada(AlcanceSesion.SinCampamento);
+        var alcanceBusqueda = AlcanceSesion.ValidarAlcance(solicitud.EmpresaMandanteId, solicitud.CampamentoId);
+        if (alcanceBusqueda is not null)
+            return new ResultadoBusquedaReservas.Rechazada(alcanceBusqueda);
 
         var filas = await _consulta.BuscarAsync(new FiltroReserva(
             solicitud.CampamentoId,
@@ -68,8 +69,9 @@ public sealed class ObtenerCatalogoReserva : IObtenerCatalogoReserva
 
     public async Task<ResultadoCatalogoReserva> EjecutarAsync(int empresaMandanteId, int campamentoId, CancellationToken cancellationToken)
     {
-        if (!AlcanceSesion.TieneCampamento(campamentoId))
-            return new ResultadoCatalogoReserva.Rechazado(AlcanceSesion.SinCampamento);
+        var alcanceCatalogo = AlcanceSesion.ValidarAlcance(empresaMandanteId, campamentoId);
+        if (alcanceCatalogo is not null)
+            return new ResultadoCatalogoReserva.Rechazado(alcanceCatalogo);
 
         var catalogo = await _consulta.ObtenerCatalogoAsync(empresaMandanteId, campamentoId, cancellationToken);
         return new ResultadoCatalogoReserva.Listo(new CatalogoReservaDto(
@@ -95,8 +97,9 @@ public sealed class CrearReserva : ICrearReserva
         if (solicitud.UsuarioId <= 0)
             return new ResultadoAltaReserva.Rechazada("La sesión no tiene un usuario.");
 
-        if (!AlcanceSesion.TieneCampamento(solicitud.CampamentoId) || solicitud.EmpresaMandanteId <= 0)
-            return new ResultadoAltaReserva.Rechazada(AlcanceSesion.SinCampamento);
+        var alcanceAlta = AlcanceSesion.ValidarAlcance(solicitud.EmpresaMandanteId, solicitud.CampamentoId);
+        if (alcanceAlta is not null)
+            return new ResultadoAltaReserva.Rechazada(alcanceAlta);
 
         var mensaje = ReglasReserva.ValidarAlta(solicitud.AreaId, solicitud.TurnoId, solicitud.FechaLlegada, solicitud.FechaSalida);
         if (mensaje is not null)
@@ -137,8 +140,9 @@ public sealed class RegistrarMovimientoReserva : IRegistrarMovimientoReserva
         if (solicitud.UsuarioId <= 0)
             return new ResultadoMovimientoReserva.Rechazado("La sesión no tiene un usuario.");
 
-        if (!AlcanceSesion.TieneCampamento(solicitud.CampamentoId))
-            return new ResultadoMovimientoReserva.Rechazado(AlcanceSesion.SinCampamento);
+        var alcanceMovimiento = AlcanceSesion.ValidarAlcance(solicitud.EmpresaMandanteId, solicitud.CampamentoId);
+        if (alcanceMovimiento is not null)
+            return new ResultadoMovimientoReserva.Rechazado(alcanceMovimiento);
 
         var mensaje = ReglasReserva.ValidarMovimiento(solicitud.ReservaId, solicitud.Fecha, solicitud.Operacion);
         if (mensaje is not null)
@@ -161,20 +165,36 @@ public sealed class RegistrarMovimientoReserva : IRegistrarMovimientoReserva
     public sealed class ActualizarReserva : IActualizarReserva
     {
         private readonly IComandoReserva _comando;
+        private readonly IConsultaReserva _consulta;
 
-        public ActualizarReserva(IComandoReserva comando) => _comando = comando;
+        public ActualizarReserva(IComandoReserva comando, IConsultaReserva consulta)
+        {
+            _comando = comando;
+            _consulta = consulta;
+        }
 
         public async Task<ResultadoActualizacionReserva> EjecutarAsync(
             SolicitudActualizarReserva solicitud, CancellationToken cancellationToken)
         {
+            if (solicitud.UsuarioId <= 0)
+                return new ResultadoActualizacionReserva.Rechazada("La sesión no tiene un usuario.");
+
+            var alcance = AlcanceSesion.ValidarAlcance(solicitud.EmpresaMandanteId, solicitud.CampamentoId);
+            if (alcance is not null)
+                return new ResultadoActualizacionReserva.Rechazada(alcance);
+
             var mensaje = ReglasReserva.ValidarAlta(
                 solicitud.AreaId, solicitud.TurnoId, solicitud.FechaLlegada, solicitud.FechaSalida);
             if (mensaje is not null)
                 return new ResultadoActualizacionReserva.Rechazada(mensaje);
-            if (solicitud.ReservaId <= 0 || solicitud.CampamentoId <= 0 || solicitud.UsuarioId <= 0)
-                return new ResultadoActualizacionReserva.Rechazada("La reserva no tiene datos de sesión válidos.");
+            if (solicitud.ReservaId <= 0)
+                return new ResultadoActualizacionReserva.Rechazada("Seleccione una reserva.");
             if (solicitud.Estado is not ("P" or "A" or "F" or "N"))
                 return new ResultadoActualizacionReserva.Rechazada("El estado de la reserva no es válido.");
+
+            var propia = await _consulta.ReservaEstaEnCampamentoAsync(solicitud.ReservaId, solicitud.CampamentoId, cancellationToken);
+            if (!propia)
+                return new ResultadoActualizacionReserva.Rechazada(ReglasReserva.ReservaAjena);
 
             await _comando.ActualizarAsync(
                 solicitud.ReservaId, solicitud.EmpresaMandanteId, solicitud.CampamentoId, solicitud.AreaId,

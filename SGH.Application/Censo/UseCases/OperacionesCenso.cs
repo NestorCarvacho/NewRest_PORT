@@ -22,8 +22,9 @@ public sealed class BuscarCensos : IBuscarCensos
         if (mensaje is not null)
             return new ResultadoBusquedaCenso.Rechazada(mensaje);
 
-        if (!AlcanceSesion.TieneCampamento(solicitud.CampamentoId))
-            return new ResultadoBusquedaCenso.Rechazada(AlcanceSesion.SinCampamento);
+        var alcance = AlcanceSesion.ValidarAlcance(solicitud.EmpresaMandanteId, solicitud.CampamentoId);
+        if (alcance is not null)
+            return new ResultadoBusquedaCenso.Rechazada(alcance);
 
         if (solicitud.ModuloId > 0 || solicitud.PisoId > 0 || solicitud.HabitacionId > 0)
         {
@@ -71,10 +72,11 @@ public sealed class ObtenerCatalogoCenso : IObtenerCatalogoCenso
         _consulta = consulta;
     }
 
-    public async Task<ResultadoCatalogoCenso> EjecutarAsync(int campamentoId, CancellationToken cancellationToken)
+    public async Task<ResultadoCatalogoCenso> EjecutarAsync(int empresaMandanteId, int campamentoId, CancellationToken cancellationToken)
     {
-        if (!AlcanceSesion.TieneCampamento(campamentoId))
-            return new ResultadoCatalogoCenso.Rechazado(AlcanceSesion.SinCampamento);
+        var alcance = AlcanceSesion.ValidarAlcance(empresaMandanteId, campamentoId);
+        if (alcance is not null)
+            return new ResultadoCatalogoCenso.Rechazado(alcance);
 
         var catalogo = await _consulta.ObtenerCatalogoAsync(campamentoId, cancellationToken);
         return new ResultadoCatalogoCenso.Listo(new CatalogoCensoDto(
@@ -103,8 +105,9 @@ public sealed class BuscarMisCensos : IBuscarMisCensos
         if (solicitud.UsuarioId <= 0)
             return new ResultadoBusquedaMisCensos.Rechazada("La sesión no tiene un usuario.");
 
-        if (!AlcanceSesion.TieneCampamento(solicitud.CampamentoId))
-            return new ResultadoBusquedaMisCensos.Rechazada(AlcanceSesion.SinCampamento);
+        var alcance = AlcanceSesion.ValidarAlcance(solicitud.EmpresaMandanteId, solicitud.CampamentoId);
+        if (alcance is not null)
+            return new ResultadoBusquedaMisCensos.Rechazada(alcance);
 
         var filas = await _consulta.BuscarPorUsuarioAsync(
             solicitud.EmpresaMandanteId,
@@ -143,8 +146,9 @@ public sealed class GuardarCensos : IGuardarCensos
         if (solicitud.UsuarioId <= 0)
             return new ResultadoGuardadoCenso.Rechazado("La sesión no tiene un usuario.");
 
-        if (!AlcanceSesion.TieneCampamento(solicitud.CampamentoId))
-            return new ResultadoGuardadoCenso.Rechazado(AlcanceSesion.SinCampamento);
+        var alcance = AlcanceSesion.ValidarAlcance(solicitud.EmpresaMandanteId, solicitud.CampamentoId);
+        if (alcance is not null)
+            return new ResultadoGuardadoCenso.Rechazado(alcance);
 
         if (solicitud.Filas.Count == 0)
             return new ResultadoGuardadoCenso.Rechazado("No hay censos para guardar.");

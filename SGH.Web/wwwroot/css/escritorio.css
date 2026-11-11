@@ -290,6 +290,39 @@ body.app-body {
   color: var(--deep);
 }
 
+.menu-columna .menu-enlace {
+  display: block;
+  width: 100%;
+  padding: 0.32rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--gray);
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.menu-columna .menu-enlace:hover {
+  color: var(--deep);
+}
+
+.pagina-modulo {
+  padding: 1rem 1.25rem 2rem;
+}
+
+.pagina-modulo-cabeza h1 {
+  margin: 0 0 0.75rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--burgundy);
+}
+
+.pagina-modulo-cuerpo .modulo-en-pagina {
+  display: block;
+}
+
 .contenido {
   padding-top: var(--alto-cromo);
   min-height: 100vh;
@@ -1172,6 +1205,7 @@ html:not([data-tema="claro"]) .menu-panel {
 
 html:not([data-tema="claro"]) .buscador-lista button,
 html:not([data-tema="claro"]) .menu-columna button,
+html:not([data-tema="claro"]) .menu-columna .menu-enlace,
 html:not([data-tema="claro"]) .usuario-menu .version {
   color: rgba(255, 255, 255, 0.72);
 }
@@ -1188,7 +1222,8 @@ html:not([data-tema="claro"]) .usuario-menu a {
   color: #d98532;
 }
 
-html:not([data-tema="claro"]) .menu-columna button:hover {
+html:not([data-tema="claro"]) .menu-columna button:hover,
+html:not([data-tema="claro"]) .menu-columna .menu-enlace:hover {
   color: #fff;
 }
 

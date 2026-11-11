@@ -31,6 +31,7 @@ public sealed record CatalogoReservaDto(
     IReadOnlyList<TurnoDto> Turnos);
 
 public sealed record SolicitudBuscarReservas(
+    int EmpresaMandanteId,
     int CampamentoId,
     int Id,
     int AreaId,
@@ -59,7 +60,8 @@ public sealed record SolicitudCrearReserva(
     DateTime? FechaSalida,
     string? Observacion);
 
-public sealed record SolicitudMovimientoReserva(int ReservaId, DateTime Fecha, int UsuarioId, string Operacion, int CampamentoId);
+public sealed record SolicitudMovimientoReserva(
+    int ReservaId, DateTime Fecha, int UsuarioId, string Operacion, int EmpresaMandanteId, int CampamentoId);
 
 public sealed record SolicitudActualizarReserva(
     int ReservaId, int EmpresaMandanteId, int CampamentoId, int AreaId,

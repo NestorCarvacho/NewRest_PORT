@@ -4,17 +4,29 @@ export function crearApi() {
         return campo ? campo.value : "";
     }
 
-    function pedir(url, opciones) {
-        return fetch(url, opciones).then(function (respuesta) {
-            return respuesta.text().then(function (texto) {
-                var cuerpo = {};
-                if (texto) {
-                    try { cuerpo = JSON.parse(texto); } catch (error) { cuerpo = {}; }
+    function leer(respuesta) {
+        return respuesta.text().then(function (texto) {
+            var cuerpo = {};
+            if (texto) {
+                try { cuerpo = JSON.parse(texto); } catch (error) { cuerpo = {}; }
+            }
+            if (cuerpo && cuerpo.registros && cuerpo.registros.resultado === false) {
+                throw new Error(cuerpo.registros.mensaje || "No se pudo completar la operación.");
+            }
+            if (cuerpo && Object.prototype.hasOwnProperty.call(cuerpo, "registros")) cuerpo = cuerpo.registros;
+            if (!respuesta.ok) {
+                var mensajeHttp = cuerpo && cuerpo.mensaje;
+                if (!mensajeHttp && respuesta.status === 400 && !texto) {
+                    mensajeHttp = "La solicitud fue rechazada. Actualice la página e intente nuevamente.";
                 }
-                if (!respuesta.ok) throw new Error(cuerpo.mensaje || "No se pudo completar la operación.");
-                return cuerpo;
-            });
+                throw new Error(mensajeHttp || texto || "No se pudo completar la operación.");
+            }
+            return cuerpo;
         });
+    }
+
+    function pedir(url, opciones) {
+        return fetch(url, opciones).then(leer);
     }
 
     function enviar(url, cuerpo) {
@@ -28,9 +40,12 @@ export function crearApi() {
         });
     }
 
-    function enviarArchivo(url, archivo) {
+    function enviarArchivo(url, archivo, datos) {
         var cuerpo = new FormData();
         cuerpo.append("archivo", archivo);
+        if (datos) {
+            Object.keys(datos).forEach(function (clave) { cuerpo.append(clave, datos[clave]); });
+        }
         return pedir(url, {
             method: "POST",
             headers: { "RequestVerificationToken": token() },

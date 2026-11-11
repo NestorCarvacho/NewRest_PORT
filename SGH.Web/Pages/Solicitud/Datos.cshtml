@@ -1,2 +1,10 @@
 @page
 @model SGH.Web.Pages.Solicitud.DatosModel
+@{
+    ViewData["Title"] = "Solicitud alojamiento";
+    ViewData["ModuloId"] = "solicitud";
+}
+<partial name="_ModuloPagina" />
+@section Scripts {
+    <script type="module" src="~/Solicitud/Js/datosSolicitud.js" asp-append-version="true"></script>
+}

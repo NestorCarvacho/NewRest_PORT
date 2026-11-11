@@ -8,13 +8,14 @@ export function crearCenso(dependencias) {
             fechas.push(dia.getFullYear() + "-" + String(dia.getMonth() + 1).padStart(2, "0") + "-" + String(dia.getDate()).padStart(2, "0"));
         }
         return Promise.all(fechas.map(function (dia) {
-            return dependencias.pedir("/Censo/Datos?handler=Buscar" + dependencias.consulta({
+            return dependencias.enviar("/Censo/Mid/MidCenso.cs", {
+                opcion: "listar",
                 moduloId: filtro.modulo,
                 pisoId: filtro.piso,
                 habitacionId: filtro.habitacion,
                 fecha: dia,
                 turno: filtro.turno
-            }));
+            });
         })).then(function (respuestas) {
             var filas = [];
             respuestas.forEach(function (respuesta) { filas.push.apply(filas, respuesta.filas || []); });
@@ -22,8 +23,9 @@ export function crearCenso(dependencias) {
         });
     }
 
-    function urlBuscar(filtro) {
-        return "/Censo/Datos?handler=Buscar" + dependencias.consulta({
+    function buscar(filtro) {
+        return dependencias.enviar("/Censo/Mid/MidCenso.cs", {
+            opcion: "listar",
             moduloId: filtro.modulo,
             pisoId: filtro.piso,
             habitacionId: filtro.habitacion,
@@ -32,8 +34,8 @@ export function crearCenso(dependencias) {
         });
     }
 
-    function urlMisCensos(filtro) {
-        return "/Censo/Datos?handler=MisCensos" + dependencias.consulta({ fecha: filtro.fecha });
+    function buscarMios(filtro) {
+        return dependencias.enviar("/Censo/Mid/MidCenso.cs", { opcion: "miscensos", fecha: filtro.fecha });
     }
 
     function filtros() {
@@ -151,7 +153,7 @@ export function crearCenso(dependencias) {
             };
         });
         dependencias.mostrarEstado(nodo, "");
-        return dependencias.enviar("/Censo/Datos?handler=Guardar", { fecha: filtro.fecha, filas: filas })
+        return dependencias.enviar("/Censo/Mid/MidCenso.cs", { opcion: "guardar", fecha: filtro.fecha, filas: filas })
             .then(function () { return dependencias.cargar("censo"); })
             .catch(function (error) { dependencias.mostrarEstado(nodo, error.message); });
     }
@@ -160,8 +162,8 @@ export function crearCenso(dependencias) {
         filtros: filtros,
         filtrosMisCensos: filtrosMisCensos,
         buscarUltimoMes: buscarUltimoMes,
-        urlBuscar: urlBuscar,
-        urlMisCensos: urlMisCensos,
+        buscar: buscar,
+        buscarMios: buscarMios,
         enlazar: enlazar,
         filtroInicial: filtroInicial,
         filaCenso: filaCenso,

@@ -68,16 +68,16 @@
                         <div class="menu-panel">
                             <div class="menu-columna">
                                 <h2>Alojamiento</h2>
-                                <button type="button" data-modulo="solicitud">Solicitud alojamiento</button>
+                                <a class="menu-enlace" asp-page="/Solicitud/Datos">Solicitud alojamiento</a>
                                 <button type="button">Pasajeros de solicitud</button>
-                                <button type="button" data-modulo="reserva">Reserva</button>
+                                <a class="menu-enlace" asp-page="/Reserva/Datos">Reserva</a>
                                 <button type="button">Reserva por solicitud</button>
                                 <button type="button">Reserva de instalaciones</button>
                                 <button type="button">Asignación</button>
                                 <button type="button">Liberación</button>
                                 <button type="button" data-modulo="checkin">Check In</button>
                                 <button type="button" data-modulo="checkout">Check Out</button>
-                                <button type="button" data-modulo="censo">Censo</button>
+                                <a class="menu-enlace" asp-page="/Censo/Datos">Censo</a>
                                 <button type="button" data-modulo="censoQr">Censo QR</button>
                                 <button type="button" data-modulo="misCensos">Mis Censos</button>
                                 <button type="button">Desalojos</button>
@@ -249,7 +249,6 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
     <script src="~/js/core/idioma.js" asp-append-version="true"></script>
-    <script type="module" src="~/js/escritorio.js" asp-append-version="true"></script>
     <script src="~/js/aviso-cookies.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

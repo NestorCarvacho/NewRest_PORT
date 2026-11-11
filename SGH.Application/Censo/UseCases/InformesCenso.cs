@@ -11,8 +11,7 @@ public sealed class ConsultarGestionDiaria : IConsultarGestionDiaria
 
     public async Task<ResultadoInformeCenso> EjecutarAsync(FiltroGestionDiaria filtro, CancellationToken cancellationToken)
     {
-        if (!AlcanceSesion.TieneCampamento(filtro.CampamentoId))
-            throw new InvalidOperationException(AlcanceSesion.SinCampamento);
+        AlcanceSesion.ExigirAlcance(filtro.EmpresaMandanteId, filtro.CampamentoId);
         if (string.IsNullOrWhiteSpace(filtro.Turno) || filtro.Fecha == default)
             throw new ArgumentException("Debe ingresar fecha y turno.");
         return new ResultadoInformeCenso(await _informes.GestionDiariaAsync(filtro, cancellationToken));
@@ -26,8 +25,7 @@ public sealed class GenerarInformeGeneral : IGenerarInformeGeneral
 
     public async Task<ResultadoInformeCenso> EjecutarAsync(FiltroInformeGeneral filtro, CancellationToken cancellationToken)
     {
-        if (!AlcanceSesion.TieneCampamento(filtro.CampamentoId))
-            throw new InvalidOperationException(AlcanceSesion.SinCampamento);
+        AlcanceSesion.ExigirAlcance(filtro.EmpresaMandanteId, filtro.CampamentoId);
         if (filtro.Desde.Date > filtro.Hasta.Date)
             throw new ArgumentException("El período informado no es válido.");
         return new ResultadoInformeCenso(await _informes.InformeGeneralAsync(filtro, cancellationToken));
@@ -42,8 +40,7 @@ public sealed class GenerarInformeOcupabilidadCenso : IGenerarInformeOcupabilida
 
     public async Task<ResultadoInformeCenso> EjecutarAsync(FiltroOcupabilidadCenso filtro, CancellationToken cancellationToken)
     {
-        if (!AlcanceSesion.TieneCampamento(filtro.CampamentoId))
-            throw new InvalidOperationException(AlcanceSesion.SinCampamento);
+        AlcanceSesion.ExigirAlcance(filtro.EmpresaMandanteId, filtro.CampamentoId);
         if (filtro.Desde.Date > filtro.Hasta.Date)
             throw new ArgumentException("El período informado no es válido.");
         if (string.IsNullOrWhiteSpace(filtro.Tipo) || string.IsNullOrWhiteSpace(filtro.Nivel))

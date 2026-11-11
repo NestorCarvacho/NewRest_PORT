@@ -40,16 +40,43 @@ public class CompletarSesionTests
     }
 
     [Fact]
-    public async Task SinPerfilSeleccionadoPideElegirCampamento()
+    public async Task UnaSolaAsignacionEntraSinElegirCampamento()
     {
         Preparar();
         _repositorio.Perfiles.Add(Perfil(8, ReglasCuenta.PerfilOperacionesA));
 
         var resultado = await Crear().EjecutarAsync(new SolicitudCompletarSesion("123456789", Clave, 0), CancellationToken.None);
 
+        var aceptado = Assert.IsType<ResultadoAutenticacion.Aceptado>(resultado);
+        Assert.Equal(8, aceptado.Sesion.AsignacionPerfilId);
+        Assert.Equal(20, aceptado.Sesion.CampamentoId);
+    }
+
+    [Fact]
+    public async Task VariosCampamentosSinSeleccionPidenElegir()
+    {
+        Preparar();
+        _repositorio.Perfiles.Add(Perfil(8, ReglasCuenta.PerfilOperacionesA));
+        _repositorio.Perfiles.Add(new PerfilCampamentoUsuario(9, 2, "Otro", 21, "Campamento B", 9, "Mandante", "Campamento B - Otro", 25, "Ana Soto"));
+
+        var resultado = await Crear().EjecutarAsync(new SolicitudCompletarSesion("123456789", Clave, 0), CancellationToken.None);
+
         var rechazo = Assert.IsType<ResultadoAutenticacion.Rechazado>(resultado);
         Assert.Equal(MotivoRechazo.PerfilNoPermitido, rechazo.Motivo);
         Assert.Equal(ReglasCuenta.SeleccionePerfil, rechazo.Mensaje);
+    }
+
+    [Fact]
+    public async Task UnicoCampamentoVariosPerfilesEntraConLaPrimeraAsignacion()
+    {
+        Preparar();
+        _repositorio.Perfiles.Add(Perfil(8, ReglasCuenta.PerfilOperacionesA));
+        _repositorio.Perfiles.Add(new PerfilCampamentoUsuario(9, 2, "Supervisor", 20, "Campamento", 9, "Mandante", "Campamento - Supervisor", 25, "Ana Soto"));
+
+        var resultado = await Crear().EjecutarAsync(new SolicitudCompletarSesion("123456789", Clave, 0), CancellationToken.None);
+
+        var aceptado = Assert.IsType<ResultadoAutenticacion.Aceptado>(resultado);
+        Assert.Equal(8, aceptado.Sesion.AsignacionPerfilId);
     }
 
     [Fact]

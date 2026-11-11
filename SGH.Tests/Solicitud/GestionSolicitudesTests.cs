@@ -1,6 +1,8 @@
+using SGH.Application.Sesion;
 using SGH.Application.Solicitud.DTOs;
 using SGH.Application.Solicitud.UseCases;
 using SGH.Application.Solicitud.Interfaces;
+using SGH.Domain.Alcance;
 
 namespace SGH.Tests.Solicitud;
 
@@ -16,7 +18,8 @@ public class GestionSolicitudesTests
         var filtros = new FiltroSolicitudesDto(2, 3, fecha, fecha.AddDays(1), 4, 5, "P", 6);
         await Caso.BuscarAsync(filtros, CancellationToken.None);
         Assert.Equal(new FiltroSolicitudesDto(2, 3, fecha.Date, fecha.AddDays(1).Date, 4, 5, "P", 6), _falso.Filtro);
-        await Assert.ThrowsAsync<ArgumentException>(() => Caso.BuscarAsync(filtros with { CampamentoId = 0 }, CancellationToken.None));
+        var sinCampamento = await Assert.ThrowsAsync<ArgumentException>(() => Caso.BuscarAsync(filtros with { CampamentoId = 0 }, CancellationToken.None));
+        Assert.Equal(AlcanceSesion.SinCampamento, sinCampamento.Message);
         await Assert.ThrowsAsync<ArgumentException>(() => Caso.BuscarAsync(filtros with { Hasta = fecha.AddDays(-1) }, CancellationToken.None));
         await Assert.ThrowsAsync<ArgumentException>(() => Caso.BuscarAsync(filtros with { Estado = "invalid" }, CancellationToken.None));
         Assert.Equal(1, _falso.Busquedas);
@@ -37,6 +40,14 @@ public class GestionSolicitudesTests
         Assert.Equal(1, _falso.Guardados);
         Assert.Equal(datos.GrupoId, _falso.Datos!.GrupoId);
         Assert.Equal(datos.FechaCheckIn, _falso.Datos.FechaCheckIn);
+    }
+
+    [Fact]
+    public async Task MutacionRechazaSolicitudDeOtroCampamento()
+    {
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() => Caso.AnularAsync(99, 2, 3, 7, CancellationToken.None));
+        Assert.Equal(ReglasAlcance.RegistroAjenoCampamento, ex.Message);
+        Assert.Equal(0, _falso.Anulaciones);
     }
 
     [Fact]
@@ -144,6 +155,7 @@ public class GestionSolicitudesTests
         public DatosSolicitudDto? Datos { get; private set; }
         public int Busquedas { get; private set; }
         public int Guardados { get; private set; }
+        public int Anulaciones { get; private set; }
         public (int, int, int, int) Anulacion { get; private set; }
         public (int, int, int) ListadoPasajeros { get; private set; }
         public (int, int, int, int, int) Cupos { get; private set; }
@@ -160,8 +172,18 @@ public class GestionSolicitudesTests
             return Task.FromResult<IReadOnlyList<SolicitudListadaDto>>([]);
         }
 
-        public Task<SolicitudDetalleDto?> ObtenerAsync(int id, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken) =>
-            Task.FromResult<SolicitudDetalleDto?>(null);
+        public Task<SolicitudDetalleDto?> ObtenerAsync(int id, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken)
+        {
+            if (id == 42 && empresaMandanteId == 2 && campamentoId == 3)
+                return Task.FromResult<SolicitudDetalleDto?>(DetalleDePrueba);
+            return Task.FromResult<SolicitudDetalleDto?>(null);
+        }
+
+        private static readonly SolicitudDetalleDto DetalleDePrueba = new(
+            42, DateTime.Today, null, null, 2, null, 0, null, 0, null,
+            false, null, null, null, null, 3, null, null, null,
+            DateTime.Today, null, "P", null, 7, null, null, null,
+            null, null, null, null, null, null, null, null, false);
 
         public Task<IReadOnlyList<PasajeroSolicitudDto>> ListarPasajerosAsync(
             int id, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken)
@@ -226,6 +248,7 @@ public class GestionSolicitudesTests
 
         public Task AnularAsync(int id, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
         {
+            Anulaciones++;
             Anulacion = (id, empresaMandanteId, campamentoId, usuarioId);
             return Task.CompletedTask;
         }

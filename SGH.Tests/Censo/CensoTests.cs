@@ -34,6 +34,7 @@ public class GuardarCensosTests
 
         var resultado = await caso.EjecutarAsync(new SolicitudGuardarCensos(
             4,
+            1,
             20,
             new DateTime(2026, 11, 7),
             [
@@ -54,6 +55,7 @@ public class GuardarCensosTests
 
         var resultado = await caso.EjecutarAsync(new SolicitudGuardarCensos(
             4,
+            1,
             20,
             new DateTime(2026, 11, 7),
             [new FilaGuardarCensoDto("1", 9, "3", "N")]), CancellationToken.None);
@@ -70,6 +72,7 @@ public class GuardarCensosTests
 
         var resultado = await caso.EjecutarAsync(new SolicitudGuardarCensos(
             4,
+            1,
             20,
             new DateTime(2026, 11, 7),
             [
@@ -94,6 +97,7 @@ public class GuardarCensosTests
 
         var guardado = await guardar.EjecutarAsync(new SolicitudGuardarCensos(
             4,
+            9,
             0,
             fecha,
             [new FilaGuardarCensoDto("1", 9, "3", "D")]), CancellationToken.None);

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using SGH.Application.Censo.Interfaces;
+using SGH.Application.Mid;
 using SGH.Application.Censo.UseCases;
 using SGH.Application.Cuenta.Interfaces;
 using SGH.Application.Cuenta.UseCases;
@@ -36,6 +37,10 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IConsultarEstadoPagoPantalla, ConsultarEstadoPagoPantalla>();
         services.AddScoped<IConsultarEstadoPagoServicio, ConsultarEstadoPagoServicio>();
         services.AddScoped<IConsultarEstadoPagoServicioPantalla, ConsultarEstadoPagoServicioPantalla>();
+        services.AddScoped<MidReservas>();
+        services.AddScoped<MidCenso>();
+        services.AddScoped<MidSolicitudes>();
+        services.AddScoped<MidInformesCenso>();
         return services;
     }
 }

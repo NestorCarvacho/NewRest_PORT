@@ -1,2 +1,10 @@
 @page
 @model SGH.Web.Pages.Reserva.DatosModel
+@{
+    ViewData["Title"] = "Reserva";
+    ViewData["ModuloId"] = "reserva";
+}
+<partial name="_ModuloPagina" />
+@section Scripts {
+    <script type="module" src="~/Reserva/Js/datosReserva.js" asp-append-version="true"></script>
+}

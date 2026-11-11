@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -27,6 +28,15 @@ builder.Services.Configure<RequestLocalizationOptions>(opciones =>
     opciones.SupportedUICultures = culturasSoportadas;
 });
 builder.Services.AddMemoryCache();
+builder.Services.AddAntiforgery(opciones =>
+{
+    opciones.HeaderName = "RequestVerificationToken";
+});
+builder.Services.ConfigureHttpJsonOptions(opciones =>
+{
+    opciones.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    opciones.SerializerOptions.PropertyNameCaseInsensitive = true;
+});
 builder.Services.AddSingleton<EmisorCookieSesion>();
 builder.Services.AddSingleton<ClavePendienteAlmacen>();
 builder.Services.AddSingleton<RegistroVentanaIngreso>();
@@ -42,6 +52,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         opciones.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
             ? CookieSecurePolicy.SameAsRequest
             : CookieSecurePolicy.Always;
+        opciones.Events.OnRedirectToLogin = contexto => ResponderSesion(contexto, "Debe iniciar sesión.");
+        opciones.Events.OnRedirectToAccessDenied = contexto => ResponderSesion(contexto, "No tiene permiso para esta operación.");
     });
 builder.Services.AddRateLimiter(opciones =>
 {
@@ -93,13 +105,15 @@ builder.Services.Configure<Microsoft.AspNetCore.Mvc.MvcOptions>(opciones =>
 {
     opciones.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
 });
+builder.Services.AddControllers()
+    .AddJsonOptions(opciones =>
+    {
+        opciones.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        opciones.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+    });
 builder.Services.AddRazorPages(opciones =>
 {
     opciones.Conventions.AuthorizeFolder("/");
-    opciones.Conventions.AuthorizePage("/Reserva/Datos", PoliticasAplicacion.GestionarReservas);
-    opciones.Conventions.AuthorizePage("/Solicitud/Datos", PoliticasAplicacion.AdministrarUsuarios);
-    opciones.Conventions.AuthorizePage("/Censo/Datos", PoliticasAplicacion.GestionarCensos);
-    opciones.Conventions.AuthorizePage("/Censo/EstadoPago", PoliticasAplicacion.GestionarCensos);
     opciones.Conventions.AuthorizePage("/Cuenta/Usuarios", PoliticasAplicacion.AdministrarUsuarios);
     opciones.Conventions.AllowAnonymousToPage("/Cuenta/Login");
     opciones.Conventions.AllowAnonymousToPage("/Cuenta/CambiarClave");
@@ -140,7 +154,21 @@ app.Use(async (contexto, siguiente) =>
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapStaticAssets();
+app.MapControllers();
 app.MapRazorPages()
    .WithStaticAssets();
 
 app.Run();
+
+static Task ResponderSesion(Microsoft.AspNetCore.Authentication.RedirectContext<Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationOptions> contexto, string mensaje)
+{
+    if (contexto.Request.Path.Value?.Contains("/Mid/", StringComparison.OrdinalIgnoreCase) == true)
+    {
+        contexto.Response.StatusCode = StatusCodes.Status200OK;
+        contexto.Response.ContentType = "application/json";
+        return contexto.Response.WriteAsync($"{{\"registros\":{{\"resultado\":false,\"mensaje\":\"{mensaje}\"}}}}");
+    }
+
+    contexto.Response.Redirect(contexto.RedirectUri);
+    return Task.CompletedTask;
+}

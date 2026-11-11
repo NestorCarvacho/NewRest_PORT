@@ -1,20 +1,11 @@
 using System.Data;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using SGH.Domain.Reserva.Interfaces;
-using SGH.Infrastructure.Persistence;
+using SGH.Infrastructure.Data;
 
 namespace SGH.Infrastructure.Reserva.Commands;
 
 public sealed class ComandoReserva : IComandoReserva
 {
-    private readonly HotelDbContext _db;
-
-    public ComandoReserva(HotelDbContext db)
-    {
-        _db = db;
-    }
-
     public async Task<int> CrearAsync(
         int empresaMandanteId,
         int campamentoId,
@@ -27,57 +18,88 @@ public sealed class ComandoReserva : IComandoReserva
         int usuarioId,
         CancellationToken cancellationToken)
     {
-        var id = new SqlParameter("@Id", SqlDbType.Int) { Direction = ParameterDirection.Output };
-        await _db.Database.ExecuteSqlInterpolatedAsync(
-            $"""
-            EXEC dbo.sp_Reserva_Crear
-                @EmpresaMandanteId={empresaMandanteId},
-                @CampamentoId={campamentoId},
-                @AreaId={areaId},
-                @FechaReserva={fechaReserva},
-                @FechaLlegada={fechaLlegada},
-                @FechaSalida={fechaSalida},
-                @Observacion={observacion},
-                @TurnoId={turnoId},
-                @UsuarioId={usuarioId},
-                @Id={id} OUT
-            """,
-            cancellationToken);
+        var oDB = new AD_Global();
+        var oCRB = await oDB.DBOpenAsync(300, cancellationToken);
+        if (oCRB.Resultado)
+        {
+            oDB.NameProcedure = "dbo.sp_Reserva_Crear";
+            oCRB = oDB.AddParameter("@EmpresaMandanteId", empresaMandanteId);
+            oCRB = oDB.AddParameter("@CampamentoId", campamentoId);
+            oCRB = oDB.AddParameter("@AreaId", areaId);
+            oCRB = oDB.AddParameter("@FechaReserva", fechaReserva);
+            oCRB = oDB.AddParameter("@FechaLlegada", fechaLlegada);
+            oCRB = oDB.AddParameter("@FechaSalida", fechaSalida, ParameterDirection.Input, SqlDbType.DateTime);
+            oCRB = oDB.AddParameter("@Observacion", observacion, ParameterDirection.Input, SqlDbType.NVarChar, -1);
+            oCRB = oDB.AddParameter("@TurnoId", turnoId);
+            oCRB = oDB.AddParameter("@UsuarioId", usuarioId);
+            oCRB = oDB.AddParameter("@Id", null, ParameterDirection.Output, SqlDbType.Int);
+        }
 
-        return id.Value is int creado ? creado : 0;
+        if (oCRB.Resultado)
+            oCRB = await oDB.ExecuteNonQueryAsync(cancellationToken);
+
+        var id = oCRB.Resultado ? oDB.LeerSalidaInt("@Id") ?? 0 : 0;
+        oDB.DBClose();
+        if (!oCRB.Resultado)
+            throw new InvalidOperationException(oCRB.Mensaje);
+
+        return id;
     }
 
     public async Task RegistrarMovimientoAsync(int reservaId, DateTime fecha, int usuarioId, string operacion, int campamentoId, CancellationToken cancellationToken)
     {
-        var ret = new SqlParameter("@Ret", SqlDbType.Int) { Direction = ParameterDirection.Output };
-        await _db.Database.ExecuteSqlInterpolatedAsync(
-            $"""
-            EXEC dbo.sp_Reserva_RegistrarMovimiento
-                @ReservaId={reservaId},
-                @Fecha={fecha},
-                @UsuarioId={usuarioId},
-                @Operacion={operacion},
-                @CampamentoId={campamentoId},
-                @Ret={ret} OUT
-            """,
-            cancellationToken);
+        var oDB = new AD_Global();
+        var oCRB = await oDB.DBOpenAsync(300, cancellationToken);
+        if (oCRB.Resultado)
+        {
+            oDB.NameProcedure = "dbo.sp_Reserva_RegistrarMovimiento";
+            oCRB = oDB.AddParameter("@ReservaId", reservaId);
+            oCRB = oDB.AddParameter("@Fecha", fecha);
+            oCRB = oDB.AddParameter("@UsuarioId", usuarioId);
+            oCRB = oDB.AddParameter("@Operacion", operacion);
+            oCRB = oDB.AddParameter("@CampamentoId", campamentoId);
+            oCRB = oDB.AddParameter("@Ret", null, ParameterDirection.Output, SqlDbType.Int);
+        }
+
+        if (oCRB.Resultado)
+            oCRB = await oDB.ExecuteNonQueryAsync(cancellationToken);
+
+        oDB.DBClose();
+        if (!oCRB.Resultado)
+            throw new InvalidOperationException(oCRB.Mensaje);
     }
 
-    public Task ActualizarAsync(int reservaId, int empresaMandanteId, int campamentoId, int areaId,
+    public async Task ActualizarAsync(int reservaId, int empresaMandanteId, int campamentoId, int areaId,
         DateTime fechaReserva, DateTime fechaLlegada, DateTime? fechaSalida, string? observacion,
         int turnoId, int? pasajeroId, int? habitacionId, string estado, bool tieneAgua,
         int usuarioId, CancellationToken cancellationToken)
     {
-        return _db.Database.ExecuteSqlInterpolatedAsync(
-            $"""
-            EXEC dbo.sp_Reserva_Actualizar
-                @ReservaId={reservaId}, @EmpresaMandanteId={empresaMandanteId},
-                @CampamentoId={campamentoId}, @AreaId={areaId},
-                @FechaReserva={fechaReserva}, @FechaLlegada={fechaLlegada},
-                @FechaSalida={fechaSalida}, @Observacion={observacion},
-                @TurnoId={turnoId}, @PasajeroId={pasajeroId}, @HabitacionId={habitacionId},
-                @Estado={estado}, @TieneAgua={tieneAgua}, @UsuarioId={usuarioId}
-            """,
-            cancellationToken);
+        var oDB = new AD_Global();
+        var oCRB = await oDB.DBOpenAsync(300, cancellationToken);
+        if (oCRB.Resultado)
+        {
+            oDB.NameProcedure = "dbo.sp_Reserva_Actualizar";
+            oCRB = oDB.AddParameter("@ReservaId", reservaId);
+            oCRB = oDB.AddParameter("@EmpresaMandanteId", empresaMandanteId);
+            oCRB = oDB.AddParameter("@CampamentoId", campamentoId);
+            oCRB = oDB.AddParameter("@AreaId", areaId);
+            oCRB = oDB.AddParameter("@FechaReserva", fechaReserva);
+            oCRB = oDB.AddParameter("@FechaLlegada", fechaLlegada);
+            oCRB = oDB.AddParameter("@FechaSalida", fechaSalida, ParameterDirection.Input, SqlDbType.DateTime);
+            oCRB = oDB.AddParameter("@Observacion", observacion, ParameterDirection.Input, SqlDbType.NVarChar, -1);
+            oCRB = oDB.AddParameter("@TurnoId", turnoId);
+            oCRB = oDB.AddParameter("@PasajeroId", pasajeroId, ParameterDirection.Input, SqlDbType.Int);
+            oCRB = oDB.AddParameter("@HabitacionId", habitacionId, ParameterDirection.Input, SqlDbType.Int);
+            oCRB = oDB.AddParameter("@Estado", estado);
+            oCRB = oDB.AddParameter("@TieneAgua", tieneAgua);
+            oCRB = oDB.AddParameter("@UsuarioId", usuarioId);
+        }
+
+        if (oCRB.Resultado)
+            oCRB = await oDB.ExecuteNonQueryAsync(cancellationToken);
+
+        oDB.DBClose();
+        if (!oCRB.Resultado)
+            throw new InvalidOperationException(oCRB.Mensaje);
     }
 }

@@ -47,7 +47,11 @@ export function crearNavegacion(dependencias) {
         paneles.querySelectorAll(".modulo").forEach(function (nodo) {
             var visible = nodo.dataset.id === id;
             nodo.hidden = !visible;
-            if (!visible || !window.DataTable) return;
+            if (!visible) return;
+            if (!window.DataTable) {
+                if (dependencias.mostrarEstado) dependencias.mostrarEstado(nodo, "No se cargó la tabla (DataTables). Compruebe la conexión e recargue la página.");
+                return;
+            }
             if (!nodo.dataset.lista) {
                 nodo.dataset.lista = "1";
                 nodo._tabla = dependencias.inicializarTabla(nodo, dependencias.columnas(dependencias.modulos[id].modo));

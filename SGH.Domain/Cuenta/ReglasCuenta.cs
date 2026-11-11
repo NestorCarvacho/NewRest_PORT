@@ -36,6 +36,24 @@ public static class ReglasCuenta
 
     public static bool UsaSesionOperaciones(int perfilId) =>
         perfilId is PerfilOperacionesA or PerfilOperacionesB;
+
+    /// <summary>
+    /// Omite la pantalla de selección cuando hay una sola asignación o un único campamento.
+    /// Devuelve el id de asignación perfil-campamento a usar.
+    /// </summary>
+    public static int? ResolverAsignacionAutomatica(
+        int cantidadAsignaciones,
+        int cantidadCampamentosDistintos,
+        int primeraAsignacionId)
+    {
+        if (cantidadAsignaciones == 0)
+            return null;
+        if (cantidadAsignaciones == 1)
+            return primeraAsignacionId;
+        if (cantidadCampamentosDistintos == 1)
+            return primeraAsignacionId;
+        return null;
+    }
 }
 
 public static class CodigoEstadoUsuario

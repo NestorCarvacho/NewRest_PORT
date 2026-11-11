@@ -1,4 +1,4 @@
-export function crearCatalogos(pedir) {
+export function crearCatalogos(enviar) {
     var reserva = null;
     var reservaPendiente = null;
     var censo = null;
@@ -7,7 +7,7 @@ export function crearCatalogos(pedir) {
     function cargarReserva() {
         if (reserva) return Promise.resolve(reserva);
         if (reservaPendiente) return reservaPendiente;
-        reservaPendiente = pedir("/Reserva/Datos?handler=Catalogo").then(function (datos) {
+        reservaPendiente = enviar("/Reserva/Mid/MidReservas.cs", { opcion: "catalogo" }).then(function (datos) {
             reserva = datos;
             return datos;
         }).catch(function (error) {
@@ -19,7 +19,7 @@ export function crearCatalogos(pedir) {
 
     function cargarCenso() {
         if (censo) return Promise.resolve(censo);
-        return pedir("/Censo/Datos?handler=Catalogo").then(function (datos) {
+        return enviar("/Censo/Mid/MidCenso.cs", { opcion: "catalogo" }).then(function (datos) {
             censo = datos;
             return datos;
         });
@@ -27,7 +27,7 @@ export function crearCatalogos(pedir) {
 
     function preparar(modo) {
         if (modo === "solicitud") {
-            return pedir("/Solicitud/Datos?handler=Catalogo").then(function (datos) {
+            return enviar("/Solicitud/Mid/MidSolicitudes.cs", { opcion: "catalogo" }).then(function (datos) {
                 solicitud = datos;
                 return datos;
             });

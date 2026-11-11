@@ -50,7 +50,8 @@ public sealed record SolicitudBuscarMisCensos(
 
 public sealed record FilaGuardarCensoDto(string? Id, int HabitacionId, string? Cantidad, string? Turno);
 
-public sealed record SolicitudGuardarCensos(int UsuarioId, int CampamentoId, DateTime Fecha, IReadOnlyList<FilaGuardarCensoDto> Filas);
+public sealed record SolicitudGuardarCensos(
+    int UsuarioId, int EmpresaMandanteId, int CampamentoId, DateTime Fecha, IReadOnlyList<FilaGuardarCensoDto> Filas);
 
 public abstract record ResultadoCatalogoCenso
 {
