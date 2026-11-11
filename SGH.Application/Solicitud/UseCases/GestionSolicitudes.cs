@@ -1,6 +1,8 @@
 using System.Net.Mail;
+using SGH.Application.Sesion;
 using SGH.Application.Solicitud.DTOs;
 using SGH.Application.Solicitud.Interfaces;
+using SGH.Domain.Alcance;
 
 namespace SGH.Application.Solicitud.UseCases;
 
@@ -46,51 +48,51 @@ public sealed class GestionSolicitudes(IConsultaSolicitudAlojamiento consulta, I
         return await consulta.HabitacionesDisponiblesAsync(id, empresaMandanteId, campamentoId, cancellationToken);
     }
 
-    public Task AgregarCuposAsync(int id, int empresaMandanteId, int campamentoId, int usuarioId, int cantidad, CancellationToken cancellationToken)
+    public async Task AgregarCuposAsync(int id, int empresaMandanteId, int campamentoId, int usuarioId, int cantidad, CancellationToken cancellationToken)
     {
-        ValidarSesion(empresaMandanteId, campamentoId);
-        if (id <= 0 || usuarioId <= 0 || cantidad is < 1 or > 999)
-            throw new ArgumentException("Indique una solicitud, un usuario y una cantidad de cupos válidos.");
-        return comando.AgregarCuposAsync(id, empresaMandanteId, campamentoId, usuarioId, cantidad, cancellationToken);
+        await ExigirSolicitudDelCampamentoAsync(id, empresaMandanteId, campamentoId, cancellationToken);
+        if (usuarioId <= 0 || cantidad is < 1 or > 999)
+            throw new ArgumentException("Indique un usuario y una cantidad de cupos válidos.");
+        await comando.AgregarCuposAsync(id, empresaMandanteId, campamentoId, usuarioId, cantidad, cancellationToken);
     }
 
-    public Task EliminarPasajeroAsync(int id, int pasajeroId, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken)
+    public async Task EliminarPasajeroAsync(int id, int pasajeroId, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken)
     {
-        ValidarSesion(empresaMandanteId, campamentoId);
-        if (id <= 0 || pasajeroId <= 0)
-            throw new ArgumentException("Seleccione una solicitud y un pasajero válidos.");
-        return comando.EliminarPasajeroAsync(id, pasajeroId, empresaMandanteId, campamentoId, cancellationToken);
+        await ExigirSolicitudDelCampamentoAsync(id, empresaMandanteId, campamentoId, cancellationToken);
+        if (pasajeroId <= 0)
+            throw new ArgumentException("Seleccione un pasajero válido.");
+        await comando.EliminarPasajeroAsync(id, pasajeroId, empresaMandanteId, campamentoId, cancellationToken);
     }
 
-    public Task<int> GuardarPasajeroAsync(GuardarPasajeroSolicitudDto pasajero, CancellationToken cancellationToken)
+    public async Task<int> GuardarPasajeroAsync(GuardarPasajeroSolicitudDto pasajero, CancellationToken cancellationToken)
     {
-        ValidarSesion(pasajero.EmpresaMandanteId, pasajero.CampamentoId);
-        if (pasajero.SolicitudId <= 0 || pasajero.PasajeroId < 0 ||
+        await ExigirSolicitudDelCampamentoAsync(pasajero.SolicitudId, pasajero.EmpresaMandanteId, pasajero.CampamentoId, cancellationToken);
+        if (pasajero.PasajeroId < 0 ||
             pasajero.UsuarioPasajeroId <= 0 || pasajero.UsuarioId <= 0 || pasajero.FechaCheckIn == default)
-            throw new ArgumentException("Indique una solicitud, un pasajero y una fecha de check-in válidos.");
+            throw new ArgumentException("Indique un pasajero y una fecha de check-in válidos.");
         if (pasajero.FechaCheckOut.HasValue && pasajero.FechaCheckOut.Value.Date < pasajero.FechaCheckIn.Date)
             throw new ArgumentException("La fecha de check-out no puede ser anterior a la de check-in.");
-        return comando.GuardarPasajeroAsync(pasajero with
+        return await comando.GuardarPasajeroAsync(pasajero with
         {
             FechaCheckIn = pasajero.FechaCheckIn.Date,
             FechaCheckOut = pasajero.FechaCheckOut?.Date
         }, cancellationToken);
     }
 
-    public Task<int> GenerarReservasAsync(int id, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
+    public async Task<int> GenerarReservasAsync(int id, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
     {
-        ValidarSesion(empresaMandanteId, campamentoId);
-        if (id <= 0 || usuarioId <= 0)
-            throw new ArgumentException("Indique una solicitud y un usuario válidos.");
-        return comando.GenerarReservasAsync(id, empresaMandanteId, campamentoId, usuarioId, cancellationToken);
+        await ExigirSolicitudDelCampamentoAsync(id, empresaMandanteId, campamentoId, cancellationToken);
+        if (usuarioId <= 0)
+            throw new ArgumentException("Indique un usuario válido.");
+        return await comando.GenerarReservasAsync(id, empresaMandanteId, campamentoId, usuarioId, cancellationToken);
     }
 
     public async Task<IReadOnlyList<ResultadoCargaPasajeroDto>> CargarPasajerosAsync(
         int id, int empresaMandanteId, int campamentoId, int usuarioId, IReadOnlyList<FilaCargaPasajeroDto> filas, CancellationToken cancellationToken)
     {
-        ValidarSesion(empresaMandanteId, campamentoId);
-        if (id <= 0 || usuarioId <= 0)
-            throw new ArgumentException("Indique una solicitud y un usuario válidos.");
+        await ExigirSolicitudDelCampamentoAsync(id, empresaMandanteId, campamentoId, cancellationToken);
+        if (usuarioId <= 0)
+            throw new ArgumentException("Indique un usuario válido.");
         var resultados = new List<ResultadoCargaPasajeroDto>();
         foreach (var fila in filas)
         {
@@ -143,12 +145,12 @@ public sealed class GestionSolicitudes(IConsultaSolicitudAlojamiento consulta, I
         return char.ToUpperInvariant(rut[^1]) == esperado;
     }
 
-    public Task AsignarHabitacionAsync(int id, int pasajeroId, int habitacionId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
+    public async Task AsignarHabitacionAsync(int id, int pasajeroId, int habitacionId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
     {
-        ValidarSesion(empresaMandanteId, campamentoId);
-        if (id <= 0 || pasajeroId <= 0 || habitacionId <= 0 || usuarioId <= 0)
-            throw new ArgumentException("Indique una solicitud, un pasajero y una habitación válidos.");
-        return comando.AsignarHabitacionAsync(id, pasajeroId, habitacionId, empresaMandanteId, campamentoId, usuarioId, cancellationToken);
+        await ExigirSolicitudDelCampamentoAsync(id, empresaMandanteId, campamentoId, cancellationToken);
+        if (pasajeroId <= 0 || habitacionId <= 0 || usuarioId <= 0)
+            throw new ArgumentException("Indique un pasajero y una habitación válidos.");
+        await comando.AsignarHabitacionAsync(id, pasajeroId, habitacionId, empresaMandanteId, campamentoId, usuarioId, cancellationToken);
     }
 
     public async Task<CatalogoSolicitudDto> CatalogoAsync(
@@ -169,11 +171,13 @@ public sealed class GestionSolicitudes(IConsultaSolicitudAlojamiento consulta, I
         return await consulta.OrganizacionAsync(empresaMandanteId, unidadId, divisionId, cancellationToken);
     }
 
-    public Task<int> GuardarAsync(DatosSolicitudDto solicitud, CancellationToken cancellationToken)
+    public async Task<int> GuardarAsync(DatosSolicitudDto solicitud, CancellationToken cancellationToken)
     {
         ValidarSesion(solicitud.EmpresaMandanteId, solicitud.CampamentoId);
         if (solicitud.Id < 0 || solicitud.UsuarioId <= 0)
             throw new ArgumentException("La solicitud no tiene datos de sesión válidos.");
+        if (solicitud.Id > 0)
+            await ExigirSolicitudDelCampamentoAsync(solicitud.Id, solicitud.EmpresaMandanteId, solicitud.CampamentoId, cancellationToken);
         if (solicitud.SolicitanteId < 0 || solicitud.TurnoRotacionId < 0
             || solicitud.UnidadNegocioId < 0 || solicitud.DivisionId < 0 || solicitud.DepartamentoId < 0)
             throw new ArgumentException("Los identificadores de la solicitud no son válidos.");
@@ -197,7 +201,7 @@ public sealed class GestionSolicitudes(IConsultaSolicitudAlojamiento consulta, I
             || solicitud.NumeroContactoCampamento?.Length > 20 || solicitud.NumeroContrato?.Length > 100
             || solicitud.Observacion?.Length > 200)
             throw new ArgumentException("Un campo supera la longitud permitida.");
-        return comando.GuardarAsync(solicitud with
+        return await comando.GuardarAsync(solicitud with
         {
             SolicitanteId = solicitud.SolicitanteId == 0 ? null : solicitud.SolicitanteId,
             TurnoRotacionId = solicitud.TurnoRotacionId == 0 ? null : solicitud.TurnoRotacionId,
@@ -207,17 +211,28 @@ public sealed class GestionSolicitudes(IConsultaSolicitudAlojamiento consulta, I
         }, cancellationToken);
     }
 
-    public Task AnularAsync(int id, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
+    public async Task AnularAsync(int id, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
     {
-        ValidarSesion(empresaMandanteId, campamentoId);
-        if (id <= 0 || usuarioId <= 0)
+        await ExigirSolicitudDelCampamentoAsync(id, empresaMandanteId, campamentoId, cancellationToken);
+        if (usuarioId <= 0)
             throw new ArgumentException("La solicitud no tiene datos de sesión válidos.");
-        return comando.AnularAsync(id, empresaMandanteId, campamentoId, usuarioId, cancellationToken);
+        await comando.AnularAsync(id, empresaMandanteId, campamentoId, usuarioId, cancellationToken);
     }
 
     private static void ValidarSesion(int empresaMandanteId, int campamentoId)
     {
-        if (empresaMandanteId <= 0 || campamentoId <= 0)
-            throw new ArgumentException("La sesión no tiene empresa mandante y campamento válidos.");
+        var mensaje = AlcanceSesion.ValidarAlcance(empresaMandanteId, campamentoId);
+        if (mensaje is not null)
+            throw new ArgumentException(mensaje);
+    }
+
+    private async Task ExigirSolicitudDelCampamentoAsync(
+        int id, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken)
+    {
+        ValidarSesion(empresaMandanteId, campamentoId);
+        if (id <= 0)
+            throw new ArgumentException("Seleccione una solicitud válida.");
+        if (await consulta.ObtenerAsync(id, empresaMandanteId, campamentoId, cancellationToken) is null)
+            throw new ArgumentException(ReglasAlcance.RegistroAjenoCampamento);
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.RateLimiting;
 using SGH.Application.Cuenta.DTOs;
 using SGH.Application.Cuenta.Interfaces;
+using SGH.Domain.Cuenta;
 using SGH.Web.Cuenta;
 
 namespace SGH.Web.Pages.Cuenta;
@@ -99,10 +100,6 @@ public class LoginModel : PageModel
             var expira = DateTime.UtcNow.AddMinutes(5);
             var claveId = Guid.NewGuid().ToString("N");
             _claves.Guardar(claveId, Contrasena, expira);
-            Paso = "perfil";
-            ModelState.Remove(nameof(Paso));
-            Perfiles = perfiles;
-            AsignacionPerfilId = 0;
             var pendiente = new IngresoPendiente
             {
                 Rut = listo.Rut,
@@ -113,6 +110,25 @@ public class LoginModel : PageModel
                 Perfiles = perfiles
             };
             IngresoPendienteAlmacen.Guardar(TempData, pendiente);
+
+            var asignacionAutomatica = ResolverAsignacionAutomatica(listo);
+            if (listo.EsIntegracion || asignacionAutomatica is not null)
+            {
+                try
+                {
+                    return await EmitirAsync(listo.Rut, Contrasena, asignacionAutomatica ?? 0, pendiente, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    InformarFallo(ex);
+                    return Page();
+                }
+            }
+
+            Paso = "perfil";
+            ModelState.Remove(nameof(Paso));
+            Perfiles = perfiles;
+            AsignacionPerfilId = 0;
             Enmascarar(pendiente);
             return Page();
         }
@@ -198,6 +214,18 @@ public class LoginModel : PageModel
 
     private static List<OpcionPerfilVista> AVista(IEnumerable<OpcionPerfilDto> perfiles) =>
         perfiles.Select(perfil => new OpcionPerfilVista { Id = perfil.Id, Etiqueta = perfil.Etiqueta }).ToList();
+
+    private static int? ResolverAsignacionAutomatica(ResultadoPreautenticacion.Listo listo)
+    {
+        var opciones = listo.Perfiles;
+        if (opciones.Count == 0)
+            return null;
+
+        return ReglasCuenta.ResolverAsignacionAutomatica(
+            opciones.Count,
+            opciones.Select(perfil => perfil.CampamentoId).Distinct().Count(),
+            opciones[0].Id);
+    }
 
     private void InformarFallo(Exception ex)
     {

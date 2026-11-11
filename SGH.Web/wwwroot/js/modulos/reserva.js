@@ -67,7 +67,7 @@ export function crearReserva(dependencias) {
         var detalle = document.createElement("p");
         detalle.textContent = "Use los nombres exactos de Grupo Empresa y Turno del catálogo. Ingrese las fechas como AAAA-MM-DD HH:mm.";
         var plantilla = document.createElement("a");
-        plantilla.href = "/Reserva/Datos?handler=Plantilla";
+        plantilla.href = "/Reserva/PlantillaReservas";
         plantilla.className = "boton-secundario";
         plantilla.textContent = "Descargar plantilla";
         var formularioImportacion = document.createElement("form");
@@ -94,7 +94,7 @@ export function crearReserva(dependencias) {
             if (!archivo.files || archivo.files.length === 0) return;
             enviar.disabled = true;
             resultado.replaceChildren();
-            dependencias.enviarArchivo("/Reserva/Datos?handler=Importar", archivo.files[0])
+            dependencias.enviarArchivo("/Reserva/Mid/MidReservas.cs", archivo.files[0])
                 .then(function (respuesta) {
                     if (respuesta.error) {
                         resultado.textContent = respuesta.error;
@@ -166,7 +166,8 @@ export function crearReserva(dependencias) {
                 dependencias.campo("observacion", "Observación", "textarea")
             ])
         ], "Guardar", true, function (datos) {
-            return dependencias.enviar("/Reserva/Datos?handler=Actualizar", {
+            return dependencias.enviar("/Reserva/Mid/MidReservas.cs", {
+                opcion: "editar",
                 reservaId: fila.id,
                 areaId: dependencias.numero(form.querySelector("[name='areaId']").value),
                 turnoId: dependencias.numero(datos.turnoId) || fila.turnoId,
@@ -187,7 +188,8 @@ export function crearReserva(dependencias) {
     }
 
     function crear(datos, id) {
-        return dependencias.enviar("/Reserva/Datos?handler=Crear", {
+        return dependencias.enviar("/Reserva/Mid/MidReservas.cs", {
+            opcion: "crear",
             areaId: dependencias.numero(datos.grupo),
             turnoId: dependencias.numero(datos.turno),
             fechaReserva: datos.reserva,
@@ -201,8 +203,9 @@ export function crearReserva(dependencias) {
         });
     }
 
-    function urlBuscar(filtro) {
-        return "/Reserva/Datos?handler=Buscar" + dependencias.consulta({
+    function buscar(filtro) {
+        return dependencias.enviar("/Reserva/Mid/MidReservas.cs", {
+            opcion: "listar",
             areaId: filtro.grupo,
             origen: filtro.origen,
             solicitudId: filtro.solicitud,
@@ -255,7 +258,7 @@ export function crearReserva(dependencias) {
         abrirImportacion: abrirImportacion,
         abrirEdicion: abrirEdicion,
         crear: crear,
-        urlBuscar: urlBuscar,
+        buscar: buscar,
         fila: fila,
         columnas: columnas
     };

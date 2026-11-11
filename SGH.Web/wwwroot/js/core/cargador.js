@@ -6,7 +6,7 @@ export function crearCargador(dependencias) {
         dependencias.mostrarEstado(nodo, "Cargando datos...");
         var solicitud = modulo.modo === "censo" && filtro.censoUltimoMes
             ? dependencias.censo.buscarUltimoMes(filtro)
-            : dependencias.pedir(obtenerUrl(modulo.modo, filtro));
+            : obtenerListado(modulo.modo, filtro);
         return solicitud.then(function (resultado) {
             dependencias.mostrarEstado(nodo, "");
             var filas = Array.isArray(resultado) ? resultado : resultado.filas || [];
@@ -17,11 +17,11 @@ export function crearCargador(dependencias) {
         });
     }
 
-    function obtenerUrl(modo, filtro) {
-        if (modo === "solicitud") return dependencias.solicitud.urlBuscar(filtro);
-        if (modo === "censo") return dependencias.censo.urlBuscar(filtro);
-        if (modo === "misCensos") return dependencias.censo.urlMisCensos(filtro);
-        return dependencias.reserva.urlBuscar(filtro);
+    function obtenerListado(modo, filtro) {
+        if (modo === "solicitud") return dependencias.solicitud.buscar(filtro);
+        if (modo === "censo") return dependencias.censo.buscar(filtro);
+        if (modo === "misCensos") return dependencias.censo.buscarMios(filtro);
+        return dependencias.reserva.buscar(filtro);
     }
 
     return { cargar: cargar };

@@ -20,7 +20,7 @@ export function crearCensoQr(dependencias) {
         if (!pendientes.length) return Promise.resolve();
         return pendientes.reduce(function (promesa, pendiente) {
             return promesa.then(function () {
-                return dependencias.enviar("/Censo/Datos?handler=GuardarQr", pendiente.payload).then(function () {
+                return dependencias.enviar("/Censo/Mid/MidCenso.cs", Object.assign({ opcion: "guardarqr" }, pendiente.payload)).then(function () {
                     var actuales = leerPendientes().filter(function (item) { return item.id !== pendiente.id; });
                     localStorage.setItem(clavePendientes, JSON.stringify(actuales));
                 });
@@ -88,7 +88,7 @@ export function crearCensoQr(dependencias) {
                 cantidad: datos.cantidad,
                 cantidadNoche: datos.cantidadNoche
             };
-            return dependencias.enviar("/Censo/Datos?handler=GuardarQr", payload).then(function () {
+            return dependencias.enviar("/Censo/Mid/MidCenso.cs", Object.assign({ opcion: "guardarqr" }, payload)).then(function () {
                 dependencias.mostrarAviso("Censo QR guardado correctamente.", "success");
             }).catch(function (error) {
                 guardarPendiente(payload);

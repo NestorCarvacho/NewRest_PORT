@@ -1,0 +1,10 @@
+@{
+    var titulo = ViewData["Title"] as string ?? "Módulo";
+    var moduloId = ViewData["ModuloId"] as string ?? "";
+}
+<section class="pagina-modulo">
+    <header class="pagina-modulo-cabeza">
+        <h1>@titulo</h1>
+    </header>
+    <div id="modulo-pagina" class="pagina-modulo-cuerpo" data-modulo="@moduloId"></div>
+</section>

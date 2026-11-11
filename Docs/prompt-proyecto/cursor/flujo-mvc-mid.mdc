@@ -1,0 +1,183 @@
+---
+description: Forma de cada pantalla migrada. Página, un POST al Mid, repositorio y procedimiento, con las reglas de negocio de NewRest.
+alwaysApply: true
+---
+
+# Pantalla MVC + Mid
+
+Canon en repo: `Docs/prompt-proyecto/flujo-mvc-mid.md`. Compartir carpeta `Docs/prompt-proyecto/` con el equipo.
+
+Al crear o migrar una pantalla, seguí este recorrido. El modelo de patrón es `testMVCCsharp` (solo Mid; no MySQL). Migra solo el módulo que te pidan. Una pantalla que no migraste sigue como está.
+
+Las capas del sistema se mantienen: `SGH.Web` tiene el controlador, la vista y el script; `SGH.Application/Mid` tiene el catálogo y el `switch`; `SGH.Infrastructure/Data` tiene `AD_Global` y los comandos que abren, ejecutan y cierran; `SGH.Domain` conserva `Reglas*`. El controlador no llama un caso de uso: llama al Mid, y el Mid llama la regla y el repositorio.
+
+Cada acción del usuario es un solo POST. El cuerpo trae `opcion`. El controlador comprueba que esa opción exista, el Mid aplica la regla de negocio y llama al repositorio, el repositorio ejecuta el procedimiento y la página pinta `registros`.
+
+## Archivos de un módulo
+
+| Pieza | Ruta | Hace |
+|---|---|---|
+| Página | `Views/{Modulo}/{Pagina}.cshtml` | HTML, botones y modales. No trae filas. |
+| Script | `wwwroot/{Modulo}/Js/{pagina}.js` | Arma el JSON y pinta la respuesta. |
+| Controlador | `Controllers/{Modulo}Controller.cs` | GET de la página y POST único. |
+| Mid | `Mid/Mid{Modulo}.cs` | Catálogo, `switch` y reglas. |
+| Repositorio | `Data/{Entidad}Repository.cs` | Abre, ejecuta el procedimiento, mapea, cierra. |
+| Filtro | `Models/Filtro{Entidad}.cs` | Cuerpo del POST: `opcion`, `id` y el objeto de la acción. |
+| Entidad / request | `Models/{Entidad}.cs`, `Models/{Entidad}Request.cs` | Fila que vuelve y datos que entran. |
+
+Compartidos, una sola vez: `Data/AD_Global.cs`, `Data/LIB_ControlResultado.cs`, `Models/AccionApi.cs`, `EjecucionMid` junto al primer Mid. `Program.cs` registra el repositorio y el Mid con `AddScoped`.
+
+## Rutas
+
+El controlador declara las dos rutas absolutas:
+
+```csharp
+public const string Pagina = "/Reservas/DatosReserva.cshtml";
+public const string MidRuta = "/Reservas/Mid/MidReservas.cs";
+
+[HttpGet(Pagina)]
+public IActionResult DatosReserva() => View();
+
+[HttpPost(MidRuta)]
+public async Task<IActionResult> Ejecutar([FromBody] FiltroReserva? filtro) { ... }
+```
+
+`Index` redirige a `Pagina`. La URL de la página tiene que ser `/{Modulo}/{Pagina}.cshtml`. El script se referencia así, relativo a esa URL:
+
+```html
+<script src="Js/datosReserva.js"></script>
+```
+
+Eso pide el archivo `wwwroot/{Modulo}/Js/datosReserva.js`. Cada función postea a la ruta relativa `Mid/MidReservas.cs`, que cae en `MidRuta`. Si la URL de la página cambia de carpeta, el script y el POST dejan de coincidir con el controlador.
+
+La página puede usar el layout de NewRest (tema, idioma, sesión). Las dos rutas y las dos rutas relativas no cambian.
+
+## Contrato JSON
+
+El POST manda JSON camelCase. El filtro lo recibe así:
+
+```json
+{ "opcion": "editar", "id": 15, "reserva": { "areaId": 3, "turnoId": 1 } }
+```
+
+Toda respuesta que la página entiende es HTTP 200 con esta forma:
+
+```json
+{ "registros": [ ] }
+{ "registros": { "id": 15, "nombre": "..." } }
+{ "registros": { "resultado": true, "mensaje": "...", "id": 15 } }
+{ "registros": { "resultado": false, "mensaje": "Seleccione Área" } }
+```
+
+`Status` de `EjecucionMid` se usa solo en el servidor. Si no es 200, el controlador igual responde 200 y mete el mensaje en `registros.resultado = false`. Una lista vacía es éxito. Un objeto de éxito no lleva `resultado: false`.
+
+El script decide con esa bandera:
+
+```javascript
+function respuestaOk(info) {
+    if (!info || !info.registros || info.registros.resultado === false) {
+        mostrarMensaje(info && info.registros ? info.registros.mensaje : "El Mid no devolvió registros.", false);
+        return false;
+    }
+    return true;
+}
+```
+
+`intercapit.CosumirRestPost(url, data, "fncAlgoRespuesta")` hace el POST y llama `window[funcion]`. Si el HTTP falla y el cuerpo ya trae `registros`, usa ese cuerpo. Si no, arma `registros.resultado = false`.
+
+## Controlador
+
+`Ejecutar` hace solo esto, en este orden:
+
+1. Sin `opcion`: `{ registros: { resultado: false, mensaje: "El Mid requiere la propiedad opcion." } }`.
+2. `opcion` ausente en `MidX.Opciones`: el mismo sobre, con el mensaje de que no está en el Mid.
+3. `await mid.EjecutarAsync(...)`. Si `Status != 200`, sobre de error con `ejecucion.Mensaje`. Si es 200, `{ registros: ejecucion.Registros }`.
+4. Una excepción del proveedor SQL o `InvalidOperationException` también vuelve como ese sobre. El mensaje dice que no se pudo usar la base; no nombra un motor ni un puerto que este sistema no usa.
+
+La página GET y el POST llevan la misma autorización que esa pantalla ya tiene. El POST, si la sesión no alcanza, responde el sobre JSON con el mensaje ya existente. No responde HTML. La cookie, el límite de intentos de ingreso y la política de contraseña siguen donde están.
+
+El campamento, la empresa y el usuario salen de `LectorSesion.Leer(User)` y entran al Mid como argumento del servidor. El JSON del navegador no es la fuente de esos tres valores.
+
+## Mid
+
+`Opciones` es la lista cerrada de la pantalla. Cada ítem tiene `Id`, `Opcion`, `Etiqueta`, `Mid`, `Procedimiento`, `Descripcion` y, cuando aplica, `RequiereId`, `AbreFormulario`, `SoftDelete` y `Campos`. El texto de `Opcion` es el mismo en la lista, en el `switch`, en el JavaScript y en minúsculas, sin espacios (`listar`, `obtener`, `crear`, `editar`).
+
+```csharp
+public async Task<EjecucionMid> EjecutarAsync(FiltroReserva filtro, ContextoSesion sesion)
+{
+    switch (filtro.Opcion)
+    {
+        case "crear":
+            return await CrearAsync(filtro, sesion);
+        default:
+            return EjecucionMid.Fallo(StatusCodes.Status400BadRequest,
+                $"La opción '{filtro.Opcion}' no está implementada en el Mid.");
+    }
+}
+```
+
+`EjecutarAsync` del Mid empieza con `AlcanceMid.BloquearSiSinAlcance(sesion)` (mandante y campamento de `LectorSesion`; el JSON no define alcance). Los mensajes viven en `ReglasAlcance`. En mutaciones con `id`, el caso de uso debe comprobar que el registro pertenece al campamento (`ReservaEstaEnCampamentoAsync`, `FiltroEstaEnCampamentoAsync`, `ObtenerAsync` de solicitud, etc.) y devolver `RegistroAjenoCampamento` si no.
+
+Dentro de la opción el orden es fijo:
+
+1. Sesión. `AlcanceSesion.ValidarAlcance` en el Mid y en el caso de uso; sin mandante o campamento, `EjecucionMid.Fallo(400, mensaje de ReglasAlcance)`.
+2. La regla de dominio, con su mensaje tal cual. `ReglasReserva.ValidarAlta(...)`, `ReglasCenso.ValidarBusqueda(...)`, `ReglasCuenta`, `PoliticaContrasena` y el validador que ya exista. Si devuelve texto, `Fallo(400, ese texto)`.
+3. El repositorio. Si `oCRB.Resultado` es false, `Fallo(400, oCRB.Mensaje)`.
+4. Si la opción debía devolver una fila y no hay fila, `Fallo(404, mensaje)`. Si debía afectar una fila y `Filas` es 0, el mismo 404.
+5. `EjecucionMid.Ok(payload)`.
+
+`EjecucionMid.Ok` deja `Status` en 200 y `Registros` en el payload. `Fallo` deja `Status` y `Mensaje`.
+
+Las reglas siguen en `SGH.Domain` (`ReglasCuenta`, `ReglasReserva`, `ReglasCenso` y las que se agreguen). El Mid las llama. No se copian al controlador, al repositorio, al JavaScript ni al Mid. Al migrar la pantalla, la orquestación del caso de uso pasa al método de esa `opcion`. No queda un caso de uso entre el controlador y el Mid.
+
+Los mensajes, códigos, topes e invariantes documentados en `Docs/as-is/` se conservan. Un soft delete (`activo = 0` y fecha) se usa solo donde la regla de negocio ya borra así.
+
+## Repositorio y AD_Global
+
+El repositorio no decide reglas. Cada método sigue esta secuencia y termina en `DBClose`, también cuando algo falló:
+
+```csharp
+public LIB_ControlResultado Crear(DatosAlta datos, ref Reserva? creada)
+{
+    LIB_ControlResultado oCRB = new LIB_ControlResultado();
+    AD_Global oDB = new AD_Global();
+    SqlDataReader? oFuente = null;
+
+    oCRB = oDB.DBOpen(300);
+    if (oCRB.Resultado)
+    {
+        oDB.NameProcedure = "dbo.sp_Reserva_Crear";
+        oCRB = oDB.AddParameter("@EmpresaMandanteId", datos.EmpresaMandanteId);
+        oCRB = oDB.AddParameter("@CampamentoId", datos.CampamentoId);
+    }
+    if (oCRB.Resultado)
+        oCRB = oDB.ExecuteDataReader(ref oFuente);
+    if (oCRB.Resultado && oFuente != null && oFuente.Read())
+        creada = Leer(oFuente);
+
+    oDB.DBClose();
+    return oCRB;
+}
+```
+
+`AD_Global` se crea con `new` dentro del método. No se inyecta. `DBOpen(300)` abre `ConnectionStrings:Hoteldb` (SQL Server, base HOTELDB) y pone timeout 300. `NameProcedure` deja `CommandType.StoredProcedure` y limpia los parámetros. `AddParameter` manda `DBNull` cuando el valor es null. `ExecuteDataReader` ejecuta. El mapeo usa `getDBValueInt`, `getDBValueStr`, `getDBValueDec`, `getDBValueDT` y `getDBValueBol` con el alias de la columna. Esos helpers devuelven null si la columna no está o viene `DBNull`. Un `Leer` privado del mismo repositorio es el único lugar donde se puede concentrar el mapeo de una fila.
+
+El nombre y los parámetros del procedimiento que ya existe se respetan (`dbo.sp_Reserva_Crear`, `@Id` de salida, `@Ret`). Si el procedimiento devuelve un parámetro de salida en lugar de un `SELECT`, se lee con `AddParameter` de dirección output, dentro de la misma secuencia. No se reescribe el procedimiento para imitar el `SELECT` del ejemplo.
+
+`LIB_ControlResultado` nace con `Resultado = true`. `SetBadResult(descripcion, detalle)` lo pasa a false. `Mensaje` es la descripción, o `descripción. detalle` cuando difieren. Un fallo de conexión o de ejecución queda en ese objeto; el método no lo relanza.
+
+No hay SQL escrito en C#.
+
+## JavaScript
+
+Cada acción tiene `fncAccion` y `fncAccionRespuesta`. `fncAccion` arma `{ opcion, id, ... }` y llama a `CosumirRestPost`. La respuesta entra a `respuestaOk` y, si pasa, pinta el DOM.
+
+Los botones de una fila se llaman `btnObtener_{id}`, `btnEditar_{id}`, `btnEliminar_{id}`. El click se delega en la tabla y el id se parte por `_`. Editar primero postea `obtener` y, al cargar el modal, deja `hdnOpcion` en `editar`. Guardar postea el valor de `hdnOpcion` más el objeto del formulario. Después de guardar o eliminar se refresca el listado que estaba en pantalla (`listadoActual`).
+
+El script no valida reglas de negocio. `maxlength` y botones deshabilitados son de la pantalla. La decisión sigue en el Mid.
+
+## Qué se conserva de NewRest y qué es solo del ejemplo
+
+Se conserva: SQL Server y `ConnectionStrings:Hoteldb`, los procedimientos y sus parámetros, `Reglas*` y sus pruebas, la sesión leída del servidor, la autorización, el hash de contraseñas y los mensajes de `Docs/as-is/`.
+
+El ejemplo usa MySQL, `ConnectionStrings:MySql` y procedimientos `sp_producto_*` de una tabla de productos. Eso no se trae. `ProductosPagina` está en el ejemplo y no participa del recorrido: la página empieza vacía y se llena por el POST. La cadena de conexión no se copia a código ni a documentación.

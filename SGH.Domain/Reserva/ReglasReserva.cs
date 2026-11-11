@@ -1,3 +1,5 @@
+using SGH.Domain.Alcance;
+
 namespace SGH.Domain.Reserva;
 
 public static class ReglasReserva
@@ -9,7 +11,7 @@ public static class ReglasReserva
     public const string OrigenManual = "R";
     public const string CheckIn = "I";
     public const string CheckOut = "O";
-    public const string ReservaAjena = "La reserva no corresponde al campamento de la sesión.";
+    public const string ReservaAjena = ReglasAlcance.RegistroAjenoCampamento;
 
     public static string? ValidarAlta(int areaId, int turnoId, DateTime llegada, DateTime? salida)
     {

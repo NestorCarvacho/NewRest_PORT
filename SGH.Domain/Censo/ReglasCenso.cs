@@ -1,11 +1,13 @@
+using SGH.Domain.Alcance;
+
 namespace SGH.Domain.Censo;
 
 public static class ReglasCenso
 {
     public const string TurnoDia = "D";
     public const string TurnoNoche = "N";
-    public const string HabitacionAjena = "La habitación no corresponde al campamento de la sesión.";
-    public const string FiltroAjeno = "El filtro no corresponde al campamento de la sesión.";
+    public const string HabitacionAjena = ReglasAlcance.RegistroAjenoCampamento;
+    public const string FiltroAjeno = ReglasAlcance.RegistroAjenoCampamento;
 
     public static string? ValidarBusqueda(DateTime? fecha, string? turno)
     {

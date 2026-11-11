@@ -8,13 +8,13 @@ public sealed class ConsultarEstadoPago(IInformesEstadoPago informes) : IConsult
 {
     public async Task<ResultadoInformeCenso> EjecutarAsync(FiltroEstadoPago filtro, CancellationToken cancellationToken)
     {
-        Validar(filtro.CampamentoId, filtro.Desde, filtro.Hasta);
+        Validar(filtro.EmpresaMandanteId, filtro.CampamentoId, filtro.Desde, filtro.Hasta);
         return new(await informes.EstadoPagoAsync(filtro, cancellationToken));
     }
 
-    internal static void Validar(int campamentoId, DateTime? desde, DateTime? hasta)
+    internal static void Validar(int empresaMandanteId, int campamentoId, DateTime? desde, DateTime? hasta)
     {
-        if (!AlcanceSesion.TieneCampamento(campamentoId)) throw new InvalidOperationException(AlcanceSesion.SinCampamento);
+        AlcanceSesion.ExigirAlcance(empresaMandanteId, campamentoId);
         if (desde.HasValue && hasta.HasValue && desde.Value.Date > hasta.Value.Date) throw new ArgumentException("El período informado no es válido.");
     }
 }
@@ -23,7 +23,7 @@ public sealed class ConsultarEstadoPagoPantalla(IInformesEstadoPago informes) : 
 {
     public async Task<ResultadoInformeCenso> EjecutarAsync(FiltroEstadoPago filtro, CancellationToken cancellationToken)
     {
-        ConsultarEstadoPago.Validar(filtro.CampamentoId, filtro.Desde, filtro.Hasta);
+        ConsultarEstadoPago.Validar(filtro.EmpresaMandanteId, filtro.CampamentoId, filtro.Desde, filtro.Hasta);
         return new(await informes.EstadoPagoPantallaAsync(filtro, cancellationToken));
     }
 }
@@ -32,7 +32,7 @@ public sealed class ConsultarEstadoPagoServicio(IInformesEstadoPago informes) : 
 {
     public async Task<ResultadoInformeCenso> EjecutarAsync(FiltroEstadoPagoServicio filtro, CancellationToken cancellationToken)
     {
-        ConsultarEstadoPago.Validar(filtro.CampamentoId, filtro.Desde, filtro.Hasta);
+        ConsultarEstadoPago.Validar(filtro.EmpresaMandanteId, filtro.CampamentoId, filtro.Desde, filtro.Hasta);
         if (string.IsNullOrWhiteSpace(filtro.Servicio)) throw new ArgumentException("Debe indicar el servicio.");
         return new(await informes.EstadoPagoServicioAsync(filtro, cancellationToken));
     }
@@ -42,7 +42,7 @@ public sealed class ConsultarEstadoPagoServicioPantalla(IInformesEstadoPago info
 {
     public async Task<ResultadoInformeCenso> EjecutarAsync(FiltroEstadoPagoServicio filtro, CancellationToken cancellationToken)
     {
-        ConsultarEstadoPago.Validar(filtro.CampamentoId, filtro.Desde, filtro.Hasta);
+        ConsultarEstadoPago.Validar(filtro.EmpresaMandanteId, filtro.CampamentoId, filtro.Desde, filtro.Hasta);
         if (string.IsNullOrWhiteSpace(filtro.Servicio)) throw new ArgumentException("Debe indicar el servicio.");
         // Para esta variante se utiliza INF_EstadoPagoServicioPantalla en lugar de INF_EstadoPagoServicio.
         return new(await informes.EstadoPagoServicioPantallaAsync(filtro, cancellationToken));

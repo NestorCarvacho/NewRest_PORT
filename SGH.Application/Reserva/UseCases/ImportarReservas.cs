@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using SGH.Application.Reserva.DTOs;
 using SGH.Application.Reserva.Interfaces;
+using SGH.Application.Sesion;
 using SGH.Domain.Reserva.Interfaces;
 
 namespace SGH.Application.Reserva.UseCases;
@@ -33,6 +34,10 @@ public sealed class ImportarReservas : IImportarReservas
         int usuarioId,
         CancellationToken cancellationToken)
     {
+        var alcance = AlcanceSesion.ValidarAlcance(empresaMandanteId, campamentoId);
+        if (alcance is not null)
+            return new ResultadoImportacionReservas(0, [], alcance);
+
         var filas = _planilla.Leer(archivo);
         if (filas.Count == 0)
             return new ResultadoImportacionReservas(0, [], "La planilla no contiene reservas.");

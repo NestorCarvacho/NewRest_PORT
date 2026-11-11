@@ -1,5 +1,8 @@
 export function crearSolicitud(d) {
-    var base = "/Solicitud/Datos?handler=";
+    var ruta = "/Solicitud/Mid/MidSolicitudes.cs";
+    function mid(opcion, datos) {
+        return d.enviar(ruta, Object.assign({ opcion: opcion }, datos || {}));
+    }
     function opciones(lista) {
         return (lista || []).map(function (x) { return { value: x.id, text: x.nombre }; });
     }
@@ -18,8 +21,8 @@ export function crearSolicitud(d) {
         var rango = d.rangoInicial();
         return { desde: rango.reservaDesde, hasta: rango.reservaHasta };
     }
-    function urlBuscar(filtro) {
-        return base + "Buscar" + d.consulta(filtro);
+    function buscar(filtro) {
+        return mid("listar", filtro);
     }
     function boton(texto, accion) {
         var el = document.createElement("button");
@@ -109,7 +112,7 @@ export function crearSolicitud(d) {
         var versionGrupo = 0;
         function cargarOrganizacion(unidadId, divisionId, deptoId) {
             var version = ++versionOrganizacion;
-            return d.pedir(base + "Organizacion" + d.consulta({ unidadId: unidadId || 0, divisionId: divisionId || 0 }))
+            return mid("organizacion", { unidadId: unidadId || 0, divisionId: divisionId || 0 })
                 .then(function (datos) {
                     if (version !== versionOrganizacion) return;
                     llenar(unidad, datos.unidadesNegocio, unidadId);
@@ -124,7 +127,7 @@ export function crearSolicitud(d) {
             contrato.value = seleccionado && seleccionado.contrato || "";
             unidad.disabled = !!(seleccionado && seleccionado.unidadNegocioId);
             cargarOrganizacion(seleccionado && seleccionado.unidadNegocioId, 0, null);
-            d.pedir(base + "Catalogo" + d.consulta({ grupoId: grupo.value || 0 }))
+            mid("catalogo", { grupoId: grupo.value || 0 })
                 .then(function (datos) { if (version === versionGrupo) llenar(solicitante, datos.solicitantes); })
                 .catch(function (ex) { if (version === versionGrupo) errorEn(form, ex); });
         });
@@ -150,7 +153,7 @@ export function crearSolicitud(d) {
                 departamentoId: Number(departamento.value) || null, numeroContrato: contrato.value,
                 reservaVisita: visita.checked, observacion: observacion.value
             };
-            d.enviar(base + (edicion ? "Actualizar" : "Crear"), cuerpo)
+            mid(edicion ? "editar" : "crear", cuerpo)
                 .then(function (resultado) {
                     d.mostrarAviso("Solicitud guardada N° " + resultado.id + ".", "success");
                     d.cargar("solicitud");
@@ -164,8 +167,8 @@ export function crearSolicitud(d) {
         var unidadId = detalle ? detalle.unidadNegocioId || 0 : 0;
         var divisionId = detalle ? detalle.divisionId || 0 : 0;
         Promise.all([
-            d.pedir(base + "Catalogo" + d.consulta({ grupoId: grupoId })),
-            d.pedir(base + "Organizacion" + d.consulta({ unidadId: unidadId, divisionId: divisionId }))
+            mid("catalogo", { grupoId: grupoId }),
+            mid("organizacion", { unidadId: unidadId, divisionId: divisionId })
         ]).then(function (resultados) {
             d.abrirPanel(detalle ? "Editar solicitud " + detalle.id : "Nueva solicitud",
                 crearFormulario(detalle, resultados[0], resultados[1]));
@@ -173,7 +176,7 @@ export function crearSolicitud(d) {
     }
     function ejecutar(botonAccion, url, cuerpo, alTerminar, contenedor) {
         botonAccion.disabled = true;
-        d.enviar(base + url, cuerpo).then(alTerminar)
+        mid(url, cuerpo).then(alTerminar)
             .catch(function (ex) { errorEn(contenedor, ex); })
             .finally(function () { botonAccion.disabled = false; });
     }
@@ -192,14 +195,14 @@ export function crearSolicitud(d) {
             panel.append(boton("Editar solicitud", function () { abrirFormulario(detalle); }));
             var anular = boton("Anular solicitud", function () {
                 if (!window.confirm("¿Anular esta solicitud?")) return;
-                ejecutar(anular, "Anular", { id: detalle.id }, function () { d.cargar("solicitud"); abrirDetalle(detalle.id); }, panel);
+                ejecutar(anular, "anular", { id: detalle.id }, function () { d.cargar("solicitud"); abrirDetalle(detalle.id); }, panel);
             });
             panel.append(anular);
             panel.append(boton("Agregar pasajero", function () { abrirPasajero(detalle); }));
             panel.append(boton("Importar pasajeros", function () { abrirImportacion(detalle); }));
             var generar = boton("Generar reservas", function () {
                 if (!window.confirm("¿Esta seguro que desea generar las reservas para la solicitud seleccionada?")) return;
-                ejecutar(generar, "GenerarReservas", { id: detalle.id }, function (resultado) {
+                ejecutar(generar, "generar", { id: detalle.id }, function (resultado) {
                     d.mostrarAviso("Reservas generadas. Primera reserva N° " + resultado.primeraReservaId + ".", "success");
                     if (resultado.advertenciaCorreo) d.mostrarAviso(resultado.advertenciaCorreo, "error");
                     d.cargar("solicitud");
@@ -211,7 +214,7 @@ export function crearSolicitud(d) {
         }
         if (detalle.estado === "R") {
             var notificar = boton("Enviar correo de reservas", function () {
-                ejecutar(notificar, "NotificarReservas", { id: detalle.id },
+                ejecutar(notificar, "notificar", { id: detalle.id },
                     function () { d.mostrarAviso("Correo enviado.", "success"); }, panel);
             });
             panel.append(notificar);
@@ -255,7 +258,7 @@ export function crearSolicitud(d) {
                 var realizados = 0;
                 try {
                     for (var id of ids) {
-                        await d.enviar(base + "EliminarPasajero", { id: detalle.id, pasajeroId: id });
+                        await mid("eliminar", { id: detalle.id, pasajeroId: id });
                         realizados++;
                     }
                     d.mostrarAviso("Pasajeros eliminados: " + realizados + ".", "success");
@@ -305,7 +308,7 @@ export function crearSolicitud(d) {
                 acciones.append(boton("Editar", function () { abrirPasajero(detalle, pasajero); }));
                 var eliminar = boton("Eliminar", function () {
                     if (!window.confirm("¿Eliminar este pasajero o cupo?")) return;
-                    ejecutar(eliminar, "EliminarPasajero", { id: detalle.id, pasajeroId: pasajero.id }, function () { abrirDetalle(detalle.id); }, panel);
+                    ejecutar(eliminar, "eliminar", { id: detalle.id, pasajeroId: pasajero.id }, function () { abrirDetalle(detalle.id); }, panel);
                 });
                 acciones.append(eliminar);
             }
@@ -316,13 +319,13 @@ export function crearSolicitud(d) {
         d.abrirPanel("Solicitud N° " + detalle.id, panel);
     }
     function abrirDetalle(id) {
-        Promise.all([d.pedir(base + "Detalle&id=" + encodeURIComponent(id)),
-            d.pedir(base + "Pasajeros&id=" + encodeURIComponent(id))])
+        Promise.all([mid("detalle", { id: id }),
+            mid("pasajeros", { id: id })])
             .then(function (r) { mostrarDetalle(r[0], r[1].pasajeros); })
             .catch(function (ex) { d.mostrarAviso(ex.message, "error"); });
     }
     function abrirPasajero(detalle, pasajero) {
-        d.pedir(base + "Catalogo&grupoId=" + encodeURIComponent(detalle.areaEmpresaSolicitanteId)).then(function (catalogo) {
+        mid("catalogo", { grupoId: detalle.areaEmpresaSolicitanteId }).then(function (catalogo) {
             var form = document.createElement("form");
             form.className = "formulario";
             var error = document.createElement("p");
@@ -356,11 +359,11 @@ export function crearSolicitud(d) {
                 e.preventDefault();
                 if (!form.reportValidity()) return;
                 if (porCantidad && porCantidad.checked) {
-                    ejecutar(guardar, "AgregarCupos", { id: detalle.id, cantidad: Number(cantidad.value) },
+                    ejecutar(guardar, "cupos", { id: detalle.id, cantidad: Number(cantidad.value) },
                         function () { abrirDetalle(detalle.id); }, form);
                     return;
                 }
-                ejecutar(guardar, "GuardarPasajero", { solicitudId: detalle.id, pasajeroId: pasajero ? pasajero.id : 0,
+                ejecutar(guardar, "pasajero", { solicitudId: detalle.id, pasajeroId: pasajero ? pasajero.id : 0,
                     usuarioPasajeroId: Number(usuario.value), fechaCheckIn: desde.value, fechaCheckOut: hasta.value || null },
                     function () { abrirDetalle(detalle.id); }, form);
             });
@@ -368,7 +371,7 @@ export function crearSolicitud(d) {
         }).catch(function (ex) { d.mostrarAviso(ex.message, "error"); });
     }
     function abrirHabitacionesMultiples(detalle, pasajeros) {
-        d.pedir(base + "HabitacionesDisponibles&id=" + detalle.id).then(function (resultado) {
+        mid("habitaciones", { id: detalle.id }).then(function (resultado) {
             var form = document.createElement("form");
             form.className = "formulario";
             var error = document.createElement("p");
@@ -434,7 +437,7 @@ export function crearSolicitud(d) {
                 var realizados = 0;
                 try {
                     for (var i = 0; i < pasajeros.length; i++) {
-                        await d.enviar(base + "AsignarHabitacion", { solicitudId: detalle.id,
+                        await mid("asignar", { solicitudId: detalle.id,
                             pasajeroId: pasajeros[i].id, habitacionId: ids[i] });
                         realizados++;
                     }
@@ -453,7 +456,7 @@ export function crearSolicitud(d) {
         var aviso = document.createElement("p");
         aviso.textContent = "La importación puede crear usuarios y actualizar nombres, género, grupo y empresa de usuarios existentes. Revise las filas antes de continuar.";
         var plantilla = document.createElement("a");
-        plantilla.href = base + "PlantillaPasajeros";
+        plantilla.href = "/Solicitud/PlantillaPasajeros";
         plantilla.textContent = "Descargar plantilla";
         var archivo = campo(form, "Planilla de pasajeros (.xlsx)", "archivo", "file", null, true);
         archivo.accept = ".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
@@ -470,7 +473,7 @@ export function crearSolicitud(d) {
             if (!form.reportValidity() || !window.confirm("La carga puede modificar usuarios existentes. ¿Desea continuar?")) return;
             importar.disabled = true;
             resultado.replaceChildren();
-            d.enviarArchivo(base + "CargarPasajeros&id=" + detalle.id, archivo.files[0]).then(function (datos) {
+            d.enviarArchivo(ruta, archivo.files[0], { id: detalle.id }).then(function (datos) {
                 var resumen = document.createElement("p");
                 resumen.textContent = "Procesadas: " + datos.filas.filter(function (x) { return x.procesada; }).length +
                     " de " + datos.filas.length + ".";
@@ -499,6 +502,6 @@ export function crearSolicitud(d) {
             return { data: nombre, render: DataTable.render.text() };
         });
     }
-    return { filtros: filtros, filtroInicial: filtroInicial, urlBuscar: urlBuscar,
+    return { filtros: filtros, filtroInicial: filtroInicial, buscar: buscar,
         fila: fila, columnas: columnas, abrirNueva: function () { abrirFormulario(null); } };
 }

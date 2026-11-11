@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SGH.Application.DependencyInjection;
@@ -7,6 +6,7 @@ using SGH.Application.Reserva.Interfaces;
 using SGH.Domain.Censo.Interfaces;
 using SGH.Domain.Cuenta.Interfaces;
 using SGH.Domain.Reserva.Interfaces;
+using SGH.Infrastructure.Data;
 using SGH.Infrastructure.Persistence;
 using SGH.Infrastructure.Censo.Commands;
 using SGH.Infrastructure.Censo.Queries;
@@ -41,11 +41,7 @@ public static class InfrastructureServiceCollectionExtensions
         });
 
         var cadena = configuration.GetConnectionString("Hoteldb");
-        services.AddDbContext<HotelDbContext>(opciones =>
-            opciones.UseSqlServer(string.IsNullOrWhiteSpace(cadena)
-                ? "Server=localhost;Database=HOTELDB;Trusted_Connection=True;TrustServerCertificate=True"
-                : cadena));
-
+        AD_Global.UsarCadena(cadena);
         services.AddSingleton<IFabricaConexionSql>(_ => new FabricaConexionSql(cadena));
         services.AddScoped<IConsultaAutenticacion, ConsultaAutenticacion>();
         services.AddScoped<IComandoAutenticacion, ComandoAutenticacion>();

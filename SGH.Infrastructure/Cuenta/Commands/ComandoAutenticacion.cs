@@ -1,77 +1,90 @@
 using System.Data;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using SGH.Domain.Cuenta;
 using SGH.Domain.Cuenta.Entities;
 using SGH.Domain.Cuenta.Interfaces;
-using SGH.Infrastructure.Persistence;
+using SGH.Infrastructure.Data;
 
 namespace SGH.Infrastructure.Cuenta.Commands;
 
 public sealed class ComandoAutenticacion : IComandoAutenticacion
 {
-    private readonly HotelDbContext _db;
-
-    public ComandoAutenticacion(HotelDbContext db)
-    {
-        _db = db;
-    }
-
     public async Task<ResultadoIntentoClave> RegistrarIntentoFallidoAsync(string rut, CancellationToken cancellationToken)
     {
-        var intentos = new SqlParameter("@Intentos", SqlDbType.Int) { Direction = ParameterDirection.Output };
-        var bloqueada = new SqlParameter("@Bloqueada", SqlDbType.Bit) { Direction = ParameterDirection.Output };
-        await _db.Database.ExecuteSqlInterpolatedAsync(
-            $"EXEC sp_Usuario_RegistrarIntentoFallido @Rut={rut}, @Intentos={intentos} OUT, @Bloqueada={bloqueada} OUT",
-            cancellationToken);
-        var cantidad = intentos.Value is int numero ? numero : 0;
-        return new ResultadoIntentoClave(cantidad, EsVerdadero(bloqueada.Value));
-    }
-
-    public Task ReiniciarIntentosAsync(string rut, CancellationToken cancellationToken) =>
-        _db.Database.ExecuteSqlInterpolatedAsync(
-            $"EXEC sp_Usuario_ReiniciarIntentos @Rut={rut}",
-            cancellationToken);
-
-    public async Task<int> ActualizarPasswordAsync(string rut, string hashBcrypt, string? huellaMd5, CancellationToken cancellationToken)
-    {
-        var ret = ParametroRetorno();
-        var huella = new SqlParameter("@HuellaMd5", System.Data.SqlDbType.VarChar, 32)
+        var oDB = new AD_Global();
+        var oCRB = await oDB.DBOpenAsync(300, cancellationToken);
+        if (oCRB.Resultado)
         {
-            Value = (object?)huellaMd5 ?? DBNull.Value
-        };
-        await _db.Database.ExecuteSqlInterpolatedAsync(
-            $"EXEC sp_Usuario_ActualizarPassword @Rut={rut}, @PasswordHash={hashBcrypt}, @HuellaMd5={huella}, @Ret={ret} OUT",
-            cancellationToken);
-        return LeerCodigo(ret);
+            oDB.NameProcedure = "dbo.sp_Usuario_RegistrarIntentoFallido";
+            oCRB = oDB.AddParameter("@Rut", rut);
+            oCRB = oDB.AddParameter("@Intentos", null, ParameterDirection.Output, SqlDbType.Int);
+            oCRB = oDB.AddParameter("@Bloqueada", null, ParameterDirection.Output, SqlDbType.Bit);
+        }
+
+        if (oCRB.Resultado)
+            oCRB = await oDB.ExecuteNonQueryAsync(cancellationToken);
+
+        var intentos = oCRB.Resultado ? oDB.LeerSalidaInt("@Intentos") ?? 0 : 0;
+        var bloqueada = oCRB.Resultado && oDB.LeerSalidaBool("@Bloqueada");
+        oDB.DBClose();
+        if (!oCRB.Resultado)
+            throw new InvalidOperationException(oCRB.Mensaje);
+
+        return new ResultadoIntentoClave(intentos, bloqueada);
     }
 
-    public async Task<int> ReemplazarHashAsync(string rut, string hashBcrypt, CancellationToken cancellationToken)
+    public async Task ReiniciarIntentosAsync(string rut, CancellationToken cancellationToken)
     {
-        var ret = ParametroRetorno();
-        await _db.Database.ExecuteSqlInterpolatedAsync(
-            $"EXEC sp_Usuario_ReemplazarHash @Rut={rut}, @PasswordHash={hashBcrypt}, @Ret={ret} OUT",
-            cancellationToken);
-        return LeerCodigo(ret);
+        var oDB = new AD_Global();
+        var oCRB = await oDB.DBOpenAsync(300, cancellationToken);
+        if (oCRB.Resultado)
+        {
+            oDB.NameProcedure = "dbo.sp_Usuario_ReiniciarIntentos";
+            oCRB = oDB.AddParameter("@Rut", rut);
+        }
+
+        if (oCRB.Resultado)
+            oCRB = await oDB.ExecuteNonQueryAsync(cancellationToken);
+
+        oDB.DBClose();
+        if (!oCRB.Resultado)
+            throw new InvalidOperationException(oCRB.Mensaje);
     }
 
-    public async Task<int> RetirarMd5Async(string rut, CancellationToken cancellationToken)
+    public Task<int> ActualizarPasswordAsync(string rut, string hashBcrypt, string? huellaMd5, CancellationToken cancellationToken) =>
+        EjecutarRetornoAsync("dbo.sp_Usuario_ActualizarPassword", cancellationToken, ("@Rut", rut), ("@PasswordHash", hashBcrypt), ("@HuellaMd5", huellaMd5));
+
+    public Task<int> ReemplazarHashAsync(string rut, string hashBcrypt, CancellationToken cancellationToken) =>
+        EjecutarRetornoAsync("dbo.sp_Usuario_ReemplazarHash", cancellationToken, ("@Rut", rut), ("@PasswordHash", hashBcrypt));
+
+    public Task<int> RetirarMd5Async(string rut, CancellationToken cancellationToken) =>
+        EjecutarRetornoAsync("dbo.sp_Usuario_RetirarMd5", cancellationToken, ("@Rut", rut));
+
+    private static async Task<int> EjecutarRetornoAsync(string procedimiento, CancellationToken cancellationToken, params (string Nombre, object? Valor)[] parametros)
     {
-        var ret = ParametroRetorno();
-        await _db.Database.ExecuteSqlInterpolatedAsync(
-            $"EXEC sp_Usuario_RetirarMd5 @Rut={rut}, @Ret={ret} OUT",
-            cancellationToken);
-        return LeerCodigo(ret);
+        var oDB = new AD_Global();
+        var oCRB = await oDB.DBOpenAsync(300, cancellationToken);
+        if (oCRB.Resultado)
+        {
+            oDB.NameProcedure = procedimiento;
+            foreach (var (nombre, valor) in parametros)
+            {
+                if (nombre == "@HuellaMd5")
+                    oCRB = oDB.AddParameter(nombre, valor, ParameterDirection.Input, SqlDbType.VarChar, 32);
+                else
+                    oCRB = oDB.AddParameter(nombre, valor);
+            }
+
+            oCRB = oDB.AddParameter("@Ret", null, ParameterDirection.Output, SqlDbType.Int);
+        }
+
+        if (oCRB.Resultado)
+            oCRB = await oDB.ExecuteNonQueryAsync(cancellationToken);
+
+        var codigo = oCRB.Resultado ? oDB.LeerSalidaInt("@Ret") ?? CodigoCambioClave.NoActualizada : CodigoCambioClave.NoActualizada;
+        oDB.DBClose();
+        if (!oCRB.Resultado)
+            throw new InvalidOperationException(oCRB.Mensaje);
+
+        return codigo;
     }
-
-    private static SqlParameter ParametroRetorno() =>
-        new("@Ret", System.Data.SqlDbType.Int) { Direction = System.Data.ParameterDirection.Output };
-
-    private static int LeerCodigo(SqlParameter ret) =>
-        ret.Value is int codigo ? codigo : CodigoCambioClave.NoActualizada;
-
-    private static bool EsVerdadero(object valor) =>
-        valor is bool bandera && bandera
-        || valor is byte octeto && octeto != 0
-        || valor is int numero && numero != 0;
 }

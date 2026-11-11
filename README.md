@@ -18,18 +18,20 @@ Los módulos documentados se agrupan en las siguientes áreas:
 
 ## Estado y enfoque técnico
 
-La solución se organiza con Clean Architecture en .NET 10, C# 14, ASP.NET Core Razor Pages y SQL Server:
+La solución usa Clean Architecture en .NET 10, C# 14, ASP.NET Core (Razor Pages + controladores Mid) y SQL Server.
+
+**Prompt y arquitectura para el equipo (compartir o copiar a proyectos nuevos):** [`Docs/prompt-proyecto/`](Docs/prompt-proyecto/README.md) — empezar por [`PROMPT-PRINCIPAL.md`](Docs/prompt-proyecto/PROMPT-PRINCIPAL.md).
 
 ```
 SGH.sln
-├── SGH.Domain           Entidades, value objects, enums, interfaces y excepciones de negocio
-├── SGH.Application      DTOs, interfaces de servicios, casos de uso y validadores
-├── SGH.Infrastructure   Persistencia, repositorios, seguridad e inyección de dependencias
-├── SGH.Web              Interfaz Razor Pages, ViewModels y middlewares
+├── SGH.Domain           Reglas de negocio, entidades e interfaces de dominio
+├── SGH.Application      DTOs, casos de uso, Mid y alcance de sesión
+├── SGH.Infrastructure   Procedimientos almacenados, Dapper, comandos e inyección de dependencias
+├── SGH.Web              Razor Pages, controladores Mid, wwwroot y autenticación
 └── SGH.Tests            Pruebas automatizadas
 ```
 
-La arquitectura separa las reglas de negocio, los casos de uso, los adaptadores técnicos y la presentación. La solución usa procedimientos almacenados para interactuar con SQL Server: EF Core para escrituras y Dapper para lecturas. Las contraseñas nuevas o actualizadas se almacenan con BCrypt.
+Las reglas de negocio, la orquestación (Mid), la persistencia por SP y la presentación están separadas. Lecturas con Dapper; escrituras con `AD_Global` y SP donde aplica el legado. Contraseñas nuevas con BCrypt.
 
 ## Requisitos
 
@@ -54,24 +56,18 @@ El interruptor con sol y luna permite elegir entre tema claro y oscuro tanto en 
 
 En **Reserva**, **Importar Excel** permite descargar una plantilla `.xlsx` y cargar varias reservas. La hoja debe incluir `Grupo Empresa`, `Turno`, `Fecha Reserva` y `Fecha Llegada`; `Fecha Salida` y `Observación` son opcionales. Los nombres de grupo y turno deben coincidir con los catálogos disponibles, y las fechas deben ser celdas de fecha o usar `yyyy-MM-dd` o `yyyy-MM-dd HH:mm`. Se importan las filas válidas y se informa el número y motivo de cada fila rechazada. No hay un límite adicional de filas impuesto por la aplicación; el tamaño práctico depende de los límites de la solicitud y de los recursos disponibles.
 
-## Backend de solicitudes de alojamiento
+## Backend por Mid (POST + `opcion`)
 
-El backend de solicitudes dispone de los handlers autenticados de Razor Pages en `/Solicitud/Datos`:
+El escritorio en `/` consume JSON con token antifalsificación. Cada módulo expone un único POST y devuelve `{ "registros": ... }` o `{ "registros": { "resultado": false, "mensaje": "..." } }`.
 
-- `GET ?handler=Buscar`: filtros `desde`, `hasta`, `grupoId`, `solicitanteId`, `estado` y `numero`. Las fechas son obligatorias; `0` significa sin filtro en grupo, solicitante, estado y número.
-- `GET ?handler=Detalle&id=...`: detalle de la solicitud.
-- `GET ?handler=Pasajeros&id=...`: pasajeros de una solicitud perteneciente al mandante y campamento de la sesión.
-- `GET ?handler=HabitacionesDisponibles&id=...`: disponibilidad calculada por el procedimiento legado para las fechas, empresa y campamento de la solicitud.
-- `POST ?handler=AgregarCupos`: cuerpo JSON con `id` de solicitud y `cantidad` entre 1 y 999; crea cupos sin pasajero usando las fechas de la solicitud.
-- `POST ?handler=EliminarPasajero`: cuerpo JSON con `id` de solicitud y `pasajeroId`; rechaza pasajeros de otras solicitudes. Ambas operaciones rechazan solicitudes reservadas o anuladas.
-- `POST ?handler=GuardarPasajero`: cuerpo JSON con `solicitudId`, `pasajeroId` (`0` para alta), `usuarioPasajeroId`, `fechaCheckIn` y `fechaCheckOut` opcional. El usuario debe pertenecer al catálogo activo del grupo.
-- `POST ?handler=AsignarHabitacion`: cuerpo JSON con `solicitudId`, `pasajeroId` y `habitacionId`. Comprueba la disponibilidad legada y descuenta las asignaciones pendientes de la misma solicitud.
-- `POST ?handler=GenerarReservas`: cuerpo JSON con `id` de solicitud. Exige solicitud pendiente, al menos un pasajero o cupo y habitación para cada uno; vuelve a consultar disponibilidad, ejecuta la validación legada y, si no hay conflictos, genera las reservas en una transacción.
-- `GET ?handler=PlantillaPasajeros` y `POST ?handler=CargarPasajeros&id=...`: descarga de plantilla y carga de archivo `.xlsx` en `archivo`. La hoja `pasajeros` requiere las columnas `Identificador`, `TipoIdentificador`, `Nombres`, `Apellidos` y `Genero` (`M` o `F`). Las filas se procesan individualmente y se informan sus resultados.
-- `POST ?handler=NotificarReservas`: reintenta enviar el correo para una solicitud con reservas generadas.
-- `GET ?handler=Catalogo&grupoId=...`: grupos, estados, solicitantes activos y turnos. El grupo incluye su turno, unidad de negocio y contrato por defecto; `grupoId=0` consulta los solicitantes sin restringir por grupo.
-- `GET ?handler=Organizacion&unidadId=...&divisionId=...`: unidades de negocio de la minera del mandante, divisiones de la unidad y departamentos de la división. Use `0` cuando aún no se ha seleccionado unidad o división.
-- `POST ?handler=Crear`, `Actualizar` y `Anular`: cuerpos JSON; la actualización y la anulación requieren el `id`. Los POST de Razor Pages requieren el token antifalsificación.
+| Ruta | Opciones principales |
+|------|----------------------|
+| `/Reserva/Mid/MidReservas.cs` | `listar`, `catalogo`, `crear`, `editar`, `movimiento`, `importar` (multipart), plantilla en `/Reserva/PlantillaReservas` |
+| `/Censo/Mid/MidCenso.cs` | `listar`, `miscensos`, `catalogo`, `guardar`, `guardarqr` |
+| `/Solicitud/Mid/MidSolicitudes.cs` | `listar`, `catalogo`, `organizacion`, `detalle`, `pasajeros`, `habitaciones`, `crear`, `editar`, `anular`, `cupos`, `pasajero`, `eliminar`, `asignar`, `generar`, `notificar`, `cargar` (multipart), plantilla en `/Solicitud/PlantillaPasajeros` |
+| `/Censo/Mid/MidInformesCenso.cs` | `gestiondiaria`, `informegeneral`, `ocupabilidad`, `consultar`, `descargar`, `consultarservicio`, `descargarservicio` |
+
+Las reglas y procedimientos del legado se conservan; el mandante, campamento y usuario salen de la sesión del servidor.
 
 El mandante, campamento y usuario se toman de la sesión, no del cuerpo. Las consultas y modificaciones se limitan al mandante y campamento de la sesión, una restricción adicional respecto del listado legado, que filtraba solo por mandante. La anulación conserva el cambio al estado `A` del legado. El alta requiere correo válido, grupo con turno por defecto y fecha de salida cuando se usan turnos; la unidad, división y departamento pueden ser obligatorios según la configuración del grupo. En edición, el procedimiento legado modifica los campos de contacto y organización, pero no las fechas, el grupo ni el turno.
 

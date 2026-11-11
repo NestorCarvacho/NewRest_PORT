@@ -1,24 +1,10 @@
 @page
 @model SGH.Web.Pages.Censo.DatosModel
-<section aria-labelledby="informes-censo">
-    <h1 id="informes-censo">Informes de Censo</h1>
-    <p>Use los servicios de la pantalla para consultar la gestión diaria o descargar el informe general en Excel.</p>
-    <h2>Ocupabilidad de censo</h2>
-    <form method="get" action="?handler=Ocupabilidad">
-        <label for="ocup-tipo">Tipo</label>
-        <input id="ocup-tipo" name="tipo" value="C" required />
-        <label for="ocup-subtipo">Subtipo</label>
-        <input id="ocup-subtipo" name="subtipo" />
-        <label for="ocup-nivel">Nivel</label>
-        <input id="ocup-nivel" name="nivel" value="C" required />
-        <label for="ocup-desde">Desde</label>
-        <input id="ocup-desde" name="desde" type="date" value="@DateTime.Today.AddDays(-1).ToString("yyyy-MM-dd")" required />
-        <label for="ocup-hasta">Hasta</label>
-        <input id="ocup-hasta" name="hasta" type="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
-        <label for="ocup-minera">Minera</label>
-        <input id="ocup-minera" name="mineraId" type="number" value="0" min="0" />
-        <button type="submit">Consultar ocupabilidad</button>
-    </form>
-    <a href="?handler=GestionDiaria&amp;fecha=@DateTime.Today.ToString("yyyy-MM-dd")&amp;turno=D">Gestión diaria</a>
-    <a href="?handler=InformeGeneral&amp;desde=@DateTime.Today.AddDays(-1).ToString("yyyy-MM-dd")&amp;hasta=@DateTime.Today.ToString("yyyy-MM-dd")&amp;tipo=C&amp;tipoTurno=T">Descargar informe general (Excel)</a>
-</section>
+@{
+    ViewData["Title"] = "Censo";
+    ViewData["ModuloId"] = "censo";
+}
+<partial name="_ModuloPagina" />
+@section Scripts {
+    <script type="module" src="~/Censo/Js/datosCenso.js" asp-append-version="true"></script>
+}

@@ -17,7 +17,7 @@ public class AlcanceReservaTests
         var catalogo = new ObtenerCatalogoReserva(consulta);
 
         var busqueda = await buscar.EjecutarAsync(new SolicitudBuscarReservas(
-            0, 0, 0, "0", 0, "0", null, null, null, null, null, null, null, 0, 0, "0"), CancellationToken.None);
+            1, 0, 0, 0, "0", 0, "0", null, null, null, null, null, null, null, 0, 0, "0"), CancellationToken.None);
         var listado = await catalogo.EjecutarAsync(9, 0, CancellationToken.None);
 
         Assert.Equal(AlcanceSesion.SinCampamento, Assert.IsType<ResultadoBusquedaReservas.Rechazada>(busqueda).Mensaje);
@@ -35,13 +35,13 @@ public class AlcanceReservaTests
         var fecha = new DateTime(2026, 11, 7, 15, 0, 0);
 
         var ajena = await caso.EjecutarAsync(
-            new SolicitudMovimientoReserva(4, fecha, 3, ReglasReserva.CheckIn, 20),
+            new SolicitudMovimientoReserva(4, fecha, 3, ReglasReserva.CheckIn, 1, 20),
             CancellationToken.None);
         var propia = await caso.EjecutarAsync(
-            new SolicitudMovimientoReserva(8, fecha, 3, ReglasReserva.CheckOut, 20),
+            new SolicitudMovimientoReserva(8, fecha, 3, ReglasReserva.CheckOut, 1, 20),
             CancellationToken.None);
         var sinCampamento = await caso.EjecutarAsync(
-            new SolicitudMovimientoReserva(8, fecha, 3, ReglasReserva.CheckIn, 0),
+            new SolicitudMovimientoReserva(8, fecha, 3, ReglasReserva.CheckIn, 1, 0),
             CancellationToken.None);
 
         Assert.Equal(ReglasReserva.ReservaAjena, Assert.IsType<ResultadoMovimientoReserva.Rechazado>(ajena).Mensaje);
@@ -49,6 +49,24 @@ public class AlcanceReservaTests
         Assert.Equal(AlcanceSesion.SinCampamento, Assert.IsType<ResultadoMovimientoReserva.Rechazado>(sinCampamento).Mensaje);
         Assert.Equal(1, comando.Llamadas);
         Assert.Equal(8, comando.Reservas[0]);
+    }
+
+    [Fact]
+    public async Task ReservaDeOtroCampamentoNoSeActualiza()
+    {
+        var comando = new ComandoReservaFalso();
+        var consulta = new ConsultaReservaFalsa { ReservasPropias = [12] };
+        var caso = new RegistrarMovimientoReserva.ActualizarReserva(comando, consulta);
+        var fecha = new DateTime(2026, 11, 7, 10, 0, 0);
+
+        var ajena = await caso.EjecutarAsync(new SolicitudActualizarReserva(
+            99, 1, 20, 2, fecha, fecha, null, null, 1, null, null, "P", false, 3), CancellationToken.None);
+        var propia = await caso.EjecutarAsync(new SolicitudActualizarReserva(
+            12, 1, 20, 2, fecha, fecha, null, null, 1, null, null, "P", false, 3), CancellationToken.None);
+
+        Assert.Equal(ReglasReserva.ReservaAjena, Assert.IsType<ResultadoActualizacionReserva.Rechazada>(ajena).Mensaje);
+        Assert.IsType<ResultadoActualizacionReserva.Actualizada>(propia);
+        Assert.Equal(1, comando.Actualizaciones);
     }
 
     private sealed class ConsultaReservaFalsa : IConsultaReserva
@@ -79,6 +97,8 @@ public class AlcanceReservaTests
     {
         public int Llamadas { get; private set; }
 
+        public int Actualizaciones { get; private set; }
+
         public List<int> Reservas { get; } = [];
 
         public Task<int> CrearAsync(
@@ -104,6 +124,10 @@ public class AlcanceReservaTests
         public Task ActualizarAsync(int reservaId, int empresaMandanteId, int campamentoId, int areaId,
             DateTime fechaReserva, DateTime fechaLlegada, DateTime? fechaSalida, string? observacion,
             int turnoId, int? pasajeroId, int? habitacionId, string estado, bool tieneAgua,
-            int usuarioId, CancellationToken cancellationToken) => Task.CompletedTask;
+            int usuarioId, CancellationToken cancellationToken)
+        {
+            Actualizaciones++;
+            return Task.CompletedTask;
+        }
     }
 }
