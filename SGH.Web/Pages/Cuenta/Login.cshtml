@@ -1,5 +1,6 @@
 @page
 @model SGH.Web.Pages.Cuenta.LoginModel
+@using SGH.Domain.Alcance
 @{
     Layout = "_LoginLayout";
     ViewData["Title"] = "Ingreso";
@@ -52,6 +53,10 @@
                 }
             </select>
         </div>
+    }
+    else if (Model.Paso == "perfil" && Model.Perfiles.Count == 0)
+    {
+        <p class="login-note" role="alert">@ReglasAlcance.SinCampamento</p>
     }
 
     <partial name="_BotonEspera" model="@("Entrar")" />
