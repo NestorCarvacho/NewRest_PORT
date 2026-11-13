@@ -80,16 +80,28 @@ public class CompletarSesionTests
     }
 
     [Fact]
-    public async Task SinPerfilesEntraConElPerfilDeLaFicha()
+    public async Task SinPerfilesRechazaConMensajeDeCampamento()
     {
         Preparar();
 
         var resultado = await Crear().EjecutarAsync(new SolicitudCompletarSesion("123456789", Clave, 0), CancellationToken.None);
 
-        var aceptado = Assert.IsType<ResultadoAutenticacion.Aceptado>(resultado);
-        Assert.Equal(2, aceptado.Sesion.PerfilId);
-        Assert.Equal(0, aceptado.Sesion.CampamentoId);
-        Assert.Equal(60, aceptado.Sesion.MinutosVigencia);
+        var rechazo = Assert.IsType<ResultadoAutenticacion.Rechazado>(resultado);
+        Assert.Equal(MotivoRechazo.PerfilNoPermitido, rechazo.Motivo);
+        Assert.Equal("La sesión no tiene un campamento.", rechazo.Mensaje);
+    }
+
+    [Fact]
+    public async Task VariasAsignacionesSinCampamentoRealPidenElegir()
+    {
+        Preparar();
+        _repositorio.Perfiles.Add(new PerfilCampamentoUsuario(8, ReglasCuenta.PerfilOperacionesA, "Operaciones", 0, "Sin campamento", 9, "Mandante", "A - Operaciones", 25, "Ana Soto"));
+        _repositorio.Perfiles.Add(new PerfilCampamentoUsuario(9, 2, "Otro", 0, "Sin campamento", 9, "Mandante", "B - Otro", 25, "Ana Soto"));
+
+        var resultado = await Crear().EjecutarAsync(new SolicitudCompletarSesion("123456789", Clave, 0), CancellationToken.None);
+
+        var rechazo = Assert.IsType<ResultadoAutenticacion.Rechazado>(resultado);
+        Assert.Equal(ReglasCuenta.SeleccionePerfil, rechazo.Mensaje);
     }
 
     [Fact]

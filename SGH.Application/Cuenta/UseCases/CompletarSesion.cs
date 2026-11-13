@@ -1,6 +1,7 @@
 using SGH.Application.Cuenta.DTOs;
 using SGH.Application.Cuenta.Interfaces;
 using SGH.Application.Cuenta.Opciones;
+using SGH.Domain.Alcance;
 using SGH.Domain.Cuenta;
 using SGH.Domain.Cuenta.Entities;
 using SGH.Domain.Cuenta.Interfaces;
@@ -56,13 +57,9 @@ public sealed class CompletarSesion : ICompletarSesion
 
         if (perfiles.Count == 0)
         {
-            return new ResultadoAutenticacion.Aceptado(CrearSesion(
-                usuario,
-                usuario.PerfilId,
-                0,
-                usuario.EmpresaMandanteId ?? 0,
-                0,
-                false));
+            return new ResultadoAutenticacion.Rechazado(
+                ReglasAlcance.SinCampamento,
+                MotivoRechazo.PerfilNoPermitido);
         }
 
         var asignacionId = solicitud.AsignacionPerfilId;
@@ -70,7 +67,7 @@ public sealed class CompletarSesion : ICompletarSesion
         {
             var automatica = ReglasCuenta.ResolverAsignacionAutomatica(
                 perfiles.Count,
-                perfiles.Select(perfil => perfil.CampamentoId).Distinct().Count(),
+                perfiles.Select(perfil => perfil.CampamentoId),
                 perfiles[0].Id);
             if (automatica is int id)
                 asignacionId = id;
