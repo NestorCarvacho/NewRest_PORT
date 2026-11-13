@@ -17,6 +17,7 @@ public sealed class IngresoPendiente
     public int LargoClave { get; set; }
     public DateTime ExpiraUtc { get; set; }
     public bool EsIntegracion { get; set; }
+    public bool RequiereSelectorCampamento { get; set; }
     public List<OpcionPerfilVista> Perfiles { get; set; } = [];
 }
 

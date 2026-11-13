@@ -42,4 +42,14 @@ public class ReglasCuentaAsignacionTests
         Assert.False(ReglasCuenta.RequiereSelectorCampamento(2, [0, 0]));
         Assert.True(ReglasCuenta.RequiereSelectorCampamento(2, [20, 21]));
     }
+
+    [Fact]
+    public void AsignacionOperativaRequiereCampamentoYMandante()
+    {
+        Assert.False(ReglasCuenta.AlgunaAsignacionOperativa([], []));
+        Assert.False(ReglasCuenta.AlgunaAsignacionOperativa([0], [9]));
+        Assert.False(ReglasCuenta.AlgunaAsignacionOperativa([20], [0]));
+        Assert.True(ReglasCuenta.AlgunaAsignacionOperativa([20], [9]));
+        Assert.True(ReglasCuenta.AlgunaAsignacionOperativa([0, 20], [0, 9]));
+    }
 }

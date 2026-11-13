@@ -114,15 +114,21 @@ public class LoginModel : PageModel
             };
             IngresoPendienteAlmacen.Guardar(TempData, pendiente);
 
-            if (!listo.EsIntegracion && listo.Perfiles.Count == 0)
+            var campamentoIds = listo.Perfiles.Select(perfil => perfil.CampamentoId).ToList();
+            var mandanteIds = listo.Perfiles.Select(perfil => perfil.EmpresaMandanteId).ToList();
+
+            if (!listo.EsIntegracion && !ReglasCuenta.AlgunaAsignacionOperativa(campamentoIds, mandanteIds))
             {
-                _claves.Descartar(claveId);
-                IngresoPendienteAlmacen.Descartar(TempData);
+                VolverACredenciales(claveId);
                 ModelState.AddModelError(string.Empty, ReglasAlcance.SinCampamento);
                 return Page();
             }
 
-            var campamentoIds = listo.Perfiles.Select(perfil => perfil.CampamentoId);
+            pendiente.RequiereSelectorCampamento = ReglasCuenta.RequiereSelectorCampamento(
+                listo.Perfiles.Count,
+                campamentoIds);
+            IngresoPendienteAlmacen.Guardar(TempData, pendiente);
+
             var asignacionAutomatica = ReglasCuenta.ResolverAsignacionAutomatica(
                 listo.Perfiles.Count,
                 campamentoIds,
@@ -144,7 +150,7 @@ public class LoginModel : PageModel
             Paso = "perfil";
             ModelState.Remove(nameof(Paso));
             Perfiles = perfiles;
-            MostrarSelectorAsignacion = true;
+            MostrarSelectorAsignacion = pendiente.RequiereSelectorCampamento;
 
             AsignacionPerfilId = 0;
             Enmascarar(pendiente);
@@ -169,7 +175,7 @@ public class LoginModel : PageModel
 
         Perfiles = pendiente.Perfiles;
         Paso = "perfil";
-        MostrarSelectorAsignacion = true;
+        MostrarSelectorAsignacion = pendiente.RequiereSelectorCampamento;
         Enmascarar(pendiente);
 
         var clave = _claves.Leer(pendiente.ClaveId);
@@ -205,7 +211,21 @@ public class LoginModel : PageModel
         var resultado = await _completar.EjecutarAsync(new SolicitudCompletarSesion(rut, contrasena, asignacionPerfilId), cancellationToken);
         if (resultado is ResultadoAutenticacion.Rechazado rechazado)
         {
-            Enmascarar(pendiente);
+            if (rechazado.Mensaje is ReglasAlcance.SinCampamento or ReglasAlcance.SinEmpresaMandante)
+            {
+                VolverACredenciales(pendiente.ClaveId);
+                ModelState.AddModelError(string.Empty, rechazado.Mensaje);
+                return Page();
+            }
+
+            Paso = pendiente.RequiereSelectorCampamento ? "perfil" : "credenciales";
+            if (Paso == "perfil")
+            {
+                Perfiles = pendiente.Perfiles;
+                MostrarSelectorAsignacion = pendiente.RequiereSelectorCampamento;
+                Enmascarar(pendiente);
+            }
+
             ModelState.AddModelError(string.Empty, rechazado.Mensaje);
             return Page();
         }
@@ -220,6 +240,19 @@ public class LoginModel : PageModel
     {
         ModelState.Remove(nameof(Contrasena));
         Contrasena = new string('•', Math.Max(pendiente.LargoClave, 0));
+    }
+
+    private void VolverACredenciales(string clavePendienteId)
+    {
+        _claves.Descartar(clavePendienteId);
+        IngresoPendienteAlmacen.Descartar(TempData);
+        Paso = "credenciales";
+        ModelState.Remove(nameof(Paso));
+        ModelState.Remove(nameof(Contrasena));
+        Contrasena = string.Empty;
+        AsignacionPerfilId = 0;
+        Perfiles = [];
+        MostrarSelectorAsignacion = false;
     }
 
     private IActionResult Redirigir(string? returnUrl)

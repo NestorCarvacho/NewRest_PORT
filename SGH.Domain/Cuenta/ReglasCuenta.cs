@@ -40,6 +40,12 @@ public static class ReglasCuenta
     /// <summary>
     /// El combo de campamento/perfil solo aplica cuando hay más de un campamento real (&gt; 0).
     /// </summary>
+    public static bool AsignacionOperativa(int campamentoId, int empresaMandanteId) =>
+        campamentoId > 0 && empresaMandanteId > 0;
+
+  public static bool AlgunaAsignacionOperativa(IEnumerable<int> campamentoIds, IEnumerable<int> empresaMandanteIds) =>
+    campamentoIds.Zip(empresaMandanteIds).Any(par => AsignacionOperativa(par.First, par.Second));
+
     public static bool RequiereSelectorCampamento(int cantidadAsignaciones, IEnumerable<int> campamentoIds)
     {
         if (cantidadAsignaciones == 0)
