@@ -1,6 +1,5 @@
 @page
 @model SGH.Web.Pages.Cuenta.LoginModel
-@using SGH.Domain.Alcance
 @{
     Layout = "_LoginLayout";
     ViewData["Title"] = "Ingreso";
@@ -41,7 +40,7 @@
         </div>
     </div>
 
-    @if (Model.Paso == "perfil" && Model.Perfiles.Count > 0)
+    @if (Model.Paso == "perfil" && Model.MostrarSelectorAsignacion && Model.Perfiles.Count > 0)
     {
         <div class="login-field">
             <label class="login-label" for="AsignacionPerfilId">Seleccione Campamento/Perfil</label>
@@ -53,10 +52,6 @@
                 }
             </select>
         </div>
-    }
-    else if (Model.Paso == "perfil" && Model.Perfiles.Count == 0)
-    {
-        <p class="login-note" role="alert">@ReglasAlcance.SinCampamento</p>
     }
 
     <partial name="_BotonEspera" model="@("Entrar")" />

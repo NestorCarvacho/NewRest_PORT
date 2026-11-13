@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using SGH.Application.Cuenta.DTOs;
 using SGH.Application.Cuenta.Opciones;
 using SGH.Application.Cuenta.UseCases;
+using SGH.Domain.Alcance;
 using SGH.Domain.Cuenta;
 using SGH.Domain.Cuenta.Entities;
 using SGH.Infrastructure.Cuenta.Security;
@@ -89,6 +90,18 @@ public class CompletarSesionTests
         var rechazo = Assert.IsType<ResultadoAutenticacion.Rechazado>(resultado);
         Assert.Equal(MotivoRechazo.PerfilNoPermitido, rechazo.Motivo);
         Assert.Equal("La sesión no tiene un campamento.", rechazo.Mensaje);
+    }
+
+    [Fact]
+    public async Task UnaSolaAsignacionSinCampamentoSeRechaza()
+    {
+        Preparar();
+        _repositorio.Perfiles.Add(new PerfilCampamentoUsuario(8, 2, "Operaciones", 0, "Sin campamento", 9, "Mandante", "Sin asignar", 25, "Ana Soto"));
+
+        var resultado = await Crear().EjecutarAsync(new SolicitudCompletarSesion("123456789", Clave, 0), CancellationToken.None);
+
+        var rechazo = Assert.IsType<ResultadoAutenticacion.Rechazado>(resultado);
+        Assert.Equal(ReglasAlcance.SinCampamento, rechazo.Mensaje);
     }
 
     [Fact]

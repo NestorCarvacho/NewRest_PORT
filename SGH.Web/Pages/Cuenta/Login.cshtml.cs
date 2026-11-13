@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.RateLimiting;
 using SGH.Application.Cuenta.DTOs;
 using SGH.Application.Cuenta.Interfaces;
+using SGH.Domain.Alcance;
 using SGH.Domain.Cuenta;
 using SGH.Web.Cuenta;
 
@@ -52,6 +53,8 @@ public class LoginModel : PageModel
     public string Paso { get; set; } = "credenciales";
 
     public IReadOnlyList<OpcionPerfilVista> Perfiles { get; private set; } = [];
+
+    public bool MostrarSelectorAsignacion { get; private set; }
 
     public IActionResult OnGet(string? returnUrl)
     {
@@ -111,9 +114,37 @@ public class LoginModel : PageModel
             };
             IngresoPendienteAlmacen.Guardar(TempData, pendiente);
 
+            if (!listo.EsIntegracion && listo.Perfiles.Count == 0)
+            {
+                _claves.Descartar(claveId);
+                IngresoPendienteAlmacen.Descartar(TempData);
+                ModelState.AddModelError(string.Empty, ReglasAlcance.SinCampamento);
+                return Page();
+            }
+
+            var campamentoIds = listo.Perfiles.Select(perfil => perfil.CampamentoId);
+            var asignacionAutomatica = ReglasCuenta.ResolverAsignacionAutomatica(
+                listo.Perfiles.Count,
+                campamentoIds,
+                listo.Perfiles.Count > 0 ? listo.Perfiles[0].Id : 0);
+
+            if (listo.EsIntegracion || asignacionAutomatica is not null)
+            {
+                try
+                {
+                    return await EmitirAsync(listo.Rut, Contrasena, asignacionAutomatica ?? 0, pendiente, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    InformarFallo(ex);
+                    return Page();
+                }
+            }
+
             Paso = "perfil";
             ModelState.Remove(nameof(Paso));
             Perfiles = perfiles;
+            MostrarSelectorAsignacion = true;
 
             AsignacionPerfilId = 0;
             Enmascarar(pendiente);
@@ -138,6 +169,7 @@ public class LoginModel : PageModel
 
         Perfiles = pendiente.Perfiles;
         Paso = "perfil";
+        MostrarSelectorAsignacion = true;
         Enmascarar(pendiente);
 
         var clave = _claves.Leer(pendiente.ClaveId);

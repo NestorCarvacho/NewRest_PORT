@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.RateLimiting;
 using SGH.Infrastructure.DependencyInjection;
-using SGH.Web.Cuenta;
 using SGH.Web.Autorizacion;
+using SGH.Web.Cuenta;
+using SGH.Web.Filtros;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,7 @@ builder.Services.AddSingleton<EmisorCookieSesion>();
 builder.Services.AddSingleton<ClavePendienteAlmacen>();
 builder.Services.AddSingleton<RegistroVentanaIngreso>();
 builder.Services.AddScoped<FiltroPilaAvisos>();
+builder.Services.AddScoped<FiltroAlcanceOperativo>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(opciones =>
     {
@@ -53,7 +55,18 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             ? CookieSecurePolicy.SameAsRequest
             : CookieSecurePolicy.Always;
         opciones.Events.OnRedirectToLogin = contexto => ResponderSesion(contexto, "Debe iniciar sesión.");
-        opciones.Events.OnRedirectToAccessDenied = contexto => ResponderSesion(contexto, "No tiene permiso para esta operación.");
+        opciones.Events.OnRedirectToAccessDenied = contexto =>
+        {
+            if (contexto.Request.Path.Value?.Contains("/Mid/", StringComparison.OrdinalIgnoreCase) == true)
+                return ResponderSesion(contexto, "No tiene permiso para esta operación.");
+
+            var fabrica = contexto.HttpContext.RequestServices.GetRequiredService<ITempDataDictionaryFactory>();
+            var avisos = fabrica.GetTempData(contexto.HttpContext);
+            avisos["AccesoDenegado.Mensaje"] = "No tiene permiso para esta operación.";
+            avisos.Save();
+            contexto.Response.Redirect(contexto.RedirectUri);
+            return Task.CompletedTask;
+        };
     });
 builder.Services.AddRateLimiter(opciones =>
 {
@@ -121,9 +134,14 @@ builder.Services.AddRazorPages(opciones =>
     opciones.Conventions.AllowAnonymousToPage("/Error");
     opciones.Conventions.AllowAnonymousToPage("/NoEncontrado");
     opciones.Conventions.AllowAnonymousToPage("/AccesoDenegado");
+    opciones.Conventions.AuthorizePage("/SinAlcance");
     opciones.Conventions.AllowAnonymousToPage("/Privacy");
     opciones.Conventions.AllowAnonymousToPage("/Cookies");
-}).AddMvcOptions(opciones => opciones.Filters.AddService<FiltroPilaAvisos>());
+}).AddMvcOptions(opciones =>
+{
+    opciones.Filters.AddService<FiltroPilaAvisos>();
+    opciones.Filters.AddService<FiltroAlcanceOperativo>();
+});
 
 var app = builder.Build();
 

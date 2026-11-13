@@ -38,8 +38,19 @@ public static class ReglasCuenta
         perfilId is PerfilOperacionesA or PerfilOperacionesB;
 
     /// <summary>
-    /// Omite la elección en el combo cuando hay una sola asignación, un único campamento real (&gt; 0),
-    /// o varias filas sin campamento (CampamentoId 0) que obligan a elegir perfil.
+    /// El combo de campamento/perfil solo aplica cuando hay más de un campamento real (&gt; 0).
+    /// </summary>
+    public static bool RequiereSelectorCampamento(int cantidadAsignaciones, IEnumerable<int> campamentoIds)
+    {
+        if (cantidadAsignaciones == 0)
+            return false;
+
+        return campamentoIds.Where(id => id > 0).Distinct().Count() > 1;
+    }
+
+    /// <summary>
+    /// Omite el combo cuando hay una sola asignación o un único campamento real (&gt; 0).
+    /// Varias filas sin campamento o con más de un campamento real obligan a elegir.
     /// Devuelve el id de asignación perfil-campamento a usar.
     /// </summary>
     public static int? ResolverAsignacionAutomatica(

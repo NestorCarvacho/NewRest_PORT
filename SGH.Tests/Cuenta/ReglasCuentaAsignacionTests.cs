@@ -33,4 +33,13 @@ public class ReglasCuentaAsignacionTests
     {
         Assert.Null(ReglasCuenta.ResolverAsignacionAutomatica(2, [0, 0], 8));
     }
+
+    [Fact]
+    public void SelectorSoloConMasDeUnCampamentoReal()
+    {
+        Assert.False(ReglasCuenta.RequiereSelectorCampamento(1, [20]));
+        Assert.False(ReglasCuenta.RequiereSelectorCampamento(2, [20, 20]));
+        Assert.False(ReglasCuenta.RequiereSelectorCampamento(2, [0, 0]));
+        Assert.True(ReglasCuenta.RequiereSelectorCampamento(2, [20, 21]));
+    }
 }

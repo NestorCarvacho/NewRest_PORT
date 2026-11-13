@@ -82,6 +82,20 @@ public sealed class CompletarSesion : ICompletarSesion
             return new ResultadoAutenticacion.Rechazado(ReglasCuenta.CredencialesInvalidas, MotivoRechazo.PerfilNoPermitido);
         }
 
+        if (elegido.CampamentoId <= 0)
+        {
+            return new ResultadoAutenticacion.Rechazado(
+                ReglasAlcance.SinCampamento,
+                MotivoRechazo.PerfilNoPermitido);
+        }
+
+        if (elegido.EmpresaMandanteId <= 0)
+        {
+            return new ResultadoAutenticacion.Rechazado(
+                ReglasAlcance.SinEmpresaMandante,
+                MotivoRechazo.PerfilNoPermitido);
+        }
+
         return new ResultadoAutenticacion.Aceptado(CrearSesion(
             usuario,
             elegido.PerfilId,

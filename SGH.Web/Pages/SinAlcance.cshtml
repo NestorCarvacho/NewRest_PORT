@@ -1,0 +1,13 @@
+@page
+@model SGH.Web.Pages.SinAlcanceModel
+@{
+    ViewData["Title"] = "Sin alcance";
+    ViewData["EstadoTitulo"] = "Sin alcance de campamento";
+    ViewData["EstadoDescripcion"] = Model.Mensaje;
+    ViewData["EstadoImagen"] = "~/img/estado/tabla-vacia.svg";
+    ViewData["EstadoBoton"] = "Cerrar sesión";
+    ViewData["EstadoEnlace"] = "/Cuenta/Salir";
+    ViewData["EstadoEnlaceEsPagina"] = false;
+}
+
+<partial name="_PaginaEstado" />

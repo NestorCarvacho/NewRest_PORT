@@ -2,11 +2,11 @@
 @model SGH.Web.Pages.NoEncontradoModel
 @{
     ViewData["Title"] = "Página no encontrada";
+    ViewData["EstadoTitulo"] = "Página no encontrada";
+    ViewData["EstadoDescripcion"] = "Esa dirección no corresponde a una pantalla de Gestión Hotelera.";
+    ViewData["EstadoImagen"] = "~/img/estado/no-encontrado.svg";
+    ViewData["EstadoBoton"] = "Volver al inicio";
+    ViewData["EstadoEnlace"] = "/Index";
 }
 
-<section class="estado">
-    <img src="~/img/estado/no-encontrado.svg" alt="" />
-    <h1>Página no encontrada</h1>
-    <p>Esa dirección no corresponde a una pantalla de Gestión Hotelera.</p>
-    <a class="boton-primario" asp-page="/Index">Volver al inicio</a>
-</section>
+<partial name="_PaginaEstado" />

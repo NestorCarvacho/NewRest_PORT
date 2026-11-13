@@ -1,0 +1,25 @@
+@{
+    var titulo = ViewData["EstadoTitulo"] as string ?? ViewData["Title"] as string ?? "Aviso";
+    var descripcion = ViewData["EstadoDescripcion"] as string ?? string.Empty;
+    var imagen = ViewData["EstadoImagen"] as string ?? "~/img/estado/tabla-vacia.svg";
+    var textoBoton = ViewData["EstadoBoton"] as string ?? "Volver al inicio";
+    var enlaceBoton = ViewData["EstadoEnlace"] as string ?? "/Index";
+    var enlaceEsPagina = ViewData["EstadoEnlaceEsPagina"] as bool? ?? true;
+}
+
+<section class="estado">
+    <img src="@Url.Content(imagen)" alt="" />
+    <h1 data-i18n>@titulo</h1>
+    @if (!string.IsNullOrWhiteSpace(descripcion))
+    {
+        <p data-i18n>@descripcion</p>
+    }
+    @if (enlaceEsPagina)
+    {
+        <a class="boton-primario" asp-page="@enlaceBoton" data-i18n>@textoBoton</a>
+    }
+    else
+    {
+        <a class="boton-primario" href="@enlaceBoton" data-i18n>@textoBoton</a>
+    }
+</section>
