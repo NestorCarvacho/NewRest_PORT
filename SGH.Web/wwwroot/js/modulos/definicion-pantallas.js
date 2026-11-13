@@ -3,35 +3,18 @@ function pantalla(titulo, columnas, filtros, secciones, accion, modo) {
 }
 
 export function definirPantallasReserva(reserva) {
+    var columnasReserva = ["Acciones", "N°", "Fecha Reserva", "Grupo Empresa", "Pasajero", "Habitación", "Estado", "Llegada", "Salida", "Check In", "Check Out"];
     var modulos = {
         reserva: pantalla(
             "Reserva",
-            ["Acciones", "N°", "Fecha Reserva", "Grupo Empresa", "Pasajero", "Habitación", "Estado", "Llegada", "Salida"],
+            columnasReserva,
             reserva.filtros,
-            reserva.formulario,
-            { titulo: "Nueva reserva", boton: "Nueva reserva", confirmar: "Guardar" },
+            null,
+            null,
             "reserva"
-        ),
-        checkin: pantalla(
-            "Check In",
-            ["Acciones", "N°", "Fecha Reserva", "Grupo Empresa", "Pasajero", "Habitación", "Estado", "Llegada", "Salida"],
-            reserva.filtros,
-            null,
-            null,
-            "checkin"
-        ),
-        checkout: pantalla(
-            "Check Out",
-            ["Acciones", "N°", "Fecha Reserva", "Grupo Empresa", "Pasajero", "Habitación", "Estado", "Llegada", "Salida"],
-            reserva.filtros,
-            null,
-            null,
-            "checkout"
         )
     };
     modulos.reserva.filtroInicial = function () { return reserva.filtroInicial("reserva"); };
-    modulos.checkin.filtroInicial = function () { return reserva.filtroInicial("checkin"); };
-    modulos.checkout.filtroInicial = function () { return reserva.filtroInicial("checkout"); };
     return modulos;
 }
 
@@ -39,7 +22,7 @@ export function definirPantallasCenso(censo) {
     var modulos = {
         censo: pantalla(
             "Censo",
-            ["Nº", "Fecha", "Módulo", "Piso", "Habitación", "Estado Censo", "Estado Habitación", "N° Camas", "Camas ocupadas", "Camas ocupadas (CheckIn)"],
+            ["Nº", "Fecha", "Módulo", "Piso", "Habitación", "Estado Censo", "Estado Habitación", "N° Camas", "Camas ocupadas", "Cam. ocupadas (CheckIn)"],
             censo.filtros,
             null,
             { titulo: "Censo", boton: "Guardar", confirmar: "Guardar" },
@@ -71,6 +54,7 @@ export function definirPantallasSolicitud(solicitud) {
         )
     };
     modulos.solicitud.filtroInicial = solicitud.filtroInicial;
+    modulos.solicitud.ordenInicial = [[2, "desc"], [1, "desc"]];
     return modulos;
 }
 

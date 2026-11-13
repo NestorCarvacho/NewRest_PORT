@@ -54,11 +54,11 @@ La interfaz ofrece español, inglés, portugués y francés. Inicialmente usa el
 
 El interruptor con sol y luna permite elegir entre tema claro y oscuro tanto en el acceso como en la aplicación. La elección se guarda en el navegador; si no existe una preferencia, se usa el tema oscuro.
 
-En **Reserva**, **Importar Excel** permite descargar una plantilla `.xlsx` y cargar varias reservas. La hoja debe incluir `Grupo Empresa`, `Turno`, `Fecha Reserva` y `Fecha Llegada`; `Fecha Salida` y `Observación` son opcionales. Los nombres de grupo y turno deben coincidir con los catálogos disponibles, y las fechas deben ser celdas de fecha o usar `yyyy-MM-dd` o `yyyy-MM-dd HH:mm`. Se importan las filas válidas y se informa el número y motivo de cada fila rechazada. No hay un límite adicional de filas impuesto por la aplicación; el tamaño práctico depende de los límites de la solicitud y de los recursos disponibles.
-
 ## Backend por Mid (POST + `opcion`)
 
 El escritorio en `/` consume JSON con token antifalsificación. Cada módulo expone un único POST y devuelve `{ "registros": ... }` o `{ "registros": { "resultado": false, "mensaje": "..." } }`.
+
+Los errores de los módulos se muestran como avisos en la esquina inferior derecha. En las importaciones, el aviso se complementa con el detalle de las filas no procesadas.
 
 | Ruta | Opciones principales |
 |------|----------------------|
@@ -69,17 +69,25 @@ El escritorio en `/` consume JSON con token antifalsificación. Cada módulo exp
 
 Las reglas y procedimientos del legado se conservan; el mandante, campamento y usuario salen de la sesión del servidor.
 
+La tabla de Reserva muestra solo la fecha de llegada y salida previstas, y la fecha y hora de los movimientos efectivos de check-in y check-out. Las acciones de check-in y check-out están disponibles en cada reserva según su estado y se identifican con iconos de entrada y salida; al pasar el cursor se muestra su nombre. Para consultar movimientos ya realizados, abra Filtros, seleccione «Asignada con Checkout» y aplique la búsqueda. La carga inicial comprende los últimos 30 días de fecha de reserva; al aplicar filtros, deje vacías las fechas para no restringir la búsqueda.
+
 El mandante, campamento y usuario se toman de la sesión, no del cuerpo. Las consultas y modificaciones se limitan al mandante y campamento de la sesión, una restricción adicional respecto del listado legado, que filtraba solo por mandante. La anulación conserva el cambio al estado `A` del legado. El alta requiere correo válido, grupo con turno por defecto y fecha de salida cuando se usan turnos; la unidad, división y departamento pueden ser obligatorios según la configuración del grupo. En edición, el procedimiento legado modifica los campos de contacto y organización, pero no las fechas, el grupo ni el turno.
 
 Antes de usar estos handlers, ejecutar en la base de destino el script [001_sp_solicitud.sql](SGH.Infrastructure/Solicitud/Persistence/001_sp_solicitud.sql). Este reutiliza `SOL_GuardaSolicitudAlojamiento`; el detalle y los solicitantes reutilizan `SOL_ObtieneSolicitudAlojamiento` y `USU_ObtieneUsuarios`. Los catálogos organizacionales reutilizan `UNG_ObtieneUnidadesNegocio`, `DIV_ObtieneDivisiones` y `DEP_ObtieneDepartamentos`. El listado, la anulación, la primera reserva generada y la comprobación transaccional de alcance requieren procedimientos nuevos porque el legado hacía esas operaciones directamente sobre entidades. Verificar los contratos y permisos de los procedimientos legados en cada base antes del despliegue.
 
-El menú **Gestión > Solicitud alojamiento** permite filtrar, crear, editar y anular solicitudes; administrar pasajeros y cupos; importar pasajeros, asignar habitaciones y generar reservas. La generación requiere que las habitaciones estén asignadas previamente. La importación conserva el comportamiento legado: puede crear usuarios o actualizar nombres, género, grupo y empresa de usuarios existentes; la pantalla pide confirmación antes de importarlos. Si una carga se interrumpe, algunas filas pueden haber sido procesadas y deben revisarse antes de repetirla.
+El menú **Gestión > Solicitud alojamiento** permite filtrar, crear, editar y anular solicitudes; administrar pasajeros y cupos; importar pasajeros, asignar habitaciones y generar reservas. El listado se ordena inicialmente por fecha de solicitud descendente y, para una misma fecha, por número descendente; el usuario puede cambiar el orden desde las columnas. La generación requiere que las habitaciones estén asignadas previamente. La importación conserva el comportamiento legado: puede crear usuarios o actualizar nombres, género, grupo y empresa de usuarios existentes; la pantalla pide confirmación antes de importarlos. Si una carga se interrumpe, algunas filas pueden haber sido procesadas y deben revisarse antes de repetirla.
 
 En el detalle de una solicitud pendiente se pueden seleccionar pasajeros individualmente o todos a la vez. La selección habilita la eliminación y la asignación de habitaciones, así como la generación de reservas para la solicitud completa. La eliminación y la asignación se realizan una por una: si alguna operación falla, se informa cuántas se completaron y se actualiza el detalle. El flujo todavía no incluye la exportación del informe ni la creación individual de usuarios desde la solicitud.
+
+Al asignar habitaciones, el número de camas disponibles descuenta las preasignaciones de la solicitud y las selecciones realizadas en el panel. El indicador es verde cuando todas las camas están disponibles, amarillo cuando solo quedan algunas y rojo cuando no queda ninguna. Use el contador de cada habitación para asignar camas a los pasajeros en orden; el panel impide superar la disponibilidad o la cantidad de pasajeros. La disponibilidad mostrada es provisional y el servidor vuelve a validarla al guardar.
+
+**Asignar automático** conserva las selecciones previas y completa los pasajeros restantes usando las habitaciones visibles, en orden, antes de guardar inmediatamente. Si la selección no alcanza para todos, no se envían asignaciones y se informa cuántos pasajeros quedan pendientes. Al guardar, las operaciones siguen siendo individuales: un cambio de disponibilidad u otro error del servidor puede dejar asignaciones parciales.
 
 Para consultar pasajeros, ejecutar también [002_sp_pasajeros_solicitud.sql](SGH.Infrastructure/Solicitud/Persistence/002_sp_pasajeros_solicitud.sql). Este procedimiento comprueba el alcance y reutiliza `SOL_ObtienePasajerosSolicitudAlojamiento`.
 
 Para guardar pasajeros identificados y generar reservas, ejecutar [003_sp_guardar_pasajero.sql](SGH.Infrastructure/Solicitud/Persistence/003_sp_guardar_pasajero.sql), [005_sp_habitaciones_solicitud.sql](SGH.Infrastructure/Solicitud/Persistence/005_sp_habitaciones_solicitud.sql) y [004_sp_generar_reservas.sql](SGH.Infrastructure/Solicitud/Persistence/004_sp_generar_reservas.sql). Reutilizan `SOL_GuardaPasajeroSolicitudAlojamiento`, `HAB_ValidaCreacionReserva_Solicitud` y `RES_CreaReserva`, respectivamente. La generación informa el primer conflicto legado.
+
+Al actualizar estos procedimientos, abrir los scripts como UTF-8 para conservar los mensajes con caracteres acentuados; los cambios en los archivos no actualizan automáticamente la base de datos.
 
 Para consultar y asignar habitaciones, ejecutar [005_sp_habitaciones_solicitud.sql](SGH.Infrastructure/Solicitud/Persistence/005_sp_habitaciones_solicitud.sql), que reutiliza `HAB_ObtieneHabitacionesDisponiblesV2` y `SOL_AsignaHabitacionPasajeroSolicitudEmpresa`. El cálculo legado no cuenta asignaciones pendientes de otras solicitudes de alojamiento; el bloqueo de la nueva aplicación solo coordina sus propias asignaciones y generaciones, no escrituras realizadas por otros sistemas.
 

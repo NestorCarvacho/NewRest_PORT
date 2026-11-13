@@ -14,12 +14,12 @@ export function crearTablas() {
         return tabla;
     }
 
-    function inicializar(nodo, columnas) {
+    function inicializar(nodo, columnas, ordenInicial) {
         function t(texto) {
             return window.SGHI18n ? window.SGHI18n.traducir(texto) : texto;
         }
 
-        var tabla = new DataTable(nodo.querySelector("table"), {
+        var opciones = {
             columns: columnas,
             language: {
                 emptyTable: t("No hay registros para mostrar"),
@@ -30,7 +30,9 @@ export function crearTablas() {
                 zeroRecords: t("Sin resultados"),
                 paginate: { previous: t("Anterior"), next: t("Siguiente") }
             }
-        });
+        };
+        if (ordenInicial) opciones.order = ordenInicial;
+        var tabla = new DataTable(nodo.querySelector("table"), opciones);
         tabla.on("draw", function () { completarFilas(tabla); });
         completarFilas(tabla);
         return tabla;

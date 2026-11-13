@@ -128,6 +128,7 @@ public class LoginModel : PageModel
             Paso = "perfil";
             ModelState.Remove(nameof(Paso));
             Perfiles = perfiles;
+
             AsignacionPerfilId = 0;
             Enmascarar(pendiente);
             return Page();

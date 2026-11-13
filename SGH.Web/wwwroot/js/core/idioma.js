@@ -13,6 +13,31 @@
         ["Gestión Hotelera", "Hotel Management", "Gestão Hoteleira", "Gestion Hôtelière"],
         ["Buscar módulo", "Search module", "Buscar módulo", "Rechercher un module"],
         ["Gestión", "Management", "Gestão", "Gestion"],
+        ["Solicitud", "Request", "Solicitação", "Demande"],
+        ["Hay filas de la importación pendientes de revisión.", "Some import rows need review.", "Há linhas da importação pendentes de revisão.", "Certaines lignes importées doivent être vérifiées."],
+        ["Asigne una habitación a todos los pasajeros antes de generar reservas.", "Assign a room to every passenger before generating reservations.", "Atribua um quarto a todos os passageiros antes de gerar reservas.", "Attribuez une chambre à tous les passagers avant de générer les réservations."],
+        ["Asignar automático", "Assign automatically", "Atribuir automaticamente", "Attribuer automatiquement"],
+        ["camas disponibles", "beds available", "camas disponíveis", "lits disponibles"],
+        ["de", "of", "de", "sur"],
+        ["Siguiente pasajero:", "Next passenger:", "Próximo passageiro:", "Passager suivant :"],
+        ["Indique la cantidad de camas por habitación. Las camas se asignan a los pasajeros en el orden seleccionado.", "Enter the number of beds per room. Beds are assigned to passengers in the selected order.", "Informe a quantidade de camas por quarto. As camas são atribuídas aos passageiros na ordem selecionada.", "Indiquez le nombre de lits par chambre. Les lits sont attribués aux passagers dans l'ordre sélectionné."],
+        ["La cantidad no es válida o supera las camas disponibles. Revise las selecciones anteriores.", "The quantity is invalid or exceeds the available beds. Review the previous selections.", "A quantidade é inválida ou excede as camas disponíveis. Revise as seleções anteriores.", "La quantité est invalide ou dépasse le nombre de lits disponibles. Vérifiez les sélections précédentes."],
+        ["Seleccionar", "Select", "Selecionar", "Sélectionner"],
+        ["Quitar última selección", "Undo last selection", "Desfazer última seleção", "Annuler la dernière sélection"],
+        ["Seleccione una cama para cada pasajero, en el orden indicado. Puede repetir una habitación si tiene camas disponibles.", "Select a bed for each passenger in the indicated order. You can select a room more than once if beds are available.", "Selecione uma cama para cada passageiro na ordem indicada. Você pode repetir um quarto se houver camas disponíveis.", "Sélectionnez un lit pour chaque passager dans l'ordre indiqué. Vous pouvez choisir une chambre plusieurs fois si des lits sont disponibles."],
+        ["Asignación Servicio", "Service assignment", "Atribuição de serviço", "Affectation de service"],
+        ["Gestión OT", "Work order management", "Gestão de ordens de trabalho", "Gestion des ordres de travail"],
+        ["Registro Servicios", "Service log", "Registro de serviços", "Journal des services"],
+        ["Solicitud Empresa", "Company request", "Solicitação da empresa", "Demande d'entreprise"],
+        ["Control de valijas", "Dispatch bag control", "Controle de malotes", "Gestion des valises"],
+        ["Comentarios", "Comments", "Comentários", "Commentaires"],
+        ["Asignación EPP", "PPE assignment", "Atribuição de EPI", "Affectation des EPI"],
+        ["Asignación Casilleros", "Locker assignment", "Atribuição de armários", "Affectation des casiers"],
+        ["Registro Desalojos", "Eviction log", "Registro de desocupações", "Journal des expulsions"],
+        ["No Conformidades", "Non-conformities", "Não conformidades", "Non-conformités"],
+        ["Planificación Proyectos", "Project planning", "Planejamento de projetos", "Planification des projets"],
+        ["Reserva Ubicaciones", "Location reservation", "Reserva de locais", "Réservation d'emplacements"],
+        ["No disponible", "Not available", "Indisponível", "Indisponible"],
         ["Alojamiento", "Accommodation", "Alojamento", "Hébergement"],
         ["Solicitud alojamiento", "Accommodation request", "Solicitação de alojamento", "Demande d'hébergement"],
         ["Pasajeros de solicitud", "Request passengers", "Passageiros da solicitação", "Passagers de la demande"],
@@ -97,6 +122,18 @@
         ["Filas rechazadas:", "Rejected rows:", "Linhas rejeitadas:", "Lignes rejetées :"],
         ["Fila", "Row", "Linha", "Ligne"],
         ["Cancelar", "Cancel", "Cancelar", "Annuler"],
+        ["No se pueden modificar los pasajeros de una solicitud reservada o anulada.", "Passengers cannot be modified on a reserved or cancelled request.", "Não é possível alterar os passageiros de uma solicitação reservada ou cancelada.", "Les passagers d'une demande réservée ou annulée ne peuvent pas être modifiés."],
+        ["Resultado de la importación", "Import result", "Resultado da importação", "Résultat de l'importation"],
+        ["No hay habitaciones disponibles para los filtros seleccionados.", "There are no rooms available for the selected filters.", "Não há quartos disponíveis para os filtros selecionados.", "Aucune chambre n'est disponible pour les filtres sélectionnés."],
+        ["Buscar habitaciones", "Search rooms", "Buscar quartos", "Rechercher des chambres"],
+        ["Al completar la selección, elegir otra habitación reemplaza la última seleccionada.", "Once the selection is complete, choosing another room replaces the last one selected.", "Quando a seleção estiver completa, escolher outro quarto substituirá o último selecionado.", "Une fois la sélection complète, choisir une autre chambre remplace la dernière sélectionnée."],
+        ["Total de filas", "Total rows", "Total de linhas", "Nombre total de lignes"],
+        ["Procesadas", "Processed", "Processadas", "Traitées"],
+        ["No procesadas", "Not processed", "Não processadas", "Non traitées"],
+        ["Detalle de filas no procesadas", "Details of unprocessed rows", "Detalhes das linhas não processadas", "Détails des lignes non traitées"],
+        ["No hay filas pendientes de revisión.", "There are no rows to review.", "Não há linhas pendentes de revisão.", "Aucune ligne ne nécessite de vérification."],
+        ["Aún no hay pasajeros ni cupos. Agregue uno o importe una planilla.", "There are no passengers or slots yet. Add one or import a spreadsheet.", "Ainda não há passageiros nem vagas. Adicione um ou importe uma planilha.", "Il n'y a pas encore de passagers ni de places. Ajoutez-en un ou importez une feuille de calcul."],
+        ["No hay pasajeros ni cupos para esta solicitud.", "There are no passengers or slots for this request.", "Não há passageiros nem vagas para esta solicitação.", "Il n'y a pas de passagers ni de places pour cette demande."],
         ["Guardar", "Save", "Guardar", "Enregistrer"],
         ["Continuar", "Continue", "Continuar", "Continuer"],
         ["Aplicar", "Apply", "Aplicar", "Appliquer"],
@@ -182,7 +219,6 @@
         ["Página no encontrada", "Page not found", "Página não encontrada", "Page introuvable"],
         ["Esa dirección no corresponde a una pantalla de Gestión Hotelera.", "This address does not match a Hotel Management page.", "Esse endereço não corresponde a uma tela da Gestão Hoteleira.", "Cette adresse ne correspond pas à une page de Gestion Hôtelière."],
         ["Gestión Hotelera", "Hotel Management", "Gestão Hoteleira", "Gestion Hôtelière"],
-        ["Abra Reserva, Check In, Check Out o Censo desde el menú. Cada pantalla queda en una solapa.", "Open Reservation, Check-in, Check-out or Census from the menu. Each page opens in a tab.", "Abra Reserva, Check-in, Check-out ou Censo pelo menu. Cada tela fica em uma aba.", "Ouvrez Réservation, Arrivée, Départ ou Recensement depuis le menu. Chaque page s'ouvre dans un onglet."],
         ["Censo QR guardado correctamente.", "QR census saved successfully.", "Censo QR salvo com sucesso.", "Recensement QR enregistré avec succès."],
         ["Reserva creada N° ", "Reservation created No. ", "Reserva criada Nº ", "Réservation créée n° "],
         ["Cargando datos...", "Loading data...", "Carregando dados...", "Chargement des données..."],
@@ -362,6 +398,9 @@
             var rangoTraducido = limpio.match(/^(\d+)(?: to | a | à )(\d+)(?: of | de | sur )(\d+)$/);
             if (rangoTraducido)
                 base = rangoTraducido[1] + " a " + rangoTraducido[2] + " de " + rangoTraducido[3];
+            var pendientesTraducidos = limpio.match(/^(?:Automatic assignment could not be completed\. Passengers remaining: |Não foi possível concluir a atribuição automática\. Passageiros pendentes: |L'attribution automatique n'a pas pu être terminée\. Passagers restants : )(\d+)(?:\. Check the rooms and filters\.|\. Revise os quartos e filtros\.|\. Vérifiez les chambres et les filtres\.)$/);
+            if (pendientesTraducidos)
+                base = "No se pudo completar la asignación automática. Pasajeros pendientes: " + pendientesTraducidos[1] + ". Revise las habitaciones y filtros.";
             var tituloTraducido = limpio.match(/^(.+) - (?:Hotel Management|Gestão Hoteleira|Gestion Hôtelière)$/);
             if (tituloTraducido) {
                 var textoTitulo = tituloTraducido[1];
@@ -382,6 +421,14 @@
         }
 
         var traduccion = idiomas[actual][base];
+        if (!traduccion) {
+            var pendientes = base.match(/^No se pudo completar la asignación automática\. Pasajeros pendientes: (\d+)\. Revise las habitaciones y filtros\.$/);
+            if (pendientes) {
+                traduccion = actual === "en" ? "Automatic assignment could not be completed. Passengers remaining: " + pendientes[1] + ". Check the rooms and filters."
+                    : actual === "pt" ? "Não foi possível concluir a atribuição automática. Passageiros pendentes: " + pendientes[1] + ". Revise os quartos e filtros."
+                    : "L'attribution automatique n'a pas pu être terminée. Passagers restants : " + pendientes[1] + ". Vérifiez les chambres et les filtres.";
+            }
+        }
         if (!traduccion) {
             var creado = base.match(/^Reserva creada N° (.+)\.$/);
             if (creado) {

@@ -8,6 +8,8 @@ export function instalarSolicitud(base) {
         enviarArchivo: base.api.enviarArchivo,
         consulta: base.consulta,
         campo: base.campo,
+        inicializarSelectores: base.inicializarSelectores,
+        actualizarSelector: base.actualizarSelector,
         obtenerCatalogo: base.catalogos.obtenerSolicitud,
         prepararCatalogo: base.prepararCatalogo,
         abrirPanel: base.abrirPanel,

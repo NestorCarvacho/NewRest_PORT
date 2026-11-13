@@ -26,14 +26,11 @@ export function iniciarPaginaModulo(idModulo) {
     nodo.classList.add("modulo-en-pagina");
     ancla.replaceChildren(nodo);
 
-    var vista = document.getElementById("vista-inicial");
-    if (vista) vista.hidden = true;
-
     return entorno.prepararCatalogo(modulo.modo).then(function () {
         if (!window.DataTable) {
             throw new Error("No se cargó DataTables. Compruebe la conexión e recargue la página.");
         }
-        nodo._tabla = entorno.tablas.inicializar(nodo, entorno.renderizador.columnas(modulo.modo));
+        nodo._tabla = entorno.tablas.inicializar(nodo, entorno.renderizador.columnas(modulo.modo), modulo.ordenInicial);
         nodo.dataset.lista = "1";
         return entorno.cargar(id);
     }).catch(function (error) {

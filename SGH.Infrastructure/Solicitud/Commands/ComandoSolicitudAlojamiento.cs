@@ -127,10 +127,15 @@ public sealed class ComandoSolicitudAlojamiento : IComandoSolicitudAlojamiento
         var id = oDB.LeerSalidaInt(salida) ?? 0;
         oDB.DBClose();
         if (!oCRB.Resultado)
-            throw new InvalidOperationException(oCRB.Mensaje);
+            throw new InvalidOperationException(MensajeError(procedimiento, oCRB));
 
         return id;
     }
+
+    internal static string MensajeError(string procedimiento, LIB_ControlResultado resultado) =>
+        procedimiento == "dbo.sp_Solicitud_GenerarReservas" && resultado.Codigo == "51051"
+            ? "Asigne una habitación a todos los pasajeros antes de generar reservas."
+            : resultado.Mensaje;
 
     private static async Task<LIB_ControlResultado> AbrirAsync(AD_Global oDB, string procedimiento, CancellationToken cancellationToken)
     {

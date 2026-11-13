@@ -6,12 +6,10 @@ import { instalarSolicitud } from "../modulos/paquetes/solicitud-paquete.js";
  * Pantallas del escritorio (solapas en Index).
  * Al agregar módulo: registrar en PANTALLA_A_PAQUETE e INSTALADORES.
  */
-export var PANTALLAS_ESCRITORIO = ["reserva", "checkin", "checkout", "censo", "misCensos", "solicitud"];
+export var PANTALLAS_ESCRITORIO = ["reserva", "censo", "misCensos", "solicitud"];
 
 export var PANTALLA_A_PAQUETE = {
     reserva: "reserva",
-    checkin: "reserva",
-    checkout: "reserva",
     censo: "censo",
     misCensos: "censo",
     censoQr: "censo",

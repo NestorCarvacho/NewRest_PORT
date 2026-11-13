@@ -119,6 +119,14 @@ html .campo .select2-container--disabled .select2-selection__rendered {
   color: #514842 !important;
 }
 
+html:not([data-tema="claro"]) .campo select {
+  color-scheme: dark;
+}
+
+html[data-tema="claro"] .campo select {
+  color-scheme: light;
+}
+
 html:not([data-tema="claro"]) .campo input:disabled,
 html:not([data-tema="claro"]) .campo input[readonly],
 html:not([data-tema="claro"]) .campo textarea:disabled,

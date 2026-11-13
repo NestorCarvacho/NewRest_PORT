@@ -32,21 +32,6 @@ export function crearPanelModulo(dependencias) {
                 dependencias.solicitud.abrirNueva();
             }));
         }
-        if (modulo.accion && modulo.modo === "reserva") {
-            barra.append(dependencias.boton(modulo.accion.boton, "boton-primario", function () {
-                dependencias.prepararCatalogo(modulo.modo).then(function () {
-                    dependencias.abrirPanel(modulo.accion.titulo, dependencias.formulario(
-                        dependencias.contenido(modulo.secciones),
-                        modulo.accion.confirmar,
-                        true,
-                        function (datos) { return dependencias.reserva.crear(datos, id); }
-                    ));
-                }).catch(function (error) { dependencias.mostrarEstado(nodo, error.message); });
-            }));
-            barra.append(dependencias.boton("Importar Excel", "boton-secundario", function () {
-                dependencias.reserva.abrirImportacion(id);
-            }));
-        }
         if (modulo.modo === "censo") {
             barra.append(dependencias.boton("Censo QR", "boton-secundario", dependencias.censoQr.abrir));
             var guardar = dependencias.boton("Guardar", "boton-primario", function () {

@@ -130,7 +130,6 @@ public sealed class AD_Global
         {
             var fallo = new LIB_ControlResultado();
             fallo.SetBadResult(
-                "No se pudo ejecutar el procedimiento almacenado " + _command.CommandText,
                 $"({ex.Number}) {ex.Message}");
             fallo.Codigo = ex.Number.ToString();
             return fallo;

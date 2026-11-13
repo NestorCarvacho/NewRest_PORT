@@ -8,10 +8,12 @@ export function crearCargador(dependencias) {
             ? dependencias.censo.buscarUltimoMes(filtro)
             : obtenerListado(modulo.modo, filtro);
         return solicitud.then(function (resultado) {
+            if (!nodo.isConnected) return;
             dependencias.mostrarEstado(nodo, "");
             var filas = Array.isArray(resultado) ? resultado : resultado.filas || [];
             dependencias.pintar(nodo, filas, modulo.modo);
         }).catch(function (error) {
+            if (!nodo.isConnected) return;
             dependencias.pintar(nodo, [], modulo.modo);
             dependencias.mostrarEstado(nodo, error.message);
         });

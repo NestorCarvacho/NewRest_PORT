@@ -6,6 +6,8 @@ Las capas del sistema se mantienen: `SGH.Web` tiene el controlador, la vista y e
 
 Cada acción del usuario es un solo POST. El cuerpo trae `opcion`. El controlador comprueba que esa opción exista, el Mid aplica la regla de negocio y llama al repositorio, el repositorio ejecuta el procedimiento y la página pinta `registros`.
 
+En el escritorio actual, Reserva, Solicitud y Censo se abren en solapas junto a Check In, Check Out y Mis Censos. Sus rutas directas `/Reserva/Datos`, `/Solicitud/Datos` y `/Censo/Datos` siguen disponibles y abren la solapa correspondiente.
+
 ## Archivos de un módulo
 
 | Pieza | Ruta | Hace |

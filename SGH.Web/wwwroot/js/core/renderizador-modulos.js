@@ -8,8 +8,7 @@ export function crearRenderizadorModulos(dependencias) {
 
     function columnas(modo) {
         if (modo === "solicitud") return dependencias.solicitud.columnas();
-        var columnasCenso = dependencias.censo.columnas(modo);
-        if (columnasCenso) return columnasCenso;
+        if (modo === "censo" || modo === "misCensos") return dependencias.censo.columnas(modo);
         return dependencias.reserva.columnas(modo, dependencias.movimientosReserva.crearAcciones);
     }
 

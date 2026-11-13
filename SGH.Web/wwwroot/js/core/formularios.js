@@ -141,12 +141,21 @@ export function crearFormularios(dependencias) {
 
         window.jQuery(form).find("select.selector-buscable").select2({
             width: "100%",
+            minimumResultsForSearch: 0,
             language: {
                 noResults: function () { return t("Sin resultados"); },
                 searching: function () { return t("Buscando..."); }
             },
             dropdownParent: window.jQuery("#panel-lateral")
+        }).on("select2:select select2:unselect", function () {
+            this.dispatchEvent(new Event("change", { bubbles: true }));
         });
+    }
+
+    function actualizarSelector(select) {
+        if (!window.jQuery || !window.jQuery.fn.select2) return;
+        var elemento = window.jQuery(select);
+        if (elemento.hasClass("select2-hidden-accessible")) elemento.trigger("change.select2");
     }
 
     function crear(secciones, accion, esAlta, alEnviar) {
@@ -226,6 +235,8 @@ export function crearFormularios(dependencias) {
         boton: boton,
         seccion: seccion,
         contenido: contenido,
-        aOpcion: aOpcion
+        aOpcion: aOpcion,
+        inicializarSelectores: inicializarSelectores,
+        actualizarSelector: actualizarSelector
     };
 }

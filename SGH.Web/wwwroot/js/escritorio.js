@@ -19,6 +19,7 @@ import { crearEntornoEscritorio } from "./core/fabrica-escritorio.js";
         modulos: entorno.modulos,
         crearPanel: entorno.crearPanel,
         columnas: entorno.renderizador.columnas,
+        prepararCatalogo: entorno.prepararCatalogo,
         inicializarTabla: entorno.tablas.inicializar,
         destruirTabla: entorno.tablas.destruir,
         cargar: entorno.cargar,
@@ -39,6 +40,9 @@ import { crearEntornoEscritorio } from "./core/fabrica-escritorio.js";
         window.addEventListener("online", entorno.censoQr.sincronizarPendientes);
         entorno.censoQr.sincronizarPendientes();
     }
+
+    var inicial = document.getElementById("modulo-inicial");
+    if (inicial) navegacion.abrir(inicial.dataset.moduloInicial);
 
     document.addEventListener("keydown", function (evento) {
         if (evento.key === "Escape") {

@@ -1,10 +1,7 @@
 @{
-    var titulo = ViewData["Title"] as string ?? "Módulo";
     var moduloId = ViewData["ModuloId"] as string ?? "";
 }
-<section class="pagina-modulo">
-    <header class="pagina-modulo-cabeza">
-        <h1>@titulo</h1>
-    </header>
-    <div id="modulo-pagina" class="pagina-modulo-cuerpo" data-modulo="@moduloId"></div>
+<section class="bienvenida" id="modulo-inicial" data-modulo-inicial="@moduloId">
+    <h1>Gestión Hotelera</h1>
+    <p>Use el menú para abrir los módulos en solapas.</p>
 </section>

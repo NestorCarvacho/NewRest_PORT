@@ -1,3 +1,5 @@
+var validacionEnlazada = false;
+
 export function crearAvisos() {
     function mostrarAviso(mensaje, tipo) {
         var contenedor = document.getElementById("avisos-escritorio");
@@ -31,10 +33,25 @@ export function crearAvisos() {
             nodo._avisoCarga = null;
         }
         if (mensaje && mensaje !== "Cargando datos...") mostrarAviso(mensaje, "error");
-        estado.hidden = !mensaje || mensaje === "Cargando datos...";
-        estado.textContent = mensaje || "";
+        estado.hidden = true;
+        estado.textContent = "";
         estado.classList.toggle("cargando", mensaje === "Cargando datos...");
         estado.setAttribute("aria-live", "polite");
+    }
+
+    if (!validacionEnlazada) {
+        validacionEnlazada = true;
+        var avisandoValidacion = false;
+        document.addEventListener("invalid", function (evento) {
+            var control = evento.target;
+            if (!control.closest("#panel-lateral, .modulo")) return;
+            evento.preventDefault();
+            if (avisandoValidacion) return;
+            avisandoValidacion = true;
+            mostrarAviso(control.validationMessage, "error");
+            control.focus();
+            window.setTimeout(function () { avisandoValidacion = false; }, 0);
+        }, true);
     }
 
     return { mostrarAviso: mostrarAviso, mostrarEstado: mostrarEstado };

@@ -26,7 +26,7 @@
     <header class="app-cromo">
         <div class="navbar-app">
             <a class="marca" asp-page="/Index">
-                <img src="~/img/logo-sgh.png" alt="" />
+                <img src="~/img/hosteat-logo-vertical.svg" alt="" />
                 <span title="Gestión Hotelera - @nombreEmpresa">Gestión Hotelera - @nombreEmpresa</span>
             </a>
             <div class="buscador">
@@ -65,22 +65,24 @@
                         <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></svg>
                     </button>
                     <div class="menu-desplegable">
-                        <div class="menu-panel">
+                        <div class="menu-panel menu-panel-gestion">
                             <div class="menu-columna">
-                                <h2>Alojamiento</h2>
-                                <a class="menu-enlace" asp-page="/Solicitud/Datos">Solicitud alojamiento</a>
-                                <button type="button">Pasajeros de solicitud</button>
-                                <a class="menu-enlace" asp-page="/Reserva/Datos">Reserva</a>
-                                <button type="button">Reserva por solicitud</button>
-                                <button type="button">Reserva de instalaciones</button>
-                                <button type="button">Asignación</button>
-                                <button type="button">Liberación</button>
-                                <button type="button" data-modulo="checkin">Check In</button>
-                                <button type="button" data-modulo="checkout">Check Out</button>
-                                <a class="menu-enlace" asp-page="/Censo/Datos">Censo</a>
-                                <button type="button" data-modulo="censoQr">Censo QR</button>
-                                <button type="button" data-modulo="misCensos">Mis Censos</button>
-                                <button type="button">Desalojos</button>
+                                <h2>Gestión</h2>
+                                <a class="menu-enlace" asp-page="/Solicitud/Datos" data-modulo="solicitud">Solicitud</a>
+                                <button type="button" disabled title="No disponible">Asignación Servicio</button>
+                                <a class="menu-enlace" asp-page="/Reserva/Datos" data-modulo="reserva">Reserva</a>
+                                <a class="menu-enlace" asp-page="/Censo/Datos" data-modulo="censo">Censo</a>
+                                <button type="button" disabled title="No disponible">Gestión OT</button>
+                                <button type="button" disabled title="No disponible">Registro Servicios</button>
+                                <button type="button" disabled title="No disponible">Solicitud Empresa</button>
+                                <button type="button" disabled title="No disponible">Control de valijas</button>
+                                <button type="button" disabled title="No disponible">Comentarios</button>
+                                <button type="button" disabled title="No disponible">Asignación EPP</button>
+                                <button type="button" disabled title="No disponible">Asignación Casilleros</button>
+                                <button type="button" disabled title="No disponible">Registro Desalojos</button>
+                                <button type="button" disabled title="No disponible">No Conformidades</button>
+                                <button type="button" disabled title="No disponible">Planificación Proyectos</button>
+                                <button type="button" disabled title="No disponible">Reserva Ubicaciones</button>
                             </div>
                         </div>
                     </div>

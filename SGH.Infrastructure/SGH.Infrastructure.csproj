@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SGH.Application\SGH.Application.csproj" />
     <ProjectReference Include="..\SGH.Domain\SGH.Domain.csproj" />
+    <InternalsVisibleTo Include="SGH.Tests" />
   </ItemGroup>
 
   <ItemGroup>

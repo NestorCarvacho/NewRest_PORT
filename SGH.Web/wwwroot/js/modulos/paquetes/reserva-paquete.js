@@ -14,7 +14,6 @@ export function instalarReserva(base) {
         formulario: base.formulario,
         numero: numero,
         enviar: base.enviar,
-        enviarArchivo: base.api.enviarArchivo,
         abrirPanel: base.abrirPanel,
         cargar: base.cargar,
         mostrarAviso: base.mostrarAviso,

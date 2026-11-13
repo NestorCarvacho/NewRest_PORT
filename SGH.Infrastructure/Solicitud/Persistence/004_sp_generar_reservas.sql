@@ -55,7 +55,7 @@ BEGIN
         BEGIN
             DECLARE @Mensaje nvarchar(2048);
             SELECT TOP (1) @Mensaje = CASE WHEN Tipo = 1
-                THEN CONCAT('El pasajero ', PasajeroNombre, ' tiene conflicto con la reserva N° ', ReservaId, '.')
+                THEN CONCAT(N'El pasajero ', PasajeroNombre, N' ya tiene una reserva para el periodo solicitado. Reserva N', NCHAR(176), N' ', ReservaId, N'.')
                 ELSE PasajeroNombre END
             FROM @Conflictos;
             IF @Mensaje IS NULL OR @Mensaje = ''

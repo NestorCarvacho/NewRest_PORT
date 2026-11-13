@@ -52,10 +52,23 @@ export function crearNavegacion(dependencias) {
                 if (dependencias.mostrarEstado) dependencias.mostrarEstado(nodo, "No se cargó la tabla (DataTables). Compruebe la conexión e recargue la página.");
                 return;
             }
-            if (!nodo.dataset.lista) {
-                nodo.dataset.lista = "1";
-                nodo._tabla = dependencias.inicializarTabla(nodo, dependencias.columnas(dependencias.modulos[id].modo));
-                dependencias.cargar(id);
+            if (!nodo.dataset.lista && !nodo.dataset.iniciando) {
+                nodo.dataset.iniciando = "1";
+                dependencias.mostrarEstado(nodo, "Cargando datos...");
+                Promise.resolve().then(function () {
+                    if (!nodo.isConnected) return;
+                    if (!nodo._tabla)
+                        nodo._tabla = dependencias.inicializarTabla(nodo, dependencias.columnas(dependencias.modulos[id].modo), dependencias.modulos[id].ordenInicial);
+                    return dependencias.prepararCatalogo(dependencias.modulos[id].modo);
+                }).then(function () {
+                    if (!nodo.isConnected) return;
+                    nodo.dataset.lista = "1";
+                    return dependencias.cargar(id);
+                }).catch(function (error) {
+                    if (nodo.isConnected) dependencias.mostrarEstado(nodo, error.message);
+                }).finally(function () {
+                    delete nodo.dataset.iniciando;
+                });
             }
         });
     }
@@ -63,9 +76,11 @@ export function crearNavegacion(dependencias) {
     function cerrarSolapa(id) {
         var indice = orden.indexOf(id);
         if (indice < 0) return;
+        var estabaActiva = solapas.querySelector('[data-id="' + id + '"]').classList.contains("activa");
         orden.splice(indice, 1);
         solapas.querySelector('[data-id="' + id + '"]').remove();
         var nodo = paneles.querySelector('[data-id="' + id + '"]');
+        dependencias.mostrarEstado(nodo, "");
         dependencias.destruirTabla(nodo);
         nodo.remove();
         if (orden.length === 0) {
@@ -73,7 +88,7 @@ export function crearNavegacion(dependencias) {
             vista.hidden = false;
             return;
         }
-        activar(orden[Math.max(0, indice - 1)]);
+        if (estabaActiva) activar(orden[Math.max(0, indice - 1)]);
     }
 
     solapas.addEventListener("dragstart", function (evento) {
@@ -90,10 +105,11 @@ export function crearNavegacion(dependencias) {
     solapas.addEventListener("dragover", function (evento) {
         evento.preventDefault();
         var destino = evento.target.closest(".solapa");
-        if (!destino || destino === arrastrada) return;
+        if (!arrastrada || !destino || destino === arrastrada) return;
         var rect = destino.getBoundingClientRect();
         var despues = evento.clientX > rect.left + rect.width / 2;
         solapas.insertBefore(arrastrada, despues ? destino.nextSibling : destino);
+        orden = Array.from(solapas.querySelectorAll(".solapa"), function (solapa) { return solapa.dataset.id; });
     });
 
     return { abrir: abrir, activar: activar, cerrar: cerrarSolapa, paneles: paneles };

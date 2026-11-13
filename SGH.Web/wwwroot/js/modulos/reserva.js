@@ -25,14 +25,6 @@ export function crearReserva(dependencias) {
 
     function filtroInicial(modo) {
         var rango = dependencias.rangoReservaInicial();
-        if (modo === "checkin") {
-            rango.estado = "A";
-            return rango;
-        }
-        if (modo === "checkout") {
-            rango.estado = "I";
-            return rango;
-        }
         if (modo === "reserva") return rango;
         return null;
     }
@@ -58,84 +50,6 @@ export function crearReserva(dependencias) {
                 dependencias.campo("observaciones", "Observaciones", "textarea")
             ])
         ];
-    }
-
-    function abrirImportacion(id) {
-        var contenido = document.createElement("div");
-        var ayuda = document.createElement("p");
-        ayuda.textContent = "Complete la plantilla Excel. Las filas con errores se informarán sin impedir la importación de las demás.";
-        var detalle = document.createElement("p");
-        detalle.textContent = "Use los nombres exactos de Grupo Empresa y Turno del catálogo. Ingrese las fechas como AAAA-MM-DD HH:mm.";
-        var plantilla = document.createElement("a");
-        plantilla.href = "/Reserva/PlantillaReservas";
-        plantilla.className = "boton-secundario";
-        plantilla.textContent = "Descargar plantilla";
-        var formularioImportacion = document.createElement("form");
-        formularioImportacion.className = "formulario";
-        var campoArchivo = document.createElement("label");
-        campoArchivo.className = "campo";
-        var etiquetaArchivo = document.createElement("span");
-        etiquetaArchivo.textContent = "Planilla Excel (.xlsx)";
-        var archivo = document.createElement("input");
-        archivo.type = "file";
-        archivo.name = "archivo";
-        archivo.accept = ".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-        archivo.required = true;
-        campoArchivo.append(etiquetaArchivo, archivo);
-        var enviar = document.createElement("button");
-        enviar.type = "submit";
-        enviar.className = "boton-primario";
-        enviar.textContent = "Importar reservas";
-        var resultado = document.createElement("div");
-        resultado.setAttribute("aria-live", "polite");
-        formularioImportacion.append(campoArchivo, enviar, resultado);
-        formularioImportacion.addEventListener("submit", function (evento) {
-            evento.preventDefault();
-            if (!archivo.files || archivo.files.length === 0) return;
-            enviar.disabled = true;
-            resultado.replaceChildren();
-            dependencias.enviarArchivo("/Reserva/Mid/MidReservas.cs", archivo.files[0])
-                .then(function (respuesta) {
-                    if (respuesta.error) {
-                        resultado.textContent = respuesta.error;
-                        return;
-                    }
-                    var creadas = respuesta.filas.filter(function (fila) { return fila.reservaId !== null; }).length;
-                    var rechazadas = respuesta.filas.filter(function (fila) { return fila.error; });
-                    var resumen = document.createElement("p");
-                    resumen.textContent = "Reservas creadas: " + creadas + " de " + respuesta.filasLeidas + ".";
-                    resultado.append(resumen);
-                    if (respuesta.error) {
-                        var errorGeneral = document.createElement("p");
-                        errorGeneral.textContent = respuesta.error;
-                        resultado.append(errorGeneral);
-                    }
-                    if (rechazadas.length > 0) {
-                        var titulo = document.createElement("p");
-                        titulo.textContent = "Filas rechazadas:";
-                        var lista = document.createElement("ul");
-                        rechazadas.forEach(function (fila) {
-                            var elemento = document.createElement("li");
-                            elemento.textContent = "Fila " + fila.numeroFila + ": " + fila.error;
-                            lista.append(elemento);
-                        });
-                        resultado.append(titulo, lista);
-                    }
-                    if (creadas > 0) {
-                        dependencias.cargar(id).catch(function (error) {
-                            var errorActualizacion = document.createElement("p");
-                            errorActualizacion.textContent = error.message;
-                            resultado.append(errorActualizacion);
-                        });
-                    }
-                })
-                .catch(function (error) {
-                    resultado.textContent = error.message;
-                })
-                .finally(function () { enviar.disabled = false; });
-        });
-        contenido.append(ayuda, detalle, plantilla, formularioImportacion);
-        dependencias.abrirPanel("Importación masiva de reservas", contenido);
     }
 
     function abrirEdicion(fila) {
@@ -234,12 +148,33 @@ export function crearReserva(dependencias) {
             estado: fila.estado,
             llegada: fila.llegada,
             salida: fila.salida,
+            checkIn: fila.checkIn || "",
+            checkOut: fila.checkOut || "",
             _fila: fila
         };
     }
 
+    function renderizarMovimiento(valor, tipo) {
+        if (!valor) return "";
+        if (tipo === "sort" || tipo === "type") {
+            var partes = /^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}:\d{2})$/.exec(valor);
+            if (partes) return partes[3] + "-" + partes[2] + "-" + partes[1] + " " + partes[4];
+        }
+        return DataTable.render.text().display(valor);
+    }
+
+    function renderizarFechaPrevista(valor, tipo) {
+        if (!valor) return "";
+        var partes = /^(\d{2})\/(\d{2})\/(\d{4})(?: \d{2}:\d{2})?$/.exec(valor);
+        if (!partes) return DataTable.render.text().display(valor);
+        if (tipo === "sort" || tipo === "type") return partes[3] + "-" + partes[2] + "-" + partes[1];
+        return partes[1] + "/" + partes[2] + "/" + partes[3];
+    }
+
     function columnas(modo, crearAcciones) {
-        return ["acciones", "numero", "fechaReserva", "grupo", "pasajero", "habitacion", "estado", "llegada", "salida"].map(function (clave) {
+        return ["acciones", "numero", "fechaReserva", "grupo", "pasajero", "habitacion", "estado", "llegada", "salida", "checkIn", "checkOut"].map(function (clave) {
+            if (clave === "checkIn" || clave === "checkOut") return { data: clave, render: renderizarMovimiento };
+            if (clave === "llegada" || clave === "salida") return { data: clave, render: renderizarFechaPrevista };
             if (clave !== "acciones") return { data: clave };
             return {
                 data: clave,
@@ -255,7 +190,6 @@ export function crearReserva(dependencias) {
         filtros: filtros,
         filtroInicial: filtroInicial,
         formulario: formulario,
-        abrirImportacion: abrirImportacion,
         abrirEdicion: abrirEdicion,
         crear: crear,
         buscar: buscar,

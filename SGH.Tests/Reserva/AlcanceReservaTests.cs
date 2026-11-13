@@ -1,3 +1,4 @@
+using System.Text.Json;
 using SGH.Application.Reserva.DTOs;
 using SGH.Application.Reserva.UseCases;
 using SGH.Application.Sesion;
@@ -9,6 +10,31 @@ namespace SGH.Tests.Reserva;
 
 public class AlcanceReservaTests
 {
+    [Fact]
+    public async Task BusquedaConservaMovimientosRegistradosYCheckoutPendienteEnJson()
+    {
+        var consulta = new ConsultaReservaFalsa
+        {
+            Filas =
+            [
+                new ReservaListada(1, 2, 3, 4, 5, "Grupo", "Pasajero", "Habitación", "Asignada", "A",
+                    "10/11/2026 10:00", "11/11/2026 00:00", "<Sin Asignar>", "11/11/2026 09:18", "11/11/2026 13:18"),
+                new ReservaListada(2, 2, 3, 4, 5, "Grupo", "Pasajero", "Habitación", "Asignada", "A",
+                    "10/11/2026 10:00", "11/11/2026 00:00", "<Sin Asignar>", "11/11/2026 09:18", null)
+            ]
+        };
+        var caso = new BuscarReservas(consulta);
+
+        var resultado = await caso.EjecutarAsync(new SolicitudBuscarReservas(
+            1, 20, 0, 0, "0", 0, "0", null, null, null, null, null, null, null, 0, 0, "0"), CancellationToken.None);
+
+        var filas = Assert.IsType<ResultadoBusquedaReservas.Lista>(resultado).Filas;
+        using var json = JsonDocument.Parse(JsonSerializer.Serialize(filas, new JsonSerializerOptions(JsonSerializerDefaults.Web)));
+        Assert.Equal("11/11/2026 09:18", json.RootElement[0].GetProperty("checkIn").GetString());
+        Assert.Equal("11/11/2026 13:18", json.RootElement[0].GetProperty("checkOut").GetString());
+        Assert.Equal(JsonValueKind.Null, json.RootElement[1].GetProperty("checkOut").ValueKind);
+    }
+
     [Fact]
     public async Task SinCampamentoNoBuscaNiListaElCatalogo()
     {
@@ -73,6 +99,8 @@ public class AlcanceReservaTests
     {
         public HashSet<int>? ReservasPropias { get; init; }
 
+        public IReadOnlyList<ReservaListada> Filas { get; init; } = [];
+
         public int Busquedas { get; private set; }
 
         public int Catalogos { get; private set; }
@@ -80,7 +108,7 @@ public class AlcanceReservaTests
         public Task<IReadOnlyList<ReservaListada>> BuscarAsync(FiltroReserva filtro, CancellationToken cancellationToken)
         {
             Busquedas++;
-            return Task.FromResult<IReadOnlyList<ReservaListada>>([]);
+            return Task.FromResult(Filas);
         }
 
         public Task<CatalogoReserva> ObtenerCatalogoAsync(int empresaMandanteId, int campamentoId, CancellationToken cancellationToken)

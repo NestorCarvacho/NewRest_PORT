@@ -15,8 +15,8 @@ export function crearMovimientosReserva(dependencias) {
     }
 
     function crearBotonMovimiento(reservaId, operacion, texto) {
-        return dependencias.boton(texto, "accion-fila", function () {
-            dependencias.abrirPanel("Seleccionar Fecha", dependencias.formulario([
+        var boton = dependencias.boton(texto, "accion-fila accion-" + (operacion === "I" ? "checkin" : "checkout"), function () {
+            dependencias.abrirPanel(texto, dependencias.formulario([
                 dependencias.seccion("", [
                     dependencias.campo("fecha", "Fecha", "datetime-local", [], { requerido: true, valor: dependencias.momentoLocal(true) })
                 ])
@@ -36,6 +36,27 @@ export function crearMovimientosReserva(dependencias) {
                 });
             }));
         });
+        var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 24 24");
+        svg.setAttribute("fill", "none");
+        svg.setAttribute("stroke", "currentColor");
+        svg.setAttribute("stroke-width", "2");
+        svg.setAttribute("stroke-linecap", "round");
+        svg.setAttribute("stroke-linejoin", "round");
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("focusable", "false");
+        var partes = operacion === "I"
+            ? [["path", "d", "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"], ["polyline", "points", "10 17 15 12 10 7"], ["path", "d", "M15 12H3"]]
+            : [["path", "d", "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"], ["polyline", "points", "16 17 21 12 16 7"], ["path", "d", "M21 12H9"]];
+        partes.forEach(function (parte) {
+            var elemento = document.createElementNS("http://www.w3.org/2000/svg", parte[0]);
+            elemento.setAttribute(parte[1], parte[2]);
+            svg.append(elemento);
+        });
+        boton.setAttribute("aria-label", texto);
+        boton.setAttribute("title", texto);
+        boton.replaceChildren(svg);
+        return boton;
     }
 
     return { crearAcciones: crearAcciones };

@@ -14,7 +14,10 @@ export function crearCenso(dependencias) {
                 pisoId: filtro.piso,
                 habitacionId: filtro.habitacion,
                 fecha: dia,
-                turno: filtro.turno
+                turno: filtro.turno,
+                EmpresaMandanteId: filtro.EmpresaMandanteId,
+                campamentoId: filtro.campamentoId
+                
             });
         })).then(function (respuestas) {
             var filas = [];
@@ -142,7 +145,20 @@ export function crearCenso(dependencias) {
         return null;
     }
 
+    function validarCamasOcupadas(fila) {
+        return fila.camasOcupadas <= fila.numeroCamas;
+    }
+
     function guardar(nodo) {
+        // Validar que las camas ocupadas no superen el número de camas y que no sean menor a 0
+        // pero pueden ser = 0
+        for (var i = 0; i < (nodo._filas || []).length; i++) {
+            var fila = nodo._filas[i];
+            if (!validarCamasOcupadas(fila) || fila.camasOcupadas < 0) {
+                dependencias.mostrarEstado(nodo, "Las camas ocupadas deben estar entre 0 y el número de camas, revisar id: " + (fila.id) + "");
+                return Promise.reject(new Error("Las camas ocupadas deben estar entre 0 y el número de camas"));
+            }
+        }
         var filtro = nodo._filtro || {};
         var filas = (nodo._filas || []).map(function (fila) {
             return {
