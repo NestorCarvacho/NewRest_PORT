@@ -27,11 +27,23 @@ Catálogo: `SGH.Application/Configuracion/CatalogoSecretos.cs`.
 
 ## Desarrollo local
 
-```bash
-cp SGH.Web/secrets.example.json SGH.Web/secrets.json
+**PowerShell (Windows)**
+
+```powershell
+Copy-Item SGH.Web\secrets.example.json SGH.Web\secrets.json
 # Editar secrets.json (no commitear)
 
-dotnet user-secrets set "ConnectionStrings:Hoteldb" "Server=...;Database=HOTELDB;..." --project SGH.Web
+dotnet user-secrets set "ConnectionStrings:Hoteldb" 'Server=(localdb)\MSSQLLocalDB;Database=HOTELDB;Trusted_Connection=True;TrustServerCertificate=True;Encrypt=False;Application Name=SGH.Web' --project SGH.Web
+```
+
+Use comillas simples en la cadena para que `\` no se corrompa. Si LocalDB no está instalado, apunte al servidor SQL corporativo con `Server=...;User Id=...;Password=...`.
+
+**Comprobar entorno**
+
+```powershell
+$env:ASPNETCORE_ENVIRONMENT = "Production"   # debe fallar si falta HOTELDB
+$env:ASPNETCORE_ENVIRONMENT = "Testing"      # debe arrancar sin validar cadena
+$env:ASPNETCORE_ENVIRONMENT = "Development" # warning si falta cadena; User Secrets si está configurado
 ```
 
 ## Producción / staging

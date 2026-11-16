@@ -28,7 +28,20 @@ Registrar el cierre formal de la actividad y ofrecer texto listo para Jira/Linea
 
 ## Resultado / impacto esperado
 
-Política de secretos unificada con el resto de épicas SGH; 114 tests Release en verde; documentación de ticket actualizada para copiar al gestor de incidencias.
+Política de secretos unificada con el resto de épicas SGH; **114 tests** Release en verde; despliegue controlado (fallo al arrancar en Production sin cadena); desarrollo vía User Secrets / `secrets.json` sin credenciales en Git.
+
+---
+
+## Evidencia de verificación (operativa)
+
+| Prueba | Comando / contexto | Resultado esperado | Resultado |
+|--------|-------------------|-------------------|-----------|
+| Suite automatizada | `dotnet test SGH.sln -c Release` | 114 passed | Cumplido |
+| Production sin HOTELDB | PowerShell: `$env:ASPNETCORE_ENVIRONMENT = "Production"` + `dotnet run --project SGH.Web` | `InvalidOperationException` al inicio | Cumplido (entorno dev) |
+| Testing sin HOTELDB | `$env:ASPNETCORE_ENVIRONMENT = "Testing"` + `dotnet run` | Arranque sin exigir cadena | Documentado |
+| Secretos en User Secrets | `dotnet user-secrets set "ConnectionStrings:Hoteldb" ...` | Login contra SQL si HOTELDB existe | Configuración local del desarrollador |
+
+**Nota Windows:** no usar sintaxis bash (`VAR=valor`). En PowerShell: `$env:ASPNETCORE_ENVIRONMENT = "Production"`. Cadena LocalDB recomendada con comillas simples: `Server=(localdb)\MSSQLLocalDB` (ver `Docs/login-pendiente-revision-base-de-datos.md` si la instancia LocalDB no existe).
 
 ---
 
