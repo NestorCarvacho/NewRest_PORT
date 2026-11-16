@@ -54,7 +54,9 @@ export function crearReserva(dependencias) {
 
     function abrirEdicion(fila) {
         var catalogo = dependencias.obtenerCatalogo() || { grupos: [], pasajeros: [], habitaciones: [], turnos: [] };
-        var fecha = dependencias.momentoLocal(false);
+        var fechaReservaInicial = dependencias.fechaListadoAInput(fila.fechaReserva) || dependencias.momentoLocal(false);
+        var fechaLlegadaInicial = dependencias.fechaListadoAInput(fila.llegada) || dependencias.fechaListadoAInput(fila.fechaLlegada);
+        var fechaSalidaInicial = dependencias.fechaListadoAInput(fila.salida) || dependencias.fechaListadoAInput(fila.fechaSalida);
         var bloqueada = fila.estadoNumero === "F" || fila.estadoNumero === "N";
         var habitaciones = dependencias.aOpcion(catalogo.habitaciones);
         if (habitaciones.length === 1) {
@@ -74,9 +76,9 @@ export function crearReserva(dependencias) {
                     { value: "F", text: "Finalizada" },
                     { value: "N", text: "Anulada" }
                 ], { deshabilitado: true, valor: fila.estadoNumero || "P" }),
-                dependencias.campo("fechaReserva", "Fecha Reserva", "date", [], { valor: fecha }),
-                dependencias.campo("fechaLlegada", "Fecha Llegada", "date", [], { valor: fecha }),
-                dependencias.campo("fechaSalida", "Fecha Salida", "date"),
+                dependencias.campo("fechaReserva", "Fecha Reserva", "date", [], { valor: fechaReservaInicial }),
+                dependencias.campo("fechaLlegada", "Fecha Llegada", "date", [], { valor: fechaLlegadaInicial }),
+                dependencias.campo("fechaSalida", "Fecha Salida", "date", [], { valor: fechaSalidaInicial }),
                 dependencias.campo("observacion", "Observación", "textarea")
             ])
         ], "Guardar", true, function (datos) {
@@ -85,9 +87,9 @@ export function crearReserva(dependencias) {
                 reservaId: fila.id,
                 areaId: dependencias.numero(form.querySelector("[name='areaId']").value),
                 turnoId: dependencias.numero(datos.turnoId) || fila.turnoId,
-                fechaReserva: datos.fechaReserva || fecha,
-                fechaLlegada: datos.fechaLlegada || fecha,
-                fechaSalida: datos.fechaSalida,
+                fechaReserva: datos.fechaReserva || fechaReservaInicial,
+                fechaLlegada: datos.fechaLlegada || fechaLlegadaInicial,
+                fechaSalida: datos.fechaSalida || fechaSalidaInicial || null,
                 observacion: datos.observacion,
                 pasajeroId: dependencias.numero(form.querySelector("[name='pasajeroId']").value) || null,
                 habitacionId: dependencias.numero(datos.habitacionId) || null,

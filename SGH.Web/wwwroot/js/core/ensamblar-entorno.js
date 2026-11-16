@@ -57,6 +57,8 @@ export function ensamblarEntorno(idsPantalla) {
         contenido: base.contenido,
         cargar: base.cargar,
         mostrarEstado: base.mostrarEstado,
+        mostrarAviso: base.mostrarAviso,
+        exportarTabla: base.exportarTabla,
         reserva: instancia.reserva,
         solicitud: instancia.solicitud,
         censo: instancia.censo,

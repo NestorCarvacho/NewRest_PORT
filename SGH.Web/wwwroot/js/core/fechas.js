@@ -15,6 +15,16 @@ export function crearFechas() {
         return fecha + "T" + dosDigitos(ahora.getHours()) + ":" + dosDigitos(ahora.getMinutes());
     }
 
+    /** Convierte dd/MM/yyyy o dd/MM/yyyy HH:mm (p. ej. listado) a yyyy-MM-dd para input[type=date]. */
+    function fechaListadoAInput(valor) {
+        if (!valor || typeof valor !== "string") return "";
+        var texto = valor.trim();
+        if (texto.indexOf("<") >= 0) return "";
+        var partes = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(texto);
+        if (!partes) return "";
+        return partes[3] + "-" + partes[2] + "-" + partes[1];
+    }
+
     function rangoReservaInicial() {
         var hoy = new Date();
         var fecha = fechaActual();
@@ -24,5 +34,10 @@ export function crearFechas() {
         return { reservaDesde: desde, reservaHasta: fecha };
     }
 
-    return { fechaActual: fechaActual, momentoLocal: momentoLocal, rangoReservaInicial: rangoReservaInicial };
+    return {
+        fechaActual: fechaActual,
+        momentoLocal: momentoLocal,
+        rangoReservaInicial: rangoReservaInicial,
+        fechaListadoAInput: fechaListadoAInput
+    };
 }

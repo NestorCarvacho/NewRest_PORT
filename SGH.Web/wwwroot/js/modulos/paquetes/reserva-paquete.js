@@ -11,6 +11,7 @@ export function instalarReserva(base) {
         seccion: base.seccion,
         momentoLocal: base.momentoLocal,
         rangoReservaInicial: base.rangoReservaInicial,
+        fechaListadoAInput: base.fechaListadoAInput,
         formulario: base.formulario,
         numero: numero,
         enviar: base.enviar,
