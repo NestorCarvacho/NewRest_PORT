@@ -19,6 +19,7 @@ public class CompletarSesionTests
     public async Task SegundoPasoNoRevalidaLaClave()
     {
         Preparar();
+        _repositorio.Perfiles.Add(Perfil(8, ReglasCuenta.PerfilOperacionesA));
 
         var resultado = await Crear().EjecutarAsync(new SolicitudCompletarSesion("123456789", "otra123", 8), CancellationToken.None);
 

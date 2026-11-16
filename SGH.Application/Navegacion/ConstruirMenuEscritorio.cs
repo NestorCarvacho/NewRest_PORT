@@ -2,6 +2,9 @@ using SGH.Domain.Navegacion;
 
 namespace SGH.Application.Navegacion;
 
+/// <summary>
+/// Arma grupos desde BD: raíz <c>nav</c> → título del desplegable; hijos <c>side</c> → ítems del panel bajo la barra (no panel lateral).
+/// </summary>
 public static class ConstruirMenuEscritorio
 {
     private static readonly StringComparer Comparador = StringComparer.OrdinalIgnoreCase;
@@ -11,28 +14,62 @@ public static class ConstruirMenuEscritorio
         if (filas.Count == 0)
             return new MenuEscritorioVm(Array.Empty<MenuGrupoVm>(), desdeBaseDeDatos);
 
-        var gruposPorUbicacion = filas
-            .GroupBy(f => string.IsNullOrWhiteSpace(f.Ubicacion) ? "Otros" : f.Ubicacion.Trim(), Comparador)
-            .OrderBy(g => OrdenGrupo(g.Key), Comparador)
-            .ThenBy(g => g.Key, Comparador);
+        var raices = filas
+            .Where(EsRaizBarra)
+            .OrderBy(f => f.Orden)
+            .ThenBy(f => f.Nombre, Comparador)
+            .ToList();
+
+        if (raices.Count == 0)
+            return DesdeFilasPlano(filas, desdeBaseDeDatos);
 
         var grupos = new List<MenuGrupoVm>();
-        foreach (var grupo in gruposPorUbicacion)
+        foreach (var raiz in raices)
         {
-            var items = grupo
+            var hijos = filas
+                .Where(f => f.PadreId == raiz.Id)
                 .OrderBy(f => f.Orden)
                 .ThenBy(f => f.Nombre, Comparador)
                 .Select(CrearItem)
                 .ToList();
 
-            var tituloGrupo = TituloGrupo(grupo.Key);
-            var esConfig = EsGrupoConfiguracion(grupo.Key);
-            var columna = new MenuColumnaVm(tituloGrupo, items);
-            grupos.Add(new MenuGrupoVm(tituloGrupo, esConfig, new[] { columna }));
+            if (hijos.Count == 0)
+                continue;
+
+            var esConfig = EsGrupoConfiguracionRaiz(raiz);
+            var columna = new MenuColumnaVm(raiz.Nombre, hijos);
+            grupos.Add(new MenuGrupoVm(raiz.Nombre, esConfig, new[] { columna }));
         }
 
         return new MenuEscritorioVm(grupos, desdeBaseDeDatos);
     }
+
+    /// <summary>Formato legado sin filas <c>nav</c> (solo <c>side</c> u otras ubicaciones).</summary>
+    private static MenuEscritorioVm DesdeFilasPlano(IReadOnlyList<MenuPerfilItem> filas, bool desdeBaseDeDatos)
+    {
+        var grupos = filas
+            .GroupBy(f => string.IsNullOrWhiteSpace(f.Ubicacion) ? "Otros" : f.Ubicacion.Trim(), Comparador)
+            .OrderBy(g => g.Key, Comparador)
+            .Select(grupo =>
+            {
+                var items = grupo.OrderBy(f => f.Orden).Select(CrearItem).ToList();
+                var titulo = grupo.Key;
+                var esConfig = titulo.Contains("config", StringComparison.OrdinalIgnoreCase);
+                return new MenuGrupoVm(titulo, esConfig, new[] { new MenuColumnaVm(titulo, items) });
+            })
+            .ToList();
+
+        return new MenuEscritorioVm(grupos, desdeBaseDeDatos);
+    }
+
+    private static bool EsRaizBarra(MenuPerfilItem fila) =>
+        string.Equals(fila.Ubicacion, "nav", StringComparison.OrdinalIgnoreCase)
+        || fila.PadreId is null or 0;
+
+    private static bool EsGrupoConfiguracionRaiz(MenuPerfilItem raiz) =>
+        raiz.Nombre.Contains("configuración", StringComparison.OrdinalIgnoreCase)
+        || raiz.Nombre.Contains("configuracion", StringComparison.OrdinalIgnoreCase)
+        || raiz.Link.Contains("/config", StringComparison.OrdinalIgnoreCase);
 
     private static MenuItemVm CrearItem(MenuPerfilItem fila)
     {
@@ -52,21 +89,5 @@ public static class ConstruirMenuEscritorio
             rutaPagina: null,
             disponible: false,
             tituloDeshabilitado: "No disponible");
-    }
-
-    private static bool EsGrupoConfiguracion(string ubicacion) =>
-        ubicacion.Contains("config", StringComparison.OrdinalIgnoreCase)
-        || ubicacion.Contains("campamento", StringComparison.OrdinalIgnoreCase)
-        || ubicacion.Contains("administr", StringComparison.OrdinalIgnoreCase);
-
-    private static string TituloGrupo(string ubicacion) =>
-        string.IsNullOrWhiteSpace(ubicacion) ? "Otros" : ubicacion;
-
-    private static string OrdenGrupo(string ubicacion)
-    {
-        if (EsGrupoConfiguracion(ubicacion))
-            return "zzz";
-
-        return ubicacion;
     }
 }

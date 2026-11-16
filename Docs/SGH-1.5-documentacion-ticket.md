@@ -71,7 +71,9 @@ Diccionario completo: `Docs/datos/Diccionario_de_datos_HotelDB.xlsx`
 | `censo` | `/Censo/Datos` | `GestionarCensos` |
 | `usuarios` | `/Cuenta/Usuarios` | `AdministrarUsuarios` |
 
-El mapeo detecta **fragmentos** en `Link` (p. ej. `/api/solicitud…`, `/reservas`, `/censo`, `/usuarios`). Ampliar `MapeoEnlacesMenu.cs` cuando aparezcan links con otro texto.
+**BD vs UI:** en HOTELDB, `nav` = raíz y `side` = hijos (`PadreId`). En NewRest los `side` van al **desplegable bajo cada botón de la barra** (hover/click), no al panel lateral de navegación. Ver perfiles **1** / **137** en `Docs/datos/diccionario-hoteldb-perfiles-menus.md`.
+
+Mapeo de rutas SPA (`/app/gestion/censo`, `/app/gestion/miscensos` → `censo` / `censoQr`). Los informes (`/app/gestion/informe/censo`) quedan deshabilitados hasta migrar. Ampliar `MapeoEnlacesMenu.cs` según nuevos `Link`.
 
 ### 4. Políticas (regla combinada)
 

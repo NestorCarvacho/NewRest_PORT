@@ -19,7 +19,8 @@ erDiagram
 ```
 
 - **Sesión NewRest:** el login usa **`PerfilesUsuario.id`** (asignación campamento–perfil) y el **`PerfilId`** de esa fila (`sp_Usuario_ObtenerCampamentosYPerfiles`).
-- **Menú legado:** cada fila de **`Menus`** es un ítem (`Link`, jerarquía `PadreId`, agrupación `Ubicacion`); **`MenusPerfil`** define qué ítems ve cada **`PerfilId`**.
+- **Menú legado (datos):** cada fila de **`Menus`** es un ítem (`Link`, jerarquía `PadreId`, campo `Ubicacion`); **`MenusPerfil`** define qué ítems ve cada **`PerfilId`**.
+- **Menú NewRest (UI, directriz actual):** las filas `Ubicacion = nav` son los botones de la **barra superior**; las filas `side` con `PadreId` del `nav` se muestran en el **panel desplegable** bajo ese botón (hover/click), **no** en el panel lateral `#panel-lateral` (ese panel queda para formularios de módulos).
 - **Autorización HTTP (objetivo 1.5):** alinear políticas con el conjunto de `Menus.Link` (o un código derivado de `Menus.Id`) permitido para el `PerfilId` de sesión.
 
 ---
@@ -125,6 +126,50 @@ Además del login (`Password`, `Md5Retirado`, bloqueo, etc.):
 | `PoliticaUsuario` | Aceptación de políticas (login AS-IS, no menú) |
 
 > **`dbo.Modulos`** en HOTELDB es **módulo físico del campamento** (`PabellonId`), no entrada de menú de aplicación.
+
+---
+
+## Muestra real — `PerfilId = 1` (administración / menú completo)
+
+Misma jerarquía `nav` / `side`. En **Gestión** (`PadreId = 2`) aparecen los módulos migrados del escritorio:
+
+| Nombre | `Link` | NewRest |
+|--------|--------|---------|
+| Solicitud | `/app/gestion/solicitud` | `/Solicitud/Datos` |
+| Reserva | `/app/gestion/reserva` | `/Reserva/Datos` |
+| Censo | `/app/gestion/censo` | `/Censo/Datos` |
+| Solicitud Empresa | `/app/gestion/solicitudempresa` | No migrado |
+| Gestión OT, etc. | … | No migrado |
+
+En **Configuración** (`PadreId = 4`): **Usuarios** → `/app/config/usuario` → `/Cuenta/Usuarios`.
+
+`Dashboard` (`nav` sin hijos `side`) no se muestra en el menú nuevo hasta tener página destino. **Home** con `Link = #` queda deshabilitado.
+
+El nav **Dashboard** (`Id = 1`) suele no tener filas `side` en `MenusPerfil`; el resto de barras sí.
+
+---
+
+## Muestra real — `PerfilId = 137`
+
+Estructura legado contrastada con la query `sp_Menu_ObtenerPorPerfil`:
+
+| Nivel en BD | `Ubicacion` | `PadreId` | En pantalla NewRest |
+|-------------|-------------|-----------|---------------------|
+| Raíz | `nav` | `NULL` | Botón en barra superior (Gestión, Informes, …) |
+| Hijo | `side` | id del `nav` | Lista dentro del **desplegable** bajo ese botón (hover/click) |
+
+En el **sistema legado** los hijos `side` abrían un panel lateral; en **NewRest** la directriz vigente mantiene todo en la barra + desplegable (`menu-desplegable`), sin reutilizar el panel lateral para navegación.
+
+Rutas SPA típicas: `/app/gestion`, `/app/gestion/censo`, `/app/gestion/informe/censo`, `/app/gestion/miscensos`, `/app/config/codigoqr`.
+
+Mapeo en NewRest (`MapeoEnlacesMenu`):
+
+| `Link` (fragmento) | Escritorio |
+|--------------------|------------|
+| `/app/gestion/censo` | Módulo `censo` → `/Censo/Datos` |
+| `/app/gestion/miscensos` | `censoQr` (panel QR, sin página Razor) |
+| `/app/gestion/informe/censo` | Sin migrar (deshabilitado) |
+| Solicitud / Reserva (cuando existan en menú) | `/Solicitud/Datos`, `/Reserva/Datos` |
 
 ---
 
