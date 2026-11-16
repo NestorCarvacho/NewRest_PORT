@@ -45,7 +45,7 @@ No inventar contratos: cada sub-módulo exige inventario de SP legado, mensajes 
 
 | Fase | ID sugerido | Alcance | Entregable mínimo |
 |------|-------------|---------|-------------------|
-| **0 — Inventario** | SGH 2.1.0 | Matriz 41 listas + SP por tabla | `Docs/datos/maestros-listas-inventario.md` |
+| **0 — Inventario** | SGH 2.1.0 | Matriz 41 listas + SP por tabla | `Docs/datos/maestros-listas-inventario.md` + [`diccionario-hoteldb-procedimientos-almacenados.md`](datos/diccionario-hoteldb-procedimientos-almacenados.md) |
 | **1 — Listas (lotes)** | SGH 2.1.1a…n | 5–8 catálogos Lista por ticket | Módulo `Listas/{Codigo}` MVC+Mid |
 | **2 — Empresas** | SGH 2.1.2 | CRUD Empresas + alcance mandante | `/Empresas/Datos` + `MidEmpresas` |
 | **3 — Áreas** | SGH 2.1.3 | CRUD AreasEmpresa (depende Empresa) | Mid + reglas jerarquía |

@@ -13,9 +13,16 @@ Matriz de los **41 catálogos `Listas`** para planificar lotes SGH 2.1.1a…n. U
 | 1 | `usrpasshist` | (política contraseña) | — | `Docs/login-…` | — | N/A (parámetro) | Solo lectura reglas |
 | 2 | *(completar)* | | | | | | Pendiente |
 
-## Consulta sugerida (ajustar al esquema real)
+## Consultas SQL (catálogo de SP)
 
-Contrastar en SQL Server las tablas/vistas que alimentan el mantenedor **Listas** del front legado y documentar aquí los 41 ítems. No ejecutar en este repo sin credenciales; el dueño de HOTELDB completa la matriz.
+Usar [`diccionario-hoteldb-procedimientos-almacenados.md`](diccionario-hoteldb-procedimientos-almacenados.md):
+
+- **§1** — todos los procedimientos de HOTELDB.
+- **§2** — filtro por prefijos maestros (`UNG_`, `DIV_`, `DEP_`, `EMP_`, `LIS_`, …).
+- **§3** — parámetros por SP.
+- **§4** — SP que referencian tablas `Listas`, `Empresas`, etc.
+
+Exportar resultados a CSV y completar la matriz de abajo (41 ítems).
 
 ## Siguiente paso
 
