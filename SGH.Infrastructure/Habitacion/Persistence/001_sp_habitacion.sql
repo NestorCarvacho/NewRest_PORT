@@ -354,6 +354,48 @@ BEGIN
                 SET @EstadoTabla = 8;
         END
 
+        /* Legado: SexoTabla + Sexo referencian dbo.Listas (catálogo sexos, IdTabla 11). */
+        DECLARE @SexoTabla int = 11;
+        DECLARE @SexoLista varchar(20);
+        SELECT TOP 1 @SexoTabla = ISNULL(h.SexoTabla, 11)
+        FROM dbo.Habitaciones AS h WITH (NOLOCK)
+        WHERE h.SexoTabla IS NOT NULL
+        ORDER BY h.Id DESC;
+        IF @SexoTabla IS NULL
+            SET @SexoTabla = 11;
+
+        DECLARE @SexoNorm varchar(20) = UPPER(LTRIM(RTRIM(ISNULL(@Sexo, N''))));
+        IF @SexoNorm IN (N'HOMBRE', N'MASCULINO')
+            SET @SexoNorm = N'M';
+        IF @SexoNorm IN (N'MUJER', N'FEMENINO')
+            SET @SexoNorm = N'F';
+
+        SELECT TOP 1 @SexoLista = l.Valor1
+        FROM dbo.Listas AS l WITH (NOLOCK)
+        WHERE l.IdTabla = @SexoTabla
+          AND l.Tipo = N'Detalle'
+          AND l.Valor1 <> N'0'
+          AND (
+                l.Valor1 = @SexoNorm
+                OR (@SexoNorm = N'M' AND l.Valor1 IN (N'M', N'HOMBRE'))
+                OR (@SexoNorm = N'F' AND l.Valor1 IN (N'F', N'MUJER'))
+                OR (@SexoNorm = N'MIXTO' AND l.Valor1 IN (N'MIXTO', N'O'))
+              )
+        ORDER BY
+            CASE
+                WHEN l.Valor1 = @SexoNorm THEN 0
+                WHEN @SexoNorm = N'M' AND l.Valor1 = N'M' THEN 1
+                WHEN @SexoNorm = N'F' AND l.Valor1 = N'F' THEN 1
+                WHEN @SexoNorm = N'MIXTO' AND l.Valor1 = N'MIXTO' THEN 1
+                ELSE 2
+            END;
+
+        IF @SexoLista IS NULL
+        BEGIN
+            SET @Mensaje = N'El sexo seleccionado no existe en el catálogo legado (Listas).';
+            RETURN;
+        END
+
         SET @MinutosMin = CASE
             WHEN @PermiteUsoPorTurnos = 1 AND @TiempoHigienizacionMin > 0 THEN @TiempoHigienizacionMin
             ELSE @MinutosMin END;
@@ -371,7 +413,8 @@ BEGIN
                     Nombre = @Nombre,
                     IsActive = @IsActive,
                     CantidadCamas = @CantidadCamas,
-                    Sexo = @Sexo,
+                    SexoTabla = @SexoTabla,
+                    Sexo = @SexoLista,
                     TipoInstalacionId = @TipoInstalacionId,
                     StandardHabitacionId = @StandardHabitacionId,
                     EstadoTabla = @EstadoTabla,
@@ -411,7 +454,7 @@ BEGIN
                 END
 
                 INSERT INTO dbo.Habitaciones (
-                    ModuloId, Nombre, IsActive, CantidadCamas, Sexo,
+                    ModuloId, Nombre, IsActive, CantidadCamas, SexoTabla, Sexo,
                     TipoInstalacionId, StandardHabitacionId, EstadoTabla, Estado,
                     ObservacionBloqueo, M2, IsReservable,
                     PersonasCantidadMin, PersonasCantidadMax,
@@ -419,7 +462,7 @@ BEGIN
                     BanoId, PermiteUsoExclusivo, PermiteUsoPorTurnos, TiempoHigienizacionMin,
                     FechaCreacion, UsuarioCreacionId)
                 VALUES (
-                    @ModuloId, @Nombre, @IsActive, @CantidadCamas, @Sexo,
+                    @ModuloId, @Nombre, @IsActive, @CantidadCamas, @SexoTabla, @SexoLista,
                     @TipoInstalacionId, @StandardHabitacionId, @EstadoTabla, @Estado,
                     @ObservacionBloqueo, @M2, @IsReservable,
                     @PersonasCantidadMin, @PersonasCantidadMax,
