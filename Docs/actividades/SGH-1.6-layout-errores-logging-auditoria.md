@@ -1,35 +1,45 @@
 # Registro de actividad — SGH 1.6 Layout, errores, logging y auditoría
 
 **Épica / ticket:** SGH 1.6 · Layout, manejo de errores, logging y auditoría de campos Fecha/Usuario  
-**Fecha:** 2026-11-16  
-**Rama:** `cursor/sgh-1-6-layout-transversal-f6a4`  
-**Estado:** **Completada** (implementación MVP + documentación; exclusiones explícitas abajo)
+**Fecha cierre:** 2026-11-16  
+**Integración:** `main` — merge `ee2f6bd` (SGH 1.6) + documentación asociada en `3906963`  
+**Rama histórica:** `cursor/sgh-1-6-layout-transversal-f6a4`  
+**Estado:** **Completada**
 
-**Referencias:** `Docs/SGH-1.6-layout-errores-logging-auditoria.md`, `Docs/prompt-proyecto/layout-escritorio.md`, `errores-y-logging.md`, `auditoria-sp.md`
+**Referencias:** `Docs/SGH-1.6-documentacion-ticket.md`, `Docs/SGH-1.6-layout-errores-logging-auditoria.md`, `Docs/prompt-proyecto/layout-escritorio.md`, `errores-y-logging.md`, `auditoria-sp.md`
 
 ---
 
 ## Descripción
 
-Se implementó la infraestructura transversal SGH 1.6 en NewRest_PORT: **layout mínimo** para páginas de estado, **middleware de correlación**, **ejecutor central de errores** en controladores Mid (`EjecutorPeticionMid`), **política de logging** por namespace `SGH`, helper **`AuditoriaPersistencia`** y guías en `prompt-proyecto` para layout, errores y plantilla de auditoría en SP.
+Se elaboró e implementó la infraestructura transversal **SGH 1.6** en NewRest_PORT como guía operativa oficial para módulos migrados: **layout general** del escritorio (layouts canónicos), **manejo centralizado de errores** en POST Mid y páginas Razor, **logging** con namespace `SGH` y **auditoría** de campos `FechaCreacion`, `FechaActualizacion`, `UsuarioCreacionId` y `UsuarioActualizacionId` mediante convención documentada y helper `AuditoriaPersistencia`. El trabajo está **mergeado en `main`** y cubre correlación `X-Correlation-Id`, `EjecutorPeticionMid` en los cuatro controladores Mid y `_LayoutMinimo` para estados de error.
 
 ## Objetivo de la documentación
 
-Dejar constancia verificable de qué quedó operativo en código y qué sigue fuera de alcance, para cerrar el ticket y orientar módulos nuevos sin repetir `try/catch` ni ambigüedad en columnas Fecha/Usuario.
+Dejar un registro formal estándar (gestión de proyectos y onboarding) que describa qué se entregó, cómo debe usarlo el equipo en desarrollos futuros y qué queda explícitamente fuera del alcance, sin ambigüedad respecto al contrato JSON `registros` ni al origen del `UsuarioId` (solo sesión servidor).
 
 ## Resumen de directrices definidas
 
-- **Layouts:** `_Layout` (operación), `_LayoutMinimo` (error/404/acceso denegado), `_LoginLayout` (cuenta).
-- **Errores Mid:** un solo `catch` vía `EjecutorPeticionMid`; contrato `registros` sin cambios.
-- **Correlación:** `X-Correlation-Id` y mismo id en `/Error`.
-- **Logging:** niveles `SGH` en `appsettings`; eventos de fallo Mid con módulo, opción, `UsuarioId` y correlación; sin PII.
-- **Auditoría:** `AuditoriaPersistencia.UsuarioDeSesion` + plantilla SQL documentada; SP legado no reescritos en bloque.
+- **Layout (Clean Architecture · capa Web):** `_Layout` para operación, `_LayoutMinimo` para error/404/acceso denegado, `_LoginLayout` para cuenta; catálogo en `layout-escritorio.md`.
+- **Errores:** `CorrelacionSolicitudMiddleware` + página `/Error` en español con identificador; Mid siempre vía `EjecutorPeticionMid` + `RespuestaDeMid` (sin cambiar forma del sobre JSON).
+- **Logging:** niveles `SGH` en configuración; fallos Mid con `Modulo`, `Opcion`, `UsuarioId`, `CorrelacionId`; sin PII en trazas.
+- **Auditoría SP:** `AuditoriaPersistencia.UsuarioDeSesion`; plantilla CUD en `auditoria-sp.md`; parámetro `@UsuarioId` desde `DatosSesion`, nunca desde JSON cliente.
+- **Anti-patrones evitados:** `try/catch` duplicado en controladores Mid, mensajes SQL al usuario, auditoría sin usuario de sesión válido.
 
 ## Resultado / impacto esperado
 
-La épica puede marcarse **completa** para el alcance acordado: transversal en Web/Application documentada y probada (`dotnet test`). Quedan **exclusiones conscientes:** bitácora de autenticación en HOTELDB, sink externo de logs, correlación dentro del JSON Mid, migración masiva de SP a la plantilla.
+**Única fuente de verdad** para cerrar SGH 1.6 en el gestor de incidencias (`SGH-1.6-documentacion-ticket.md` listo para copiar). Reduce deuda transversal, acelera incorporación de desarrolladores y alinea soporte (correlación log ↔ pantalla de error). Exclusiones registradas: bitácora auth HOTELDB, sink centralizado de logs, correlación dentro del JSON Mid, migración masiva de SP legado.
 
 ---
+
+## Inventario de entregables
+
+| Tipo | Entregable |
+|------|------------|
+| Código | `EjecutorPeticionMid`, `CorrelacionSolicitudMiddleware`, `_LayoutMinimo`, `AuditoriaPersistencia` |
+| Config | `appsettings.json` (LogLevel `SGH`) |
+| Docs equipo | `layout-escritorio.md`, `errores-y-logging.md`, `auditoria-sp.md` |
+| QA | `RespuestaDeMidTests`, `AuditoriaPersistenciaTests` |
 
 ## Verificación
 
@@ -37,15 +47,12 @@ La épica puede marcarse **completa** para el alcance acordado: transversal en W
 dotnet test SGH.sln -c Release
 ```
 
-| Prueba añadida | Qué valida |
-|----------------|------------|
-| `RespuestaDeMidTests` | Mensajes genéricos vs reglas de dominio |
-| `AuditoriaPersistenciaTests` | `UsuarioId` de sesión obligatorio |
+104 tests passed (Release), 2026-11-16.
 
 ---
 
-## Anexo — Texto para gestor (actividad cerrada)
+## Anexo — Bloque único para pegar en gestor
 
-**Descripción:** Implementación de layout transversal, manejo centralizado de errores Mid, correlación de solicitudes, logging estructurado por namespace y convención de auditoría Fecha/Usuario para SP.
+**SGH 1.6 · Layout, manejo de errores, logging y auditoría de campos**
 
-**Resultado:** Entregado en código y documentación en repo; pruebas automatizadas en verde. Auditoría de login y telemetría centralizada quedan para tickets posteriores.
+Implementación mergeada en `main`: layouts transversales, errores Mid centralizados, correlación de solicitudes, logging `SGH` y convención auditoría Fecha/Usuario en SP. Documentación: `Docs/SGH-1.6-documentacion-ticket.md`. Actividad **cerrada**; exclusiones: auditoría login en BD, telemetría externa, correlación en JSON Mid.

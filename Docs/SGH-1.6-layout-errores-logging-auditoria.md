@@ -12,7 +12,7 @@ Documento de planificación y registro para gestor de incidencias. Complementa [
 
 **Depende de:** Login y sesión (`UsuarioId` en claims / `DatosSesion`); menú dinámico SGH 1.5 en `_Layout` (`MenuPerfil`).
 
-**Estado (2026-11-16):** **Implementado** en rama `cursor/sgh-1-6-layout-transversal-f6a4`. Pendiente fuera de alcance: bitácora de autenticación en BD, sink centralizado de logs, reescritura masiva de SP legado.
+**Estado (2026-11-16):** **Implementado y mergeado en `main`** (merge `ee2f6bd`). Ticket listo para gestor: [`SGH-1.6-documentacion-ticket.md`](SGH-1.6-documentacion-ticket.md). Pendiente fuera de alcance: bitácora de autenticación en BD, sink centralizado de logs, reescritura masiva de SP legado.
 
 ---
 
