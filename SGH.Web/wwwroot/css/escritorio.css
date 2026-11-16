@@ -739,6 +739,35 @@ div.dt-container table.dataTable tbody > tr > td {
   gap: 0.35rem;
 }
 
+.modulo-habitaciones div.dt-container table.dataTable {
+  min-width: 72rem;
+}
+
+.modulo-banos div.dt-container table.dataTable {
+  min-width: 44rem;
+}
+
+.modulo-habitaciones table.dataTable th:first-child,
+.modulo-habitaciones table.dataTable td:first-child,
+.modulo-banos table.dataTable th:first-child,
+.modulo-banos table.dataTable td:first-child {
+  width: 11rem;
+}
+
+.modulo-habitaciones div.dt-container table.dataTable tbody > tr > td:first-child,
+.modulo-banos div.dt-container table.dataTable tbody > tr > td:first-child {
+  white-space: normal;
+  text-overflow: clip;
+  overflow: visible;
+}
+
+.modulo-habitaciones .acciones-fila,
+.modulo-banos .acciones-fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
 .modulo-reserva table.dataTable th:nth-child(2),
 .modulo-reserva table.dataTable td:nth-child(2),
 .modulo-checkin table.dataTable th:nth-child(2),
