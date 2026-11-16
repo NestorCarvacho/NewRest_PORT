@@ -21,16 +21,16 @@ BEGIN
         ISNULL((SELECT COUNT(*) FROM dbo.Camas AS c WITH (NOLOCK) WHERE c.HabitacionId = h.Id AND c.IsActive = 1), h.CantidadCamas) AS CantidadCamas,
         ISNULL((SELECT COUNT(*) FROM dbo.Camas AS c WITH (NOLOCK) WHERE c.HabitacionId = h.Id AND c.IsActive = 1 AND c.Habilitada = 1),
                CASE WHEN h.IsActive = 1 THEN h.CantidadCamas ELSE 0 END) AS CamasHabilitadas,
-        h.IsActive,
-        h.IsReservable,
+        CAST(ISNULL(h.IsActive, 0) AS bit) AS IsActive,
+        CAST(ISNULL(h.IsReservable, 0) AS bit) AS IsReservable,
         m.Id AS ModuloId,
         m.Nombre AS ModuloNombre,
         p.Id AS PabellonId,
         p.Nombre AS PabellonNombre,
         h.BanoId,
         b.CodigoNombre AS BanoNombre,
-        ISNULL(h.PermiteUsoPorTurnos, CASE WHEN h.MinutosMin > 0 OR h.MinutosMax > 0 THEN 1 ELSE 0 END) AS PermiteUsoPorTurnos,
-        ISNULL(h.PermiteUsoExclusivo, CASE WHEN h.PersonasCantidadMax >= h.CantidadCamas AND h.CantidadCamas > 0 THEN 1 ELSE 0 END) AS PermiteUsoExclusivo
+        CAST(ISNULL(h.PermiteUsoPorTurnos, CASE WHEN h.MinutosMin > 0 OR h.MinutosMax > 0 THEN 1 ELSE 0 END) AS bit) AS PermiteUsoPorTurnos,
+        CAST(ISNULL(h.PermiteUsoExclusivo, CASE WHEN h.PersonasCantidadMax >= h.CantidadCamas AND h.CantidadCamas > 0 THEN 1 ELSE 0 END) AS bit) AS PermiteUsoExclusivo
     FROM dbo.Habitaciones AS h WITH (NOLOCK)
     INNER JOIN dbo.Modulos AS m WITH (NOLOCK) ON m.Id = h.ModuloId
     INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
@@ -60,8 +60,8 @@ BEGIN
         h.Sexo,
         h.Estado,
         ISNULL((SELECT COUNT(*) FROM dbo.Camas AS c WHERE c.HabitacionId = h.Id AND c.IsActive = 1), h.CantidadCamas) AS CantidadCamas,
-        h.IsActive,
-        h.IsReservable,
+        CAST(ISNULL(h.IsActive, 0) AS bit) AS IsActive,
+        CAST(ISNULL(h.IsReservable, 0) AS bit) AS IsReservable,
         h.TipoInstalacionId,
         h.StandardHabitacionId,
         h.ObservacionBloqueo,
@@ -72,9 +72,9 @@ BEGIN
         ISNULL(h.MinutosMin, 0) AS MinutosMin,
         ISNULL(h.MinutosMax, 0) AS MinutosMax,
         ISNULL(h.TiempoHigienizacionMin, h.MinutosMin) AS TiempoHigienizacionMin,
-        ISNULL(h.TieneServiciosAlimentacion, 0) AS TieneServiciosAlimentacion,
-        ISNULL(h.PermiteUsoPorTurnos, CAST(CASE WHEN h.MinutosMin > 0 OR h.MinutosMax > 0 THEN 1 ELSE 0 END AS bit)) AS PermiteUsoPorTurnos,
-        ISNULL(h.PermiteUsoExclusivo, CAST(CASE WHEN h.PersonasCantidadMax >= h.CantidadCamas AND h.CantidadCamas > 0 THEN 1 ELSE 0 END AS bit)) AS PermiteUsoExclusivo
+        CAST(ISNULL(h.TieneServiciosAlimentacion, 0) AS bit) AS TieneServiciosAlimentacion,
+        CAST(ISNULL(h.PermiteUsoPorTurnos, CASE WHEN h.MinutosMin > 0 OR h.MinutosMax > 0 THEN 1 ELSE 0 END) AS bit) AS PermiteUsoPorTurnos,
+        CAST(ISNULL(h.PermiteUsoExclusivo, CASE WHEN h.PersonasCantidadMax >= h.CantidadCamas AND h.CantidadCamas > 0 THEN 1 ELSE 0 END) AS bit) AS PermiteUsoExclusivo
     FROM dbo.Habitaciones AS h WITH (NOLOCK)
     INNER JOIN dbo.Modulos AS m WITH (NOLOCK) ON m.Id = h.ModuloId
     INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId

@@ -13,7 +13,7 @@ BEGIN
         b.Ubicacion,
         b.TipoSexo,
         b.Estado,
-        b.IsActive,
+        CAST(ISNULL(b.IsActive, 0) AS bit) AS IsActive,
         (SELECT COUNT(*) FROM dbo.Habitaciones AS h WITH (NOLOCK)
          WHERE h.BanoId = b.Id AND h.IsActive = 1) AS HabitacionesVinculadas
     FROM dbo.Banos AS b WITH (NOLOCK)

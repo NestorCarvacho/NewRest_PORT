@@ -23,10 +23,10 @@ public sealed record HabitacionListada(
     string? ModuloNombre,
     int PabellonId,
     string? PabellonNombre,
-    bool PermiteUsoPorTurnos,
-    bool PermiteUsoExclusivo,
     int? BanoId,
-    string? BanoNombre);
+    string? BanoNombre,
+    bool PermiteUsoPorTurnos,
+    bool PermiteUsoExclusivo);
 
 public sealed record HabitacionDetalle(
     int Id,
@@ -41,15 +41,15 @@ public sealed record HabitacionDetalle(
     int StandardHabitacionId,
     string? ObservacionBloqueo,
     decimal? M2,
+    int? BanoId,
     int PersonasCantidadMin,
     int PersonasCantidadMax,
     int MinutosMin,
     int MinutosMax,
+    int TiempoHigienizacionMin,
     bool TieneServiciosAlimentacion,
     bool PermiteUsoPorTurnos,
-    bool PermiteUsoExclusivo,
-    int? BanoId,
-    int TiempoHigienizacionMin);
+    bool PermiteUsoExclusivo);
 
 public sealed record OpcionCatalogo(int Id, string Etiqueta, int PadreId = 0);
 public sealed record OpcionLista(string Codigo, string Etiqueta);
