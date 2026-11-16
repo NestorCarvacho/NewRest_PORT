@@ -749,7 +749,8 @@ div.dt-container table.dataTable tbody > tr > td {
 
 .modulo-habitaciones table.dataTable th:first-child,
 .modulo-habitaciones table.dataTable td:first-child {
-  width: 11rem;
+  width: 13.5rem;
+  min-width: 13.5rem;
 }
 
 .modulo-banos table.dataTable th:first-child,
@@ -766,8 +767,9 @@ div.dt-container table.dataTable tbody > tr > td {
 }
 
 .modulo-habitaciones .acciones-fila {
-  display: flex;
-  flex-wrap: wrap;
+  display: inline-flex;
+  flex-flow: row nowrap;
+  align-items: center;
   gap: 0.35rem;
 }
 

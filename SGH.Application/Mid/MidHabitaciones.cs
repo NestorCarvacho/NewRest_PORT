@@ -87,7 +87,8 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
         var datos = LeerCuerpoHabitacion(filtro, sesion.UsuarioId, esAlta);
         if (datos is null)
             return EjecucionMid.Fallo(400, "Revise los datos del formulario.");
-        var resultado = await gestion.GuardarAsync(datos, sesion.CampamentoId, cancellationToken);
+        var resultado = await gestion.GuardarAsync(
+            datos, sesion.CampamentoId, sesion.EmpresaMandanteId, cancellationToken);
         if (!resultado.Exito)
             return EjecucionMid.Fallo(400, resultado.Mensaje);
         return EjecucionMid.Ok(new { resultado = true, id = resultado.Id, mensaje = "Habitación guardada." });
@@ -126,7 +127,8 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
             actual.TiempoHigienizacionMin,
             sesion.UsuarioId);
 
-        var resultado = await gestion.GuardarAsync(datos, sesion.CampamentoId, cancellationToken);
+        var resultado = await gestion.GuardarAsync(
+            datos, sesion.CampamentoId, sesion.EmpresaMandanteId, cancellationToken);
         if (!resultado.Exito)
             return EjecucionMid.Fallo(400, resultado.Mensaje);
         return EjecucionMid.Ok(new { resultado = true, mensaje = "Habitación inactivada." });
