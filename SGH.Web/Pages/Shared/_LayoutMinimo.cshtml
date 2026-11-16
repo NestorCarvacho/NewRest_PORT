@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gestión Hotelera</title>
+    <partial name="_Favicon" />
+    <script src="~/js/core/tema.js" asp-append-version="true"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/escritorio.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/tema.css" asp-append-version="true" />
+</head>
+<body class="app-body layout-minimo">
+    <header class="app-cromo layout-minimo-cromo">
+        <div class="navbar-app layout-minimo-barra">
+            <a class="marca" asp-page="/Index">
+                <img src="~/img/hosteat-logo-vertical.svg" alt="" />
+                <span>Gestión Hotelera</span>
+            </a>
+            <p class="layout-minimo-version">versión @Configuracion["Aplicacion:Version"]</p>
+        </div>
+    </header>
+    <main class="contenido layout-minimo-contenido">
+        @RenderBody()
+    </main>
+</body>
+</html>

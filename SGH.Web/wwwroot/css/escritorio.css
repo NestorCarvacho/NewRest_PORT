@@ -1962,3 +1962,31 @@ html:not([data-tema="claro"]) .aviso-escritorio-info { border-left: 3px solid #2
   background: #28201c;
   color: #fff;
 }
+
+.layout-minimo-barra {
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--alto-navbar);
+}
+
+.layout-minimo-version {
+  margin: 0;
+  padding-right: 1rem;
+  color: var(--gray);
+  font-size: 0.78rem;
+}
+
+.layout-minimo-contenido {
+  padding-top: var(--alto-navbar);
+}
+
+body.layout-minimo .estado {
+  min-height: calc(100vh - var(--alto-navbar) - 2rem);
+}
+
+.estado-ayuda-dev {
+  max-width: 28rem;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--gray);
+}
