@@ -2,7 +2,9 @@
 
 ## Descripción / objetivo
 
-Implementar las políticas de autorización según tablas y reglas de **Perfiles** / **MenuPerfil** del legado, y exponer un **menú dinámico por perfil** en el escritorio (equivalente funcional al sistema anterior), con **refuerzo en servidor** en páginas, controladores y POST Mid.
+Implementar las políticas de autorización según tablas y reglas de **`Perfiles`** / **`MenusPerfil`** del legado (ítems en **`Menus`**), y exponer un **menú dinámico por perfil** en el escritorio (equivalente funcional al sistema anterior), con **refuerzo en servidor** en páginas, controladores y POST Mid.
+
+**Diccionario de datos:** [`Docs/datos/Diccionario_de_datos_HotelDB.xlsx`](datos/Diccionario_de_datos_HotelDB.xlsx) — extracto para este epic: [`Docs/datos/diccionario-hoteldb-perfiles-menus.md`](datos/diccionario-hoteldb-perfiles-menus.md).
 
 ---
 
@@ -11,7 +13,7 @@ Implementar las políticas de autorización según tablas y reglas de **Perfiles
 | Área | Hoy | Brecha respecto al objetivo |
 |------|-----|------------------------------|
 | Autorización HTTP | Políticas en `PoliticasAplicacion`: distingue solo **pasajero (`PerfilId = 2`)** vs **resto**. Ver `Docs/prompt-proyecto/autorizacion-rbac.md`. | No se discrimina por perfil 4, 5, 11, 68, 142, etc. Claims `capacidad` en cookie **sin enforcement**. |
-| Menú lateral | HTML fijo en `SGH.Web/Pages/Shared/_Layout.cshtml`; la mayoría de ítems son placeholders. | No hay consulta a `MenuPerfil` ni filtrado por `PerfilId` de sesión. |
+| Menú lateral | HTML fijo en `SGH.Web/Pages/Shared/_Layout.cshtml`; la mayoría de ítems son placeholders. | No hay consulta a `Menus` / `MenusPerfil` ni filtrado por `PerfilId` de sesión. |
 | UI puntual | Se ocultan «Usuarios» si `tipoPerfil = pasajero`. | No sustituye políticas ni menú completo por perfil. |
 | Sesión | `perfilId`, `asignacionPerfilId`, campamento y mandante en claims (`EmisorCookieSesion`). | Origen correcto para autorizar; falta mapeo perfil → permisos / ítems de menú. |
 | Alcance de datos | `AlcanceMid` / `ReglasAlcance` por campamento. | Se mantiene aparte de autorización por menú. |
@@ -22,7 +24,7 @@ Implementar las políticas de autorización según tablas y reglas de **Perfiles
 
 ### Dentro
 
-1. **Descubrimiento AS-IS**: modelo `Perfiles`, `MenuPerfil` (y tablas relacionadas), procedimientos que alimentan menú y permisos en el legado.
+1. **Descubrimiento AS-IS**: modelo `Perfiles`, `Menus`, `MenusPerfil`, `PerfilesUsuario` (y tablas relacionadas); procedimientos que alimentan menú y permisos en el legado (ver extracto del diccionario).
 2. **Contrato de dominio**: permisos o códigos de menú atómicos; mapeo `PerfilId` → conjunto permitido (desde BD o capa que envuelva SP existentes).
 3. **Autorización en servidor**: políticas o `IAuthorizationHandler` por permiso/código de menú; aplicación coherente en Razor Pages, controladores y respuestas JSON del Mid cuando la sesión no alcanza.
 4. **Menú dinámico**: cargar estructura (grupos, columnas, enlaces) según sesión; integrar con buscador de módulos y solapas del escritorio; i18n vía claves existentes donde aplique.
@@ -45,7 +47,7 @@ Implementar las políticas de autorización según tablas y reglas de **Perfiles
 
 | ID | Actividad | Entregable |
 |----|-----------|------------|
-| A1 | Inventariar tablas `Perfiles`, `MenuPerfil` y SPs legado que devuelven menú por perfil o usuario. | Documento AS-IS en `Docs/as-is/` (nuevo). |
+| A1 | Contrastar `Perfiles`, `Menus`, `MenusPerfil` (diccionario ya en repo) y localizar SPs/API legado que devuelven menú por `PerfilId`. | Completar § pendientes en `diccionario-hoteldb-perfiles-menus.md` + AS-IS si aplica. |
 | A2 | Comparar ítems del menú fijo actual (`_Layout.cshtml`) con menú legado por perfil piloto (p. ej. 4, 68, 142). | Matriz ítem ↔ ruta Razor / URL ↔ código menú BD. |
 | A3 | Definir modelo: ¿permiso por código de menú, por ruta, o ambos? ¿Una política ASP.NET por módulo o `RequireClaim` por capacidad? | ADR corto o sección en este archivo. |
 | A4 | Definir comportamiento pasajero vs operadores y perfil `ideauno` (11) / sin campamento. | Reglas en dominio (`MatrizPerfiles` o sucesor). |
@@ -54,7 +56,7 @@ Implementar las políticas de autorización según tablas y reglas de **Perfiles
 
 | ID | Actividad | Entregable |
 |----|-----------|------------|
-| B1 | Exponer lectura de menú por `PerfilId` (y campamento si el legado lo exige) vía SP existente o envoltorio en `SGH.Infrastructure`. | Repositorio + script SQL idempotente si aplica. |
+| B1 | Exponer lectura de menú por `PerfilId` (`Menus` ⨝ `MenusPerfil`, `IsActive`) vía SP existente o envoltorio en `SGH.Infrastructure`. | Repositorio + script SQL idempotente si aplica. |
 | B2 | Exponer resolución perfil → permisos / ítems si no viene en el mismo SP del menú. | Métodos en capa Cuenta/Configuración. |
 | B3 | Validar en HOTELDB LocalDB con datos de prueba por perfil. | Notas en A1 o script de datos de prueba. |
 
@@ -108,14 +110,15 @@ Implementar las políticas de autorización según tablas y reglas de **Perfiles
 
 ## Dependencias
 
-- Base **HOTELDB** con tablas y SP de menú/perfiles del legado (contrastar en entorno LocalDB o el aprobado por el equipo).
+- Base **HOTELDB** con tablas documentadas en `Docs/datos/` y SP de menú/perfiles del legado (contrastar en LocalDB o entorno aprobado).
 - Login y selección campamento/perfil ya operativos (`Docs/login-pendiente-revision-base-de-datos.md`).
 - Convención MVC + Mid para pantallas nuevas (`.cursor/rules/flujo-mvc-mid.mdc`).
 
 ---
 
-## Referencias de código
+## Referencias de código y datos
 
+- Diccionario HOTELDB: `Docs/datos/Diccionario_de_datos_HotelDB.xlsx`, extracto perfiles/menú: `Docs/datos/diccionario-hoteldb-perfiles-menus.md`
 - Políticas: `SGH.Web/Autorizacion/PoliticasAplicacion.cs`, `SGH.Web/Program.cs`
 - Claims: `SGH.Web/Cuenta/EmisorCookieSesion.cs`
 - Menú estático: `SGH.Web/Pages/Shared/_Layout.cshtml`, `SGH.Web/wwwroot/js/escritorio.js`, `wwwroot/js/core/menu-modulos.js`
