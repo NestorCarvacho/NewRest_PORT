@@ -123,7 +123,9 @@ BEGIN
 
     SELECT b.Id, b.CodigoNombre + N' (' + b.Ubicacion + N')' AS Etiqueta, 0 AS PadreId
     FROM dbo.Banos AS b WITH (NOLOCK)
-    WHERE b.CampamentoId = @CampamentoId AND b.IsActive = 1 AND b.Estado = 'ACTIVO'
+    WHERE b.CampamentoId = @CampamentoId
+      AND (b.IsActive = 1 OR b.Estado = N'ACTIVO')
+      AND b.Estado <> N'INACTIVO'
     ORDER BY b.Ubicacion, b.CodigoNombre;
 END
 GO
@@ -172,7 +174,10 @@ BEGIN
 
     IF @BanoId IS NOT NULL AND @BanoId > 0
     BEGIN
-        IF NOT EXISTS (SELECT 1 FROM dbo.Banos WHERE Id = @BanoId AND CampamentoId = @CampamentoId AND IsActive = 1)
+        IF NOT EXISTS (
+            SELECT 1 FROM dbo.Banos
+            WHERE Id = @BanoId AND CampamentoId = @CampamentoId
+              AND (IsActive = 1 OR Estado = N'ACTIVO'))
         BEGIN
             SET @Mensaje = N'El baño seleccionado no es válido para el campamento.';
             RETURN;

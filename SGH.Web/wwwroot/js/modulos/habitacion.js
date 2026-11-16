@@ -196,6 +196,10 @@ export function crearHabitacion(dependencias) {
         var banosOpts = dependencias.aOpcion(catalogo.banos || []);
         var esAlta = opcion === "crear";
         var titulo = esAlta ? "Nueva habitación" : "Editar habitación";
+        var estados = opcionesEstado(catalogo);
+        var estadoDefecto = fila && fila.estado
+            ? fila.estado
+            : (estados[0] ? estados[0].value : "D");
         var form = dependencias.formulario([
             dependencias.seccion("Ubicación", [
                 dependencias.campo("pabellonId", "Pabellón", "select", dependencias.aOpcion(catalogo.pabellones), {
@@ -209,7 +213,10 @@ export function crearHabitacion(dependencias) {
                 dependencias.campo("sexo", "Sexo", "select", opcionesSexo(catalogo), { requerido: true, valor: fila ? fila.sexo : "" }),
                 dependencias.campo("banoId", "Baño", "select", banosOpts, { valor: fila && fila.banoId ? fila.banoId : "" }),
                 dependencias.campo("cantidadCamas", "N° camas", "number", [], { requerido: true, valor: fila ? fila.cantidadCamas : 1 }),
-                dependencias.campo("estado", "Estado", "select", opcionesEstado(catalogo), { valor: fila ? fila.estado : "ACTIVO" }),
+                dependencias.campo("estado", "Estado", "select", estados, {
+                    sinVacio: estados.length > 0,
+                    valor: estadoDefecto
+                }),
                 dependencias.campo("minutosMin", "Minutos higienización", "number", [], { valor: 0 })
             ]),
             dependencias.seccion("Opciones", [

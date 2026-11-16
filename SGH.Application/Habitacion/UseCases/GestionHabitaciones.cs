@@ -23,8 +23,11 @@ public sealed class GestionHabitaciones(
         consulta.CatalogoAsync(campamentoId, empresaMandanteId, cancellationToken);
 
     public async Task<ResultadoGuardarHabitacion> GuardarAsync(
-        DatosGuardarHabitacion datos, int campamentoId, CancellationToken cancellationToken)
+        DatosGuardarHabitacion datos, int campamentoId, int empresaMandanteId, CancellationToken cancellationToken)
     {
+        datos = await HabitacionLegadoDefaults.CompletarAsync(
+            datos, campamentoId, empresaMandanteId, consulta, cancellationToken);
+
         var minutosHig = datos.UsoPorTurnos
             ? (datos.TiempoHigienizacionMin > 0 ? datos.TiempoHigienizacionMin : datos.MinutosMin)
             : 0;
@@ -42,9 +45,9 @@ public sealed class GestionHabitaciones(
 
         if (datos.BanoId is > 0)
         {
-            var banos = await consultaBano.ListarAsync(campamentoId, 1, cancellationToken);
+            var banos = await consultaBano.ListarAsync(campamentoId, 0, cancellationToken);
             var bano = banos.FirstOrDefault(b => b.Id == datos.BanoId);
-            if (bano is null)
+            if (bano is null || (!bano.IsActive && !string.Equals(bano.Estado, "ACTIVO", StringComparison.OrdinalIgnoreCase)))
                 return new ResultadoGuardarHabitacion(false, "El baño seleccionado no es válido para el campamento.", datos.Id);
             if (!ReglasHabitacion.SexoCompatibleBano(datos.Sexo, bano.TipoSexo))
                 return new ResultadoGuardarHabitacion(false, "RN-02: El sexo de la habitación no es compatible con el baño.", datos.Id);
