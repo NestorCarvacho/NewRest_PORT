@@ -30,6 +30,7 @@ export function instalarHabitacion(base) {
         obtenerCatalogoHabitacion: base.catalogos.obtenerHabitacion,
         invalidarCatalogoHabitacion: base.catalogos.invalidarHabitacion,
         campo: base.campo,
+        seccion: base.seccion,
         aOpcion: base.aOpcion,
         formulario: base.formulario,
         abrirPanel: base.abrirPanel,
