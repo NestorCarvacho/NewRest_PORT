@@ -333,6 +333,27 @@ BEGIN
     IF @GuardadoLegado = 0
     BEGIN
         SET @UsarNativo = 1;
+
+        /* Legado: EstadoTabla referencia dbo.Listas (catálogo estados habitación, IdTabla 8). */
+        DECLARE @EstadoTabla int = 8;
+        SELECT TOP 1 @EstadoTabla = h.EstadoTabla
+        FROM dbo.Habitaciones AS h WITH (NOLOCK)
+        WHERE h.EstadoTabla IS NOT NULL
+        ORDER BY h.Id DESC;
+        IF @EstadoTabla IS NULL
+            SET @EstadoTabla = 8;
+        IF NOT EXISTS (
+            SELECT 1 FROM dbo.Listas WITH (NOLOCK)
+            WHERE IdTabla = @EstadoTabla AND Tipo = N'Detalle' AND Valor1 = @Estado)
+        BEGIN
+            SELECT TOP 1 @EstadoTabla = l.IdTabla
+            FROM dbo.Listas AS l WITH (NOLOCK)
+            WHERE l.Tipo = N'Detalle' AND l.Valor1 = @Estado AND l.IdTabla IN (8, 11)
+            ORDER BY CASE l.IdTabla WHEN 8 THEN 0 ELSE 1 END;
+            IF @EstadoTabla IS NULL
+                SET @EstadoTabla = 8;
+        END
+
         SET @MinutosMin = CASE
             WHEN @PermiteUsoPorTurnos = 1 AND @TiempoHigienizacionMin > 0 THEN @TiempoHigienizacionMin
             ELSE @MinutosMin END;
@@ -353,6 +374,7 @@ BEGIN
                     Sexo = @Sexo,
                     TipoInstalacionId = @TipoInstalacionId,
                     StandardHabitacionId = @StandardHabitacionId,
+                    EstadoTabla = @EstadoTabla,
                     Estado = @Estado,
                     ObservacionBloqueo = @ObservacionBloqueo,
                     M2 = @M2,
@@ -390,7 +412,7 @@ BEGIN
 
                 INSERT INTO dbo.Habitaciones (
                     ModuloId, Nombre, IsActive, CantidadCamas, Sexo,
-                    TipoInstalacionId, StandardHabitacionId, Estado,
+                    TipoInstalacionId, StandardHabitacionId, EstadoTabla, Estado,
                     ObservacionBloqueo, M2, IsReservable,
                     PersonasCantidadMin, PersonasCantidadMax,
                     MinutosMin, MinutosMax, TieneServiciosAlimentacion,
@@ -398,7 +420,7 @@ BEGIN
                     FechaCreacion, UsuarioCreacionId)
                 VALUES (
                     @ModuloId, @Nombre, @IsActive, @CantidadCamas, @Sexo,
-                    @TipoInstalacionId, @StandardHabitacionId, @Estado,
+                    @TipoInstalacionId, @StandardHabitacionId, @EstadoTabla, @Estado,
                     @ObservacionBloqueo, @M2, @IsReservable,
                     @PersonasCantidadMin, @PersonasCantidadMax,
                     @MinutosMin, @MinutosMax, @TieneServiciosAlimentacion,
