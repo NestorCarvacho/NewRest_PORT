@@ -109,7 +109,8 @@ Implementar las políticas de autorización según tablas y reglas de **`Perfile
 
 | ID | Título | Descripción | Depende de |
 |----|--------|-------------|------------|
-| | | | |
+| A1-SQL | Consulta usuarios con `PerfilId = 1` | Registro estándar + consultas T-SQL (`PerfilesUsuario` vs `Usuarios.PerfilId`). | Diccionario HOTELDB |
+| | | Ver [`actividades/SGH-1.5-consulta-usuarios-perfil-1.md`](actividades/SGH-1.5-consulta-usuarios-perfil-1.md). | |
 
 ---
 

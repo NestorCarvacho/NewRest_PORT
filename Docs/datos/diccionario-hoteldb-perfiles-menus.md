@@ -186,5 +186,6 @@ El diccionario **no lista procedimientos**. Para el legado hay que contrastar en
 ## Referencias en NewRest_PORT
 
 - Epic y actividades: [`../SGH-1.5-autorizacion-perfiles-menu-dinamico.md`](../SGH-1.5-autorizacion-perfiles-menu-dinamico.md)
+- Consultas operativas `PerfilId = 1`: [`../actividades/SGH-1.5-consulta-usuarios-perfil-1.md`](../actividades/SGH-1.5-consulta-usuarios-perfil-1.md)
 - Login y `PerfilesUsuario`: [`../login-pendiente-revision-base-de-datos.md`](../login-pendiente-revision-base-de-datos.md)
 - RBAC actual: [`../prompt-proyecto/autorizacion-rbac.md`](../prompt-proyecto/autorizacion-rbac.md)
