@@ -126,6 +126,14 @@ public class GestionSolicitudesTests
     }
 
     [Fact]
+    public async Task DesasignacionValidaPasajeroYTransmiteAlcance()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() => Caso.DesasignarHabitacionAsync(42, 0, 2, 3, 7, CancellationToken.None));
+        await Caso.DesasignarHabitacionAsync(42, 9, 2, 3, 7, CancellationToken.None);
+        Assert.Equal((42, 9, 2, 3, 7), _falso.Desasignacion);
+    }
+
+    [Fact]
     public async Task CargaNormalizaRutYReportaRechazoPorFila()
     {
         var filas = new[]
@@ -163,6 +171,7 @@ public class GestionSolicitudesTests
         public GuardarPasajeroSolicitudDto? PasajeroGuardado { get; private set; }
         public (int, int, int, int) Generacion { get; private set; }
         public (int, int, int, int, int, int) Asignacion { get; private set; }
+        public (int, int, int, int, int) Desasignacion { get; private set; }
         public List<FilaCargaPasajeroDto> FilasCargadas { get; } = [];
 
         public Task<IReadOnlyList<SolicitudListadaDto>> BuscarAsync(FiltroSolicitudesDto filtro, CancellationToken cancellationToken)
@@ -237,6 +246,12 @@ public class GestionSolicitudesTests
         public Task AsignarHabitacionAsync(int id, int pasajero, int habitacion, int empresa, int campamento, int usuario, CancellationToken cancellationToken)
         {
             Asignacion = (id, pasajero, habitacion, empresa, campamento, usuario);
+            return Task.CompletedTask;
+        }
+
+        public Task DesasignarHabitacionAsync(int id, int pasajero, int empresa, int campamento, int usuario, CancellationToken cancellationToken)
+        {
+            Desasignacion = (id, pasajero, empresa, campamento, usuario);
             return Task.CompletedTask;
         }
 

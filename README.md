@@ -89,7 +89,7 @@ Para guardar pasajeros identificados y generar reservas, ejecutar [003_sp_guarda
 
 Al actualizar estos procedimientos, abrir los scripts como UTF-8 para conservar los mensajes con caracteres acentuados; los cambios en los archivos no actualizan automáticamente la base de datos.
 
-Para consultar y asignar habitaciones, ejecutar [005_sp_habitaciones_solicitud.sql](SGH.Infrastructure/Solicitud/Persistence/005_sp_habitaciones_solicitud.sql), que reutiliza `HAB_ObtieneHabitacionesDisponiblesV2` y `SOL_AsignaHabitacionPasajeroSolicitudEmpresa`. El cálculo legado no cuenta asignaciones pendientes de otras solicitudes de alojamiento; el bloqueo de la nueva aplicación solo coordina sus propias asignaciones y generaciones, no escrituras realizadas por otros sistemas.
+Para consultar, asignar y desasignar habitaciones, ejecutar [005_sp_habitaciones_solicitud.sql](SGH.Infrastructure/Solicitud/Persistence/005_sp_habitaciones_solicitud.sql), que reutiliza `HAB_ObtieneHabitacionesDisponiblesV2` y `SOL_AsignaHabitacionPasajeroSolicitudEmpresa` (la desasignación actualiza `PasajerosSolicitudAlojamiento.HabitacionId` en la misma transacción bloqueada que la asignación). El cálculo legado no cuenta asignaciones pendientes de otras solicitudes de alojamiento; el bloqueo de la nueva aplicación solo coordina sus propias asignaciones y generaciones, no escrituras realizadas por otros sistemas.
 
 Para importar pasajeros, ejecutar [006_sp_cargar_pasajero.sql](SGH.Infrastructure/Solicitud/Persistence/006_sp_cargar_pasajero.sql), que reutiliza `SOL_GuardaPasajeroSolicitudAlojamientoMasivo` y revierte los cambios de cada fila rechazada.
 

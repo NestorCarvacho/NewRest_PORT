@@ -46,6 +46,11 @@ public sealed class ComandoSolicitudAlojamiento : IComandoSolicitudAlojamiento
             ("@SolicitudId", solicitudId), ("@PasajeroId", pasajeroId), ("@HabitacionId", habitacionId),
             ("@EmpresaMandanteId", empresaMandanteId), ("@CampamentoId", campamentoId), ("@UsuarioId", usuarioId));
 
+    public Task DesasignarHabitacionAsync(int solicitudId, int pasajeroId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken) =>
+        EjecutarAsync("dbo.sp_Solicitud_DesasignarHabitacion", cancellationToken,
+            ("@SolicitudId", solicitudId), ("@PasajeroId", pasajeroId),
+            ("@EmpresaMandanteId", empresaMandanteId), ("@CampamentoId", campamentoId), ("@UsuarioId", usuarioId));
+
     public async Task<int> GenerarReservasAsync(int solicitudId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
     {
         var id = await EjecutarSalidaAsync("dbo.sp_Solicitud_GenerarReservas", "@PrimeraReservaId", cancellationToken,
