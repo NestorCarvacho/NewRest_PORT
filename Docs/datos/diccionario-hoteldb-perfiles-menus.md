@@ -128,6 +128,26 @@ Además del login (`Password`, `Md5Retirado`, bloqueo, etc.):
 
 ---
 
+## Muestra real — `PerfilId = 1` (administración / menú completo)
+
+Misma jerarquía `nav` / `side`. En **Gestión** (`PadreId = 2`) aparecen los módulos migrados del escritorio:
+
+| Nombre | `Link` | NewRest |
+|--------|--------|---------|
+| Solicitud | `/app/gestion/solicitud` | `/Solicitud/Datos` |
+| Reserva | `/app/gestion/reserva` | `/Reserva/Datos` |
+| Censo | `/app/gestion/censo` | `/Censo/Datos` |
+| Solicitud Empresa | `/app/gestion/solicitudempresa` | No migrado |
+| Gestión OT, etc. | … | No migrado |
+
+En **Configuración** (`PadreId = 4`): **Usuarios** → `/app/config/usuario` → `/Cuenta/Usuarios`.
+
+`Dashboard` (`nav` sin hijos `side`) no se muestra en el menú nuevo hasta tener página destino. **Home** con `Link = #` queda deshabilitado.
+
+El nav **Dashboard** (`Id = 1`) suele no tener filas `side` en `MenusPerfil`; el resto de barras sí.
+
+---
+
 ## Muestra real — `PerfilId = 137`
 
 Estructura legado contrastada con la query `sp_Menu_ObtenerPorPerfil`:

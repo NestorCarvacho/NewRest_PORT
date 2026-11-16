@@ -21,6 +21,23 @@ public sealed class MapeoEnlacesMenuTests
         Assert.False(MapeoEnlacesMenu.TryMapear("/app/gestion/informe/censo", out _));
     }
 
+    [Theory]
+    [InlineData("/app/gestion/informe/reserva")]
+    [InlineData("/app/gestion/solicitudempresa")]
+    [InlineData("/app/gestion/informe/solicitudempresa")]
+    [InlineData("#")]
+    public void TryMapear_rutas_no_migradas_sin_mapeo(string link)
+    {
+        Assert.False(MapeoEnlacesMenu.TryMapear(link, out _));
+    }
+
+    [Fact]
+    public void TryMapear_usuario_config_perfil1()
+    {
+        Assert.True(MapeoEnlacesMenu.TryMapear("/app/config/usuario", out var mapeo));
+        Assert.Equal(MenuClaves.Usuarios, mapeo.ClaveModulo);
+    }
+
     [Fact]
     public void ClavesDesdeRutaPagina_devuelve_modulos_de_la_pagina()
     {

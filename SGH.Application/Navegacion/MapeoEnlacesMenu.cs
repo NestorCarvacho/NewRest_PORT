@@ -9,34 +9,31 @@ public sealed record EnlaceMenuMapeado(
 public static class MapeoEnlacesMenu
 {
     /// <summary>
-    /// Rutas legado SPA (<c>/app/...</c>) evaluadas de más específica a más general.
-  /// Una coincidencia por sufijo de ruta evita que <c>informe/censo</c> abra el módulo Censo.
+    /// Rutas SPA (<c>/app/...</c>) por sufijo exacto; las más largas primero.
     /// </summary>
     private static readonly (string SufijoRuta, EnlaceMenuMapeado Mapeo)[] RutasApp =
     [
+        ("/app/gestion/solicitudalojamiento", new(MenuClaves.Solicitud, "/Solicitud/Datos", "GestionarReservas", true)),
+        ("/app/gestion/solicitud", new(MenuClaves.Solicitud, "/Solicitud/Datos", "GestionarReservas", true)),
         ("/app/gestion/miscensos", new(MenuClaves.CensoQr, null, "GestionarCensos", false)),
         ("/app/gestion/censo", new(MenuClaves.Censo, "/Censo/Datos", "GestionarCensos", false)),
-        ("/app/gestion/solicitud", new(MenuClaves.Solicitud, "/Solicitud/Datos", "GestionarReservas", true)),
-        ("/app/gestion/solicitudalojamiento", new(MenuClaves.Solicitud, "/Solicitud/Datos", "GestionarReservas", true)),
         ("/app/gestion/reserva", new(MenuClaves.Reserva, "/Reserva/Datos", "GestionarReservas", true)),
+        ("/app/config/usuario", new(MenuClaves.Usuarios, "/Cuenta/Usuarios", "AdministrarUsuarios", false)),
         ("/app/config/usuarios", new(MenuClaves.Usuarios, "/Cuenta/Usuarios", "AdministrarUsuarios", false)),
         ("/app/gestion/usuarios", new(MenuClaves.Usuarios, "/Cuenta/Usuarios", "AdministrarUsuarios", false)),
     ];
 
+    /// <summary>Rutas API u otros orígenes sin prefijo <c>/app</c>.</summary>
     private static readonly (string Fragmento, EnlaceMenuMapeado Mapeo)[] FragmentosLegado =
     [
         ("solicitudalojamiento", new(MenuClaves.Solicitud, "/Solicitud/Datos", "GestionarReservas", true)),
-        ("solicitud", new(MenuClaves.Solicitud, "/Solicitud/Datos", "GestionarReservas", true)),
-        ("reservas", new(MenuClaves.Reserva, "/Reserva/Datos", "GestionarReservas", true)),
-        ("reserva", new(MenuClaves.Reserva, "/Reserva/Datos", "GestionarReservas", true)),
         ("miscensos", new(MenuClaves.CensoQr, null, "GestionarCensos", false)),
-        ("usuarios", new(MenuClaves.Usuarios, "/Cuenta/Usuarios", "AdministrarUsuarios", false)),
     ];
 
     public static bool TryMapear(string linkLegado, out EnlaceMenuMapeado mapeo)
     {
         mapeo = default!;
-        if (string.IsNullOrWhiteSpace(linkLegado))
+        if (string.IsNullOrWhiteSpace(linkLegado) || linkLegado is "#")
             return false;
 
         var normalizado = Normalizar(linkLegado);
@@ -53,7 +50,7 @@ public static class MapeoEnlacesMenu
         foreach (var (fragmento, regla) in FragmentosLegado)
         {
             if (normalizado.Contains(fragmento, StringComparison.OrdinalIgnoreCase)
-                && !EsInformeCenso(normalizado, fragmento))
+                && !ExcluirFragmento(normalizado, fragmento))
             {
                 mapeo = regla;
                 return true;
@@ -85,9 +82,17 @@ public static class MapeoEnlacesMenu
         return claves;
     }
 
-    private static bool EsInformeCenso(string normalizado, string fragmento) =>
-        fragmento.Equals("censo", StringComparison.OrdinalIgnoreCase)
-        && normalizado.Contains("/informe/", StringComparison.OrdinalIgnoreCase);
+    private static bool ExcluirFragmento(string normalizado, string fragmento)
+    {
+        if (normalizado.Contains("/informe/", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (fragmento.Contains("solicitud", StringComparison.OrdinalIgnoreCase)
+            && normalizado.Contains("solicitudempresa", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    }
 
     private static bool CoincideSufijoRuta(string normalizado, string sufijo)
     {
