@@ -2,6 +2,9 @@ using SGH.Domain.Navegacion;
 
 namespace SGH.Application.Navegacion;
 
+/// <summary>
+/// Arma grupos desde BD: raíz <c>nav</c> → título del desplegable; hijos <c>side</c> → ítems del panel bajo la barra (no panel lateral).
+/// </summary>
 public static class ConstruirMenuEscritorio
 {
     private static readonly StringComparer Comparador = StringComparer.OrdinalIgnoreCase;

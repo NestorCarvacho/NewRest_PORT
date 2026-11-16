@@ -71,7 +71,7 @@ Diccionario completo: `Docs/datos/Diccionario_de_datos_HotelDB.xlsx`
 | `censo` | `/Censo/Datos` | `GestionarCensos` |
 | `usuarios` | `/Cuenta/Usuarios` | `AdministrarUsuarios` |
 
-El menú legado usa jerarquía **`Ubicacion = nav`** (barra) + hijos **`side`** con `PadreId`. Ejemplo contrastado: **perfil 137** en `Docs/datos/diccionario-hoteldb-perfiles-menus.md`.
+**BD vs UI:** en HOTELDB, `nav` = raíz y `side` = hijos (`PadreId`). En NewRest los `side` van al **desplegable bajo cada botón de la barra** (hover/click), no al panel lateral de navegación. Ver perfiles **1** / **137** en `Docs/datos/diccionario-hoteldb-perfiles-menus.md`.
 
 Mapeo de rutas SPA (`/app/gestion/censo`, `/app/gestion/miscensos` → `censo` / `censoQr`). Los informes (`/app/gestion/informe/censo`) quedan deshabilitados hasta migrar. Ampliar `MapeoEnlacesMenu.cs` según nuevos `Link`.
 

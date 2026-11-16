@@ -153,10 +153,12 @@ El nav **Dashboard** (`Id = 1`) suele no tener filas `side` en `MenusPerfil`; el
 
 Estructura legado contrastada con la query `sp_Menu_ObtenerPorPerfil`:
 
-| Nivel | `Ubicacion` | `PadreId` | Ejemplo |
-|-------|-------------|-----------|---------|
-| Barra principal | `nav` | `NULL` | Gestión, Informes, Configuración, Operaciones |
-| Ítems del desplegable | `side` | id del `nav` | Censo bajo Gestión (`PadreId = 2`) |
+| Nivel en BD | `Ubicacion` | `PadreId` | En pantalla NewRest |
+|-------------|-------------|-----------|---------------------|
+| Raíz | `nav` | `NULL` | Botón en barra superior (Gestión, Informes, …) |
+| Hijo | `side` | id del `nav` | Lista dentro del **desplegable** bajo ese botón (hover/click) |
+
+En el **sistema legado** los hijos `side` abrían un panel lateral; en **NewRest** la directriz vigente mantiene todo en la barra + desplegable (`menu-desplegable`), sin reutilizar el panel lateral para navegación.
 
 Rutas SPA típicas: `/app/gestion`, `/app/gestion/censo`, `/app/gestion/informe/censo`, `/app/gestion/miscensos`, `/app/config/codigoqr`.
 
