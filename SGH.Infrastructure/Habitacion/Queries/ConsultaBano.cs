@@ -19,4 +19,17 @@ public sealed class ConsultaBano(IFabricaConexionSql fabrica) : IConsultaBano
             cancellationToken: cancellationToken));
         return filas.AsList();
     }
+
+    public async Task<IReadOnlyList<HabitacionVinculadaBano>> ListarHabitacionesActivasPorBanoAsync(
+        int banoId, int campamentoId, CancellationToken cancellationToken)
+    {
+        using var conexion = fabrica.Crear();
+        var filas = await conexion.QueryAsync<HabitacionVinculadaBano>(new CommandDefinition(
+            "dbo.sp_Bano_HabitacionesActivasPorBano",
+            new { BanoId = banoId, CampamentoId = campamentoId },
+            commandType: CommandType.StoredProcedure,
+            commandTimeout: 120,
+            cancellationToken: cancellationToken));
+        return filas.AsList();
+    }
 }

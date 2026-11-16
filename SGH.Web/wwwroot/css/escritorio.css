@@ -748,10 +748,14 @@ div.dt-container table.dataTable tbody > tr > td {
 }
 
 .modulo-habitaciones table.dataTable th:first-child,
-.modulo-habitaciones table.dataTable td:first-child,
+.modulo-habitaciones table.dataTable td:first-child {
+  width: 11rem;
+}
+
 .modulo-banos table.dataTable th:first-child,
 .modulo-banos table.dataTable td:first-child {
-  width: 11rem;
+  width: 13.5rem;
+  min-width: 13.5rem;
 }
 
 .modulo-habitaciones div.dt-container table.dataTable tbody > tr > td:first-child,
@@ -761,10 +765,16 @@ div.dt-container table.dataTable tbody > tr > td {
   overflow: visible;
 }
 
-.modulo-habitaciones .acciones-fila,
-.modulo-banos .acciones-fila {
+.modulo-habitaciones .acciones-fila {
   display: flex;
   flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.modulo-banos .acciones-fila {
+  display: inline-flex;
+  flex-flow: row nowrap;
+  align-items: center;
   gap: 0.35rem;
 }
 

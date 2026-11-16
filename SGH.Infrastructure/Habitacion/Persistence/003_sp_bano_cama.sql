@@ -23,6 +23,26 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE dbo.sp_Bano_HabitacionesActivasPorBano
+    @BanoId int,
+    @CampamentoId int
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        h.Id,
+        h.Nombre
+    FROM dbo.Habitaciones AS h WITH (NOLOCK)
+    INNER JOIN dbo.Modulos AS m WITH (NOLOCK) ON m.Id = h.ModuloId
+    INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
+    WHERE h.BanoId = @BanoId
+      AND h.IsActive = 1
+      AND p.CampamentoId = @CampamentoId
+    ORDER BY h.Nombre, h.Id;
+END
+GO
+
 CREATE OR ALTER PROCEDURE dbo.sp_Bano_Guardar
     @Id int,
     @CampamentoId int,

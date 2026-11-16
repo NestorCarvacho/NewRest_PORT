@@ -20,6 +20,7 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
         Accion("crearbano", "Crear baño", "dbo.sp_Bano_Guardar", "Alta de baño."),
         Accion("editarbano", "Editar baño", "dbo.sp_Bano_Guardar", "Actualización de baño."),
         Accion("inactivarbano", "Inactivar baño", "dbo.sp_Bano_Guardar", "Baja lógica de baño."),
+        Accion("activarbano", "Activar baño", "dbo.sp_Bano_Guardar", "Reactivación de baño."),
         Accion("listarcamas", "Listar camas", "dbo.sp_Cama_ListarPorHabitacion", "Camas de una habitación."),
         Accion("guardarcama", "Guardar cama", "dbo.sp_Cama_Guardar", "Alta o edición de cama.")
     ];
@@ -42,6 +43,7 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
             "crearbano" => await GuardarBanoAsync(filtro, sesion, esAlta: true, cancellationToken),
             "editarbano" => await GuardarBanoAsync(filtro, sesion, esAlta: false, cancellationToken),
             "inactivarbano" => await InactivarBanoAsync(filtro, sesion, cancellationToken),
+            "activarbano" => await ActivarBanoAsync(filtro, sesion, cancellationToken),
             "listarcamas" => await ListarCamasAsync(filtro, sesion, cancellationToken),
             "guardarcama" => await GuardarCamaAsync(filtro, sesion, cancellationToken),
             _ => EjecucionMid.Fallo(400, $"La opción '{filtro.Opcion}' no está implementada en el Mid.")
@@ -143,6 +145,13 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
         var datos = LeerCuerpoBano(filtro, sesion.UsuarioId, esAlta);
         if (datos is null)
             return EjecucionMid.Fallo(400, "Revise los datos del baño.");
+        if (!esAlta && LecturaPeticion.Campo(filtro, "estado") is null)
+        {
+            var listado = await gestion.ListarBanosAsync(sesion.CampamentoId, 0, cancellationToken);
+            var actual = listado.FirstOrDefault(b => b.Id == datos.Id);
+            if (actual is not null)
+                datos = datos with { Estado = actual.Estado, IsActive = actual.IsActive };
+        }
         var resultado = await gestion.GuardarBanoAsync(datos, sesion.CampamentoId, cancellationToken);
         if (!resultado.Exito)
             return EjecucionMid.Fallo(400, resultado.Mensaje);
@@ -164,13 +173,37 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
             actual.CodigoNombre,
             actual.Ubicacion,
             actual.TipoSexo,
-            actual.Estado,
+            "INACTIVO",
             false,
             sesion.UsuarioId);
         var resultado = await gestion.GuardarBanoAsync(datos, sesion.CampamentoId, cancellationToken);
         if (!resultado.Exito)
             return EjecucionMid.Fallo(400, resultado.Mensaje);
         return EjecucionMid.Ok(new { resultado = true, mensaje = "Baño inactivado." });
+    }
+
+    private async Task<EjecucionMid> ActivarBanoAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var id = LecturaPeticion.Entero(filtro, "id");
+        if (id <= 0)
+            return EjecucionMid.Fallo(400, "Seleccione un baño.");
+        var filas = await gestion.ListarBanosAsync(sesion.CampamentoId, 0, cancellationToken);
+        var actual = filas.FirstOrDefault(b => b.Id == id);
+        if (actual is null)
+            return EjecucionMid.Fallo(404, "El baño no existe en el campamento.");
+
+        var datos = new DatosGuardarBano(
+            actual.Id,
+            actual.CodigoNombre,
+            actual.Ubicacion,
+            actual.TipoSexo,
+            "ACTIVO",
+            true,
+            sesion.UsuarioId);
+        var resultado = await gestion.GuardarBanoAsync(datos, sesion.CampamentoId, cancellationToken);
+        if (!resultado.Exito)
+            return EjecucionMid.Fallo(400, resultado.Mensaje);
+        return EjecucionMid.Ok(new { resultado = true, mensaje = "Baño activado." });
     }
 
     private async Task<EjecucionMid> ListarCamasAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
@@ -248,6 +281,11 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
         var isActive = !string.Equals(estado, "INACTIVO", StringComparison.OrdinalIgnoreCase);
         if (LecturaPeticion.Bandera(filtro, "inactivo"))
             isActive = false;
+        if (esAlta)
+        {
+            estado = "ACTIVO";
+            isActive = true;
+        }
         return new DatosGuardarBano(
             id,
             codigo.Trim(),
