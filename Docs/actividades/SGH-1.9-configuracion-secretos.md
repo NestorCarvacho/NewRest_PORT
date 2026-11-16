@@ -2,8 +2,8 @@
 
 **Épica / ticket:** SGH 1.9 · Gestión de configuración y secretos  
 **Fecha:** 2026-11-16  
-**Rama / merge:** `cursor/sgh-1-9-config-secretos-f6a4` → `main` (`6288dcd`)  
-**Estado:** Implementada y mergeada
+**Rama / merge:** `cursor/sgh-1-9-config-secretos-f6a4` → `main` (`6288dcd`, docs `1a909d4`)  
+**Estado:** Implementada, mergeada y verificada en local (Windows / PowerShell)
 
 **Ticket gestor:** [`../SGH-1.9-documentacion-ticket.md`](../SGH-1.9-documentacion-ticket.md)
 
