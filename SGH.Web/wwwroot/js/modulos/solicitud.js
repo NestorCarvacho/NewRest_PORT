@@ -83,7 +83,7 @@ export function crearSolicitud(d) {
         solicitante.disabled = edicion;
         var fechaSolicitud = campo(form, "Fecha solicitud", "fechaSolicitud", "date", edicion ? fecha(detalle.fechaSolicitud) : d.fechaActual(), true);
         var checkIn = campo(form, "Check-in", "fechaCheckIn", "date", edicion ? fecha(detalle.fechaCheckIn) : d.fechaActual(), true);
-        var checkOut = campo(form, "Check-out", "fechaCheckOut", "date", edicion ? fecha(detalle.fechaCheckOut) : "");
+        var checkOut = campo(form, "Check-out", "fechaCheckOut", "date", edicion ? fecha(detalle.fechaCheckOut) : d.fechaActual());
         var conTurno = campo(form, "Sistema de turno", "conSistemaTurno", "checkbox", edicion && detalle.conSistemaTurno);
         var turno = campo(form, "Turno", "turnoId", "select", null, true);
         var rotacion = campo(form, "Turno rotación", "turnoRotacionId", "select");

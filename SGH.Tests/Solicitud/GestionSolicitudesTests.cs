@@ -40,6 +40,7 @@ public class GestionSolicitudesTests
         Assert.Equal(1, _falso.Guardados);
         Assert.Equal(datos.GrupoId, _falso.Datos!.GrupoId);
         Assert.Equal(datos.FechaCheckIn, _falso.Datos.FechaCheckIn);
+        Assert.Equal(datos.FechaCheckIn, _falso.Datos.FechaCheckOut);
     }
 
     [Fact]
@@ -142,6 +143,7 @@ public class GestionSolicitudesTests
         Assert.Equal("rut", _falso.FilasCargadas[0].TipoIdentificador);
         Assert.Equal("F", _falso.FilasCargadas[0].Genero);
         Assert.Equal(2, _falso.FilasCargadas.Count);
+        Assert.Equal((42, 2, 3, 7), _falso.PeriodoImportacion);
     }
 
     private static DatosSolicitudDto Crear() => new(
@@ -164,6 +166,7 @@ public class GestionSolicitudesTests
         public (int, int, int, int) Generacion { get; private set; }
         public (int, int, int, int, int, int) Asignacion { get; private set; }
         public List<FilaCargaPasajeroDto> FilasCargadas { get; } = [];
+        public (int, int, int, int)? PeriodoImportacion { get; private set; }
 
         public Task<IReadOnlyList<SolicitudListadaDto>> BuscarAsync(FiltroSolicitudesDto filtro, CancellationToken cancellationToken)
         {
@@ -219,6 +222,12 @@ public class GestionSolicitudesTests
         {
             PasajeroGuardado = pasajero;
             return Task.FromResult(9);
+        }
+
+        public Task AsegurarPeriodoImportacionAsync(int solicitudId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
+        {
+            PeriodoImportacion = (solicitudId, empresaMandanteId, campamentoId, usuarioId);
+            return Task.CompletedTask;
         }
 
         public Task<ResultadoProcedimientoCargaDto> CargarPasajeroAsync(int id, int empresa, int campamento,

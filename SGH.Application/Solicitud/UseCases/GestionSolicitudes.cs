@@ -93,6 +93,7 @@ public sealed class GestionSolicitudes(IConsultaSolicitudAlojamiento consulta, I
         await ExigirSolicitudDelCampamentoAsync(id, empresaMandanteId, campamentoId, cancellationToken);
         if (usuarioId <= 0)
             throw new ArgumentException("Indique un usuario válido.");
+        await comando.AsegurarPeriodoImportacionAsync(id, empresaMandanteId, campamentoId, usuarioId, cancellationToken);
         var resultados = new List<ResultadoCargaPasajeroDto>();
         foreach (var fila in filas)
         {
@@ -201,8 +202,14 @@ public sealed class GestionSolicitudes(IConsultaSolicitudAlojamiento consulta, I
             || solicitud.NumeroContactoCampamento?.Length > 20 || solicitud.NumeroContrato?.Length > 100
             || solicitud.Observacion?.Length > 200)
             throw new ArgumentException("Un campo supera la longitud permitida.");
+
+        var fechaCheckOut = solicitud.FechaCheckOut;
+        if (!fechaCheckOut.HasValue && solicitud.FechaCheckIn.HasValue)
+            fechaCheckOut = solicitud.FechaCheckIn.Value.Date;
+
         return await comando.GuardarAsync(solicitud with
         {
+            FechaCheckOut = fechaCheckOut,
             SolicitanteId = solicitud.SolicitanteId == 0 ? null : solicitud.SolicitanteId,
             TurnoRotacionId = solicitud.TurnoRotacionId == 0 ? null : solicitud.TurnoRotacionId,
             UnidadNegocioId = solicitud.UnidadNegocioId == 0 ? null : solicitud.UnidadNegocioId,
