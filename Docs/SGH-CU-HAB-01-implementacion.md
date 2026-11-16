@@ -22,6 +22,8 @@ Sin **002** y **003**, **001** referencia columnas/objetos inexistentes.
 
 Ruta: `/Habitacion/Mid/MidHabitaciones.cs`
 
+UI: solapas del escritorio (`habitaciones`, `banos`), igual que Censo/Reserva; páginas `/Habitacion/Datos` y `/Habitacion/Banos` abren el módulo inicial vía `escritorio.js`.
+
 **Habitaciones:** `listar`, `catalogo`, `obtener`, `crear`, `editar`, `inactivar`
 
 **Baños:** `listarbanos`, `crearbano`, `editarbano`, `inactivarbano`

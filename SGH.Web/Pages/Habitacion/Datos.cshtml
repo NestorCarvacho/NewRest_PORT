@@ -2,9 +2,9 @@
 @model SGH.Web.Pages.Habitacion.DatosModel
 @{
     ViewData["Title"] = "Habitaciones";
-    ViewData["TabInicial"] = "habitaciones";
+    ViewData["ModuloId"] = "habitaciones";
 }
-<partial name="_ModuloHabitacionBanos" />
+<partial name="_ModuloPagina" />
 @section Scripts {
-    <script type="module" src="~/Habitacion/Js/datosHabitacion.js" asp-append-version="true"></script>
+    <script type="module" src="~/js/escritorio.js" asp-append-version="true"></script>
 }

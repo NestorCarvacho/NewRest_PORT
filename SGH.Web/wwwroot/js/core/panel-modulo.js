@@ -8,6 +8,12 @@ export function crearPanelModulo(dependencias) {
         var estado = document.createElement("p");
         estado.className = "modulo-estado";
         estado.hidden = true;
+        if (modulo.tipo === "habitacion") {
+            nodo._hostHabitacion = document.createElement("div");
+            nodo._hostHabitacion.className = "habitacion-solapa-host";
+            nodo.append(estado, nodo._hostHabitacion);
+            return nodo;
+        }
         var barra = document.createElement("div");
         barra.className = "modulo-barra";
         barra.append(dependencias.boton("Filtros", "boton-secundario", function () {

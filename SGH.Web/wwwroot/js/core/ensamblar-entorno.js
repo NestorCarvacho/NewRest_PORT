@@ -26,7 +26,8 @@ export function ensamblarEntorno(idsPantalla) {
         censo: null,
         solicitud: null,
         movimientosReserva: null,
-        censoQr: null
+        censoQr: null,
+        habitacion: null
     };
     var modulos = {};
 
