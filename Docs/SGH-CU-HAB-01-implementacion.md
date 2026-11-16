@@ -4,7 +4,7 @@
 
 | CU | NewRest | Notas |
 |----|---------|--------|
-| CRUD **Habitación** | Sí | `MidHabitaciones`, `/Habitacion/Datos`; `sp_Habitacion_*` (edición nativa; alta legado `HAB_*` con fallback si `files.HabitacionFiles` está roto) |
+| CRUD **Habitación** | Sí | `MidHabitaciones`, `/Habitacion/Datos`; `sp_Habitacion_Guardar` nativo (ver `Docs/datos/hab-guarda-habitacion-as-is.md`; `HAB_GuardaHabitacion` solo UPDATE) |
 | CRUD **Baño** | Sí | Tabla `dbo.Banos`, `sp_Bano_*`, pestaña Baños |
 | CRUD **Cama** (N filas) | Sí | Tabla `dbo.Camas`, sincronización al guardar habitación; toggles `habilitada` en edición |
 | **Turno** horario (operativo faena) | Parcial | Flags explícitos + `TiempoHigienizacionMin`; turnos de faena en `Turnos` / solicitud |
