@@ -10,6 +10,27 @@ export function crearPanelModulo(dependencias) {
         estado.hidden = true;
         var barra = document.createElement("div");
         barra.className = "modulo-barra";
+        barra.append(dependencias.boton("Actualizar", "boton-secundario", function () {
+            dependencias.cargar(id).catch(function (error) {
+                dependencias.mostrarEstado(nodo, error.message);
+            });
+        }));
+        barra.append(dependencias.boton("Exportar Excel", "boton-secundario", function () {
+            if (!nodo._tabla) {
+                dependencias.mostrarAviso("No hay datos para exportar.", "warning");
+                return;
+            }
+            var avisoVacio = function () { dependencias.mostrarAviso("No hay datos para exportar.", "warning"); };
+            dependencias.exportarTabla.exportarExcel(nodo, modulo.titulo, avisoVacio);
+        }));
+        barra.append(dependencias.boton("Exportar CSV", "boton-secundario", function () {
+            if (!nodo._tabla) {
+                dependencias.mostrarAviso("No hay datos para exportar.", "warning");
+                return;
+            }
+            var avisoVacio = function () { dependencias.mostrarAviso("No hay datos para exportar.", "warning"); };
+            dependencias.exportarTabla.exportarCsv(nodo, modulo.titulo, avisoVacio);
+        }));
         barra.append(dependencias.boton("Filtros", "boton-secundario", function () {
             dependencias.prepararCatalogo(modulo.modo).then(function () {
                 dependencias.abrirPanel("Filtros de " + modulo.titulo, dependencias.formulario(

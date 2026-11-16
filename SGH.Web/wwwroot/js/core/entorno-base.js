@@ -6,6 +6,7 @@ import { crearCatalogos } from "./catalogos.js";
 import { crearAvisos } from "./avisos.js";
 import { crearPanelLateral } from "./panel-lateral.js";
 import { crearCargarDeferido } from "./cargar-deferido.js";
+import { crearExportadorTabla } from "./exportar-tabla.js";
 
 export function crearEntornoBase() {
     var api = crearApi();
@@ -15,6 +16,7 @@ export function crearEntornoBase() {
     var avisos = crearAvisos();
     var panelLateral = crearPanelLateral();
     var cargarDeferido = crearCargarDeferido();
+    var exportarTabla = crearExportadorTabla();
     var enlazarFormulario = function () { };
 
     var interfazFormularios = crearFormularios({
@@ -42,6 +44,8 @@ export function crearEntornoBase() {
         fechaActual: fechas.fechaActual,
         momentoLocal: fechas.momentoLocal,
         rangoReservaInicial: fechas.rangoReservaInicial,
+        fechaListadoAInput: fechas.fechaListadoAInput,
+        exportarTabla: exportarTabla,
         cargar: cargarDeferido.cargar,
         cargarDeferido: cargarDeferido,
         formulario: interfazFormularios.formulario,
