@@ -48,17 +48,6 @@ export function crearNavegacion(dependencias) {
             var visible = nodo.dataset.id === id;
             nodo.hidden = !visible;
             if (!visible) return;
-            var def = dependencias.modulos[id];
-            if (def && def.tipo === "habitacion" && dependencias.montarHabitacion) {
-                if (!nodo.dataset.montado && nodo._hostHabitacion) {
-                    nodo.dataset.montado = "1";
-                    dependencias.mostrarEstado(nodo, "Cargando...");
-                    Promise.resolve(dependencias.montarHabitacion(nodo._hostHabitacion, { tabInicial: def.tabInicial }))
-                        .then(function () { dependencias.mostrarEstado(nodo, ""); })
-                        .catch(function (error) { dependencias.mostrarEstado(nodo, error.message); });
-                }
-                return;
-            }
             if (!window.DataTable) {
                 if (dependencias.mostrarEstado) dependencias.mostrarEstado(nodo, "No se cargó la tabla (DataTables). Compruebe la conexión e recargue la página.");
                 return;

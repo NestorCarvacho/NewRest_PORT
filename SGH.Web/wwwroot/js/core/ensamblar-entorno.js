@@ -27,7 +27,8 @@ export function ensamblarEntorno(idsPantalla) {
         solicitud: null,
         movimientosReserva: null,
         censoQr: null,
-        habitacion: null
+        habitacion: null,
+        movimientosHabitacion: null
     };
     var modulos = {};
 
@@ -44,7 +45,9 @@ export function ensamblarEntorno(idsPantalla) {
         censo: instancia.censo,
         reserva: instancia.reserva,
         solicitud: instancia.solicitud,
-        movimientosReserva: instancia.movimientosReserva
+        movimientosReserva: instancia.movimientosReserva,
+        habitacion: instancia.habitacion,
+        movimientosHabitacion: instancia.movimientosHabitacion
     });
     var crearPanel = crearPanelModulo({
         boton: base.boton,
@@ -58,6 +61,7 @@ export function ensamblarEntorno(idsPantalla) {
         solicitud: instancia.solicitud,
         censo: instancia.censo,
         censoQr: instancia.censoQr,
+        habitacion: instancia.habitacion,
         crearTabla: base.tablas.crear
     });
 
@@ -69,6 +73,7 @@ export function ensamblarEntorno(idsPantalla) {
             censo: instancia.censo,
             reserva: instancia.reserva,
             solicitud: instancia.solicitud,
+            habitacion: instancia.habitacion,
             mostrarEstado: base.mostrarEstado,
             pintar: renderizador.pintar
         });
