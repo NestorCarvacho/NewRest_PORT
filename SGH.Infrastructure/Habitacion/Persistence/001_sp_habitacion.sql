@@ -228,7 +228,23 @@ BEGIN
         RETURN;
     END
 
-    DECLARE @UsarNativo bit = CASE WHEN @Id > 0 THEN 1 ELSE 0 END;
+    /* HAB_ValidaHabitacion (as-is HOTELDB): no permite quitar reservable con reservas activas. */
+    IF @Id > 0
+       AND @IsReservable = 0
+       AND EXISTS (
+           SELECT 1 FROM dbo.Habitaciones WITH (NOLOCK)
+           WHERE Id = @Id AND IsActive = 1 AND IsReservable = 1)
+       AND EXISTS (
+           SELECT 1 FROM dbo.ReservasInstalacion WITH (NOLOCK)
+           WHERE ubicacionId = @Id
+             AND fecHorInicio >= DATEADD(hour, DATEDIFF(hour, 0, SYSDATETIME()), 0))
+    BEGIN
+        SET @Mensaje = N'Ubicacion se encuentra con reservas activas';
+        RETURN;
+    END
+
+    /* HAB_GuardaHabitacion legado solo hace UPDATE (Id > 0); el alta va por INSERT nativo CU-HAB. */
+    DECLARE @UsarNativo bit = 1;
     DECLARE @GuardadoLegado bit = 0;
     DECLARE @ret int;
     DECLARE @ErrLegado nvarchar(500);
@@ -334,24 +350,43 @@ BEGIN
     BEGIN
         SET @UsarNativo = 1;
 
-        /* Legado: EstadoTabla referencia dbo.Listas (catálogo estados habitación, IdTabla 8). */
+        /* HOTELDB (HAB_GuardaHabitacion + muestra): SexoTabla=11, Sexo varchar(1); EstadoTabla=8, Estado varchar(2). */
         DECLARE @EstadoTabla int = 8;
-        SELECT TOP 1 @EstadoTabla = h.EstadoTabla
-        FROM dbo.Habitaciones AS h WITH (NOLOCK)
-        WHERE h.EstadoTabla IS NOT NULL
-        ORDER BY h.Id DESC;
-        IF @EstadoTabla IS NULL
-            SET @EstadoTabla = 8;
+        DECLARE @SexoTabla int = 11;
+        DECLARE @SexoLista varchar(1);
+
         IF NOT EXISTS (
             SELECT 1 FROM dbo.Listas WITH (NOLOCK)
             WHERE IdTabla = @EstadoTabla AND Tipo = N'Detalle' AND Valor1 = @Estado)
         BEGIN
-            SELECT TOP 1 @EstadoTabla = l.IdTabla
+            SET @Mensaje = N'El estado no existe en dbo.Listas (IdTabla 8).';
+            RETURN;
+        END
+
+        DECLARE @SexoNorm varchar(10) = UPPER(LTRIM(RTRIM(ISNULL(@Sexo, N''))));
+        IF @SexoNorm IN (N'HOMBRE', N'MASCULINO')
+            SET @SexoNorm = N'M';
+        IF @SexoNorm IN (N'MUJER', N'FEMENINO')
+            SET @SexoNorm = N'F';
+
+        IF LEN(@SexoNorm) = 1 AND @SexoNorm IN (N'M', N'F', N'O')
+            SET @SexoLista = @SexoNorm;
+        ELSE IF @SexoNorm = N'MIXTO'
+        BEGIN
+            SELECT TOP 1 @SexoLista = CAST(l.Valor1 AS varchar(1))
             FROM dbo.Listas AS l WITH (NOLOCK)
-            WHERE l.Tipo = N'Detalle' AND l.Valor1 = @Estado AND l.IdTabla IN (8, 11)
-            ORDER BY CASE l.IdTabla WHEN 8 THEN 0 ELSE 1 END;
-            IF @EstadoTabla IS NULL
-                SET @EstadoTabla = 8;
+            WHERE l.IdTabla = @SexoTabla AND l.Tipo = N'Detalle' AND l.Valor1 IN (N'O', N'M', N'F', N'MIXTO')
+            ORDER BY CASE l.Valor1 WHEN N'O' THEN 0 WHEN N'MIXTO' THEN 1 ELSE 2 END;
+        END
+        ELSE
+            SET @SexoLista = LEFT(@SexoNorm, 1);
+
+        IF @SexoLista IS NULL OR NOT EXISTS (
+            SELECT 1 FROM dbo.Listas WITH (NOLOCK)
+            WHERE IdTabla = @SexoTabla AND Tipo = N'Detalle' AND Valor1 = @SexoLista)
+        BEGIN
+            SET @Mensaje = N'El sexo no existe en dbo.Listas (IdTabla 11).';
+            RETURN;
         END
 
         SET @MinutosMin = CASE
@@ -371,10 +406,10 @@ BEGIN
                     Nombre = @Nombre,
                     IsActive = @IsActive,
                     CantidadCamas = @CantidadCamas,
-                    Sexo = @Sexo,
+                    SexoTabla = @SexoTabla,
+                    Sexo = @SexoLista,
                     TipoInstalacionId = @TipoInstalacionId,
-                    StandardHabitacionId = @StandardHabitacionId,
-                    EstadoTabla = @EstadoTabla,
+                    StandardHabitacionId = NULLIF(@StandardHabitacionId, 0),
                     Estado = @Estado,
                     ObservacionBloqueo = @ObservacionBloqueo,
                     M2 = @M2,
@@ -411,7 +446,7 @@ BEGIN
                 END
 
                 INSERT INTO dbo.Habitaciones (
-                    ModuloId, Nombre, IsActive, CantidadCamas, Sexo,
+                    ModuloId, Nombre, IsActive, CantidadCamas, SexoTabla, Sexo,
                     TipoInstalacionId, StandardHabitacionId, EstadoTabla, Estado,
                     ObservacionBloqueo, M2, IsReservable,
                     PersonasCantidadMin, PersonasCantidadMax,
@@ -419,8 +454,8 @@ BEGIN
                     BanoId, PermiteUsoExclusivo, PermiteUsoPorTurnos, TiempoHigienizacionMin,
                     FechaCreacion, UsuarioCreacionId)
                 VALUES (
-                    @ModuloId, @Nombre, @IsActive, @CantidadCamas, @Sexo,
-                    @TipoInstalacionId, @StandardHabitacionId, @EstadoTabla, @Estado,
+                    @ModuloId, @Nombre, @IsActive, @CantidadCamas, @SexoTabla, @SexoLista,
+                    @TipoInstalacionId, NULLIF(@StandardHabitacionId, 0), @EstadoTabla, @Estado,
                     @ObservacionBloqueo, @M2, @IsReservable,
                     @PersonasCantidadMin, @PersonasCantidadMax,
                     @MinutosMin, @MinutosMax, @TieneServiciosAlimentacion,
