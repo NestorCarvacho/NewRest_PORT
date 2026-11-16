@@ -57,5 +57,8 @@ TestResult.xml
 nunit-*.xml
 
 
-# connection string
+# secretos y configuración local (SGH 1.9)
 appsettings.Development.json
+appsettings.*.local.json
+**/secrets.json
+**/user-secrets.json

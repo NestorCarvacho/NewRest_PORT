@@ -12,9 +12,11 @@ using SGH.Web.Autorizacion;
 using SGH.Application.Navegacion;
 using SGH.Web.Infraestructura;
 using SGH.Web.Mid;
+using SGH.Web.Configuracion;
 using SGH.Web.Transversal;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AgregarAlmacenSecretosPorAmbiente();
 
 builder.Services.AddInfraestructura(builder.Configuration);
 builder.Services.AddServiciosTransversalesWeb();
@@ -144,6 +146,7 @@ builder.Services.AddRazorPages(opciones =>
 }).AddMvcOptions(opciones => opciones.Filters.AddService<FiltroPilaAvisos>());
 
 var app = builder.Build();
+app.ValidarSecretosObligatorios();
 
 app.UseMiddleware<CorrelacionSolicitudMiddleware>();
 

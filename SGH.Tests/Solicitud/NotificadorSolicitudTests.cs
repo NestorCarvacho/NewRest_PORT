@@ -4,6 +4,8 @@ using System.Text;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using SGH.Application.Configuracion;
 using SGH.Application.Solicitud.DTOs;
 using SGH.Infrastructure.Transversal;
 using SGH.Application.Solicitud.Interfaces;
@@ -79,7 +81,9 @@ public class NotificadorSolicitudTests : IClassFixture<WebApplicationFactory<Pro
             ["CorreoSolicitudes:Remitente"] = "a@test",
             ["CorreoSolicitudes:Ssl"] = "false"
         }).Build();
-        var enviador = new EnviadorCorreoSmtp(configuracion);
+        var enviador = new EnviadorCorreoSmtp(
+            configuracion,
+            Options.Create(OpcionesCorreoSolicitudes.DesdeSeccion(configuracion.GetSection("CorreoSolicitudes"))));
         await Assert.ThrowsAsync<InvalidOperationException>(() => enviador.EnviarAsync(
             new Application.Transversal.CorreoMensaje
             {

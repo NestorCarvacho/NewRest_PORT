@@ -19,6 +19,7 @@ using SGH.Infrastructure.Reserva.Queries;
 using SGH.Application.Solicitud.Interfaces;
 using SGH.Infrastructure.Solicitud.Commands;
 using SGH.Infrastructure.Solicitud.Queries;
+using SGH.Application.Configuracion;
 using SGH.Application.Transversal;
 using SGH.Infrastructure.Transversal;
 using SGH.Infrastructure.Solicitud.Planillas;
@@ -53,6 +54,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IComandoReserva, ComandoReserva>();
         services.AddScoped<IConsultaSolicitudAlojamiento, ConsultaSolicitudAlojamiento>();
         services.AddScoped<IComandoSolicitudAlojamiento, ComandoSolicitudAlojamiento>();
+        services.Configure<OpcionesCorreoSolicitudes>(configuration.GetSection(OpcionesCorreoSolicitudes.Seccion));
         services.AddScoped<IEnviadorCorreo, EnviadorCorreoSmtp>();
         services.AddScoped<IGeneradorCodigoQr, GeneradorCodigoQr>();
         services.AddScoped<IGeneradorPdf, GeneradorPdfDocumento>();

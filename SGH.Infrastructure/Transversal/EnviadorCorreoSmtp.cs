@@ -2,34 +2,35 @@ using System.Net;
 using System.Net.Mail;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using SGH.Application.Configuracion;
 using SGH.Application.Transversal;
 
 namespace SGH.Infrastructure.Transversal;
 
-public sealed class EnviadorCorreoSmtp(IConfiguration configuracion) : IEnviadorCorreo
+public sealed class EnviadorCorreoSmtp(
+    IConfiguration configuracion,
+    IOptions<OpcionesCorreoSolicitudes> correoSolicitudes) : IEnviadorCorreo
 {
     public async Task EnviarAsync(CorreoMensaje mensaje, string seccionConfiguracion, CancellationToken cancellationToken)
     {
-        var seccion = configuracion.GetSection(seccionConfiguracion);
-        var host = seccion["Host"];
-        var remitente = seccion["Remitente"];
-        var usuario = seccion["Usuario"];
-        var contrasena = seccion["Contrasena"];
-        if (!bool.TryParse(seccion["Habilitado"], out var habilitado) || !habilitado)
+        var opciones = seccionConfiguracion == OpcionesCorreoSolicitudes.Seccion
+            ? correoSolicitudes.Value
+            : OpcionesCorreoSolicitudes.DesdeSeccion(configuracion.GetSection(seccionConfiguracion));
+
+        if (!opciones.Habilitado)
             throw new InvalidOperationException("El envío de correo no está habilitado.");
-        if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(remitente)
-            || !int.TryParse(seccion["Puerto"], out var puerto) || puerto is < 1 or > 65535)
+        if (string.IsNullOrWhiteSpace(opciones.Host) || string.IsNullOrWhiteSpace(opciones.Remitente)
+            || opciones.Puerto is < 1 or > 65535)
             throw new InvalidOperationException("La configuración SMTP está incompleta.");
         if (string.IsNullOrWhiteSpace(mensaje.Destinatario))
             throw new InvalidOperationException("El mensaje no tiene destinatario.");
-        if (string.IsNullOrWhiteSpace(usuario) != string.IsNullOrWhiteSpace(contrasena))
+        if (string.IsNullOrWhiteSpace(opciones.Usuario) != string.IsNullOrWhiteSpace(opciones.Contrasena))
             throw new InvalidOperationException("La configuración SMTP requiere usuario y contraseña.");
-        if (!bool.TryParse(seccion["Ssl"], out var ssl))
-            throw new InvalidOperationException("Indique si el servidor SMTP requiere SSL.");
 
         using var correo = new MailMessage
         {
-            From = new MailAddress(remitente),
+            From = new MailAddress(opciones.Remitente),
             Subject = mensaje.Asunto,
             SubjectEncoding = Encoding.UTF8,
             BodyEncoding = Encoding.UTF8,
@@ -40,9 +41,13 @@ public sealed class EnviadorCorreoSmtp(IConfiguration configuracion) : IEnviador
         if (!string.IsNullOrWhiteSpace(mensaje.CuerpoTexto))
             correo.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(mensaje.CuerpoTexto, Encoding.UTF8, "text/plain"));
 
-        using var cliente = new SmtpClient(host, puerto) { EnableSsl = ssl, Timeout = 30000 };
-        if (!string.IsNullOrWhiteSpace(usuario))
-            cliente.Credentials = new NetworkCredential(usuario, contrasena);
+        using var cliente = new SmtpClient(opciones.Host, opciones.Puerto)
+        {
+            EnableSsl = opciones.Ssl,
+            Timeout = 30000
+        };
+        if (!string.IsNullOrWhiteSpace(opciones.Usuario))
+            cliente.Credentials = new NetworkCredential(opciones.Usuario, opciones.Contrasena);
         await cliente.SendMailAsync(correo, cancellationToken);
     }
 }
