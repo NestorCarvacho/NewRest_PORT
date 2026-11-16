@@ -206,6 +206,22 @@ BEGIN
         RETURN;
     END
 
+    IF @Id > 0 AND (@PersonasCantidadMax <= 0 OR @PersonasCantidadMin <= 0)
+    BEGIN
+        SELECT
+            @PersonasCantidadMin = CASE
+                WHEN @PersonasCantidadMin > 0 THEN @PersonasCantidadMin
+                ELSE ISNULL(NULLIF(h.PersonasCantidadMin, 0), 1) END,
+            @PersonasCantidadMax = CASE
+                WHEN @PersonasCantidadMax > 0 THEN @PersonasCantidadMax
+                ELSE ISNULL(NULLIF(h.PersonasCantidadMax, 0), @CantidadCamas) END
+        FROM dbo.Habitaciones AS h WITH (NOLOCK)
+        WHERE h.Id = @Id;
+    END
+
+    IF @PersonasCantidadMin <= 0 SET @PersonasCantidadMin = 1;
+    IF @PersonasCantidadMax <= 0 SET @PersonasCantidadMax = @CantidadCamas;
+
   DECLARE @ret int;
     EXEC dbo.HAB_ValidaHabitacion
         @id = @Id,
