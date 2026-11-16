@@ -37,9 +37,11 @@ DECLARE @MenuBano int = (SELECT TOP 1 Id FROM dbo.Menus WHERE Link = N'/app/conf
 
 IF @MenuHab IS NOT NULL
    AND NOT EXISTS (SELECT 1 FROM dbo.MenusPerfil WHERE PerfilId = 1 AND MenuId = @MenuHab)
-    INSERT INTO dbo.MenusPerfil (PerfilId, MenuId) VALUES (1, @MenuHab);
+    INSERT INTO dbo.MenusPerfil (PerfilId, MenuId, FechaCreacion, UsuarioCreacionId)
+    VALUES (1, @MenuHab, @Ahora, @Usuario);
 
 IF @MenuBano IS NOT NULL
    AND NOT EXISTS (SELECT 1 FROM dbo.MenusPerfil WHERE PerfilId = 1 AND MenuId = @MenuBano)
-    INSERT INTO dbo.MenusPerfil (PerfilId, MenuId) VALUES (1, @MenuBano);
+    INSERT INTO dbo.MenusPerfil (PerfilId, MenuId, FechaCreacion, UsuarioCreacionId)
+    VALUES (1, @MenuBano, @Ahora, @Usuario);
 GO
