@@ -4,6 +4,24 @@ function siNo(valor) {
     return valor ? "Sí" : "No";
 }
 
+/** En UI solo MIXTO / HOMBRE / MUJER; el Mid acepta también M/F legados. */
+function tipoSexoBanoParaFormulario(codigo) {
+    if (!codigo) return "MIXTO";
+    var u = String(codigo).trim().toUpperCase();
+    if (u === "M" || u === "HOMBRE") return "HOMBRE";
+    if (u === "F" || u === "MUJER") return "MUJER";
+    if (u === "MIXTO") return "MIXTO";
+    return "MIXTO";
+}
+
+function opcionesTipoSexoBano() {
+    return [
+        { value: "MIXTO", text: "Mixto" },
+        { value: "HOMBRE", text: "Hombre" },
+        { value: "MUJER", text: "Mujer" }
+    ];
+}
+
 export function crearHabitacion(dependencias) {
     function mid(opcion, datos) {
         return dependencias.enviar(rutaMid, Object.assign({ opcion: opcion }, datos || {}));
@@ -260,22 +278,19 @@ export function crearHabitacion(dependencias) {
     function abrirFormularioBano(opcion, fila) {
         var esAlta = opcion === "crearbano";
         var titulo = esAlta ? "Nuevo baño" : "Editar baño";
-        var sexos = [
-            { value: "MIXTO", text: "Mixto" },
-            { value: "HOMBRE", text: "Hombre" },
-            { value: "MUJER", text: "Mujer" },
-            { value: "M", text: "M" },
-            { value: "F", text: "F" }
-        ];
         var form = dependencias.formulario([
             dependencias.seccion("", [
                 dependencias.campo("codigoNombre", "Código", "text", [], { requerido: true, valor: fila ? fila.codigoNombre : "" }),
                 dependencias.campo("ubicacion", "Ubicación", "text", [], { requerido: true, valor: fila ? fila.ubicacion : "" }),
-                dependencias.campo("tipoSexo", "Tipo sexo", "select", sexos, { requerido: true, valor: fila ? fila.tipoSexo : "MIXTO" }),
+                dependencias.campo("tipoSexo", "Tipo sexo", "select", opcionesTipoSexoBano(), {
+                    requerido: true,
+                    sinVacio: true,
+                    valor: tipoSexoBanoParaFormulario(fila ? fila.tipoSexo : "MIXTO")
+                }),
                 dependencias.campo("estado", "Estado", "select", [
                     { value: "ACTIVO", text: "Activo" },
                     { value: "INACTIVO", text: "Inactivo" }
-                ], { valor: fila ? fila.estado : "ACTIVO" })
+                ], { sinVacio: true, valor: fila ? fila.estado : "ACTIVO" })
             ])
         ], "Guardar", true, function (datos) {
             return mid(opcion, {
