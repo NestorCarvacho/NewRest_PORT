@@ -1,6 +1,6 @@
 using SGH.Application.Censo.Interfaces;
-using SGH.Application.Mid.Informes;
 using SGH.Application.Sesion;
+using SGH.Application.Transversal;
 using SGH.Domain.Censo.Interfaces;
 
 namespace SGH.Application.Mid;
@@ -12,7 +12,8 @@ public sealed class MidInformesCenso(
     IConsultarEstadoPago estadoPago,
     IConsultarEstadoPagoPantalla estadoPagoPantalla,
     IConsultarEstadoPagoServicio estadoPagoServicio,
-    IConsultarEstadoPagoServicioPantalla estadoPagoServicioPantalla)
+    IConsultarEstadoPagoServicioPantalla estadoPagoServicioPantalla,
+    IExportadorHojaCalculo exportadorHojaCalculo)
 {
     public const string Ruta = "Mid/MidInformesCenso.cs";
 
@@ -77,7 +78,7 @@ public sealed class MidInformesCenso(
             sesion.EmpresaMandanteId), cancellationToken);
 
         return EjecucionMid.Descarga(
-            ExportarExcel.Crear(resultado.Filas, "Censo"),
+            exportadorHojaCalculo.CrearXmlSpreadsheet(resultado.Filas, "Censo"),
             "informe-censo.xls",
             "application/vnd.ms-excel");
     }
@@ -116,7 +117,7 @@ public sealed class MidInformesCenso(
             : estadoPagoPantalla.EjecutarAsync(filtroInforme, cancellationToken));
 
         return descargar
-            ? EjecucionMid.Descarga(ExportarExcel.Crear(resultado.Filas, "EstadoPago"), "EstadoPago.xls", "application/vnd.ms-excel")
+            ? EjecucionMid.Descarga(exportadorHojaCalculo.CrearXmlSpreadsheet(resultado.Filas, "EstadoPago"), "EstadoPago.xls", "application/vnd.ms-excel")
             : EjecucionMid.Ok(new { filas = resultado.Filas });
     }
 
@@ -140,7 +141,7 @@ public sealed class MidInformesCenso(
             : estadoPagoServicioPantalla.EjecutarAsync(filtroInforme, cancellationToken));
 
         return descargar
-            ? EjecucionMid.Descarga(ExportarExcel.Crear(resultado.Filas, "EstadoPagoServicio"), "EstadoPagoServicio.xls", "application/vnd.ms-excel")
+            ? EjecucionMid.Descarga(exportadorHojaCalculo.CrearXmlSpreadsheet(resultado.Filas, "EstadoPagoServicio"), "EstadoPagoServicio.xls", "application/vnd.ms-excel")
             : EjecucionMid.Ok(new { filas = resultado.Filas });
     }
 

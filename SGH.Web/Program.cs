@@ -12,10 +12,12 @@ using SGH.Web.Autorizacion;
 using SGH.Application.Navegacion;
 using SGH.Web.Infraestructura;
 using SGH.Web.Mid;
+using SGH.Web.Transversal;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfraestructura(builder.Configuration);
+builder.Services.AddServiciosTransversalesWeb();
 builder.Services.AddLocalization();
 var culturasSoportadas = new[]
 {
@@ -190,3 +192,5 @@ static Task ResponderSesion(Microsoft.AspNetCore.Authentication.RedirectContext<
     contexto.Response.Redirect(contexto.RedirectUri);
     return Task.CompletedTask;
 }
+
+public partial class Program;

@@ -1,0 +1,40 @@
+@using SGH.Web.Correo
+@model CorreoReservasGeneradasVm
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Reservas generadas — solicitud @Model.Solicitud.Id</title>
+</head>
+<body style="font-family:Segoe UI,Arial,sans-serif;font-size:14px;color:#222;">
+    <p>Estimado/a,</p>
+    <p>Se generaron reservas para la <strong>solicitud N° @Model.Solicitud.Id</strong>.</p>
+    <ul>
+        <li><strong>Campamento:</strong> @Model.Solicitud.CampamentoNombre</li>
+        <li><strong>Contacto campamento:</strong> @Model.Solicitud.CampamentoEmail</li>
+        <li><strong>Correo solicitud:</strong> @Model.Solicitud.EmailContactoCampamento</li>
+    </ul>
+    <p><strong>Pasajeros</strong></p>
+    <table cellpadding="6" cellspacing="0" border="1" style="border-collapse:collapse;border-color:#ccc;">
+        <thead style="background:#f4f4f4;">
+        <tr>
+            <th>Pasajero</th>
+            <th>Habitación</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var pasajero in Model.Pasajeros)
+        {
+            <tr>
+                <td>@(pasajero.NombrePasajero ?? "Cupo sin identificar")</td>
+                <td>@(pasajero.Habitacion ?? "Sin asignar")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <p style="margin-top:24px;color:#666;font-size:12px;">Mensaje generado por SGH — no responder a este correo si no corresponde.</p>
+</body>
+</html>
