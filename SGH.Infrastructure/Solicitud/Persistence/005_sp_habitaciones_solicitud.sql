@@ -119,11 +119,12 @@ BEGIN
             WHERE Id = @PasajeroId AND SolicitudAlojamientoId = @SolicitudId AND HabitacionId IS NOT NULL)
             THROW 51058, 'El pasajero no tiene habitación asignada.', 1;
 
-        UPDATE dbo.PasajerosSolicitudAlojamiento
-        SET HabitacionId = NULL
-        WHERE Id = @PasajeroId AND SolicitudAlojamientoId = @SolicitudId;
-        IF @@ROWCOUNT = 0
-            THROW 51058, 'No se pudo quitar la habitación del pasajero.', 1;
+        DECLARE @Ret int;
+        EXEC dbo.SOL_AsignaHabitacionPasajeroSolicitudEmpresa
+            @id = @PasajeroId, @habitacion = NULL, @usuario = @UsuarioId,
+            @origen = 'solicitud', @ret = @Ret OUTPUT;
+        IF ISNULL(@Ret, 0) <> @PasajeroId
+            THROW 51057, 'El procedimiento legado no pudo quitar la habitación.', 1;
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
