@@ -71,6 +71,10 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IConsultaMenuPerfil, ConsultaMenuPerfil>();
         services.AddScoped<IConsultaHabitacion, ConsultaHabitacion>();
         services.AddScoped<IComandoHabitacion, ComandoHabitacion>();
+        services.AddScoped<IConsultaBano, ConsultaBano>();
+        services.AddScoped<IComandoBano, ComandoBano>();
+        services.AddScoped<IConsultaCama, ConsultaCama>();
+        services.AddScoped<IComandoCama, ComandoCama>();
         return services;
     }
 }

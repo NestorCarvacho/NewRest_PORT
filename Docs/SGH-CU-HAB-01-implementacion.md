@@ -1,27 +1,35 @@
 # CU-HAB-01 — Implementación en NewRest (habitaciones)
 
-## Alcance implementado (MVP)
+## Alcance implementado
 
 | CU | NewRest | Notas |
 |----|---------|--------|
-| CRUD **Habitación** | Sí — `MidHabitaciones`, `/Habitacion/Datos` | Envuelve `HAB_GuardaHabitacion` / `HAB_ValidaHabitacion` vía `sp_Habitacion_Guardar` |
-| CRUD **Baño** | No | No existe `dbo.Bano` en HOTELDB |
-| CRUD **Cama** (N filas) | Parcial | Capacidad = `CantidadCamas`; sin tabla `Camas` ni `habilitada` por plaza |
-| **Turno** horario | Parcial | Flags `usoPorTurnos` → `MinutosMin/Max`; turno operativo de faena sigue en `Turnos` / solicitud |
-| RN-01 … RN-06 | Parcial | Ver matriz en conversación de análisis; reglas en `ReglasHabitacion` + validación legado |
+| CRUD **Habitación** | Sí | `MidHabitaciones`, `/Habitacion/Datos`; `sp_Habitacion_*` + legado `HAB_*` |
+| CRUD **Baño** | Sí | Tabla `dbo.Banos`, `sp_Bano_*`, pestaña Baños |
+| CRUD **Cama** (N filas) | Sí | Tabla `dbo.Camas`, sincronización al guardar habitación; toggles `habilitada` en edición |
+| **Turno** horario (operativo faena) | Parcial | Flags explícitos + `TiempoHigienizacionMin`; turnos de faena en `Turnos` / solicitud |
+| RN-01 … RN-06 | Parcial | RN-01/RN-02 en SP y `ReglasBano` / `ReglasHabitacion`; resto según matriz CU |
 
-## Scripts SQL (aplicar en HOTELDB)
+## Scripts SQL (aplicar en HOTELDB, en orden)
 
-`SGH.Infrastructure/Habitacion/Persistence/001_sp_habitacion.sql`
+1. `SGH.Infrastructure/Habitacion/Persistence/002_hotldb_cu_hab_extension.sql` — tablas y columnas
+2. `SGH.Infrastructure/Habitacion/Persistence/003_sp_bano_cama.sql` — procedimientos baño/cama
+3. `SGH.Infrastructure/Habitacion/Persistence/001_sp_habitacion.sql` — habitación (lee `Banos`/`Camas`)
+
+Sin **002** y **003**, **001** referencia columnas/objetos inexistentes.
 
 ## API Mid
 
-Ruta: `/Habitacion/Mid/MidHabitaciones.cs`  
-Opciones: `listar`, `catalogo`, `obtener`, `crear`, `editar`, `inactivar`
+Ruta: `/Habitacion/Mid/MidHabitaciones.cs`
 
-## Próximos pasos hacia CU completo
+**Habitaciones:** `listar`, `catalogo`, `obtener`, `crear`, `editar`, `inactivar`
 
-1. Inventariar si el legado modela “baño compartido” sin tabla dedicada.
-2. Camas individuales + `Reservas.CamaId` si el negocio exige RN-03 granular.
-3. `HabitacionDiaSemana` / `XMLSemana` en guardado para RN-06 horaria.
-4. Enlace menú HOTELDB `Menus` para producción (mapeo `/app/config/habitaciones`).
+**Baños:** `listarbanos`, `crearbano`, `editarbano`, `inactivarbano`
+
+**Camas:** `listarcamas`, `guardarcama`
+
+## Próximos pasos
+
+1. `HabitacionDiaSemana` / `XMLSemana` en guardado para RN-06 horaria.
+2. Enlace menú HOTELDB `Menus` para producción (mapeo `/app/config/habitaciones`).
+3. Reserva por `CamaId` si el negocio exige RN-03 a nivel de plaza.

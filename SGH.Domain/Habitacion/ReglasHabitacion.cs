@@ -44,7 +44,23 @@ public static class ReglasHabitacion
         return null;
     }
 
-    /// <summary>RN-02 simplificado: códigos de sexo compatibles con listas HOTELDB (sin baño).</summary>
+    /// <summary>RN-02: compatibilidad sexo habitación con tipo de sexo del baño.</summary>
+    public static bool SexoCompatibleBano(string? sexoHabitacion, string? tipoSexoBano)
+    {
+        if (string.IsNullOrWhiteSpace(tipoSexoBano))
+            return true;
+        var b = tipoSexoBano.Trim().ToUpperInvariant();
+        var h = NormalizarSexo(sexoHabitacion);
+        if (b is "MIXTO" or "M" or "F")
+            return true;
+        if (b is "HOMBRE" or "M")
+            return h is "M" or "MIXTO";
+        if (b is "MUJER" or "F")
+            return h is "F" or "MIXTO";
+        return SexoCompatible(sexoHabitacion, tipoSexoBano);
+    }
+
+    /// <summary>RN-02 simplificado entre dos códigos de sexo.</summary>
     public static bool SexoCompatible(string? sexoHabitacion, string? sexoComparar)
     {
         if (string.IsNullOrWhiteSpace(sexoComparar))

@@ -20,6 +20,8 @@ public sealed record DatosGuardarHabitacion(
     bool TieneServiciosAlimentacion,
     bool UsoPorTurnos,
     bool UsoExclusivo,
+    int? BanoId,
+    int TiempoHigienizacionMin,
     int UsuarioId);
 
 public sealed record ResultadoGuardarHabitacion(bool Exito, string Mensaje, int Id);

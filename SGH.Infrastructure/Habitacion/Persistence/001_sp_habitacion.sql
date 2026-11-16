@@ -18,20 +18,23 @@ BEGIN
         h.Nombre,
         h.Sexo,
         h.Estado,
-        h.CantidadCamas,
-        /* HOTELDB no tiene tabla Camas: capacidad operativa = CantidadCamas si activa */
-        CASE WHEN h.IsActive = 1 THEN h.CantidadCamas ELSE 0 END AS CamasHabilitadas,
+        ISNULL((SELECT COUNT(*) FROM dbo.Camas AS c WITH (NOLOCK) WHERE c.HabitacionId = h.Id AND c.IsActive = 1), h.CantidadCamas) AS CantidadCamas,
+        ISNULL((SELECT COUNT(*) FROM dbo.Camas AS c WITH (NOLOCK) WHERE c.HabitacionId = h.Id AND c.IsActive = 1 AND c.Habilitada = 1),
+               CASE WHEN h.IsActive = 1 THEN h.CantidadCamas ELSE 0 END) AS CamasHabilitadas,
         h.IsActive,
         h.IsReservable,
         m.Id AS ModuloId,
         m.Nombre AS ModuloNombre,
         p.Id AS PabellonId,
         p.Nombre AS PabellonNombre,
-        CAST(CASE WHEN h.MinutosMin > 0 OR h.MinutosMax > 0 THEN 1 ELSE 0 END AS bit) AS PermiteUsoPorTurnos,
-        CAST(CASE WHEN h.PersonasCantidadMax >= h.CantidadCamas AND h.CantidadCamas > 0 THEN 1 ELSE 0 END AS bit) AS PermiteUsoExclusivo
+        h.BanoId,
+        b.CodigoNombre AS BanoNombre,
+        ISNULL(h.PermiteUsoPorTurnos, CASE WHEN h.MinutosMin > 0 OR h.MinutosMax > 0 THEN 1 ELSE 0 END) AS PermiteUsoPorTurnos,
+        ISNULL(h.PermiteUsoExclusivo, CASE WHEN h.PersonasCantidadMax >= h.CantidadCamas AND h.CantidadCamas > 0 THEN 1 ELSE 0 END) AS PermiteUsoExclusivo
     FROM dbo.Habitaciones AS h WITH (NOLOCK)
     INNER JOIN dbo.Modulos AS m WITH (NOLOCK) ON m.Id = h.ModuloId
     INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
+    LEFT JOIN dbo.Banos AS b WITH (NOLOCK) ON b.Id = h.BanoId
     WHERE p.CampamentoId = @CampamentoId
       AND (@PabellonId = 0 OR p.Id = @PabellonId)
       AND (@ModuloId = 0 OR m.Id = @ModuloId)
@@ -56,20 +59,22 @@ BEGIN
         h.ModuloId,
         h.Sexo,
         h.Estado,
-        h.CantidadCamas,
+        ISNULL((SELECT COUNT(*) FROM dbo.Camas AS c WHERE c.HabitacionId = h.Id AND c.IsActive = 1), h.CantidadCamas) AS CantidadCamas,
         h.IsActive,
         h.IsReservable,
         h.TipoInstalacionId,
         h.StandardHabitacionId,
         h.ObservacionBloqueo,
         h.M2,
+        h.BanoId,
         ISNULL(h.PersonasCantidadMin, 0) AS PersonasCantidadMin,
         ISNULL(h.PersonasCantidadMax, 0) AS PersonasCantidadMax,
         ISNULL(h.MinutosMin, 0) AS MinutosMin,
         ISNULL(h.MinutosMax, 0) AS MinutosMax,
+        ISNULL(h.TiempoHigienizacionMin, h.MinutosMin) AS TiempoHigienizacionMin,
         ISNULL(h.TieneServiciosAlimentacion, 0) AS TieneServiciosAlimentacion,
-        CAST(CASE WHEN h.MinutosMin > 0 OR h.MinutosMax > 0 THEN 1 ELSE 0 END AS bit) AS PermiteUsoPorTurnos,
-        CAST(CASE WHEN h.PersonasCantidadMax >= h.CantidadCamas AND h.CantidadCamas > 0 THEN 1 ELSE 0 END AS bit) AS PermiteUsoExclusivo
+        ISNULL(h.PermiteUsoPorTurnos, CAST(CASE WHEN h.MinutosMin > 0 OR h.MinutosMax > 0 THEN 1 ELSE 0 END AS bit)) AS PermiteUsoPorTurnos,
+        ISNULL(h.PermiteUsoExclusivo, CAST(CASE WHEN h.PersonasCantidadMax >= h.CantidadCamas AND h.CantidadCamas > 0 THEN 1 ELSE 0 END AS bit)) AS PermiteUsoExclusivo
     FROM dbo.Habitaciones AS h WITH (NOLOCK)
     INNER JOIN dbo.Modulos AS m WITH (NOLOCK) ON m.Id = h.ModuloId
     INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
@@ -115,6 +120,11 @@ BEGIN
     FROM dbo.StandardsHabitacion AS s WITH (NOLOCK)
     WHERE s.IsActive = 1
     ORDER BY s.Nombre;
+
+    SELECT b.Id, b.CodigoNombre + N' (' + b.Ubicacion + N')' AS Etiqueta, 0 AS PadreId
+    FROM dbo.Banos AS b WITH (NOLOCK)
+    WHERE b.CampamentoId = @CampamentoId AND b.IsActive = 1 AND b.Estado = 'ACTIVO'
+    ORDER BY b.Ubicacion, b.CodigoNombre;
 END
 GO
 
@@ -137,6 +147,10 @@ CREATE OR ALTER PROCEDURE dbo.sp_Habitacion_Guardar
     @MinutosMin int = 0,
     @MinutosMax int = 0,
     @TieneServiciosAlimentacion int = 0,
+    @BanoId int = NULL,
+    @PermiteUsoExclusivo bit = 0,
+    @PermiteUsoPorTurnos bit = 0,
+    @TiempoHigienizacionMin int = 0,
     @CampamentoId int,
     @IdResultado int OUTPUT,
     @Mensaje nvarchar(500) OUTPUT
@@ -154,6 +168,27 @@ BEGIN
     BEGIN
         SET @Mensaje = N'El módulo no pertenece al campamento de la sesión.';
         RETURN;
+    END
+
+    IF @BanoId IS NOT NULL AND @BanoId > 0
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM dbo.Banos WHERE Id = @BanoId AND CampamentoId = @CampamentoId AND IsActive = 1)
+        BEGIN
+            SET @Mensaje = N'El baño seleccionado no es válido para el campamento.';
+            RETURN;
+        END
+        IF EXISTS (
+            SELECT 1 FROM dbo.Banos AS b
+            WHERE b.Id = @BanoId
+              AND NOT (
+                    b.TipoSexo IN ('MIXTO', 'M', 'F')
+                    OR (b.TipoSexo IN ('HOMBRE', 'M') AND @Sexo IN ('M', 'MIXTO', 'HOMBRE'))
+                    OR (b.TipoSexo IN ('MUJER', 'F') AND @Sexo IN ('F', 'MIXTO', 'MUJER'))
+                  ))
+        BEGIN
+            SET @Mensaje = N'RN-02: El sexo de la habitación no es compatible con el baño.';
+            RETURN;
+        END
     END
 
     IF @ModuloId > 0 AND @Id > 0 AND EXISTS (
@@ -244,7 +279,20 @@ BEGIN
 
     SET @IdResultado = @ret;
 
-    IF @ModuloId > 0
-        UPDATE dbo.Habitaciones SET ModuloId = @ModuloId WHERE Id = @IdResultado;
+    UPDATE dbo.Habitaciones
+    SET ModuloId = CASE WHEN @ModuloId > 0 THEN @ModuloId ELSE ModuloId END,
+        BanoId = @BanoId,
+        PermiteUsoExclusivo = @PermiteUsoExclusivo,
+        PermiteUsoPorTurnos = @PermiteUsoPorTurnos,
+        TiempoHigienizacionMin = NULLIF(@TiempoHigienizacionMin, 0),
+        MinutosMin = CASE WHEN @PermiteUsoPorTurnos = 1 AND @TiempoHigienizacionMin > 0 THEN @TiempoHigienizacionMin ELSE MinutosMin END,
+        PersonasCantidadMax = CASE WHEN @PermiteUsoExclusivo = 1 THEN @CantidadCamas ELSE PersonasCantidadMax END
+    WHERE Id = @IdResultado;
+
+    EXEC dbo.sp_Habitacion_SincronizarCamas
+        @HabitacionId = @IdResultado,
+        @CantidadObjetivo = @CantidadCamas,
+        @CampamentoId = @CampamentoId,
+        @UsuarioId = @UsuarioId;
 END
 GO

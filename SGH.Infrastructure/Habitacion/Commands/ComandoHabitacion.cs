@@ -30,6 +30,11 @@ public sealed class ComandoHabitacion(IFabricaConexionSql fabrica) : IComandoHab
         parametros.Add("@MinutosMin", datos.UsoPorTurnos ? datos.MinutosMin : 0);
         parametros.Add("@MinutosMax", datos.UsoPorTurnos ? datos.MinutosMax : 0);
         parametros.Add("@TieneServiciosAlimentacion", datos.TieneServiciosAlimentacion ? 1 : 0);
+        parametros.Add("@BanoId", datos.BanoId);
+        parametros.Add("@PermiteUsoExclusivo", datos.UsoExclusivo);
+        parametros.Add("@PermiteUsoPorTurnos", datos.UsoPorTurnos);
+        var higiene = datos.TiempoHigienizacionMin > 0 ? datos.TiempoHigienizacionMin : datos.MinutosMin;
+        parametros.Add("@TiempoHigienizacionMin", higiene);
         parametros.Add("@CampamentoId", campamentoId);
         parametros.Add("@IdResultado", dbType: DbType.Int32, direction: ParameterDirection.Output);
         parametros.Add("@Mensaje", dbType: DbType.String, size: 500, direction: ParameterDirection.Output);

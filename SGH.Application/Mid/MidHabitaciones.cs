@@ -15,7 +15,13 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
         Accion("obtener", "Obtener", "dbo.sp_Habitacion_Obtener", "Detalle de una habitación."),
         Accion("crear", "Crear", "dbo.HAB_GuardaHabitacion", "Alta de habitación."),
         Accion("editar", "Editar", "dbo.HAB_GuardaHabitacion", "Actualización de habitación."),
-        Accion("inactivar", "Inactivar", "dbo.HAB_GuardaHabitacion", "Baja lógica (IsActive=0).")
+        Accion("inactivar", "Inactivar", "dbo.HAB_GuardaHabitacion", "Baja lógica (IsActive=0)."),
+        Accion("listarbanos", "Listar baños", "dbo.sp_Bano_Listar", "Baños del campamento."),
+        Accion("crearbano", "Crear baño", "dbo.sp_Bano_Guardar", "Alta de baño."),
+        Accion("editarbano", "Editar baño", "dbo.sp_Bano_Guardar", "Actualización de baño."),
+        Accion("inactivarbano", "Inactivar baño", "dbo.sp_Bano_Guardar", "Baja lógica de baño."),
+        Accion("listarcamas", "Listar camas", "dbo.sp_Cama_ListarPorHabitacion", "Camas de una habitación."),
+        Accion("guardarcama", "Guardar cama", "dbo.sp_Cama_Guardar", "Alta o edición de cama.")
     ];
 
     public async Task<EjecucionMid> EjecutarAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
@@ -32,6 +38,12 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
             "crear" => await GuardarAsync(filtro, sesion, esAlta: true, cancellationToken),
             "editar" => await GuardarAsync(filtro, sesion, esAlta: false, cancellationToken),
             "inactivar" => await InactivarAsync(filtro, sesion, cancellationToken),
+            "listarbanos" => await ListarBanosAsync(filtro, sesion, cancellationToken),
+            "crearbano" => await GuardarBanoAsync(filtro, sesion, esAlta: true, cancellationToken),
+            "editarbano" => await GuardarBanoAsync(filtro, sesion, esAlta: false, cancellationToken),
+            "inactivarbano" => await InactivarBanoAsync(filtro, sesion, cancellationToken),
+            "listarcamas" => await ListarCamasAsync(filtro, sesion, cancellationToken),
+            "guardarcama" => await GuardarCamaAsync(filtro, sesion, cancellationToken),
             _ => EjecucionMid.Fallo(400, $"La opción '{filtro.Opcion}' no está implementada en el Mid.")
         };
     }
@@ -70,7 +82,7 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
     private async Task<EjecucionMid> GuardarAsync(
         FiltroPeticion filtro, DatosSesion sesion, bool esAlta, CancellationToken cancellationToken)
     {
-        var datos = LeerCuerpo(filtro, sesion.UsuarioId, esAlta);
+        var datos = LeerCuerpoHabitacion(filtro, sesion.UsuarioId, esAlta);
         if (datos is null)
             return EjecucionMid.Fallo(400, "Revise los datos del formulario.");
         var resultado = await gestion.GuardarAsync(datos, sesion.CampamentoId, cancellationToken);
@@ -108,6 +120,8 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
             actual.TieneServiciosAlimentacion,
             actual.PermiteUsoPorTurnos,
             actual.PermiteUsoExclusivo,
+            actual.BanoId,
+            actual.TiempoHigienizacionMin,
             sesion.UsuarioId);
 
         var resultado = await gestion.GuardarAsync(datos, sesion.CampamentoId, cancellationToken);
@@ -116,7 +130,72 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
         return EjecucionMid.Ok(new { resultado = true, mensaje = "Habitación inactivada." });
     }
 
-    private static DatosGuardarHabitacion? LeerCuerpo(FiltroPeticion filtro, int usuarioId, bool esAlta)
+    private async Task<EjecucionMid> ListarBanosAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var soloActivos = LecturaPeticion.EnteroOpcional(filtro, "soloActivos") ?? 1;
+        var filas = await gestion.ListarBanosAsync(sesion.CampamentoId, soloActivos, cancellationToken);
+        return EjecucionMid.Ok(new { filas });
+    }
+
+    private async Task<EjecucionMid> GuardarBanoAsync(
+        FiltroPeticion filtro, DatosSesion sesion, bool esAlta, CancellationToken cancellationToken)
+    {
+        var datos = LeerCuerpoBano(filtro, sesion.UsuarioId, esAlta);
+        if (datos is null)
+            return EjecucionMid.Fallo(400, "Revise los datos del baño.");
+        var resultado = await gestion.GuardarBanoAsync(datos, sesion.CampamentoId, cancellationToken);
+        if (!resultado.Exito)
+            return EjecucionMid.Fallo(400, resultado.Mensaje);
+        return EjecucionMid.Ok(new { resultado = true, id = resultado.Id, mensaje = "Baño guardado." });
+    }
+
+    private async Task<EjecucionMid> InactivarBanoAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var id = LecturaPeticion.Entero(filtro, "id");
+        if (id <= 0)
+            return EjecucionMid.Fallo(400, "Seleccione un baño.");
+        var filas = await gestion.ListarBanosAsync(sesion.CampamentoId, 0, cancellationToken);
+        var actual = filas.FirstOrDefault(b => b.Id == id);
+        if (actual is null)
+            return EjecucionMid.Fallo(404, "El baño no existe en el campamento.");
+
+        var datos = new DatosGuardarBano(
+            actual.Id,
+            actual.CodigoNombre,
+            actual.Ubicacion,
+            actual.TipoSexo,
+            actual.Estado,
+            false,
+            sesion.UsuarioId);
+        var resultado = await gestion.GuardarBanoAsync(datos, sesion.CampamentoId, cancellationToken);
+        if (!resultado.Exito)
+            return EjecucionMid.Fallo(400, resultado.Mensaje);
+        return EjecucionMid.Ok(new { resultado = true, mensaje = "Baño inactivado." });
+    }
+
+    private async Task<EjecucionMid> ListarCamasAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var habitacionId = LecturaPeticion.Entero(filtro, "habitacionId");
+        if (habitacionId <= 0)
+            habitacionId = LecturaPeticion.Entero(filtro, "id");
+        if (habitacionId <= 0)
+            return EjecucionMid.Fallo(400, "Seleccione una habitación.");
+        var filas = await gestion.ListarCamasAsync(habitacionId, sesion.CampamentoId, cancellationToken);
+        return EjecucionMid.Ok(new { filas });
+    }
+
+    private async Task<EjecucionMid> GuardarCamaAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var datos = LeerCuerpoCama(filtro, sesion.UsuarioId);
+        if (datos is null)
+            return EjecucionMid.Fallo(400, "Revise los datos de la cama.");
+        var resultado = await gestion.GuardarCamaAsync(datos, sesion.CampamentoId, cancellationToken);
+        if (!resultado.Exito)
+            return EjecucionMid.Fallo(400, resultado.Mensaje);
+        return EjecucionMid.Ok(new { resultado = true, id = resultado.Id, mensaje = "Cama guardada." });
+    }
+
+    private static DatosGuardarHabitacion? LeerCuerpoHabitacion(FiltroPeticion filtro, int usuarioId, bool esAlta)
     {
         var nombre = LecturaPeticion.Texto(filtro, "nombre");
         var moduloId = LecturaPeticion.Entero(filtro, "moduloId");
@@ -125,6 +204,11 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
         var id = esAlta ? 0 : LecturaPeticion.Entero(filtro, "id");
         if (!esAlta && id <= 0)
             return null;
+        var banoId = LecturaPeticion.EnteroOpcional(filtro, "banoId");
+        if (banoId is 0)
+            banoId = null;
+        var tiempoHig = LecturaPeticion.EnteroOpcional(filtro, "tiempoHigienizacionMin")
+            ?? LecturaPeticion.EnteroOpcional(filtro, "minutosMin") ?? 0;
 
         return new DatosGuardarHabitacion(
             id,
@@ -146,6 +230,43 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
             LecturaPeticion.Bandera(filtro, "tieneServiciosAlimentacion"),
             LecturaPeticion.Bandera(filtro, "usoPorTurnos"),
             LecturaPeticion.Bandera(filtro, "usoExclusivo"),
+            banoId,
+            tiempoHig,
+            usuarioId);
+    }
+
+    private static DatosGuardarBano? LeerCuerpoBano(FiltroPeticion filtro, int usuarioId, bool esAlta)
+    {
+        var id = esAlta ? 0 : LecturaPeticion.Entero(filtro, "id");
+        if (!esAlta && id <= 0)
+            return null;
+        var codigo = LecturaPeticion.Texto(filtro, "codigoNombre") ?? LecturaPeticion.Texto(filtro, "nombre");
+        var ubicacion = LecturaPeticion.Texto(filtro, "ubicacion");
+        if (string.IsNullOrWhiteSpace(codigo) || string.IsNullOrWhiteSpace(ubicacion))
+            return null;
+        return new DatosGuardarBano(
+            id,
+            codigo.Trim(),
+            ubicacion.Trim(),
+            LecturaPeticion.Texto(filtro, "tipoSexo") ?? "MIXTO",
+            LecturaPeticion.Texto(filtro, "estado") ?? "ACTIVO",
+            !LecturaPeticion.Bandera(filtro, "inactivo"),
+            usuarioId);
+    }
+
+    private static DatosGuardarCama? LeerCuerpoCama(FiltroPeticion filtro, int usuarioId)
+    {
+        var habitacionId = LecturaPeticion.Entero(filtro, "habitacionId");
+        var codigo = LecturaPeticion.Texto(filtro, "codigoCama");
+        if (habitacionId <= 0 || string.IsNullOrWhiteSpace(codigo))
+            return null;
+        return new DatosGuardarCama(
+            LecturaPeticion.Entero(filtro, "id"),
+            habitacionId,
+            codigo.Trim(),
+            LecturaPeticion.Campo(filtro, "habilitada") is null || LecturaPeticion.Bandera(filtro, "habilitada"),
+            LecturaPeticion.EnteroOpcional(filtro, "orden") ?? 0,
+            !LecturaPeticion.Bandera(filtro, "inactivo"),
             usuarioId);
     }
 

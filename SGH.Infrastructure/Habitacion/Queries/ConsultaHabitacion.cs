@@ -49,13 +49,25 @@ public sealed class ConsultaHabitacion(IFabricaConexionSql fabrica) : IConsultaH
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken));
 
-        return new CatalogoHabitacion(
-            (await multi.ReadAsync<OpcionCatalogo>()).AsList(),
-            (await multi.ReadAsync<OpcionCatalogo>()).AsList(),
-            (await multi.ReadAsync<OpcionListaFila>()).Select(f => new OpcionLista(f.Id, f.Etiqueta)).ToList(),
-            (await multi.ReadAsync<OpcionListaFila>()).Select(f => new OpcionLista(f.Id, f.Etiqueta)).ToList(),
-            (await multi.ReadAsync<OpcionCatalogo>()).AsList(),
-            (await multi.ReadAsync<OpcionCatalogo>()).AsList());
+        var pabellones = (await multi.ReadAsync<OpcionCatalogo>()).AsList();
+        var modulos = (await multi.ReadAsync<OpcionCatalogo>()).AsList();
+        var sexos = (await multi.ReadAsync<OpcionListaFila>()).Select(f => new OpcionLista(f.Id, f.Etiqueta)).ToList();
+        var estados = (await multi.ReadAsync<OpcionListaFila>()).Select(f => new OpcionLista(f.Id, f.Etiqueta)).ToList();
+        var tipos = (await multi.ReadAsync<OpcionCatalogo>()).AsList();
+        var standards = (await multi.ReadAsync<OpcionCatalogo>()).AsList();
+        IReadOnlyList<OpcionCatalogo> banos = [];
+        if (!multi.IsConsumed)
+        {
+            try
+            {
+                banos = (await multi.ReadAsync<OpcionCatalogo>()).AsList();
+            }
+            catch (InvalidOperationException)
+            {
+                /* catálogo sin 7.º result set (pre-002) */
+            }
+        }
+        return new CatalogoHabitacion(pabellones, modulos, sexos, estados, tipos, standards, banos);
     }
 
     private sealed class OpcionListaFila

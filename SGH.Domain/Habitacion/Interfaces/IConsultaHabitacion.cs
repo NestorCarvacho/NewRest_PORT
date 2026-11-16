@@ -24,7 +24,9 @@ public sealed record HabitacionListada(
     int PabellonId,
     string? PabellonNombre,
     bool PermiteUsoPorTurnos,
-    bool PermiteUsoExclusivo);
+    bool PermiteUsoExclusivo,
+    int? BanoId,
+    string? BanoNombre);
 
 public sealed record HabitacionDetalle(
     int Id,
@@ -45,7 +47,9 @@ public sealed record HabitacionDetalle(
     int MinutosMax,
     bool TieneServiciosAlimentacion,
     bool PermiteUsoPorTurnos,
-    bool PermiteUsoExclusivo);
+    bool PermiteUsoExclusivo,
+    int? BanoId,
+    int TiempoHigienizacionMin);
 
 public sealed record OpcionCatalogo(int Id, string Etiqueta, int PadreId = 0);
 public sealed record OpcionLista(string Codigo, string Etiqueta);
@@ -56,7 +60,8 @@ public sealed record CatalogoHabitacion(
     IReadOnlyList<OpcionLista> Sexos,
     IReadOnlyList<OpcionLista> EstadosHabitacion,
     IReadOnlyList<OpcionCatalogo> TiposInstalacion,
-    IReadOnlyList<OpcionCatalogo> Standards);
+    IReadOnlyList<OpcionCatalogo> Standards,
+    IReadOnlyList<OpcionCatalogo> Banos);
 
 public interface IConsultaHabitacion
 {
