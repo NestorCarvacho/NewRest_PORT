@@ -48,6 +48,17 @@ BEGIN
             HAVING d.habitacionId IS NULL OR COUNT(*) > d.cantidadCamasDisponibles)
             THROW 51056, 'La disponibilidad de las habitaciones cambió. Revise las asignaciones antes de generar reservas.', 1;
 
+        UPDATE r
+        SET r.FechaSalida = COALESCE(r.FechaSalida, r.CheckOut),
+            r.FechaActualizacion = GETDATE(),
+            r.UsuarioActualizacionId = @UsuarioId
+        FROM dbo.Reservas AS r
+        INNER JOIN dbo.PasajerosSolicitudAlojamiento AS p ON p.UsuarioPasajeroId = r.PasajeroId
+        WHERE p.SolicitudAlojamientoId = @SolicitudId
+          AND r.Estado = 'A'
+          AND r.CheckOut IS NOT NULL
+          AND r.FechaSalida IS NULL;
+
         DECLARE @Conflictos TABLE (PasajeroId int, PasajeroNombre varchar(1000), ReservaId int, Tipo int);
         INSERT INTO @Conflictos
         EXEC dbo.HAB_ValidaCreacionReserva_Solicitud @SolicitudId = @SolicitudId;

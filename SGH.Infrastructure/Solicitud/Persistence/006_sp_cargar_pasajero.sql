@@ -25,6 +25,18 @@ BEGIN
         IF @Estado IN ('R', 'A')
             THROW 51043, 'No se pueden modificar los pasajeros de una solicitud reservada o anulada.', 1;
 
+        UPDATE r
+        SET r.FechaSalida = COALESCE(r.FechaSalida, r.CheckOut),
+            r.FechaActualizacion = GETDATE(),
+            r.UsuarioActualizacionId = @UsuarioId
+        FROM dbo.Reservas AS r
+        INNER JOIN dbo.Usuarios AS u ON u.Id = r.PasajeroId
+        WHERE u.EmpresaMandanteId = @EmpresaMandanteId
+          AND RTRIM(u.Rut) = RTRIM(@Identificador)
+          AND r.Estado = 'A'
+          AND r.CheckOut IS NOT NULL
+          AND r.FechaSalida IS NULL;
+
         DECLARE @Resultado TABLE (resultado int, mensaje varchar(1000));
         INSERT INTO @Resultado
         EXEC dbo.SOL_GuardaPasajeroSolicitudAlojamientoMasivo

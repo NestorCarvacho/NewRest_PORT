@@ -322,5 +322,18 @@ BEGIN
         @usuario = @UsuarioId,
         @operacion = @Operacion,
         @ret = @Ret OUTPUT;
+
+    /* SOL_GuardaPasajero* solo mira FechaSalida; cerrar periodo tras check-out (checkout anticipado). */
+    IF @Operacion = 'O' AND ISNULL(@Ret, 0) > 0
+    BEGIN
+        UPDATE dbo.Reservas
+        SET FechaSalida = COALESCE(FechaSalida, CheckOut, @Fecha),
+            FechaActualizacion = GETDATE(),
+            UsuarioActualizacionId = @UsuarioId
+        WHERE Id = @ReservaId
+          AND CampamentoId = @CampamentoId
+          AND CheckOut IS NOT NULL
+          AND FechaSalida IS NULL;
+    END
 END
 GO
