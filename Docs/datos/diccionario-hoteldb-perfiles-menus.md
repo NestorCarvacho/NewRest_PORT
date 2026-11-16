@@ -19,7 +19,8 @@ erDiagram
 ```
 
 - **Sesión NewRest:** el login usa **`PerfilesUsuario.id`** (asignación campamento–perfil) y el **`PerfilId`** de esa fila (`sp_Usuario_ObtenerCampamentosYPerfiles`).
-- **Menú legado:** cada fila de **`Menus`** es un ítem (`Link`, jerarquía `PadreId`, agrupación `Ubicacion`); **`MenusPerfil`** define qué ítems ve cada **`PerfilId`**.
+- **Menú legado (datos):** cada fila de **`Menus`** es un ítem (`Link`, jerarquía `PadreId`, campo `Ubicacion`); **`MenusPerfil`** define qué ítems ve cada **`PerfilId`**.
+- **Menú NewRest (UI, directriz actual):** las filas `Ubicacion = nav` son los botones de la **barra superior**; las filas `side` con `PadreId` del `nav` se muestran en el **panel desplegable** bajo ese botón (hover/click), **no** en el panel lateral `#panel-lateral` (ese panel queda para formularios de módulos).
 - **Autorización HTTP (objetivo 1.5):** alinear políticas con el conjunto de `Menus.Link` (o un código derivado de `Menus.Id`) permitido para el `PerfilId` de sesión.
 
 ---
