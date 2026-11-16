@@ -10,6 +10,8 @@ using SGH.Infrastructure.DependencyInjection;
 using SGH.Web.Cuenta;
 using SGH.Web.Autorizacion;
 using SGH.Application.Navegacion;
+using SGH.Web.Infraestructura;
+using SGH.Web.Mid;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,8 @@ builder.Services.Configure<RequestLocalizationOptions>(opciones =>
     opciones.SupportedCultures = culturasSoportadas;
     opciones.SupportedUICultures = culturasSoportadas;
 });
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<EjecutorPeticionMid>();
 builder.Services.AddMemoryCache();
 builder.Services.AddAntiforgery(opciones =>
 {
@@ -138,6 +142,8 @@ builder.Services.AddRazorPages(opciones =>
 }).AddMvcOptions(opciones => opciones.Filters.AddService<FiltroPilaAvisos>());
 
 var app = builder.Build();
+
+app.UseMiddleware<CorrelacionSolicitudMiddleware>();
 
 if (!app.Environment.IsDevelopment())
 {

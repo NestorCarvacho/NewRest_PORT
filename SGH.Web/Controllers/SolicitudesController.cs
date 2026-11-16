@@ -9,18 +9,24 @@ using SGH.Web.Mid;
 namespace SGH.Web.Controllers;
 
 [Authorize(Policy = PoliticasAplicacion.GestionarReservas)]
-public sealed class SolicitudesController(MidSolicitudes mid, IWebHostEnvironment ambiente, ILogger<SolicitudesController> logger) : Controller
+public sealed class SolicitudesController(MidSolicitudes mid, EjecutorPeticionMid ejecutor) : Controller
 {
     public const string MidRuta = "/Solicitud/Mid/MidSolicitudes.cs";
+    private const string Modulo = "Solicitudes";
 
     [HttpGet("/Solicitud/PlantillaPasajeros")]
-    public async Task<IActionResult> Plantilla(CancellationToken cancellationToken)
+    public Task<IActionResult> Plantilla(CancellationToken cancellationToken)
     {
         var sesion = LectorSesion.Leer(User);
-        return RespuestaDeMid.De(await mid.EjecutarAsync(
-            new FiltroPeticion { Opcion = "plantilla" },
-            new DatosSesion(sesion.UsuarioId, sesion.CampamentoId, sesion.EmpresaMandanteId),
-            cancellationToken));
+        return ejecutor.EjecutarAsync(
+            async () => RespuestaDeMid.De(await mid.EjecutarAsync(
+                new FiltroPeticion { Opcion = "plantilla" },
+                SesionDesde(sesion),
+                cancellationToken)),
+            Modulo,
+            "plantilla",
+            sesion.UsuarioId,
+            cancellationToken);
     }
 
     [HttpPost(MidRuta)]
@@ -45,35 +51,35 @@ public sealed class SolicitudesController(MidSolicitudes mid, IWebHostEnvironmen
         if (MidSolicitudes.Opciones.All(item => item.Opcion != filtro.Opcion))
             return RespuestaDeMid.De(EjecucionMid.Fallo(400, $"La opción '{filtro.Opcion}' no está en Mid/MidSolicitudes.cs."));
 
-        try
-        {
-            var sesion = LectorSesion.Leer(User);
-            return RespuestaDeMid.De(await mid.EjecutarAsync(filtro, new DatosSesion(sesion.UsuarioId, sesion.CampamentoId, sesion.EmpresaMandanteId), cancellationToken));
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            logger.LogError(ex, "Fallo la opción {Opcion} de solicitudes.", filtro.Opcion);
-            return RespuestaDeMid.DeExcepcion(ex, ambiente.IsDevelopment());
-        }
+        var sesion = LectorSesion.Leer(User);
+        return await ejecutor.EjecutarAsync(
+            async () => RespuestaDeMid.De(await mid.EjecutarAsync(filtro, SesionDesde(sesion), cancellationToken)),
+            Modulo,
+            filtro.Opcion,
+            sesion.UsuarioId,
+            cancellationToken);
     }
 
-    private async Task<IActionResult> CargarAsync(CancellationToken cancellationToken)
+    private Task<IActionResult> CargarAsync(CancellationToken cancellationToken)
     {
         var archivo = Request.Form.Files["archivo"];
         if (!int.TryParse(Request.Form["id"], out var id) || archivo is null || archivo.Length == 0
             || !string.Equals(Path.GetExtension(archivo.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
-            return RespuestaDeMid.De(EjecucionMid.Fallo(400, "Seleccione una solicitud y una planilla .xlsx válida."));
+            return Task.FromResult(RespuestaDeMid.De(EjecucionMid.Fallo(400, "Seleccione una solicitud y una planilla .xlsx válida.")));
 
-        try
-        {
-            var sesion = LectorSesion.Leer(User);
-            await using var contenido = archivo.OpenReadStream();
-            return RespuestaDeMid.De(await mid.CargarAsync(id, contenido, new DatosSesion(sesion.UsuarioId, sesion.CampamentoId, sesion.EmpresaMandanteId), cancellationToken));
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            logger.LogError(ex, "Falló la carga masiva de pasajeros de la solicitud {SolicitudId}.", id);
-            return RespuestaDeMid.DeExcepcion(ex, ambiente.IsDevelopment());
-        }
+        var sesion = LectorSesion.Leer(User);
+        return ejecutor.EjecutarAsync(
+            async () =>
+            {
+                await using var contenido = archivo.OpenReadStream();
+                return RespuestaDeMid.De(await mid.CargarAsync(id, contenido, SesionDesde(sesion), cancellationToken));
+            },
+            Modulo,
+            "cargar_pasajeros",
+            sesion.UsuarioId,
+            cancellationToken);
     }
+
+    private static DatosSesion SesionDesde(ContextoSesion sesion) =>
+        new(sesion.UsuarioId, sesion.CampamentoId, sesion.EmpresaMandanteId);
 }

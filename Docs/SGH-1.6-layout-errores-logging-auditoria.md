@@ -12,17 +12,35 @@ Documento de planificación y registro para gestor de incidencias. Complementa [
 
 **Depende de:** Login y sesión (`UsuarioId` en claims / `DatosSesion`); menú dinámico SGH 1.5 en `_Layout` (`MenuPerfil`).
 
+**Estado (2026-11-16):** **Implementado** en rama `cursor/sgh-1-6-layout-transversal-f6a4`. Pendiente fuera de alcance: bitácora de autenticación en BD, sink centralizado de logs, reescritura masiva de SP legado.
+
+---
+
+## Entregables implementados
+
+| ID | Entregable | Ubicación |
+|----|------------|-----------|
+| B1 | Layout mínimo (error / 404 / acceso denegado) | `Pages/Shared/_LayoutMinimo.cshtml` |
+| B2 | Guía de layouts | `Docs/prompt-proyecto/layout-escritorio.md` |
+| C1 | Ejecutor central de excepciones Mid | `Mid/EjecutorPeticionMid.cs` + controladores |
+| C2 | Correlación solicitud | `Infraestructura/CorrelacionSolicitudMiddleware.cs`, `/Error` |
+| C3 | Matriz errores/logging | `Docs/prompt-proyecto/errores-y-logging.md` |
+| D1 | Niveles `SGH` en configuración | `appsettings.json`, `appsettings.Development.json` |
+| E1 | Helper auditoría sesión | `Application/Sesion/AuditoriaPersistencia.cs` |
+| E2 | Plantilla SP | `Docs/prompt-proyecto/auditoria-sp.md` |
+| E3 | Pruebas | `SGH.Tests/Web/RespuestaDeMidTests.cs`, `Sesion/AuditoriaPersistenciaTests.cs` |
+
 ---
 
 ## Estado actual (AS-IS en NewRest_PORT)
 
 | Ámbito | Qué hay | Brecha |
 |--------|---------|--------|
-| **Layout** | `SGH.Web/Pages/Shared/_Layout.cshtml`: cromo, búsqueda, tema/idioma, `MenuPerfil`, `main`, panel lateral para paneles/solapas; CSS `escritorio.css`, `tema.css`. | Falta catálogo de partials obligatorios, layout alternativo (sin chrome) y reglas de qué páginas usan layout completo vs anónimo. |
-| **Errores HTTP** | `UseExceptionHandler("/Error")` (no Development), `UseStatusCodePagesWithReExecute("/NoEncontrado")`, `Error.cshtml` con `RequestId` = `TraceIdentifier`. | Sin middleware unificado para APIs Mid; sin correlación explícita en JSON de error. |
-| **Errores Mid** | `RespuestaDeMid.De` / `DeExcepcion`: siempre HTTP 200 + sobre `registros` (regla MVC+Mid). | Lógica duplicada en cada controlador; mensajes SQL 50000 vs genéricos repartidos. |
-| **Logging** | `Logging` por defecto en `appsettings.json`; `LogError`/`LogWarning` en algunos controladores y casos de uso (p. ej. login, importación). | Sin categorías estándar, sin política de qué no loguear (PII), sin enriquecimiento (usuario, campamento, opción Mid). |
-| **Auditoría BD** | SP de reserva/solicitud asignan `UsuarioCreacionId`, `FechaActualizacion`, `UsuarioActualizacionId` vía `@UsuarioId` de sesión. Login doc indica auditoría de autenticación **no** migrada aún. | Convención de nombres distinta entre tablas (`UsuarioCreacion` vs `UsuarioCreacionId`); no hay helper de aplicación que documente el contrato para nuevos CUD. |
+| **Layout** | `_Layout` (escritorio), `_LayoutMinimo` (estado/error), `_LoginLayout` (cuenta). Guía en `layout-escritorio.md`. | Nuevas pantallas deben declarar layout explícitamente si no usan `_ViewStart`. |
+| **Errores HTTP** | Correlación + `/Error` en español con layout mínimo. | JSON Mid no incluye aún `correlacionId` en el cuerpo (solo cabecera HTTP). |
+| **Errores Mid** | `EjecutorPeticionMid` en los cuatro controladores Mid. | Lectura JSON inválida sigue en controlador (validación local). |
+| **Logging** | Política `SGH` documentada; fallos Mid con módulo/opción/usuario/correlación. | Login y otros flujos fuera de Mid pueden seguir con logs propios. |
+| **Auditoría BD** | `AuditoriaPersistencia` + plantilla SP; SP existentes sin cambio masivo. | Migrar llamadas gradualmente a `UsuarioDeSesion`; auditoría auth en BD pendiente. |
 
 ---
 

@@ -20,6 +20,9 @@ Carpeta **autocontenida** para compartir con el equipo y usar como **instrucció
 | **`flujo-mvc-mid.md`** | Recorrido pantalla a pantalla (archivos, rutas, controlador, repositorio, JS). |
 | **`autorizacion-rbac.md`** | Políticas HTTP, perfiles, alcance de campamento. |
 | **`directrices-desarrollo.md`** | Capas, datos, seguridad, estilo C#, pruebas. |
+| **`layout-escritorio.md`** | Layouts `_Layout`, `_LayoutMinimo`, `_LoginLayout` (SGH 1.6). |
+| **`errores-y-logging.md`** | Correlación, `EjecutorPeticionMid`, matriz Mid vs Razor (SGH 1.6). |
+| **`auditoria-sp.md`** | Columnas Fecha/Usuario y plantilla CUD (SGH 1.6). |
 | **`cursor/flujo-mvc-mid.mdc`** | Misma regla que `flujo-mvc-mid.md`, formato Cursor (`alwaysApply`). |
 
 ## Repo de referencia
