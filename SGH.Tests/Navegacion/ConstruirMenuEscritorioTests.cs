@@ -54,6 +54,16 @@ public sealed class ConstruirMenuEscritorioTests
         var usuarios = config.Single(i => i.Nombre == "Usuarios");
         Assert.True(usuarios.Disponible);
         Assert.Equal(MenuClaves.Usuarios, usuarios.ClaveModulo);
+
+        var habitaciones = config.Single(i => i.Nombre == "Habitaciones");
+        Assert.True(habitaciones.Disponible);
+        Assert.Equal(MenuClaves.Habitaciones, habitaciones.ClaveModulo);
+        Assert.Equal("/Habitacion/Datos", habitaciones.RutaPagina);
+
+        var banos = config.Single(i => i.Nombre == "Baños");
+        Assert.True(banos.Disponible);
+        Assert.Equal(MenuClaves.Banos, banos.ClaveModulo);
+        Assert.Equal("/Habitacion/Banos", banos.RutaPagina);
     }
 
     [Fact]
@@ -76,6 +86,8 @@ public sealed class ConstruirMenuEscritorioTests
         new(8, "Censo", "/app/gestion/censo", 2, "side", 3, null),
         new(80, "Solicitud Empresa", "/app/gestion/solicitudempresa", 2, "side", 6, null),
         new(18, "Usuarios", "/app/config/usuario", 4, "side", 6, null),
+        new(901, "Habitaciones", "/app/config/habitaciones", 4, "side", 7, null),
+        new(902, "Baños", "/app/config/banos", 4, "side", 8, null),
     ];
 
     private static List<MenuPerfilItem> DatosPerfil137() =>

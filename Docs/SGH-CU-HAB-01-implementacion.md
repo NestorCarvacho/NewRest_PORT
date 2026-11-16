@@ -31,5 +31,5 @@ Ruta: `/Habitacion/Mid/MidHabitaciones.cs`
 ## Próximos pasos
 
 1. `HabitacionDiaSemana` / `XMLSemana` en guardado para RN-06 horaria.
-2. Enlace menú HOTELDB `Menus` para producción (mapeo `/app/config/habitaciones`).
+2. Menú Configuración en HOTELDB: `002_menu_config_habitacion_bano.sql` + mapeo `/app/config/habitaciones` y `/app/config/banos`.
 3. Reserva por `CamaId` si el negocio exige RN-03 a nivel de plaza.

@@ -292,5 +292,11 @@ import { crearApi } from "../../js/core/api.js";
         }).catch(function (e) { aviso(e.message, false); });
     });
 
+    var app = document.getElementById("habitaciones-app");
+    var tabInicial = app && app.getAttribute("data-tab-inicial");
+    if (tabInicial === "banos") {
+        cambiarTab("banos");
+    }
+
     cargarCatalogo().then(cargarListado).catch(function (e) { aviso(e.message, false); });
 })();

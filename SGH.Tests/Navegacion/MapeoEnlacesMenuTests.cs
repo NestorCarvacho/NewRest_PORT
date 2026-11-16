@@ -38,6 +38,16 @@ public sealed class MapeoEnlacesMenuTests
         Assert.Equal(MenuClaves.Usuarios, mapeo.ClaveModulo);
     }
 
+    [Theory]
+    [InlineData("/app/config/habitaciones", MenuClaves.Habitaciones, "/Habitacion/Datos")]
+    [InlineData("/app/config/banos", MenuClaves.Banos, "/Habitacion/Banos")]
+    public void TryMapear_config_habitacion_y_banos(string link, string clave, string ruta)
+    {
+        Assert.True(MapeoEnlacesMenu.TryMapear(link, out var mapeo));
+        Assert.Equal(clave, mapeo.ClaveModulo);
+        Assert.Equal(ruta, mapeo.RutaPagina);
+    }
+
     [Fact]
     public void ClavesDesdeRutaPagina_devuelve_modulos_de_la_pagina()
     {

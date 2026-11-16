@@ -141,7 +141,7 @@ Misma jerarquía `nav` / `side`. En **Gestión** (`PadreId = 2`) aparecen los m�
 | Solicitud Empresa | `/app/gestion/solicitudempresa` | No migrado |
 | Gestión OT, etc. | … | No migrado |
 
-En **Configuración** (`PadreId = 4`): **Usuarios** → `/app/config/usuario` → `/Cuenta/Usuarios`.
+En **Configuración** (`PadreId = 4`): **Usuarios** → `/app/config/usuario` → `/Cuenta/Usuarios`; **Habitaciones** → `/app/config/habitaciones` → `/Habitacion/Datos`; **Baños** → `/app/config/banos` → `/Habitacion/Banos` (script `SGH.Infrastructure/Navegacion/Persistence/002_menu_config_habitacion_bano.sql`).
 
 `Dashboard` (`nav` sin hijos `side`) no se muestra en el menú nuevo hasta tener página destino. **Home** con `Link = #` queda deshabilitado.
 

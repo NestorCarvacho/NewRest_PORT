@@ -1,0 +1,133 @@
+@{
+    var tabInicial = ViewData["TabInicial"] as string ?? "habitaciones";
+    var titulo = tabInicial == "banos" ? "Baños" : "Habitaciones";
+}
+<div id="habitaciones-app" class="panel-modulo" data-tab-inicial="@tabInicial">
+    <header class="panel-modulo__cabecera">
+        <h1>@titulo</h1>
+        <nav class="pestanas-modulo" role="tablist">
+            <button type="button" class="pestanas-modulo__activa" data-tab="habitaciones" role="tab">Habitaciones</button>
+            <button type="button" data-tab="banos" role="tab">Baños</button>
+        </nav>
+        <button type="button" id="btnNuevaHabitacion" class="btn primario">Nueva habitación</button>
+        <button type="button" id="btnNuevoBano" class="btn primario" hidden>Nuevo baño</button>
+    </header>
+    <div id="habitacionesAviso" class="aviso" hidden></div>
+    <div id="panelHabitaciones" class="panel-tab">
+        <table id="tablaHabitaciones" class="tabla-modulo">
+            <thead>
+                <tr>
+                    <th>Acciones</th>
+                    <th>Código</th>
+                    <th>Sexo</th>
+                    <th>Baño</th>
+                    <th>Pabellón</th>
+                    <th>Módulo</th>
+                    <th>Camas</th>
+                    <th>Hab./total</th>
+                    <th>Por turnos</th>
+                    <th>Exclusivo</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div id="panelBanos" class="panel-tab" hidden>
+        <table id="tablaBanos" class="tabla-modulo">
+            <thead>
+                <tr>
+                    <th>Acciones</th>
+                    <th>Código</th>
+                    <th>Ubicación</th>
+                    <th>Sexo</th>
+                    <th>Estado</th>
+                    <th>Habitaciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+<div id="modalHabitacion" class="modal" hidden aria-hidden="true">
+    <form id="formHabitacion" class="formulario-modulo">
+        <h2 id="tituloFormHabitacion">Habitación</h2>
+        <input type="hidden" id="hdnHabitacionId" value="0" />
+        <input type="hidden" id="hdnOpcion" value="crear" />
+        <label>Pabellón
+            <select id="selPabellon" required></select>
+        </label>
+        <label>Módulo
+            <select id="selModulo" required></select>
+        </label>
+        <label>Código / nombre
+            <input id="txtNombre" required maxlength="100" />
+        </label>
+        <label>Sexo
+            <select id="selSexo" required></select>
+        </label>
+        <label>Baño (RN-02)
+            <select id="selBano">
+                <option value="">— Sin asignar —</option>
+            </select>
+        </label>
+        <label>N° camas (capacidad física)
+            <input id="txtCantidadCamas" type="number" min="1" value="1" required />
+        </label>
+        <fieldset id="fsCamas" class="fieldset-camas" hidden>
+            <legend>Camas (habilitar plazas)</legend>
+            <ul id="listaCamas" class="lista-camas"></ul>
+        </fieldset>
+        <label>Estado
+            <select id="selEstado"></select>
+        </label>
+        <label class="fila-check">
+            <input id="chkReservable" type="checkbox" checked /> Reservable
+        </label>
+        <label class="fila-check">
+            <input id="chkUsoPorTurnos" type="checkbox" /> Uso por turnos
+        </label>
+        <label class="fila-check">
+            <input id="chkUsoExclusivo" type="checkbox" /> Uso exclusivo (PersonasMax = todas las camas)
+        </label>
+        <label>Minutos higienización (mín.)
+            <input id="txtMinutosMin" type="number" min="0" value="0" />
+        </label>
+        <div class="acciones-formulario">
+            <button type="submit" class="btn primario">Guardar</button>
+            <button type="button" id="btnCerrarModal" class="btn">Cancelar</button>
+        </div>
+    </form>
+</div>
+<div id="modalBano" class="modal" hidden aria-hidden="true">
+    <form id="formBano" class="formulario-modulo">
+        <h2 id="tituloFormBano">Baño</h2>
+        <input type="hidden" id="hdnBanoId" value="0" />
+        <input type="hidden" id="hdnOpcionBano" value="crearbano" />
+        <label>Código
+            <input id="txtBanoCodigo" required maxlength="100" />
+        </label>
+        <label>Ubicación
+            <input id="txtBanoUbicacion" required maxlength="200" />
+        </label>
+        <label>Tipo sexo
+            <select id="selBanoSexo" required>
+                <option value="MIXTO">Mixto</option>
+                <option value="HOMBRE">Hombre</option>
+                <option value="MUJER">Mujer</option>
+                <option value="M">M</option>
+                <option value="F">F</option>
+            </select>
+        </label>
+        <label>Estado
+            <select id="selBanoEstado">
+                <option value="ACTIVO">Activo</option>
+                <option value="INACTIVO">Inactivo</option>
+            </select>
+        </label>
+        <div class="acciones-formulario">
+            <button type="submit" class="btn primario">Guardar</button>
+            <button type="button" id="btnCerrarModalBano" class="btn">Cancelar</button>
+        </div>
+    </form>
+</div>
