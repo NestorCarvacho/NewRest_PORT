@@ -244,13 +244,17 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
         var ubicacion = LecturaPeticion.Texto(filtro, "ubicacion");
         if (string.IsNullOrWhiteSpace(codigo) || string.IsNullOrWhiteSpace(ubicacion))
             return null;
+        var estado = (LecturaPeticion.Texto(filtro, "estado") ?? "ACTIVO").Trim();
+        var isActive = !string.Equals(estado, "INACTIVO", StringComparison.OrdinalIgnoreCase);
+        if (LecturaPeticion.Bandera(filtro, "inactivo"))
+            isActive = false;
         return new DatosGuardarBano(
             id,
             codigo.Trim(),
             ubicacion.Trim(),
             LecturaPeticion.Texto(filtro, "tipoSexo") ?? "MIXTO",
-            LecturaPeticion.Texto(filtro, "estado") ?? "ACTIVO",
-            !LecturaPeticion.Bandera(filtro, "inactivo"),
+            estado,
+            isActive,
             usuarioId);
     }
 

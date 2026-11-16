@@ -7,9 +7,10 @@ export function crearMovimientosHabitacion(dependencias) {
 
     function estaActivo(registro) {
         if (!registro) return false;
+        var estadoActivo = String(registro.estado || "").toUpperCase() === "ACTIVO";
         if (registro.isActive === true || registro.isActive === 1) return true;
-        if (registro.isActive === false || registro.isActive === 0) return false;
-        return String(registro.estado || "").toUpperCase() === "ACTIVO";
+        if (registro.isActive === false || registro.isActive === 0) return estadoActivo;
+        return estadoActivo;
     }
 
     function crearAcciones(dato, modo) {
