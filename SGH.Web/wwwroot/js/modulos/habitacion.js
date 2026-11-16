@@ -286,19 +286,14 @@ export function crearHabitacion(dependencias) {
                     requerido: true,
                     sinVacio: true,
                     valor: tipoSexoBanoParaFormulario(fila ? fila.tipoSexo : "MIXTO")
-                }),
-                dependencias.campo("estado", "Estado", "select", [
-                    { value: "ACTIVO", text: "Activo" },
-                    { value: "INACTIVO", text: "Inactivo" }
-                ], { sinVacio: true, valor: fila ? fila.estado : "ACTIVO" })
+                })
             ])
         ], "Guardar", true, function (datos) {
             return mid(opcion, {
                 id: fila ? fila.id : 0,
                 codigoNombre: (datos.codigoNombre || "").trim(),
                 ubicacion: (datos.ubicacion || "").trim(),
-                tipoSexo: datos.tipoSexo,
-                estado: datos.estado
+                tipoSexo: datos.tipoSexo
             }).then(function () {
                 if (dependencias.invalidarCatalogoHabitacion) dependencias.invalidarCatalogoHabitacion();
                 var activo = document.querySelector(".modulo:not([hidden])");
@@ -329,6 +324,28 @@ export function crearHabitacion(dependencias) {
         });
     }
 
+    function activarBano(id) {
+        return mid("activarbano", { id: id }).then(function () {
+            if (dependencias.invalidarCatalogoHabitacion) dependencias.invalidarCatalogoHabitacion();
+            var activo = document.querySelector(".modulo:not([hidden])");
+            return activo ? dependencias.cargar(activo.dataset.id) : null;
+        }).then(function () {
+            dependencias.mostrarAviso("Baño activado.", "success");
+        });
+    }
+
+    function banoEstaActivo(fila) {
+        var estadoActivo = String(fila.estado || "").toUpperCase() === "ACTIVO";
+        if (fila.isActive === true || fila.isActive === 1) return true;
+        if (fila.isActive === false || fila.isActive === 0) return estadoActivo;
+        return estadoActivo;
+    }
+
+    function alternarEstadoBano(fila) {
+        if (banoEstaActivo(fila)) return inactivarBano(fila.id);
+        return activarBano(fila.id);
+    }
+
     return {
         filtros: filtros,
         filtroInicial: filtroInicial,
@@ -340,6 +357,8 @@ export function crearHabitacion(dependencias) {
         abrirEdicionHabitacion: abrirEdicionHabitacion,
         abrirEdicionBano: abrirEdicionBano,
         inactivarHabitacion: inactivarHabitacion,
-        inactivarBano: inactivarBano
+        inactivarBano: inactivarBano,
+        activarBano: activarBano,
+        alternarEstadoBano: alternarEstadoBano
     };
 }

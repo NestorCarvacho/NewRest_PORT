@@ -20,6 +20,8 @@ public sealed record DatosGuardarBano(
 
 public sealed record ResultadoGuardarBano(bool Exito, string Mensaje, int Id);
 
+public sealed record HabitacionVinculadaBano(int Id, string Nombre);
+
 public sealed record CamaListada(
     int Id,
     int HabitacionId,
@@ -42,6 +44,8 @@ public sealed record ResultadoGuardarCama(bool Exito, string Mensaje, int Id);
 public interface IConsultaBano
 {
     Task<IReadOnlyList<BanoListado>> ListarAsync(int campamentoId, int soloActivos, CancellationToken cancellationToken);
+    Task<IReadOnlyList<HabitacionVinculadaBano>> ListarHabitacionesActivasPorBanoAsync(
+        int banoId, int campamentoId, CancellationToken cancellationToken);
 }
 
 public interface IComandoBano

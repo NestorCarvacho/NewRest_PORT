@@ -23,4 +23,14 @@ public sealed class ReglasBanoTests
     [InlineData("F", "F", true)]
     public void Rn02CompatibleBano(string habitacion, string bano, bool esperado) =>
         Assert.Equal(esperado, ReglasHabitacion.SexoCompatibleBano(habitacion, bano));
+
+    [Fact]
+    public void MensajeHabitacionesVinculadasIncluyeIdYNombre()
+    {
+        var mensaje = ReglasBano.MensajeHabitacionesVinculadas(
+            [(101, "H-101"), (202, "Suite B")]);
+        Assert.Contains("H-101 (Id 101)", mensaje);
+        Assert.Contains("Suite B (Id 202)", mensaje);
+        Assert.StartsWith(ReglasBano.PrefijoInactivarConHabitaciones, mensaje);
+    }
 }

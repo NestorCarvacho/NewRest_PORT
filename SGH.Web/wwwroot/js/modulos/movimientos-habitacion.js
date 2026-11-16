@@ -33,18 +33,17 @@ export function crearMovimientosHabitacion(dependencias) {
             }
         }
         if (modo === "banos") {
+            var activo = estaActivo(fila);
             acciones.append(dependencias.boton("Editar", "accion-fila", function () {
                 dependencias.prepararCatalogo("banos").then(function () {
                     dependencias.habitacion.abrirEdicionBano(fila);
                 }).catch(function (error) { dependencias.mostrarAviso(error.message, "error"); });
             }));
-            if (estaActivo(fila)) {
-                acciones.append(dependencias.boton("Inactivar", "accion-fila", function () {
-                    dependencias.habitacion.inactivarBano(fila.id).catch(function (error) {
-                        dependencias.mostrarAviso(error.message, "error");
-                    });
-                }));
-            }
+            acciones.append(dependencias.boton(activo ? "Inactivar" : "Activar", "accion-fila", function () {
+                dependencias.habitacion.alternarEstadoBano(fila).catch(function (error) {
+                    dependencias.mostrarAviso(error.message, "error");
+                });
+            }));
         }
         return acciones;
     }

@@ -72,10 +72,14 @@ public sealed class GestionHabitaciones(
 
         if (datos.Id > 0 && !datos.IsActive)
         {
-            var filas = await consultaBano.ListarAsync(campamentoId, 1, cancellationToken);
-            var actual = filas.FirstOrDefault(b => b.Id == datos.Id);
-            if (actual is not null && actual.HabitacionesVinculadas > 0)
-                return new ResultadoGuardarBano(false, "RN-01: No puede inactivar el baño mientras tenga habitaciones activas vinculadas.", datos.Id);
+            var vinculadas = await consultaBano.ListarHabitacionesActivasPorBanoAsync(
+                datos.Id, campamentoId, cancellationToken);
+            if (vinculadas.Count > 0)
+            {
+                var mensajeVinculos = ReglasBano.MensajeHabitacionesVinculadas(
+                    vinculadas.Select(h => (h.Id, h.Nombre)).ToList());
+                return new ResultadoGuardarBano(false, mensajeVinculos, datos.Id);
+            }
         }
 
         return await comandoBano.GuardarAsync(datos, campamentoId, cancellationToken);
