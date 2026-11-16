@@ -35,6 +35,7 @@ internal static class MenuRespaldoEstatico
         {
             var config = new List<MenuItemVm>
             {
+                Item("Habitaciones", MenuClaves.Habitaciones, "/Habitacion/Datos"),
                 Item("Usuarios", MenuClaves.Usuarios, "/Cuenta/Usuarios"),
             };
             grupos.Add(new MenuGrupoVm(

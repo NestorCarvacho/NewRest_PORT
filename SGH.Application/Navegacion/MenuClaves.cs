@@ -7,4 +7,5 @@ public static class MenuClaves
     public const string Censo = "censo";
     public const string CensoQr = "censoQr";
     public const string Usuarios = "usuarios";
+    public const string Habitaciones = "habitaciones";
 }

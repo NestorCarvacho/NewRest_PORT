@@ -10,6 +10,8 @@ using SGH.Application.Solicitud.Interfaces;
 using SGH.Application.Solicitud.UseCases;
 using SGH.Application.Navegacion;
 using SGH.Application.Navegacion.Interfaces;
+using SGH.Application.Habitacion.Interfaces;
+using SGH.Application.Habitacion.UseCases;
 
 namespace SGH.Application.DependencyInjection;
 
@@ -43,6 +45,8 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<MidCenso>();
         services.AddScoped<MidSolicitudes>();
         services.AddScoped<MidInformesCenso>();
+        services.AddScoped<IGestionHabitaciones, GestionHabitaciones>();
+        services.AddScoped<MidHabitaciones>();
         services.AddScoped<IServicioMenuPerfil, ServicioMenuPerfil>();
         return services;
     }

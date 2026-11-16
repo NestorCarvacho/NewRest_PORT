@@ -120,6 +120,11 @@ builder.Services.AddAuthorization(opciones =>
             .AddRequirements(
                 new PerfilAutorizacionRequirement(false),
                 new MenuAccesoRequirement(MenuClaves.Censo, MenuClaves.CensoQr)));
+    opciones.AddPolicy(PoliticasAplicacion.GestionarHabitaciones, politica =>
+        politica.RequireAuthenticatedUser()
+            .AddRequirements(
+                new PerfilAutorizacionRequirement(false),
+                new MenuAccesoRequirement(MenuClaves.Habitaciones, MenuClaves.Censo)));
 });
 builder.Services.Configure<Microsoft.AspNetCore.Mvc.MvcOptions>(opciones =>
 {

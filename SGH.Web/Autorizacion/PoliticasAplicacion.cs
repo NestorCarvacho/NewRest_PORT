@@ -10,6 +10,7 @@ public static class PoliticasAplicacion
     public const string GestionarReservas = "GestionarReservas";
     public const string EjecutarCheckInOut = "EjecutarCheckInOut";
     public const string GestionarCensos = "GestionarCensos";
+    public const string GestionarHabitaciones = "GestionarHabitaciones";
 }
 
 public sealed class PerfilAutorizacionRequirement : IAuthorizationRequirement

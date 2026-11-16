@@ -25,6 +25,9 @@ using SGH.Infrastructure.Transversal;
 using SGH.Infrastructure.Solicitud.Planillas;
 using SGH.Domain.Navegacion.Interfaces;
 using SGH.Infrastructure.Navegacion.Queries;
+using SGH.Domain.Habitacion.Interfaces;
+using SGH.Infrastructure.Habitacion.Commands;
+using SGH.Infrastructure.Habitacion.Queries;
 
 namespace SGH.Infrastructure.DependencyInjection;
 
@@ -66,6 +69,8 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IInformesCenso, InformesCenso>();
         services.AddScoped<IInformesEstadoPago, InformesEstadoPago>();
         services.AddScoped<IConsultaMenuPerfil, ConsultaMenuPerfil>();
+        services.AddScoped<IConsultaHabitacion, ConsultaHabitacion>();
+        services.AddScoped<IComandoHabitacion, ComandoHabitacion>();
         return services;
     }
 }
