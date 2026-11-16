@@ -1,6 +1,27 @@
 export function inicializarMenuModulos(dependencias) {
     var resultados = document.getElementById("buscar-resultados");
 
+    function esSolapaEnEscritorio(modulo) {
+        if (!modulo) return false;
+        if (typeof dependencias.esModuloSolapa === "function") return dependencias.esModuloSolapa(modulo);
+        return false;
+    }
+
+    function activarEnlace(evento, boton, modulo) {
+        if (boton.tagName === "A" && (evento.ctrlKey || evento.metaKey || evento.shiftKey || evento.altKey)) return;
+        if (modulo === "censoQr") {
+            evento.preventDefault();
+            dependencias.abrirCensoQr();
+            return;
+        }
+        if (boton.tagName === "A" && !esSolapaEnEscritorio(modulo)) {
+            /* Páginas Razor dedicadas (p. ej. Habitaciones, Baños, Usuarios) */
+            return;
+        }
+        evento.preventDefault();
+        dependencias.abrirModulo(modulo);
+    }
+
     function normalizar(texto) {
         return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     }
@@ -27,11 +48,8 @@ export function inicializarMenuModulos(dependencias) {
 
     document.querySelectorAll(".menu-columna [data-modulo]").forEach(function (boton) {
         boton.addEventListener("click", function (evento) {
-            if (boton.tagName === "A" && (evento.ctrlKey || evento.metaKey || evento.shiftKey || evento.altKey)) return;
-            evento.preventDefault();
             var modulo = boton.getAttribute("data-modulo");
-            if (modulo === "censoQr") dependencias.abrirCensoQr();
-            else dependencias.abrirModulo(modulo);
+            activarEnlace(evento, boton, modulo);
             cerrarMenus();
         });
     });
@@ -63,12 +81,16 @@ export function inicializarMenuModulos(dependencias) {
                 var boton = document.createElement("button");
                 boton.type = "button";
                 boton.textContent = origen.textContent;
-                boton.addEventListener("click", function () {
+                boton.addEventListener("click", function (evento) {
                     buscador.value = "";
                     resultados.hidden = true;
                     var id = origen.getAttribute("data-modulo");
-                    if (id === "censoQr") dependencias.abrirCensoQr();
-                    else if (id) dependencias.abrirModulo(id);
+                    if (origen.tagName === "A" && !esSolapaEnEscritorio(id)) {
+                        window.location.href = origen.href;
+                    } else if (id) {
+                        var eventoFalso = { preventDefault: function () {} };
+                        activarEnlace(eventoFalso, origen, id);
+                    }
                     cerrarMenus();
                 });
                 item.append(boton);

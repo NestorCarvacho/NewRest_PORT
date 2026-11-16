@@ -32,7 +32,8 @@ import { crearEntornoEscritorio } from "./core/fabrica-escritorio.js";
 
     var menuModulos = inicializarMenuModulos({
         abrirModulo: navegacion.abrir,
-        abrirCensoQr: entorno.censoQr ? entorno.censoQr.abrir : function () { }
+        abrirCensoQr: entorno.censoQr ? entorno.censoQr.abrir : function () { },
+        esModuloSolapa: function (id) { return !!entorno.modulos[id]; }
     });
 
     entorno.enlazarPanelesLaterales();
