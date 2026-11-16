@@ -6,9 +6,24 @@ Implementar las políticas de autorización según tablas y reglas de **`Perfile
 
 **Diccionario de datos:** [`Docs/datos/Diccionario_de_datos_HotelDB.xlsx`](datos/Diccionario_de_datos_HotelDB.xlsx) — extracto para este epic: [`Docs/datos/diccionario-hoteldb-perfiles-menus.md`](datos/diccionario-hoteldb-perfiles-menus.md).
 
+**Documentación para ticket (Jira/Linear):** [`Docs/SGH-1.5-documentacion-ticket.md`](SGH-1.5-documentacion-ticket.md)
+
 ---
 
-## Estado actual en NewRest_PORT (referencia)
+## Estado de implementación (rama `cursor/sgh-1-5-menu-autorizacion-f6a4`)
+
+| Entregable | Estado |
+|------------|--------|
+| `sp_Menu_ObtenerPorPerfil` + `ConsultaMenuPerfil` | Implementado |
+| Menú dinámico (`MenuPerfilViewComponent`) | Implementado |
+| Autorización `MenuAccesoAuthorizationHandler` | Implementado |
+| Tests unitarios `SGH.Tests/Navegacion` | Implementado |
+| Matriz completa `Link` legado ↔ Razor | Pendiente |
+| QA manual multi-perfil con HOTELDB | Pendiente |
+
+---
+
+## Estado previo en NewRest_PORT (antes de 1.5)
 
 | Área | Hoy | Brecha respecto al objetivo |
 |------|-----|------------------------------|
@@ -101,7 +116,7 @@ Implementar las políticas de autorización según tablas y reglas de **`Perfile
 ## Criterios de aceptación (borrador)
 
 1. Un usuario con **perfil pasajero** ve solo los ítems de menú y puede abrir solo las URLs que el legado permite a ese perfil; el acceso directo a otras rutas devuelve no autorizado (página o JSON coherente).
-2. Usuarios con **perfiles operativos distintos** (p. ej. 4 vs 68) ven menús **diferentes** cuando `MenuPerfil` lo define así en BD.
+2. Usuarios con **perfiles operativos distintos** (p. ej. 4 vs 68) ven menús **diferentes** cuando `MenusPerfil` lo define así en BD.
 3. Las páginas y POST Mid migrados exigen la misma autorización que el menú muestra (no se confía solo en ocultar enlaces).
 4. El alcance por campamento/mandante sigue saliendo de sesión en servidor; el menú no puede ampliar campamento vía cliente.
 5. Documentación actualizada con matriz de referencia y procedimientos usados.
