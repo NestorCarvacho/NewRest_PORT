@@ -3,6 +3,7 @@ export function crearCatalogos(enviar) {
     var reservaPendiente = null;
     var censo = null;
     var solicitud = null;
+    var habitacion = null;
 
     function cargarReserva() {
         if (reserva) return Promise.resolve(reserva);
@@ -25,6 +26,14 @@ export function crearCatalogos(enviar) {
         });
     }
 
+    function cargarHabitacion() {
+        if (habitacion) return Promise.resolve(habitacion);
+        return enviar("/Habitacion/Mid/MidHabitaciones.cs", { opcion: "catalogo" }).then(function (datos) {
+            habitacion = datos;
+            return datos;
+        });
+    }
+
     function preparar(modo) {
         if (modo === "solicitud") {
             return enviar("/Solicitud/Mid/MidSolicitudes.cs", { opcion: "catalogo" }).then(function (datos) {
@@ -32,6 +41,7 @@ export function crearCatalogos(enviar) {
                 return datos;
             });
         }
+        if (modo === "habitaciones" || modo === "banos") return cargarHabitacion();
         if (modo === "misCensos") return Promise.resolve(null);
         if (modo === "censo") return cargarCenso();
         return cargarReserva();
@@ -41,6 +51,8 @@ export function crearCatalogos(enviar) {
         preparar: preparar,
         obtenerReserva: function () { return reserva; },
         obtenerSolicitud: function () { return solicitud; },
-        obtenerCenso: function () { return censo; }
+        obtenerCenso: function () { return censo; },
+        obtenerHabitacion: function () { return habitacion; },
+        invalidarHabitacion: function () { habitacion = null; }
     };
 }
