@@ -71,7 +71,9 @@ Diccionario completo: `Docs/datos/Diccionario_de_datos_HotelDB.xlsx`
 | `censo` | `/Censo/Datos` | `GestionarCensos` |
 | `usuarios` | `/Cuenta/Usuarios` | `AdministrarUsuarios` |
 
-El mapeo detecta **fragmentos** en `Link` (p. ej. `/api/solicitud…`, `/reservas`, `/censo`, `/usuarios`). Ampliar `MapeoEnlacesMenu.cs` cuando aparezcan links con otro texto.
+El menú legado usa jerarquía **`Ubicacion = nav`** (barra) + hijos **`side`** con `PadreId`. Ejemplo contrastado: **perfil 137** en `Docs/datos/diccionario-hoteldb-perfiles-menus.md`.
+
+Mapeo de rutas SPA (`/app/gestion/censo`, `/app/gestion/miscensos` → `censo` / `censoQr`). Los informes (`/app/gestion/informe/censo`) quedan deshabilitados hasta migrar. Ampliar `MapeoEnlacesMenu.cs` según nuevos `Link`.
 
 ### 4. Políticas (regla combinada)
 

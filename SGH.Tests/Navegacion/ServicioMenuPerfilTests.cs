@@ -23,7 +23,8 @@ public sealed class ServicioMenuPerfilTests
     {
         var filas = new[]
         {
-            new MenuPerfilItem(1, "Censo", "/censo", null, "Gestión", 1, null)
+            new MenuPerfilItem(8, "Censo", "/app/gestion/censo", 2, "side", 3, null),
+            new MenuPerfilItem(2, "Gestión", "/app/gestion", null, "nav", 2, null)
         };
         var servicio = CrearServicio(filas);
 

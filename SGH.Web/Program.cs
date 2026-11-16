@@ -111,7 +111,7 @@ builder.Services.AddAuthorization(opciones =>
         politica.RequireAuthenticatedUser()
             .AddRequirements(
                 new PerfilAutorizacionRequirement(false),
-                new MenuAccesoRequirement(MenuClaves.Censo)));
+                new MenuAccesoRequirement(MenuClaves.Censo, MenuClaves.CensoQr)));
 });
 builder.Services.Configure<Microsoft.AspNetCore.Mvc.MvcOptions>(opciones =>
 {

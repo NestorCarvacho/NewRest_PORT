@@ -26,6 +26,10 @@
                                         {
                                             <a class="menu-enlace" asp-page="@item.RutaPagina" data-modulo="@item.ClaveModulo">@item.Nombre</a>
                                         }
+                                        else if (item.Disponible && !string.IsNullOrEmpty(item.ClaveModulo))
+                                        {
+                                            <button type="button" class="menu-enlace" data-modulo="@item.ClaveModulo">@item.Nombre</button>
+                                        }
                                         else
                                         {
                                             <button type="button" disabled title="@(item.TituloDeshabilitado ?? "No disponible")">@item.Nombre</button>
@@ -60,6 +64,10 @@
                                         if (item.Disponible && !string.IsNullOrEmpty(item.RutaPagina))
                                         {
                                             <a class="menu-enlace" asp-page="@item.RutaPagina" data-modulo="@item.ClaveModulo">@item.Nombre</a>
+                                        }
+                                        else if (item.Disponible && !string.IsNullOrEmpty(item.ClaveModulo))
+                                        {
+                                            <button type="button" class="menu-enlace" data-modulo="@item.ClaveModulo">@item.Nombre</button>
                                         }
                                         else
                                         {

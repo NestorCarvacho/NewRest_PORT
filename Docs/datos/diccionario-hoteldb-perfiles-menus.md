@@ -128,6 +128,28 @@ Además del login (`Password`, `Md5Retirado`, bloqueo, etc.):
 
 ---
 
+## Muestra real — `PerfilId = 137`
+
+Estructura legado contrastada con la query `sp_Menu_ObtenerPorPerfil`:
+
+| Nivel | `Ubicacion` | `PadreId` | Ejemplo |
+|-------|-------------|-----------|---------|
+| Barra principal | `nav` | `NULL` | Gestión, Informes, Configuración, Operaciones |
+| Ítems del desplegable | `side` | id del `nav` | Censo bajo Gestión (`PadreId = 2`) |
+
+Rutas SPA típicas: `/app/gestion`, `/app/gestion/censo`, `/app/gestion/informe/censo`, `/app/gestion/miscensos`, `/app/config/codigoqr`.
+
+Mapeo en NewRest (`MapeoEnlacesMenu`):
+
+| `Link` (fragmento) | Escritorio |
+|--------------------|------------|
+| `/app/gestion/censo` | Módulo `censo` → `/Censo/Datos` |
+| `/app/gestion/miscensos` | `censoQr` (panel QR, sin página Razor) |
+| `/app/gestion/informe/censo` | Sin migrar (deshabilitado) |
+| Solicitud / Reserva (cuando existan en menú) | `/Solicitud/Datos`, `/Reserva/Datos` |
+
+---
+
 ## Pendientes de inventario (actividad A1)
 
 El diccionario **no lista procedimientos**. Para el legado hay que contrastar en código/SQL Server:
