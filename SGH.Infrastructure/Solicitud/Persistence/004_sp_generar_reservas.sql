@@ -32,6 +32,12 @@ BEGIN
             SELECT 1 FROM dbo.Turnos WHERE Id = @TurnoId AND DiasTrabajados > 0 AND DiasLibres >= 0)
             THROW 51052, 'El turno de la solicitud no tiene una duración válida.', 1;
 
+        EXEC dbo.sp_Solicitud_AsegurarPeriodo
+            @SolicitudId = @SolicitudId,
+            @EmpresaMandanteId = @EmpresaMandanteId,
+            @CampamentoId = @CampamentoId,
+            @UsuarioId = @UsuarioId;
+
         DECLARE @Disponibles TABLE (
             pabellonId int, pabellonName nvarchar(100), moduloId int, moduloName nvarchar(100),
             habitacionId int, habitacionName nvarchar(100), totalCamas int, sexo nvarchar(100),
@@ -50,14 +56,16 @@ BEGIN
 
         UPDATE r
         SET r.FechaSalida = COALESCE(r.FechaSalida, r.CheckOut),
+            r.Estado = 'F',
             r.FechaActualizacion = GETDATE(),
             r.UsuarioActualizacionId = @UsuarioId
         FROM dbo.Reservas AS r
         INNER JOIN dbo.PasajerosSolicitudAlojamiento AS p ON p.UsuarioPasajeroId = r.PasajeroId
+        INNER JOIN dbo.Empresas AS e ON e.Id = @EmpresaMandanteId
+        INNER JOIN dbo.Campamentos AS c ON c.Id = r.CampamentoId AND c.MineraId = e.MineraId
         WHERE p.SolicitudAlojamientoId = @SolicitudId
-          AND r.Estado = 'A'
           AND r.CheckOut IS NOT NULL
-          AND r.FechaSalida IS NULL;
+          AND r.Estado = 'A';
 
         DECLARE @Conflictos TABLE (PasajeroId int, PasajeroNombre varchar(1000), ReservaId int, Tipo int);
         INSERT INTO @Conflictos

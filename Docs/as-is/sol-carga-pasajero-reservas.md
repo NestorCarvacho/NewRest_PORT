@@ -18,7 +18,8 @@ Mensaje: `Pasajero ya cuenta con reservas para el periodo. Reserva #…`.
 
 ## Ajuste NewRest (sin reescribir el legado)
 
-1. Al registrar **check-out** (`sp_Reserva_RegistrarMovimiento`), si `FechaSalida` sigue NULL, copiar `CheckOut` (o la fecha del movimiento) a `FechaSalida`.
-2. Antes de **`sp_Solicitud_CargarPasajero`** y **`sp_Solicitud_GenerarReservas`**, mismo cierre para reservas `Estado = 'A'` con `CheckOut` y sin `FechaSalida` (datos históricos).
+1. **`sp_Reserva_FinalizarCheckout`**: si hay `CheckOut`, completar `FechaSalida` y pasar la reserva a **`Estado = 'F'`** (el masivo solo bloquea con `Estado = 'A'`).
+2. Se invoca al registrar check-out (`sp_Reserva_RegistrarMovimiento`), antes de importar pasajeros (`sp_Solicitud_CargarPasajero`, por RUT y toda la minera) y al generar reservas.
+3. **`sp_Solicitud_AsegurarPeriodo`**: si `FechaCheckOut` de la solicitud viene NULL, derivarla del turno o igualar `FechaCheckIn` (evita la rama `(@fechaCheckOut IS NULL AND r.FechaSalida IS NULL)` del masivo).
 
-Si el negocio exige otra regla (p. ej. anular reserva al checkout), hay que alinear `RES_RealizaCheckX` / estados en HOTELDB.
+En pantalla una reserva puede figurar con check-out y aún **Asignada** (`A`); sin finalizarla, el import masivo sigue viendo solapamiento aunque `salida` esté informada.

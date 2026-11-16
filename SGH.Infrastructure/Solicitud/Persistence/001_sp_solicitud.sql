@@ -186,6 +186,14 @@ BEGIN
 
         IF @Ret <= 0
             THROW 51032, 'No se pudo guardar la solicitud.', 1;
+
+        DECLARE @SolicitudId int = CASE WHEN @Id = 0 THEN @Ret ELSE @Id END;
+        EXEC dbo.sp_Solicitud_AsegurarPeriodo
+            @SolicitudId = @SolicitudId,
+            @EmpresaMandanteId = @EmpresaMandanteId,
+            @CampamentoId = @CampamentoId,
+            @UsuarioId = @UsuarioId;
+
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH

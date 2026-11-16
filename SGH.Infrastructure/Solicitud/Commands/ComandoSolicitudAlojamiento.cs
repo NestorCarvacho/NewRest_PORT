@@ -7,6 +7,11 @@ namespace SGH.Infrastructure.Solicitud.Commands;
 
 public sealed class ComandoSolicitudAlojamiento : IComandoSolicitudAlojamiento
 {
+    public Task AsegurarPeriodoImportacionAsync(int solicitudId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken) =>
+        EjecutarAsync("dbo.sp_Solicitud_AsegurarPeriodo", cancellationToken,
+            ("@SolicitudId", solicitudId), ("@EmpresaMandanteId", empresaMandanteId),
+            ("@CampamentoId", campamentoId), ("@UsuarioId", usuarioId));
+
     public async Task<ResultadoProcedimientoCargaDto> CargarPasajeroAsync(int solicitudId, int empresaMandanteId, int campamentoId,
         int usuarioId, FilaCargaPasajeroDto fila, CancellationToken cancellationToken)
     {
