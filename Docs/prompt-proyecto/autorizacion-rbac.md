@@ -4,7 +4,9 @@
 
 **Parcialmente.** El sistema usa **autorización por políticas de ASP.NET Core** apoyada en el **`PerfilId`** que viene de la base (asignación campamento–perfil al iniciar sesión), no un RBAC clásico con matriz rol→permiso persistida y evaluada por rol.
 
-En la práctica hoy hay **dos bandas**:
+Desde **SGH 1.5**, las políticas operativas también exigen un ítem en **`MenusPerfil`** para el `PerfilId` de sesión (`MenuAccesoAuthorizationHandler` + `sp_Menu_ObtenerPorPerfil`). Si la BD no devuelve menú, se usa un respaldo mínimo equivalente al escritorio migrado.
+
+En la práctica hoy hay **dos bandas** (más el filtro por menú anterior):
 
 | Banda | `PerfilId` | Acceso a módulos operativos |
 |--------|------------|-----------------------------|

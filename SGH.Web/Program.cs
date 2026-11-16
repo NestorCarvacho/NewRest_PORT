@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using SGH.Infrastructure.DependencyInjection;
 using SGH.Web.Cuenta;
 using SGH.Web.Autorizacion;
+using SGH.Application.Navegacion;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,16 +91,27 @@ builder.Services.AddRateLimiter(opciones =>
     });
 });
 builder.Services.AddSingleton<IAuthorizationHandler, PerfilAutorizacionHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, MenuAccesoAuthorizationHandler>();
 builder.Services.AddAuthorization(opciones =>
 {
     opciones.AddPolicy(PoliticasAplicacion.AdministrarUsuarios, politica =>
-        politica.RequireAuthenticatedUser().AddRequirements(new PerfilAutorizacionRequirement(false)));
+        politica.RequireAuthenticatedUser()
+            .AddRequirements(new PerfilAutorizacionRequirement(false), new MenuAccesoRequirement(MenuClaves.Usuarios)));
     opciones.AddPolicy(PoliticasAplicacion.GestionarReservas, politica =>
-        politica.RequireAuthenticatedUser().AddRequirements(new PerfilAutorizacionRequirement(true)));
+        politica.RequireAuthenticatedUser()
+            .AddRequirements(
+                new PerfilAutorizacionRequirement(true),
+                new MenuAccesoRequirement(MenuClaves.Solicitud, MenuClaves.Reserva)));
     opciones.AddPolicy(PoliticasAplicacion.EjecutarCheckInOut, politica =>
-        politica.RequireAuthenticatedUser().AddRequirements(new PerfilAutorizacionRequirement(false)));
+        politica.RequireAuthenticatedUser()
+            .AddRequirements(
+                new PerfilAutorizacionRequirement(false),
+                new MenuAccesoRequirement(MenuClaves.Reserva)));
     opciones.AddPolicy(PoliticasAplicacion.GestionarCensos, politica =>
-        politica.RequireAuthenticatedUser().AddRequirements(new PerfilAutorizacionRequirement(false)));
+        politica.RequireAuthenticatedUser()
+            .AddRequirements(
+                new PerfilAutorizacionRequirement(false),
+                new MenuAccesoRequirement(MenuClaves.Censo)));
 });
 builder.Services.Configure<Microsoft.AspNetCore.Mvc.MvcOptions>(opciones =>
 {

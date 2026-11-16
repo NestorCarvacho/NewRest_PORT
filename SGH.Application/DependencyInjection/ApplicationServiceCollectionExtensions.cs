@@ -8,6 +8,8 @@ using SGH.Application.Reserva.Interfaces;
 using SGH.Application.Reserva.UseCases;
 using SGH.Application.Solicitud.Interfaces;
 using SGH.Application.Solicitud.UseCases;
+using SGH.Application.Navegacion;
+using SGH.Application.Navegacion.Interfaces;
 
 namespace SGH.Application.DependencyInjection;
 
@@ -41,6 +43,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<MidCenso>();
         services.AddScoped<MidSolicitudes>();
         services.AddScoped<MidInformesCenso>();
+        services.AddScoped<IServicioMenuPerfil, ServicioMenuPerfil>();
         return services;
     }
 }
