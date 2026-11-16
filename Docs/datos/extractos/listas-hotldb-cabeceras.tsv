@@ -1,0 +1,43 @@
+(si Tipo distingue definición de ítem)
+IdTabla	Tipo	Valor1	Descripcion
+1	Cabecera	0	Estados de Solicitud de Alojamiento
+2	Cabecera	0	Cargos Trabajador
+3	Cabecera	0	Tipos de Empresa
+4	Cabecera	0	Area Pabellón
+5	Cabecera	0	Origen Reserva
+6	Cabecera	0	Estados Reserva
+7	Cabecera	0	Estados Cama
+7	Cabecera	O	Ocupada
+8	Cabecera	0	Estados Habitación
+9	Cabecera	0	Estados Registro Desviacion (OT)
+10	Cabecera	0	Tipos de turno
+11	Cabecera	0	Sexos
+12	Cabecera	0	Estados registro Artículos
+13	Cabecera	0	Artículos EPP
+14	Cabecera	0	Estados Artículos EPP
+15	Cabecera	0	Estados Casilleros EPP
+16	Cabecera	0	Estados Desalojos
+17	Cabecera	0	Estados de Solicitud de Empresa
+18	Cabecera		Tipo Acción No Conformidad
+19	Cabecera		Área No Conformidad
+20	Cabecera		Estados Origen Mejora No Conformidad
+21	Cabecera		Estados Solución Propuesta No Conformidad
+22	Cabecera		Estados No Conformidad
+23	Cabecera		Sectores Artículos
+30	Cabecera	0	Estados de Items de Valija
+31	Cabecera	0	Estados de Entrega de Items de Valija
+32	Cabecera	0	Configuracion Bloqueo Checkin Checkout
+33	Cabecera	0	Tipos de Valija
+34	Cabecera	0	Parámetros generales
+35	Cabecera	0	Tipo de comentario
+36	Cabecera	0	Estado Comentario
+37	Cabecera	0	Tipo de observación ESS
+38	Cabecera	0	Estados del proyecto
+39	Cabecera	0	Tipo proyecto preventivo
+40	Cabecera	0	Estados de la actividad preventiva
+41	Cabecera	0	Origen del registro de desviación
+42	Cabecera	0	Porcentaje de proyectos
+43	Cabecera	0	Clasificación Actividades
+44	Cabecera	0	Informes PBI
+50	Cabecera	0	Areas Sugerencias
+51	Cabecera	0	Sistema

@@ -6,6 +6,6 @@
 | [`diccionario-hoteldb-perfiles-menus.md`](diccionario-hoteldb-perfiles-menus.md) | Menú, perfiles, SGH 1.5 |
 | [`diccionario-hoteldb-procedimientos-almacenados.md`](diccionario-hoteldb-procedimientos-almacenados.md) | Consultas SQL para actualizar inventarios |
 | [`maestros-listas-inventario.md`](maestros-listas-inventario.md) | SGH 2.1.0 — matriz Listas + SP maestros |
-| [`extractos/`](extractos/) | TSV derivados del filtro §2/§3 (maestros) |
+| [`extractos/`](extractos/) | TSV: SP maestros, cabeceras `Listas`, agregado `IdTabla` |
 
 Actualizar el xlsx cuando cambie el esquema en HOTELDB; repetir extractos con las consultas del markdown de procedimientos o con las herramientas del equipo.
