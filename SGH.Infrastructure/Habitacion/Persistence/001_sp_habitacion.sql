@@ -228,6 +228,21 @@ BEGIN
         RETURN;
     END
 
+    /* HAB_ValidaHabitacion (as-is HOTELDB): no permite quitar reservable con reservas activas. */
+    IF @Id > 0
+       AND @IsReservable = 0
+       AND EXISTS (
+           SELECT 1 FROM dbo.Habitaciones WITH (NOLOCK)
+           WHERE Id = @Id AND IsActive = 1 AND IsReservable = 1)
+       AND EXISTS (
+           SELECT 1 FROM dbo.ReservasInstalacion WITH (NOLOCK)
+           WHERE ubicacionId = @Id
+             AND fecHorInicio >= DATEADD(hour, DATEDIFF(hour, 0, SYSDATETIME()), 0))
+    BEGIN
+        SET @Mensaje = N'Ubicacion se encuentra con reservas activas';
+        RETURN;
+    END
+
     /* HAB_GuardaHabitacion legado solo hace UPDATE (Id > 0); el alta va por INSERT nativo CU-HAB. */
     DECLARE @UsarNativo bit = 1;
     DECLARE @GuardadoLegado bit = 0;
