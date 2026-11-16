@@ -1,0 +1,20 @@
+@model SGH.Web.Ui.ModalDialogoVm
+<div id="@Model.ModalId"
+     class="sgh-ui-modal"
+     data-sgh-modal
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="@(Model.ModalId)-titulo"
+     hidden>
+    <div class="sgh-ui-modal-dialogo">
+        <header class="sgh-ui-modal-cabeza">
+            <h2 id="@(Model.ModalId)-titulo">@Model.Titulo</h2>
+            <button type="button" class="sgh-ui-modal-cerrar" data-sgh-modal-cerrar aria-label="Cerrar">×</button>
+        </header>
+        <div class="sgh-ui-modal-cuerpo" data-sgh-modal-mensaje></div>
+        <footer class="sgh-ui-modal-pie">
+            <button type="button" class="boton-secundario" data-sgh-modal-cancelar>@Model.TextoCancelar</button>
+            <button type="button" class="boton-primario" data-sgh-modal-aceptar>@Model.TextoConfirmar</button>
+        </footer>
+    </div>
+</div>

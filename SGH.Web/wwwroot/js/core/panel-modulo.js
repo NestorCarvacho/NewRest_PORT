@@ -1,15 +1,29 @@
+import { clonarModuloShell } from "./biblioteca-ui.js";
+
 export function crearPanelModulo(dependencias) {
     function crear(id, modulo) {
-        var nodo = document.createElement("section");
-        nodo.className = "modulo modulo-" + id;
-        nodo.dataset.id = id;
+        var nodo = clonarModuloShell(id);
+        if (!nodo) {
+            nodo = document.createElement("section");
+            nodo.className = "modulo modulo-" + id;
+            nodo.dataset.id = id;
+            nodo.hidden = true;
+            var estadoLegacy = document.createElement("p");
+            estadoLegacy.className = "modulo-estado";
+            estadoLegacy.hidden = true;
+            var barraLegacy = document.createElement("div");
+            barraLegacy.className = "modulo-barra";
+            var tablaLegacy = document.createElement("div");
+            nodo.append(estadoLegacy, barraLegacy, tablaLegacy);
+        }
+
         nodo.hidden = true;
         nodo._filtro = modulo.filtroInicial();
-        var estado = document.createElement("p");
-        estado.className = "modulo-estado";
-        estado.hidden = true;
-        var barra = document.createElement("div");
-        barra.className = "modulo-barra";
+        var estado = nodo.querySelector(".modulo-estado, [data-sgh-modulo-estado]");
+        var barra = nodo.querySelector(".modulo-barra, [data-sgh-barra]");
+        var contenedorTabla = nodo.querySelector("[data-sgh-modulo-tabla]");
+        if (estado) estado.hidden = true;
+
         barra.append(dependencias.boton("Filtros", "boton-secundario", function () {
             dependencias.prepararCatalogo(modulo.modo).then(function () {
                 dependencias.abrirPanel("Filtros de " + modulo.titulo, dependencias.formulario(
@@ -41,7 +55,11 @@ export function crearPanelModulo(dependencias) {
             nodo._guardar = guardar;
             barra.append(guardar);
         }
-        nodo.append(estado, barra, dependencias.crearTabla(modulo.columnas));
+
+        var tabla = dependencias.crearTabla(modulo.columnas);
+        if (contenedorTabla) contenedorTabla.replaceWith(tabla);
+        else nodo.append(tabla);
+
         return nodo;
     }
 

@@ -125,11 +125,21 @@ export function crearFormularios(dependencias) {
                 elemento.value = dependencias.momentoLocal(conHora);
                 elemento.dispatchEvent(new Event("input", { bubbles: true }));
             });
+            var validacionFecha = document.createElement("span");
+            validacionFecha.className = "sgh-ui-validacion";
+            validacionFecha.dataset.sghValidacion = "";
+            validacionFecha.hidden = true;
+            validacionFecha.setAttribute("role", "alert");
             linea.append(elemento, ahora);
-            etiqueta.append(texto, linea);
+            etiqueta.append(texto, linea, validacionFecha);
             return etiqueta;
         }
-        etiqueta.append(texto, control);
+        var validacion = document.createElement("span");
+        validacion.className = "sgh-ui-validacion";
+        validacion.dataset.sghValidacion = "";
+        validacion.hidden = true;
+        validacion.setAttribute("role", "alert");
+        etiqueta.append(texto, control, validacion);
         return etiqueta;
     }
 
@@ -196,6 +206,11 @@ export function crearFormularios(dependencias) {
                     var campoEtiqueta = control ? control.closest(".campo") : null;
                     if (campoEtiqueta) campoEtiqueta.classList.toggle("campo-error", !completo);
                     if (control) control.setAttribute("aria-invalid", completo ? "false" : "true");
+                    var aviso = campoEtiqueta ? campoEtiqueta.querySelector("[data-sgh-validacion]") : null;
+                    if (aviso) {
+                        aviso.textContent = completo ? "" : "Este campo es obligatorio.";
+                        aviso.hidden = completo;
+                    }
                     if (!completo) valido = false;
                 });
             });

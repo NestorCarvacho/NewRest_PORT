@@ -1,0 +1,18 @@
+@model SGH.Web.Ui.TablaListadoVm
+<div id="@Model.ContenedorId"
+     class="@Model.ClaseContenedor"
+     data-sgh-tabla
+     data-sgh-paginacion="@(Model.IncluirPaginacionCliente ? "cliente" : "ninguna")">
+    <table class="tabla" aria-describedby="@(Model.ContenedorId)-leyenda">
+        <caption id="@(Model.ContenedorId)-leyenda" class="sgh-ui-solo-lectura">Listado</caption>
+        <thead>
+            <tr>
+                @foreach (var columna in Model.Columnas)
+                {
+                    <th scope="col">@columna</th>
+                }
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>

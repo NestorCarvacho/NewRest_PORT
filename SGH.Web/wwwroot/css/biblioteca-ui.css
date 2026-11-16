@@ -1,0 +1,97 @@
+.sgh-ui-solo-lectura {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.sgh-ui-tabla {
+  width: 100%;
+}
+
+.sgh-ui-ayuda {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--gray);
+  font-size: 0.78rem;
+}
+
+.sgh-ui-validacion {
+  display: block;
+  margin-top: 0.25rem;
+  color: #b42318;
+  font-size: 0.8rem;
+}
+
+.sgh-ui-campo.campo-error .sgh-ui-validacion,
+.sgh-ui-campo.campo-error [data-sgh-validacion] {
+  display: block;
+}
+
+.sgh-ui-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(5 5 3 / 45%);
+}
+
+.sgh-ui-modal[hidden] {
+  display: none !important;
+}
+
+.sgh-ui-modal-dialogo {
+  width: min(28rem, 100%);
+  background: var(--white);
+  border: 1px solid var(--blizzard);
+  border-radius: 0.65rem;
+  box-shadow: 0 12px 40px rgb(5 5 3 / 18%);
+}
+
+.sgh-ui-modal-cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem 0.35rem;
+}
+
+.sgh-ui-modal-cabeza h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--burgundy);
+}
+
+.sgh-ui-modal-cerrar {
+  border: 0;
+  background: transparent;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--gray);
+}
+
+.sgh-ui-modal-cuerpo {
+  padding: 0.5rem 1rem 1rem;
+  color: var(--deep);
+  font-size: 0.92rem;
+}
+
+.sgh-ui-modal-pie {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0 1rem 1rem;
+}
+
+.sgh-ui-filtros-leyenda {
+  margin: 0 0 0.75rem;
+  color: var(--gray);
+  font-size: 0.82rem;
+}

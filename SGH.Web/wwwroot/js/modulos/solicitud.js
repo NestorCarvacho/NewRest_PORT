@@ -1,5 +1,10 @@
 export function crearSolicitud(d) {
     var ruta = "/Solicitud/Mid/MidSolicitudes.cs";
+    function confirmarUi(mensaje, titulo) {
+        var ui = window.SGHBibliotecaUi;
+        if (ui && ui.confirmar) return ui.confirmar(mensaje, { titulo: titulo || "Confirmar" });
+        return Promise.resolve(window.confirm(mensaje));
+    }
     function mid(opcion, datos) {
         return d.enviar(ruta, Object.assign({ opcion: opcion }, datos || {}));
     }
@@ -207,8 +212,10 @@ export function crearSolicitud(d) {
         if (detalle.estado === "P") {
             accionesSolicitud.append(boton("Editar solicitud", function () { abrirFormulario(detalle); }));
             var anular = boton("Anular solicitud", function () {
-                if (!window.confirm("¿Anular esta solicitud?")) return;
-                ejecutar(anular, "anular", { id: detalle.id }, function () { d.cargar("solicitud"); abrirDetalle(detalle.id); });
+                confirmarUi("¿Anular esta solicitud?", "Anular solicitud").then(function (acepta) {
+                    if (!acepta) return;
+                    ejecutar(anular, "anular", { id: detalle.id }, function () { d.cargar("solicitud"); abrirDetalle(detalle.id); });
+                });
             });
             accionesSolicitud.append(anular);
         }
@@ -246,12 +253,14 @@ export function crearSolicitud(d) {
         accionesSeleccion.className = "solicitud-acciones solicitud-acciones-seleccion";
         if (detalle.estado === "P") {
             var generar = boton("Generar reservas", function () {
-                if (!window.confirm("¿Esta seguro que desea generar las reservas para la solicitud seleccionada?")) return;
-                ejecutar(generar, "generar", { id: detalle.id }, function (resultado) {
-                    d.mostrarAviso("Reservas generadas. Primera reserva N° " + resultado.primeraReservaId + ".", "success");
-                    if (resultado.advertenciaCorreo) d.mostrarAviso(resultado.advertenciaCorreo, "error");
-                    d.cargar("solicitud");
-                    abrirDetalle(detalle.id);
+                confirmarUi("¿Está seguro que desea generar las reservas para la solicitud seleccionada?", "Generar reservas").then(function (acepta) {
+                    if (!acepta) return;
+                    ejecutar(generar, "generar", { id: detalle.id }, function (resultado) {
+                        d.mostrarAviso("Reservas generadas. Primera reserva N° " + resultado.primeraReservaId + ".", "success");
+                        if (resultado.advertenciaCorreo) d.mostrarAviso(resultado.advertenciaCorreo, "error");
+                        d.cargar("solicitud");
+                        abrirDetalle(detalle.id);
+                    });
                 });
             });
             generar.disabled = true;
@@ -291,7 +300,7 @@ export function crearSolicitud(d) {
         }
         if (detalle.estado === "P") {
             eliminarSeleccionados = boton("Eliminar pasajeros", async function () {
-                if (!window.confirm("¿Eliminar los pasajeros seleccionados?")) return;
+                if (!(await confirmarUi("¿Eliminar los pasajeros seleccionados?", "Eliminar pasajeros"))) return;
                 var ids = Array.from(seleccion);
                 panel.querySelectorAll("button, input").forEach(function (control) { control.disabled = true; });
                 var realizados = 0;
@@ -347,8 +356,10 @@ export function crearSolicitud(d) {
             if (detalle.estado === "P") {
                 acciones.append(boton("Editar", function () { abrirPasajero(detalle, pasajero); }));
                 var eliminar = boton("Eliminar", function () {
-                    if (!window.confirm("¿Eliminar este pasajero o cupo?")) return;
-                    ejecutar(eliminar, "eliminar", { id: detalle.id, pasajeroId: pasajero.id }, function () { abrirDetalle(detalle.id); });
+                    confirmarUi("¿Eliminar este pasajero o cupo?", "Eliminar pasajero").then(function (acepta) {
+                        if (!acepta) return;
+                        ejecutar(eliminar, "eliminar", { id: detalle.id, pasajeroId: pasajero.id }, function () { abrirDetalle(detalle.id); });
+                    });
                 });
                 acciones.append(eliminar);
                 fila.append(acciones);
@@ -695,7 +706,9 @@ export function crearSolicitud(d) {
         form.append(importar, resultado, boton("Volver a la solicitud", function () { abrirDetalle(detalle.id); }));
         form.addEventListener("submit", function (e) {
             e.preventDefault();
-            if (!form.reportValidity() || !window.confirm("La carga puede modificar usuarios existentes. ¿Desea continuar?")) return;
+            if (!form.reportValidity()) return;
+            confirmarUi("La carga puede modificar usuarios existentes. ¿Desea continuar?", "Importar pasajeros").then(function (acepta) {
+            if (!acepta) return;
             importar.disabled = true;
             resultado.replaceChildren();
             d.enviarArchivo(ruta, archivo.files[0], { id: detalle.id }).then(function (datos) {
@@ -745,6 +758,7 @@ export function crearSolicitud(d) {
                 d.mostrarAviso(ex.message, "error");
             })
                 .finally(function () { importar.disabled = false; });
+            });
         });
         d.abrirPanel("Importar pasajeros", form);
     }

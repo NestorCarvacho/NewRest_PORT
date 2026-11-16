@@ -1,7 +1,5 @@
 @{
     var moduloId = ViewData["ModuloId"] as string ?? "";
+    var titulo = ViewData["Title"] as string;
 }
-<section class="bienvenida" id="modulo-inicial" data-modulo-inicial="@moduloId">
-    <h1>Gestión Hotelera</h1>
-    <p>Use el menú para abrir los módulos en solapas.</p>
-</section>
+@await Component.InvokeAsync("ModuloEscritorio", new SGH.Web.Ui.ModuloEscritorioVm(moduloId, titulo))

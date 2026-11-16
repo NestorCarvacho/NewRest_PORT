@@ -1,0 +1,26 @@
+@model SGH.Web.Ui.CampoFormularioVm
+@using SGH.Web.Ui
+<label class="campo @BibliotecaUiClases.Campo">
+    <span>@Model.Etiqueta@(Model.Requerido ? " *" : "")</span>
+    @if (Model.Tipo == "textarea")
+    {
+        <textarea name="@Model.Nombre"
+                  data-sgh-campo
+                  @(Model.Requerido ? "required" : null)
+                  maxlength="@Model.MaxLength">@Model.Valor</textarea>
+    }
+    else
+    {
+        <input type="@Model.Tipo"
+               name="@Model.Nombre"
+               value="@Model.Valor"
+               data-sgh-campo
+               @(Model.Requerido ? "required" : null)
+               maxlength="@Model.MaxLength" />
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.MensajeAyuda))
+    {
+        <span class="sgh-ui-ayuda">@Model.MensajeAyuda</span>
+    }
+    <span class="@BibliotecaUiClases.Validacion" data-sgh-validacion hidden role="alert"></span>
+</label>

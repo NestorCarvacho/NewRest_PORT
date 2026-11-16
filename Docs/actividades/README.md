@@ -17,5 +17,6 @@ Plantilla vacía: [`PLANTILLA-registro-actividad.md`](PLANTILLA-registro-activid
 |-------|-----------|---------|
 | 2026-11-16 | Consulta usuarios / asignaciones `PerfilId = 1` (SGH 1.5) | [`SGH-1.5-consulta-usuarios-perfil-1.md`](SGH-1.5-consulta-usuarios-perfil-1.md) |
 | 2026-11-16 | Layout, errores, logging y auditoría (SGH 1.6) — cerrada en `main` | [`SGH-1.6-layout-errores-logging-auditoria.md`](SGH-1.6-layout-errores-logging-auditoria.md) · ticket [`../SGH-1.6-documentacion-ticket.md`](../SGH-1.6-documentacion-ticket.md) |
+| 2026-11-16 | Biblioteca componentes UI (SGH 1.7) | [`SGH-1.7-biblioteca-componentes-ui.md`](SGH-1.7-biblioteca-componentes-ui.md) · [`../SGH-1.7-documentacion-ticket.md`](../SGH-1.7-documentacion-ticket.md) |
 
 Épicas: [`../SGH-1.5-autorizacion-perfiles-menu-dinamico.md`](../SGH-1.5-autorizacion-perfiles-menu-dinamico.md) · [`../SGH-1.6-layout-errores-logging-auditoria.md`](../SGH-1.6-layout-errores-logging-auditoria.md)

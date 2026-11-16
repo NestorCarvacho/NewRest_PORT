@@ -2,8 +2,11 @@ import { inicializarCuenta } from "./modulos/cuenta.js";
 import { crearNavegacion } from "./core/navegacion.js";
 import { inicializarMenuModulos } from "./core/menu-modulos.js";
 import { crearEntornoEscritorio } from "./core/fabrica-escritorio.js";
+import { crearBibliotecaUi } from "./core/biblioteca-ui.js";
 
 (function () {
+    window.SGHBibliotecaUi = crearBibliotecaUi();
+    window.SGHBibliotecaUi.inicializarModales();
     var solapas = document.getElementById("solapas");
     var paneles = document.getElementById("paneles");
     if (!solapas || !paneles) return;
