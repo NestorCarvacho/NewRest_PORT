@@ -1,4 +1,4 @@
-/* Habitaciones — CRUD alineado a HOTELDB (envoltorio + HAB_GuardaHabitacion / HAB_ValidaHabitacion). */
+/* Habitaciones — CRUD CU-HAB: legado HAB_* si está sano; si no (p. ej. files.HabitacionFiles), guardado nativo. */
 
 CREATE OR ALTER PROCEDURE dbo.sp_Habitacion_Listar
     @EmpresaMandanteId int,
@@ -222,98 +222,233 @@ BEGIN
     IF @PersonasCantidadMin <= 0 SET @PersonasCantidadMin = 1;
     IF @PersonasCantidadMax <= 0 SET @PersonasCantidadMax = @CantidadCamas;
 
-  DECLARE @ret int;
-    EXEC dbo.HAB_ValidaHabitacion
-        @id = @Id,
-        @nombre = @Nombre,
-        @isActive = @IsActive,
-        @cantidadCamas = @CantidadCamas,
-        @sexo = @Sexo,
-        @usuario = @UsuarioId,
-        @tipoInstalacion = @TipoInstalacionId,
-        @standarHabitacion = @StandardHabitacionId,
-        @estado = @Estado,
-        @observacionBloqueo = @ObservacionBloqueo,
-        @m2 = @M2,
-        @isReservable = @IsReservable,
-        @PersonasCantidadMin = @PersonasCantidadMin,
-        @PersonasCantidadMax = @PersonasCantidadMax,
-        @MinutosMin = @MinutosMin,
-        @MinutosMax = @MinutosMax,
-        @TieneServiciosAlimentacion = @TieneServiciosAlimentacion,
-        @FechaReservaDesde = NULL,
-        @FechaReservaHasta = NULL,
-        @ReservaDiasAnticipacion = 0,
-        @ReservaDiasCancelacion = 0,
-        @ReservaTotalEnMes = 0,
-        @FileId = 0,
-        @FileName = NULL,
-        @ContentType = NULL,
-        @XMLSemana = NULL,
-        @PlantillaUbicacionId = @ModuloId,
-        @IsExistReservaConfirm = 0,
-        @ImageId = 0,
-        @ImageName = NULL,
-        @ImageContentType = NULL;
-
-    EXEC dbo.HAB_GuardaHabitacion
-        @id = @Id,
-        @nombre = @Nombre,
-        @isActive = @IsActive,
-        @cantidadCamas = @CantidadCamas,
-        @sexo = @Sexo,
-        @usuario = @UsuarioId,
-        @tipoInstalacion = @TipoInstalacionId,
-        @standarHabitacion = @StandardHabitacionId,
-        @estado = @Estado,
-        @observacionBloqueo = @ObservacionBloqueo,
-        @m2 = @M2,
-        @isReservable = @IsReservable,
-        @PersonasCantidadMin = @PersonasCantidadMin,
-        @PersonasCantidadMax = @PersonasCantidadMax,
-        @MinutosMin = @MinutosMin,
-        @MinutosMax = @MinutosMax,
-        @TieneServiciosAlimentacion = @TieneServiciosAlimentacion,
-        @FechaReservaDesde = NULL,
-        @FechaReservaHasta = NULL,
-        @ReservaDiasAnticipacion = 0,
-        @ReservaDiasCancelacion = 0,
-        @ReservaTotalEnMes = 0,
-        @FileId = 0,
-        @FileName = NULL,
-        @ContentType = NULL,
-        @Archivo = NULL,
-        @ImageId = 0,
-        @ImageName = NULL,
-        @ImageContentType = NULL,
-        @Image = NULL,
-        @XMLSemana = NULL,
-        @PlantillaUbicacionId = @ModuloId,
-        @IsExistReservaConfirm = 0,
-        @ret = @ret OUTPUT;
-
-    IF ISNULL(@ret, 0) <= 0
+    IF @CantidadCamas < 1
     BEGIN
-        SET @Mensaje = N'No se pudo guardar la habitación (HAB_GuardaHabitacion).';
+        SET @Mensaje = N'La habitación debe tener al menos 1 cama.';
         RETURN;
     END
 
-    SET @IdResultado = @ret;
+    DECLARE @UsarNativo bit = CASE WHEN @Id > 0 THEN 1 ELSE 0 END;
+    DECLARE @GuardadoLegado bit = 0;
+    DECLARE @ret int;
+    DECLARE @ErrLegado nvarchar(500);
 
-    UPDATE dbo.Habitaciones
-    SET ModuloId = CASE WHEN @ModuloId > 0 THEN @ModuloId ELSE ModuloId END,
-        BanoId = @BanoId,
-        PermiteUsoExclusivo = @PermiteUsoExclusivo,
-        PermiteUsoPorTurnos = @PermiteUsoPorTurnos,
-        TiempoHigienizacionMin = NULLIF(@TiempoHigienizacionMin, 0),
-        MinutosMin = CASE WHEN @PermiteUsoPorTurnos = 1 AND @TiempoHigienizacionMin > 0 THEN @TiempoHigienizacionMin ELSE MinutosMin END,
-        PersonasCantidadMax = CASE WHEN @PermiteUsoExclusivo = 1 THEN @CantidadCamas ELSE PersonasCantidadMax END
-    WHERE Id = @IdResultado;
+    IF OBJECT_ID(N'dbo.HAB_GuardaHabitacion', N'P') IS NULL
+        SET @UsarNativo = 1;
 
-    EXEC dbo.sp_Habitacion_SincronizarCamas
-        @HabitacionId = @IdResultado,
-        @CantidadObjetivo = @CantidadCamas,
-        @CampamentoId = @CampamentoId,
-        @UsuarioId = @UsuarioId;
+    IF @UsarNativo = 0 AND EXISTS (
+        SELECT 1
+        FROM sys.synonyms AS s
+        WHERE s.name = N'HabitacionFiles'
+          AND SCHEMA_NAME(s.schema_id) = N'files'
+          AND OBJECT_ID(s.base_object_name) IS NULL)
+        SET @UsarNativo = 1;
+
+    IF @UsarNativo = 0
+    BEGIN
+        BEGIN TRY
+            EXEC dbo.HAB_ValidaHabitacion
+                @id = @Id,
+                @nombre = @Nombre,
+                @isActive = @IsActive,
+                @cantidadCamas = @CantidadCamas,
+                @sexo = @Sexo,
+                @usuario = @UsuarioId,
+                @tipoInstalacion = @TipoInstalacionId,
+                @standarHabitacion = @StandardHabitacionId,
+                @estado = @Estado,
+                @observacionBloqueo = @ObservacionBloqueo,
+                @m2 = @M2,
+                @isReservable = @IsReservable,
+                @PersonasCantidadMin = @PersonasCantidadMin,
+                @PersonasCantidadMax = @PersonasCantidadMax,
+                @MinutosMin = @MinutosMin,
+                @MinutosMax = @MinutosMax,
+                @TieneServiciosAlimentacion = @TieneServiciosAlimentacion,
+                @FechaReservaDesde = NULL,
+                @FechaReservaHasta = NULL,
+                @ReservaDiasAnticipacion = 0,
+                @ReservaDiasCancelacion = 0,
+                @ReservaTotalEnMes = 0,
+                @FileId = 0,
+                @FileName = NULL,
+                @ContentType = NULL,
+                @XMLSemana = NULL,
+                @PlantillaUbicacionId = @ModuloId,
+                @IsExistReservaConfirm = 0,
+                @ImageId = 0,
+                @ImageName = NULL,
+                @ImageContentType = NULL;
+
+            EXEC dbo.HAB_GuardaHabitacion
+                @id = @Id,
+                @nombre = @Nombre,
+                @isActive = @IsActive,
+                @cantidadCamas = @CantidadCamas,
+                @sexo = @Sexo,
+                @usuario = @UsuarioId,
+                @tipoInstalacion = @TipoInstalacionId,
+                @standarHabitacion = @StandardHabitacionId,
+                @estado = @Estado,
+                @observacionBloqueo = @ObservacionBloqueo,
+                @m2 = @M2,
+                @isReservable = @IsReservable,
+                @PersonasCantidadMin = @PersonasCantidadMin,
+                @PersonasCantidadMax = @PersonasCantidadMax,
+                @MinutosMin = @MinutosMin,
+                @MinutosMax = @MinutosMax,
+                @TieneServiciosAlimentacion = @TieneServiciosAlimentacion,
+                @FechaReservaDesde = NULL,
+                @FechaReservaHasta = NULL,
+                @ReservaDiasAnticipacion = 0,
+                @ReservaDiasCancelacion = 0,
+                @ReservaTotalEnMes = 0,
+                @FileId = 0,
+                @FileName = NULL,
+                @ContentType = NULL,
+                @Archivo = NULL,
+                @ImageId = 0,
+                @ImageName = NULL,
+                @ImageContentType = NULL,
+                @Image = NULL,
+                @XMLSemana = NULL,
+                @PlantillaUbicacionId = @ModuloId,
+                @IsExistReservaConfirm = 0,
+                @ret = @ret OUTPUT;
+
+            IF ISNULL(@ret, 0) > 0
+            BEGIN
+                SET @IdResultado = @ret;
+                SET @GuardadoLegado = 1;
+            END
+        END TRY
+        BEGIN CATCH
+            SET @ErrLegado = LEFT(ERROR_MESSAGE(), 500);
+        END CATCH
+
+        WHILE @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+    END
+
+    IF @GuardadoLegado = 0
+    BEGIN
+        SET @UsarNativo = 1;
+        SET @MinutosMin = CASE
+            WHEN @PermiteUsoPorTurnos = 1 AND @TiempoHigienizacionMin > 0 THEN @TiempoHigienizacionMin
+            ELSE @MinutosMin END;
+        SET @PersonasCantidadMax = CASE
+            WHEN @PermiteUsoExclusivo = 1 THEN @CantidadCamas
+            ELSE @PersonasCantidadMax END;
+
+        BEGIN TRY
+            BEGIN TRANSACTION;
+
+            IF @Id > 0
+            BEGIN
+                UPDATE dbo.Habitaciones
+                SET ModuloId = CASE WHEN @ModuloId > 0 THEN @ModuloId ELSE ModuloId END,
+                    Nombre = @Nombre,
+                    IsActive = @IsActive,
+                    CantidadCamas = @CantidadCamas,
+                    Sexo = @Sexo,
+                    TipoInstalacionId = @TipoInstalacionId,
+                    StandardHabitacionId = @StandardHabitacionId,
+                    Estado = @Estado,
+                    ObservacionBloqueo = @ObservacionBloqueo,
+                    M2 = @M2,
+                    IsReservable = @IsReservable,
+                    PersonasCantidadMin = @PersonasCantidadMin,
+                    PersonasCantidadMax = @PersonasCantidadMax,
+                    MinutosMin = @MinutosMin,
+                    MinutosMax = @MinutosMax,
+                    TieneServiciosAlimentacion = @TieneServiciosAlimentacion,
+                    BanoId = @BanoId,
+                    PermiteUsoExclusivo = @PermiteUsoExclusivo,
+                    PermiteUsoPorTurnos = @PermiteUsoPorTurnos,
+                    TiempoHigienizacionMin = NULLIF(@TiempoHigienizacionMin, 0),
+                    FechaActualizacion = SYSUTCDATETIME(),
+                    UsuarioActualizacionId = @UsuarioId
+                WHERE Id = @Id;
+
+                IF @@ROWCOUNT = 0
+                BEGIN
+                    ROLLBACK TRANSACTION;
+                    SET @Mensaje = N'La habitación no existe.';
+                    RETURN;
+                END
+
+                SET @IdResultado = @Id;
+            END
+            ELSE
+            BEGIN
+                IF @ModuloId <= 0
+                BEGIN
+                    ROLLBACK TRANSACTION;
+                    SET @Mensaje = N'Seleccione un módulo.';
+                    RETURN;
+                END
+
+                INSERT INTO dbo.Habitaciones (
+                    ModuloId, Nombre, IsActive, CantidadCamas, Sexo,
+                    TipoInstalacionId, StandardHabitacionId, Estado,
+                    ObservacionBloqueo, M2, IsReservable,
+                    PersonasCantidadMin, PersonasCantidadMax,
+                    MinutosMin, MinutosMax, TieneServiciosAlimentacion,
+                    BanoId, PermiteUsoExclusivo, PermiteUsoPorTurnos, TiempoHigienizacionMin,
+                    FechaCreacion, UsuarioCreacionId)
+                VALUES (
+                    @ModuloId, @Nombre, @IsActive, @CantidadCamas, @Sexo,
+                    @TipoInstalacionId, @StandardHabitacionId, @Estado,
+                    @ObservacionBloqueo, @M2, @IsReservable,
+                    @PersonasCantidadMin, @PersonasCantidadMax,
+                    @MinutosMin, @MinutosMax, @TieneServiciosAlimentacion,
+                    @BanoId, @PermiteUsoExclusivo, @PermiteUsoPorTurnos, NULLIF(@TiempoHigienizacionMin, 0),
+                    SYSUTCDATETIME(), @UsuarioId);
+
+                SET @IdResultado = SCOPE_IDENTITY();
+            END
+
+            COMMIT TRANSACTION;
+        END TRY
+        BEGIN CATCH
+            WHILE @@TRANCOUNT > 0
+                ROLLBACK TRANSACTION;
+
+            SET @Mensaje = LEFT(
+                COALESCE(@ErrLegado + N' ', N'') + ERROR_MESSAGE(),
+                500);
+            RETURN;
+        END CATCH
+    END
+    ELSE
+    BEGIN
+        UPDATE dbo.Habitaciones
+        SET ModuloId = CASE WHEN @ModuloId > 0 THEN @ModuloId ELSE ModuloId END,
+            BanoId = @BanoId,
+            PermiteUsoExclusivo = @PermiteUsoExclusivo,
+            PermiteUsoPorTurnos = @PermiteUsoPorTurnos,
+            TiempoHigienizacionMin = NULLIF(@TiempoHigienizacionMin, 0),
+            MinutosMin = CASE WHEN @PermiteUsoPorTurnos = 1 AND @TiempoHigienizacionMin > 0 THEN @TiempoHigienizacionMin ELSE MinutosMin END,
+            PersonasCantidadMax = CASE WHEN @PermiteUsoExclusivo = 1 THEN @CantidadCamas ELSE PersonasCantidadMax END
+        WHERE Id = @IdResultado;
+    END
+
+    IF @IdResultado <= 0
+    BEGIN
+        SET @Mensaje = COALESCE(@ErrLegado, N'No se pudo guardar la habitación.');
+        RETURN;
+    END
+
+    BEGIN TRY
+        EXEC dbo.sp_Habitacion_SincronizarCamas
+            @HabitacionId = @IdResultado,
+            @CantidadObjetivo = @CantidadCamas,
+            @CampamentoId = @CampamentoId,
+            @UsuarioId = @UsuarioId;
+    END TRY
+    BEGIN CATCH
+        SET @Mensaje = LEFT(ERROR_MESSAGE(), 500);
+        RETURN;
+    END CATCH
 END
 GO
