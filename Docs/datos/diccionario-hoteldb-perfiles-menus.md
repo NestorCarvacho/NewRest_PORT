@@ -1,6 +1,6 @@
 # HOTELDB — Perfiles, menú y asignaciones (extracto)
 
-Fuente: [`Diccionario_de_datos_HotelDB.xlsx`](Diccionario_de_datos_HotelDB.xlsx) (export LocalDB, **154 tablas** catalogadas). Este extracto resume solo lo relevante para **SGH 1.5** (autorización y menú dinámico).
+Fuente: [`Diccionario_de_datos_HotelDB.xlsx`](Diccionario_de_datos_HotelDB.xlsx) — hoja **`Tablas`** (~154 tablas catalogadas). La hoja **`Procedimientos`** cubre el catálogo SP completo (ver [`diccionario-hoteldb-procedimientos-almacenados.md`](diccionario-hoteldb-procedimientos-almacenados.md)). Este extracto resume solo lo relevante para **SGH 1.5** (autorización y menú dinámico).
 
 > En base de datos la relación menú–perfil es **`dbo.MenusPerfil`** (no existe tabla `MenuPerfil`).
 

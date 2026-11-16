@@ -1,6 +1,8 @@
 # HOTELDB — Catálogo de procedimientos almacenados (consultas)
 
-Complemento del [`Diccionario_de_datos_HotelDB.xlsx`](Diccionario_de_datos_HotelDB.xlsx). Ejecutar en **SQL Server Management Studio**, **Azure Data Studio** o `sqlcmd` contra la base **HOTELDB** (misma instancia que usa `ConnectionStrings:Hoteldb`).
+Complemento del [`Diccionario_de_datos_HotelDB.xlsx`](Diccionario_de_datos_HotelDB.xlsx) (hojas **`Tablas`** y **`Procedimientos`**, export SQL Server 2025 / HOTELDB). Ejecutar las consultas en **SSMS**, **Azure Data Studio** o `sqlcmd` contra la misma instancia que `ConnectionStrings:Hoteldb`.
+
+**Inventario maestros SGH 2.1:** resultados ya volcados en [`maestros-listas-inventario.md`](maestros-listas-inventario.md) y [`extractos/`](extractos/).
 
 **Objetivo SGH 2.1:** inventariar SP legado de **Listas**, **Empresas**, **Áreas**, **Divisiones**, **UN** y **Departamentos** antes de migrar CRUD.
 
