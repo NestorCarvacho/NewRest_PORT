@@ -124,8 +124,8 @@ export function crearHabitacion(dependencias) {
                 return {
                     data: clave,
                     orderable: false,
-                    createdCell: function (td, fila) {
-                        td.replaceChildren(crearAcciones(fila, modo));
+                    createdCell: function (td, cellData, rowData) {
+                        td.replaceChildren(crearAcciones(rowData || cellData, modo));
                     }
                 };
             });
@@ -135,8 +135,8 @@ export function crearHabitacion(dependencias) {
             return {
                 data: clave,
                 orderable: false,
-                createdCell: function (td, fila) {
-                    td.replaceChildren(crearAcciones(fila, modo));
+                createdCell: function (td, cellData, rowData) {
+                    td.replaceChildren(crearAcciones(rowData || cellData, modo));
                 }
             };
         });
