@@ -16,7 +16,8 @@ export function crearFormularios(dependencias) {
             deshabilitado: extra.deshabilitado,
             requerido: extra.requerido,
             valor: extra.valor,
-            controlesCantidad: extra.controlesCantidad
+            controlesCantidad: extra.controlesCantidad,
+            interruptor: extra.interruptor
         };
     }
 
@@ -46,6 +47,10 @@ export function crearFormularios(dependencias) {
         var datos = {};
         form.querySelectorAll("input, select, textarea").forEach(function (control) {
             if (!control.name || control.disabled) return;
+            if (control.type === "checkbox") {
+                datos[control.name] = control.checked;
+                return;
+            }
             datos[control.name] = control.value;
         });
         return datos;
@@ -53,7 +58,9 @@ export function crearFormularios(dependencias) {
 
     function campoVisual(definicion, vacio) {
         var etiqueta = document.createElement("label");
-        etiqueta.className = "campo" + (definicion.ancho ? " campo-ancho" : "");
+        var claseCampo = "campo" + (definicion.ancho ? " campo-ancho" : "");
+        if (definicion.tipo === "checkbox" && definicion.interruptor) claseCampo += " campo-interruptor";
+        etiqueta.className = claseCampo;
         var texto = document.createElement("span");
         texto.textContent = definicion.etiqueta;
         if (definicion.soloLectura || definicion.deshabilitado) {
@@ -112,7 +119,12 @@ export function crearFormularios(dependencias) {
         if (definicion.soloLectura) elemento.readOnly = true;
         if (definicion.deshabilitado) elemento.disabled = true;
         if (definicion.nombre) elemento.name = definicion.nombre;
-        if (definicion.valor) elemento.value = definicion.valor;
+        if (definicion.tipo === "checkbox") {
+            elemento.checked = definicion.valor === true || definicion.valor === "true" || definicion.valor === "1";
+            if (definicion.interruptor) elemento.setAttribute("role", "switch");
+        } else if (definicion.valor !== undefined && definicion.valor !== null && definicion.valor !== "") {
+            elemento.value = definicion.valor;
+        }
         if ((definicion.tipo === "date" || definicion.tipo === "month" || definicion.tipo === "datetime-local")
             && !definicion.soloLectura && !definicion.deshabilitado) {
             var linea = document.createElement("span");

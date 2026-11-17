@@ -10,6 +10,7 @@ export function crearSolicitud(d) {
         var catalogo = d.obtenerCatalogo() || {};
         var presets = (d.presetsPeriodo || []).map(function (p) { return { value: p.value, text: p.text }; });
         return [
+            d.campo("periodoPorRango", "Filtrar por rango", "checkbox", [], { interruptor: true, valor: true }),
             d.campo("periodo", "Período", "select", presets, { sinVacio: true, valor: "30" }),
             d.campo("desde", "Desde", "date", [], { requerido: false }),
             d.campo("hasta", "Hasta", "date", [], { requerido: false }),
@@ -21,7 +22,7 @@ export function crearSolicitud(d) {
     }
     function filtroInicial() {
         var rango = d.rangoInicial();
-        return { periodo: "30", desde: rango.reservaDesde, hasta: rango.reservaHasta };
+        return { periodoPorRango: true, periodo: "30", desde: rango.reservaDesde, hasta: rango.reservaHasta };
     }
     function buscar(filtro) {
         var payload = d.normalizarFiltroPeriodo

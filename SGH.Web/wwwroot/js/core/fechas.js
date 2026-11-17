@@ -42,8 +42,7 @@ export function crearFechas() {
         { value: "30", text: "Último mes" },
         { value: "90", text: "Últimos 3 meses" },
         { value: "180", text: "Últimos 6 meses" },
-        { value: "365", text: "Último año" },
-        { value: "custom", text: "Personalizado (por mes)" }
+        { value: "365", text: "Último año" }
     ];
 
     function ultimoDiaDelMes(anioMes) {
@@ -62,22 +61,28 @@ export function crearFechas() {
         return partes[0] + "-" + partes[1] + "-01";
     }
 
-    /** Acepta yyyy-MM-dd o yyyy-MM (personalizado por mes). */
+    function esPeriodoPorRango(datos) {
+        if (!datos) return true;
+        if (datos.periodoPorRango === false) return false;
+        if (datos.periodoPorRango === "false" || datos.periodoPorRango === "0") return false;
+        return true;
+    }
+
+    /** Con rango ON usa preset; OFF usa desde/hasta (yyyy-MM-dd) del calendario. */
     function normalizarFiltroPeriodo(datos) {
         if (!datos) return datos;
-        var periodo = datos.periodo || "30";
-        if (periodo === "custom") {
-            var desdeMes = datos.desde || datos.reservaDesde || "";
-            var hastaMes = datos.hasta || datos.reservaHasta || "";
-            var desde = desdeMes.length === 7 ? primerDiaDelMes(desdeMes) : desdeMes;
-            var hasta = hastaMes.length === 7 ? ultimoDiaDelMes(hastaMes) : hastaMes;
+        if (!esPeriodoPorRango(datos)) {
+            var desde = (datos.desde || datos.reservaDesde || "").slice(0, 10);
+            var hasta = (datos.hasta || datos.reservaHasta || "").slice(0, 10);
             return Object.assign({}, datos, {
+                periodo: "manual",
                 desde: desde,
                 hasta: hasta,
                 reservaDesde: desde,
                 reservaHasta: hasta
             });
         }
+        var periodo = datos.periodo || "30";
         return aplicarPresetPeriodo(datos, periodo);
     }
 

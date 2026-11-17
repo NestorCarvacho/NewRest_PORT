@@ -3,6 +3,7 @@ export function crearReserva(dependencias) {
         var catalogo = dependencias.obtenerCatalogo() || { grupos: [], origenes: [], pasajeros: [], habitaciones: [], turnos: [] };
         var presets = (dependencias.presetsPeriodo || []).map(function (p) { return { value: p.value, text: p.text }; });
         return [
+            dependencias.campo("periodoPorRango", "Filtrar por rango", "checkbox", [], { interruptor: true, valor: true }),
             dependencias.campo("periodo", "Período (fecha reserva)", "select", presets, { sinVacio: true, valor: "30" }),
             dependencias.campo("reservaDesde", "Desde", "date", [], { requerido: false }),
             dependencias.campo("reservaHasta", "Hasta", "date", [], { requerido: false }),
@@ -29,7 +30,7 @@ export function crearReserva(dependencias) {
 
     function filtroInicial(modo) {
         var rango = dependencias.rangoReservaInicial();
-        if (modo === "reserva") return Object.assign({ periodo: "30" }, rango);
+        if (modo === "reserva") return Object.assign({ periodoPorRango: true, periodo: "30" }, rango);
         return null;
     }
 
