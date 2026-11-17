@@ -21,6 +21,7 @@ export function crearTablas() {
 
         var opciones = {
             columns: columnas,
+            autoWidth: false,
             language: {
                 emptyTable: t("No hay registros para mostrar"),
                 search: t("Buscar:"),
@@ -31,6 +32,14 @@ export function crearTablas() {
                 paginate: { previous: t("Anterior"), next: t("Siguiente") }
             }
         };
+        if (window.DataTable && DataTable.Responsive) {
+            opciones.responsive = {
+                details: {
+                    type: "inline",
+                    target: "tr"
+                }
+            };
+        }
         if (ordenInicial) opciones.order = ordenInicial;
         var tabla = new DataTable(nodo.querySelector("table"), opciones);
         tabla.on("draw", function () { completarFilas(tabla); });
