@@ -62,7 +62,7 @@ BEGIN
         FROM dbo.Reservas AS r
         INNER JOIN dbo.PasajerosSolicitudAlojamiento AS p ON p.UsuarioPasajeroId = r.PasajeroId
         INNER JOIN dbo.Empresas AS e ON e.Id = @EmpresaMandanteId
-        INNER JOIN dbo.Campamentos AS c ON c.Id = r.CampamentoId AND c.MineraId = e.MineraId
+        INNER JOIN dbo.Empresas AS eRes ON eRes.Id = r.EmpresaMandanteId AND eRes.MineraId = e.MineraId
         WHERE p.SolicitudAlojamientoId = @SolicitudId
           AND r.CheckOut IS NOT NULL
           AND r.Estado = 'A';

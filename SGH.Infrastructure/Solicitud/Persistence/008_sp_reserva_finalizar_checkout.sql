@@ -18,12 +18,15 @@ BEGIN
         r.UsuarioActualizacionId = COALESCE(@UsuarioId, r.UsuarioActualizacionId)
     FROM dbo.Reservas AS r
     LEFT JOIN dbo.Usuarios AS u ON u.Id = r.PasajeroId
-    LEFT JOIN dbo.Empresas AS e ON e.Id = @EmpresaMandanteId
-    LEFT JOIN dbo.Campamentos AS c ON c.Id = r.CampamentoId AND e.Id IS NOT NULL AND c.MineraId = e.MineraId
+    LEFT JOIN dbo.Empresas AS eSesion ON eSesion.Id = @EmpresaMandanteId
+    LEFT JOIN dbo.Empresas AS eRes ON eRes.Id = r.EmpresaMandanteId
     WHERE r.CheckOut IS NOT NULL
       AND r.Estado = 'A'
       AND (@ReservaId IS NULL OR r.Id = @ReservaId)
-      AND (@IdentificadorRut IS NULL OR (u.EmpresaMandanteId = @EmpresaMandanteId AND RTRIM(u.Rut) = RTRIM(@IdentificadorRut)))
-      AND (@IdentificadorRut IS NULL OR c.Id IS NOT NULL);
+      AND (@IdentificadorRut IS NULL OR (
+            u.EmpresaMandanteId = @EmpresaMandanteId
+            AND RTRIM(u.Rut) = RTRIM(@IdentificadorRut)
+            AND eSesion.Id IS NOT NULL
+            AND eRes.MineraId = eSesion.MineraId));
 END
 GO
