@@ -13,8 +13,24 @@ public sealed record DatosSolicitudDto(
     int? UnidadNegocioId, int? DivisionId, int? DepartamentoId,
     string? NumeroContrato, bool ReservaVisita);
 
+public sealed record SolicitudListadaDepuracionDto(
+    int SolicitudId,
+    string EstadoCodigo,
+    int EstadoTabla,
+    int CampamentoId,
+    int EmpresaMandanteId,
+    int AreaEmpresaSolicitanteId,
+    int? UsuarioSolicitanteId,
+    int EmpresaContratistaId,
+    DateTime FechaCheckIn,
+    DateTime? FechaCheckOut,
+    int? TurnoId,
+    bool ConSistemaTurno,
+    int? PrimeraReservaGeneradaId);
+
 public sealed record SolicitudListadaDto(
-    int Numero, DateTime Fecha, string Empresa, string? Solicitante, string? Estado);
+    int Numero, DateTime Fecha, string Empresa, string? Solicitante, string? Estado,
+    SolicitudListadaDepuracionDto Depuracion);
 
 public sealed record PasajeroSolicitudDto(
     int Id, int? UsuarioPasajeroId, string? NombrePasajero, string? Rut,

@@ -407,7 +407,11 @@ export function crearSolicitud(d) {
     function abrirDetalle(id) {
         Promise.all([mid("detalle", { id: id }),
             mid("pasajeros", { id: id })])
-            .then(function (r) { mostrarDetalle(r[0], r[1].pasajeros); })
+            .then(function (r) {
+                var detalleRespuesta = r[0] && r[0].detalle ? r[0].detalle : r[0];
+                var pasajerosRespuesta = r[1] && r[1].pasajeros ? r[1].pasajeros : r[1];
+                mostrarDetalle(detalleRespuesta, pasajerosRespuesta);
+            })
             .catch(function (ex) { d.mostrarAviso(ex.message, "error"); });
     }
     function abrirPasajero(detalle, pasajero) {

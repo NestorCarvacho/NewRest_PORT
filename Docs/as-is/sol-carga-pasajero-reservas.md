@@ -1,3 +1,7 @@
+# Solicitud — depuración en respuestas Mid
+
+Las opciones `listar`, `detalle`, `pasajeros` y `habitaciones` incluyen en el JSON HTTP (no en la tabla del escritorio) un bloque `depuracion` con el procedimiento y los parámetros efectivos. En `listar`, cada fila trae además `depuracion` con ids y fechas internas (`estadoCodigo`, `areaEmpresaSolicitanteId`, etc.). Ejecutar `001_sp_solicitud.sql` actualizado para el listado.
+
 # HOTELDB — Carga masiva de pasajeros y solapamiento
 
 `SOL_GuardaPasajeroSolicitudAlojamientoMasivo` (as-is, nov 2026) antes de insertar en `PasajerosSolicitudAlojamiento` busca en `Reservas`:

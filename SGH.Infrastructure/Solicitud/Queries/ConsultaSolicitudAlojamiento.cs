@@ -50,12 +50,41 @@ public sealed class ConsultaSolicitudAlojamiento(IFabricaConexionSql fabrica) : 
     public async Task<IReadOnlyList<SolicitudListadaDto>> BuscarAsync(FiltroSolicitudesDto filtro, CancellationToken cancellationToken)
     {
         using var conexion = fabrica.Crear();
-        var filas = await conexion.QueryAsync<SolicitudListadaDto>(new CommandDefinition(
+        var filas = await conexion.QueryAsync<SolicitudListadaFila>(new CommandDefinition(
             "dbo.sp_Solicitud_Buscar",
             new { filtro.EmpresaMandanteId, filtro.CampamentoId, filtro.Desde, filtro.Hasta,
                 filtro.GrupoId, filtro.SolicitanteId, filtro.Estado, filtro.Numero },
             commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
-        return filas.AsList();
+        return filas.Select(MapearListada).ToList();
+    }
+
+    private static SolicitudListadaDto MapearListada(SolicitudListadaFila fila) =>
+        new(fila.Numero, fila.Fecha, fila.Empresa, fila.Solicitante, fila.Estado,
+            new SolicitudListadaDepuracionDto(
+                fila.SolicitudId, fila.EstadoCodigo, fila.EstadoTabla, fila.CampamentoId, fila.EmpresaMandanteId,
+                fila.AreaEmpresaSolicitanteId, fila.UsuarioSolicitanteId, fila.EmpresaContratistaId,
+                fila.FechaCheckIn, fila.FechaCheckOut, fila.TurnoId, fila.ConSistemaTurno, fila.PrimeraReservaGeneradaId));
+
+    private sealed class SolicitudListadaFila
+    {
+        public int Numero { get; set; }
+        public DateTime Fecha { get; set; }
+        public string Empresa { get; set; } = "";
+        public string? Solicitante { get; set; }
+        public string? Estado { get; set; }
+        public int SolicitudId { get; set; }
+        public string EstadoCodigo { get; set; } = "";
+        public int EstadoTabla { get; set; }
+        public int CampamentoId { get; set; }
+        public int EmpresaMandanteId { get; set; }
+        public int AreaEmpresaSolicitanteId { get; set; }
+        public int? UsuarioSolicitanteId { get; set; }
+        public int EmpresaContratistaId { get; set; }
+        public DateTime FechaCheckIn { get; set; }
+        public DateTime? FechaCheckOut { get; set; }
+        public int? TurnoId { get; set; }
+        public bool ConSistemaTurno { get; set; }
+        public int? PrimeraReservaGeneradaId { get; set; }
     }
 
     public async Task<SolicitudDetalleDto?> ObtenerAsync(int id, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken)
