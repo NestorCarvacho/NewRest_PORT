@@ -20,6 +20,7 @@ public interface IComandoSolicitudAlojamiento
     Task<ResultadoProcedimientoCargaDto> CargarPasajeroAsync(int solicitudId, int empresaMandanteId, int campamentoId, int usuarioId, FilaCargaPasajeroDto fila, CancellationToken cancellationToken);
     Task<int> GenerarReservasAsync(int solicitudId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken);
     Task AsignarHabitacionAsync(int solicitudId, int pasajeroId, int habitacionId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken);
+    Task DesasignarHabitacionAsync(int solicitudId, int pasajeroId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken);
     Task EliminarPasajeroAsync(int solicitudId, int pasajeroId, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken);
     Task<int> GuardarAsync(DatosSolicitudDto solicitud, CancellationToken cancellationToken);
     Task AnularAsync(int id, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken);

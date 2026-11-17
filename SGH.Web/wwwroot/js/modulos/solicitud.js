@@ -281,11 +281,18 @@ export function crearSolicitud(d) {
         tabla.append(cabecera, cuerpo);
         var eliminarSeleccionados;
         var asignarSeleccionados;
+        var desasignarSeleccionados;
+        function pasajerosSeleccionadosConHabitacion() {
+            return pasajeros.filter(function (p) {
+                return seleccion.has(p.id) && Number(p.habitacionId) > 0;
+            });
+        }
         function actualizarSeleccion() {
             if (detalle.estado !== "P") return;
             generar.disabled = seleccion.size === 0;
             eliminarSeleccionados.disabled = seleccion.size === 0;
             asignarSeleccionados.disabled = seleccion.size === 0;
+            desasignarSeleccionados.disabled = pasajerosSeleccionadosConHabitacion().length === 0;
             seleccionarTodos.checked = pasajeros.length > 0 && seleccion.size === pasajeros.length;
             seleccionarTodos.indeterminate = seleccion.size > 0 && seleccion.size < pasajeros.length;
         }
@@ -309,7 +316,33 @@ export function crearSolicitud(d) {
             asignarSeleccionados = boton("Asignar habitaciones", function () {
                 abrirHabitacionesMultiples(detalle, pasajeros.filter(function (p) { return seleccion.has(p.id); }), pasajeros);
             });
-            accionesSeleccion.append(asignarSeleccionados, eliminarSeleccionados, generar);
+            desasignarSeleccionados = boton("Desasignar habitaciones", async function () {
+                var candidatos = pasajerosSeleccionadosConHabitacion();
+                if (!candidatos.length) return;
+                if (!window.confirm("¿Quitar la habitación de los " + candidatos.length + " pasajero(s) seleccionado(s)?"))
+                    return;
+                panel.querySelectorAll("button, input").forEach(function (control) { control.disabled = true; });
+                var realizados = 0;
+                var omitidos = 0;
+                try {
+                    for (var i = 0; i < candidatos.length; i++) {
+                        var pasajero = candidatos[i];
+                        try {
+                            await mid("desasignar", { solicitudId: detalle.id, pasajeroId: pasajero.id });
+                            realizados++;
+                        } catch (ex) {
+                            omitidos++;
+                        }
+                    }
+                    var texto = "Habitaciones quitadas: " + realizados + ".";
+                    if (omitidos) texto += " Sin cambio en " + omitidos + " fila(s).";
+                    d.mostrarAviso(texto, omitidos ? "warning" : "success");
+                } catch (ex) {
+                    d.mostrarAviso("Quitadas antes del error: " + realizados + ". " + ex.message, "error");
+                }
+                abrirDetalle(detalle.id);
+            });
+            accionesSeleccion.append(asignarSeleccionados, desasignarSeleccionados, eliminarSeleccionados, generar);
             seccion.append(accionesSeleccion);
             seleccionarTodos.addEventListener("change", function () {
                 seleccion.clear();

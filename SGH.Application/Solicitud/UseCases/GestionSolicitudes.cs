@@ -154,6 +154,14 @@ public sealed class GestionSolicitudes(IConsultaSolicitudAlojamiento consulta, I
         await comando.AsignarHabitacionAsync(id, pasajeroId, habitacionId, empresaMandanteId, campamentoId, usuarioId, cancellationToken);
     }
 
+    public async Task DesasignarHabitacionAsync(int id, int pasajeroId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
+    {
+        await ExigirSolicitudDelCampamentoAsync(id, empresaMandanteId, campamentoId, cancellationToken);
+        if (pasajeroId <= 0 || usuarioId <= 0)
+            throw new ArgumentException("Indique un pasajero válido.");
+        await comando.DesasignarHabitacionAsync(id, pasajeroId, empresaMandanteId, campamentoId, usuarioId, cancellationToken);
+    }
+
     public async Task<CatalogoSolicitudDto> CatalogoAsync(
         int empresaMandanteId, int campamentoId, int grupoId, CancellationToken cancellationToken)
     {

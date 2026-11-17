@@ -23,6 +23,7 @@ public sealed class MidSolicitudes(IGestionSolicitudes gestion, INotificadorSoli
         Accion("pasajero", "Pasajero", "dbo.sp_Solicitud_GuardarPasajero", "Guarda un pasajero."),
         Accion("eliminar", "Eliminar pasajero", "dbo.sp_Solicitud_EliminarPasajero", "Quita un pasajero."),
         Accion("asignar", "Asignar", "dbo.sp_Solicitud_AsignarHabitacion", "Asigna una habitación."),
+        Accion("desasignar", "Desasignar", "dbo.sp_Solicitud_DesasignarHabitacion", "Quita la habitación preasignada."),
         Accion("generar", "Generar reservas", "dbo.sp_Solicitud_GenerarReservas", "Genera las reservas de la solicitud."),
         Accion("notificar", "Notificar", "correo", "Reenvía el correo de reservas generadas."),
         Accion("plantilla", "Plantilla", "planilla", "Devuelve la planilla de pasajeros."),
@@ -50,6 +51,7 @@ public sealed class MidSolicitudes(IGestionSolicitudes gestion, INotificadorSoli
             "pasajero" => await PasajeroAsync(filtro, sesion, cancellationToken),
             "eliminar" => await EliminarAsync(filtro, sesion, cancellationToken),
             "asignar" => await AsignarAsync(filtro, sesion, cancellationToken),
+            "desasignar" => await DesasignarAsync(filtro, sesion, cancellationToken),
             "generar" => await GenerarAsync(filtro, sesion, cancellationToken),
             "notificar" => await NotificarOpcionAsync(filtro, sesion, cancellationToken),
             "plantilla" => EjecucionMid.Descarga(planilla.CrearPlantilla(), "PlantillaPasajeros.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
@@ -188,6 +190,14 @@ public sealed class MidSolicitudes(IGestionSolicitudes gestion, INotificadorSoli
             LecturaPeticion.Entero(filtro, "solicitudId"), LecturaPeticion.Entero(filtro, "pasajeroId"),
             LecturaPeticion.Entero(filtro, "habitacionId"), sesion.EmpresaMandanteId, sesion.CampamentoId,
             sesion.UsuarioId, cancellationToken);
+        return EjecucionMid.Ok(new { listo = true });
+    }
+
+    private async Task<EjecucionMid> DesasignarAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        await gestion.DesasignarHabitacionAsync(
+            LecturaPeticion.Entero(filtro, "solicitudId"), LecturaPeticion.Entero(filtro, "pasajeroId"),
+            sesion.EmpresaMandanteId, sesion.CampamentoId, sesion.UsuarioId, cancellationToken);
         return EjecucionMid.Ok(new { listo = true });
     }
 

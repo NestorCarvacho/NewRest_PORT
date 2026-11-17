@@ -10,9 +10,10 @@ using SGH.Web.Cuenta;
 namespace SGH.Web.Pages.Cuenta;
 
 [AllowAnonymous]
-[EnableRateLimiting("ingreso")]
+[DisableRateLimiting]
 public class LoginModel : PageModel
 {
+    private readonly RegistroVentanaIngreso _ventanaIngreso;
     private readonly IPreautenticarUsuario _preautenticar;
     private readonly ICompletarSesion _completar;
     private readonly EmisorCookieSesion _emisor;
@@ -25,6 +26,7 @@ public class LoginModel : PageModel
         ICompletarSesion completar,
         EmisorCookieSesion emisor,
         ClavePendienteAlmacen claves,
+        RegistroVentanaIngreso ventanaIngreso,
         IWebHostEnvironment ambiente,
         ILogger<LoginModel> logger)
     {
@@ -32,6 +34,7 @@ public class LoginModel : PageModel
         _completar = completar;
         _emisor = emisor;
         _claves = claves;
+        _ventanaIngreso = ventanaIngreso;
         _ambiente = ambiente;
         _logger = logger;
     }
@@ -63,8 +66,30 @@ public class LoginModel : PageModel
         return Page();
     }
 
+    public IActionResult OnGetReiniciar(string? returnUrl)
+    {
+        var pendiente = IngresoPendienteAlmacen.Leer(TempData);
+        if (pendiente is not null)
+            _claves.Descartar(pendiente.ClaveId);
+        IngresoPendienteAlmacen.Descartar(TempData);
+
+        Paso = "credenciales";
+        Rut = string.Empty;
+        Contrasena = string.Empty;
+        Perfiles = [];
+        ReturnUrl = returnUrl;
+        LimiteIngreso.PublicarEspera(this);
+        return Page();
+    }
+
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
+        if (Paso != "perfil" && LimiteIngreso.SegundosRestantes(Request) > 0)
+        {
+            LimiteIngreso.PublicarEspera(this);
+            return Page();
+        }
+
         if (Paso == "perfil")
             return await CompletarAsync(cancellationToken);
 
@@ -87,6 +112,8 @@ public class LoginModel : PageModel
 
             if (resultado is ResultadoPreautenticacion.Rechazado rechazado)
             {
+                if (rechazado.Motivo is MotivoRechazo.CredencialesInvalidas or MotivoRechazo.CuentaBloqueada)
+                    RegistrarIntentoPorIp();
                 ModelState.AddModelError(string.Empty, rechazado.Mensaje);
                 return Page();
             }
@@ -208,5 +235,14 @@ public class LoginModel : PageModel
         ModelState.AddModelError(string.Empty, _ambiente.IsDevelopment()
             ? ex.Message
             : "No se pudo completar el inicio de sesión. Intente nuevamente.");
+    }
+
+    private void RegistrarIntentoPorIp()
+    {
+        var direccion = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "desconocido";
+        var restantes = _ventanaIngreso.Registrar(direccion);
+        HttpContext.Items[RegistroVentanaIngreso.ClaveRestantes] = restantes;
+        if (restantes <= 0)
+            LimiteIngreso.MarcarEspera(Response, RegistroVentanaIngreso.Duracion);
     }
 }
