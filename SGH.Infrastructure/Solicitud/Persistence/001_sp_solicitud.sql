@@ -14,7 +14,20 @@ BEGIN
     SELECT s.Id AS Numero, s.FechaSolicitud AS Fecha,
            a.Nombre + ' - ' + e.Nombre AS Empresa,
            u.Nombre + ' ' + u.Apellidos AS Solicitante,
-           l.Descripcion AS Estado
+           l.Descripcion AS Estado,
+           s.Id AS SolicitudId,
+           s.Estado AS EstadoCodigo,
+           s.EstadoTabla,
+           s.CampamentoId,
+           s.EmpresaMandanteId,
+           s.AreaEmpresaSolicitanteId,
+           s.UsuarioSolicitanteId,
+           a.EmpresaId AS EmpresaContratistaId,
+           s.FechaCheckIn,
+           s.FechaCheckOut,
+           s.TurnoId,
+           s.ConSistemaTurno,
+           (SELECT TOP (1) r.Id FROM dbo.Reservas AS r WHERE r.SolicitudAlojamientoId = s.Id ORDER BY r.Id) AS PrimeraReservaGeneradaId
     FROM dbo.SolicitudesAlojamiento AS s
     INNER JOIN dbo.AreasEmpresa AS a ON a.Id = s.AreaEmpresaSolicitanteId
     INNER JOIN dbo.Empresas AS e ON e.Id = a.EmpresaId

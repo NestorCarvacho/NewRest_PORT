@@ -80,12 +80,27 @@ public sealed class MidSolicitudes(IGestionSolicitudes gestion, INotificadorSoli
         if (desde is null || hasta is null)
             return EjecucionMid.Fallo(400, "Ingrese fechas y filtros válidos.");
 
-        var filas = await gestion.BuscarAsync(new FiltroSolicitudesDto(
+        var criterios = new FiltroSolicitudesDto(
             sesion.EmpresaMandanteId, sesion.CampamentoId, desde.Value, hasta.Value,
             LecturaPeticion.Entero(filtro, "grupoId"), LecturaPeticion.Entero(filtro, "solicitanteId"),
             LecturaPeticion.Texto(filtro, "estado") is { Length: > 0 } estado ? estado : "0",
-            LecturaPeticion.Entero(filtro, "numero")), cancellationToken);
-        return EjecucionMid.Ok(new { filas });
+            LecturaPeticion.Entero(filtro, "numero"));
+        var filas = await gestion.BuscarAsync(criterios, cancellationToken);
+        return EjecucionMid.Ok(new
+        {
+            filas,
+            depuracion = RegistrosDepuracion.Invocacion("dbo.sp_Solicitud_Buscar", new
+            {
+                empresaMandanteId = criterios.EmpresaMandanteId,
+                campamentoId = criterios.CampamentoId,
+                criterios.Desde,
+                criterios.Hasta,
+                grupoId = criterios.GrupoId,
+                solicitanteId = criterios.SolicitanteId,
+                criterios.Estado,
+                numero = criterios.Numero
+            })
+        });
     }
 
     private async Task<EjecucionMid> CatalogoAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken) =>
@@ -99,21 +114,72 @@ public sealed class MidSolicitudes(IGestionSolicitudes gestion, INotificadorSoli
     private async Task<EjecucionMid> DetalleAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
     {
         var detalle = await gestion.ObtenerAsync(LecturaPeticion.Entero(filtro, "id"), sesion.EmpresaMandanteId, sesion.CampamentoId, cancellationToken);
-        return detalle is null
-            ? EjecucionMid.Fallo(404, "Solicitud no encontrada.")
-            : EjecucionMid.Ok(detalle);
+        if (detalle is null)
+            return EjecucionMid.Fallo(404, "Solicitud no encontrada.");
+        var id = LecturaPeticion.Entero(filtro, "id");
+        return EjecucionMid.Ok(new
+        {
+            detalle,
+            depuracion = RegistrosDepuracion.Invocacion("dbo.SOL_ObtieneSolicitudAlojamiento", new { id })
+        });
     }
 
     private async Task<EjecucionMid> PasajerosAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
     {
-        var pasajeros = await gestion.ListarPasajerosAsync(LecturaPeticion.Entero(filtro, "id"), sesion.EmpresaMandanteId, sesion.CampamentoId, cancellationToken);
-        return EjecucionMid.Ok(new { pasajeros });
+        var solicitudId = LecturaPeticion.Entero(filtro, "id");
+        var pasajeros = await gestion.ListarPasajerosAsync(solicitudId, sesion.EmpresaMandanteId, sesion.CampamentoId, cancellationToken);
+        return EjecucionMid.Ok(new
+        {
+            pasajeros,
+            depuracion = RegistrosDepuracion.Invocacion("dbo.sp_Solicitud_ListarPasajeros", new
+            {
+                solicitudId,
+                empresaMandanteId = sesion.EmpresaMandanteId,
+                campamentoId = sesion.CampamentoId
+            })
+        });
     }
 
     private async Task<EjecucionMid> HabitacionesAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
     {
-        var habitaciones = await gestion.HabitacionesDisponiblesAsync(LecturaPeticion.Entero(filtro, "id"), sesion.EmpresaMandanteId, sesion.CampamentoId, cancellationToken);
-        return EjecucionMid.Ok(new { habitaciones });
+        var solicitudId = LecturaPeticion.Entero(filtro, "id");
+        var detalle = await gestion.ObtenerAsync(solicitudId, sesion.EmpresaMandanteId, sesion.CampamentoId, cancellationToken);
+        if (detalle is null)
+            return EjecucionMid.Fallo(404, "Solicitud no encontrada.");
+        var habitaciones = await gestion.HabitacionesDisponiblesAsync(solicitudId, sesion.EmpresaMandanteId, sesion.CampamentoId, cancellationToken);
+        return EjecucionMid.Ok(new
+        {
+            habitaciones,
+            depuracion = new
+            {
+                invocaciones = new object[]
+                {
+                    RegistrosDepuracion.Invocacion("dbo.sp_Solicitud_HabitacionesDisponibles", new
+                    {
+                        solicitudId,
+                        empresaMandanteId = sesion.EmpresaMandanteId,
+                        campamentoId = sesion.CampamentoId
+                    }),
+                    RegistrosDepuracion.Invocacion("dbo.HAB_ObtieneHabitacionesDisponiblesV2", new
+                    {
+                        grupoEmpresa = detalle.AreaEmpresaSolicitanteId,
+                        empresaContratista = detalle.EmpresaContratistaId,
+                        modulo = 0,
+                        piso = 0,
+                        habitacion = 0,
+                        fechaLlegada = detalle.FechaCheckIn,
+                        fechaSalida = detalle.FechaCheckOut,
+                        empresaMandante = sesion.EmpresaMandanteId,
+                        campamento = sesion.CampamentoId,
+                        minera = (int?)null,
+                        tipoModuloId = 0,
+                        tipoInstalacion = 0,
+                        grupoServicioId = 0,
+                        nota = "En legado @minera es Empresas.MineraId del mandante; NewRest no lo pasa al V2 (0 implícito). tipoModuloId, tipoInstalacion y grupoServicioId tampoco se envían desde solicitud."
+                    })
+                }
+            }
+        });
     }
 
     private async Task<EjecucionMid> GuardarAsync(FiltroPeticion filtro, DatosSesion sesion, int id, CancellationToken cancellationToken)
