@@ -3,7 +3,7 @@
 `SOL_GuardaPasajeroSolicitudAlojamientoMasivo` (as-is, nov 2026) antes de insertar en `PasajerosSolicitudAlojamiento` busca en `Reservas`:
 
 - `Estado = 'A'`
-- Misma **minera** (`Reservas.EmpresaMandanteId` → `Empresas.MineraId`, no `Campamentos.MineraId` — esa columna no existe en HOTELDB exportada)
+- Misma **minera**: `Reservas.CampamentoId` → `Campamentos.EmpresaMandanteId` → `Empresas.MineraId` → `Mineras` (no existe `Campamentos.MineraId`)
 - Mismo RUT (`PasajeroId` vía `Usuarios.Rut`)
 - Solapamiento con `FechaCheckIn` / `FechaCheckOut` de la solicitud usando **`FechaLlegada` y `FechaSalida` de la reserva**
 
