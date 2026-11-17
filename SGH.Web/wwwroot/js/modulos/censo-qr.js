@@ -28,26 +28,55 @@ export function crearCensoQr(dependencias) {
         }, Promise.resolve()).catch(function () { });
     }
 
-    function iniciarEscaner(campoQr) {
+    function detenerEscaner(envoltorio) {
+        if (!envoltorio) return;
+        var video = envoltorio.querySelector("video");
+        if (video && video.srcObject) {
+            video.srcObject.getTracks().forEach(function (track) { track.stop(); });
+        }
+        envoltorio.remove();
+    }
+
+    function iniciarEscaner(campoQr, formulario) {
         if (!("BarcodeDetector" in window) || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             dependencias.mostrarAviso("Este navegador no soporta lectura QR por cámara. Use un lector físico.", "error");
             return;
         }
+        var previo = formulario.querySelector(".lector-qr-envoltorio");
+        if (previo) detenerEscaner(previo);
+
+        var envoltorio = document.createElement("div");
+        envoltorio.className = "lector-qr-envoltorio";
         var video = document.createElement("video");
         video.autoplay = true;
         video.playsInline = true;
+        video.muted = true;
         video.className = "lector-qr";
-        document.getElementById("panel-cuerpo").append(video);
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } } }).then(function (stream) {
+        video.setAttribute("aria-label", "Vista previa de cámara para leer código QR");
+        envoltorio.append(video);
+        var ancla = formulario.querySelector(".lector-qr-ancla");
+        if (ancla) ancla.after(envoltorio);
+        else formulario.insertBefore(envoltorio, formulario.firstChild);
+
+        var esMovil = window.matchMedia("(max-width: 768px)").matches;
+        var restricciones = {
+            video: {
+                facingMode: { ideal: "environment" },
+                width: { ideal: esMovil ? 640 : 1280 },
+                height: { ideal: esMovil ? 480 : 720 }
+            }
+        };
+
+        navigator.mediaDevices.getUserMedia(restricciones).then(function (stream) {
             video.srcObject = stream;
             var detector = new BarcodeDetector({ formats: ["qr_code"] });
             var leer = function () {
+                if (!envoltorio.isConnected) return;
                 if (video.readyState < 2) return requestAnimationFrame(leer);
                 detector.detect(video).then(function (codigos) {
                     if (codigos.length) {
                         campoQr.value = codigos[0].rawValue;
-                        stream.getTracks().forEach(function (track) { track.stop(); });
-                        video.remove();
+                        detenerEscaner(envoltorio);
                         return;
                     }
                     requestAnimationFrame(leer);
@@ -55,7 +84,7 @@ export function crearCensoQr(dependencias) {
             };
             leer();
         }).catch(function () {
-            video.remove();
+            detenerEscaner(envoltorio);
             dependencias.mostrarAviso("No fue posible acceder a la cámara.", "error");
         });
     }
@@ -97,10 +126,13 @@ export function crearCensoQr(dependencias) {
         });
         dependencias.abrirPanel("Censo QR", contenidoQr);
         var campoQr = contenidoQr.querySelector("[name='qr']");
+        var ancla = document.createElement("div");
+        ancla.className = "lector-qr-ancla";
+        contenidoQr.insertBefore(ancla, contenidoQr.firstChild);
         var botonEscanear = dependencias.boton("Usar cámara", "boton-secundario", function () {
-            iniciarEscaner(campoQr);
+            iniciarEscaner(campoQr, contenidoQr);
         });
-        contenidoQr.insertBefore(botonEscanear, contenidoQr.firstChild);
+        ancla.append(botonEscanear);
     }
 
     return { abrir: abrir, sincronizarPendientes: sincronizarPendientes };

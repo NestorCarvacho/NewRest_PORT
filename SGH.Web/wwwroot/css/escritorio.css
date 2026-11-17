@@ -1742,6 +1742,30 @@ html:not([data-tema="claro"]) .campo-interruptor input:checked {
   margin-top: 0.4rem;
 }
 
+.lector-qr-ancla {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.lector-qr-envoltorio {
+  width: 100%;
+  max-width: 22rem;
+  margin: 0 auto 1rem;
+  overflow: hidden;
+  border: 1px solid var(--blizzard);
+  border-radius: 0.85rem;
+  background: #0a0a0a;
+  aspect-ratio: 4 / 3;
+}
+
+.lector-qr {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 @media (max-width: 768px) {
   .marca span,
   .buscador {
@@ -1750,6 +1774,91 @@ html:not([data-tema="claro"]) .campo-interruptor input:checked {
 
   .formulario-grilla {
     grid-template-columns: 1fr;
+  }
+
+  .lector-qr-envoltorio {
+    max-width: 100%;
+    max-height: min(42vh, 16.5rem);
+    aspect-ratio: 3 / 4;
+  }
+
+  .modulo {
+    padding: 0.85rem 0.65rem 1.25rem;
+  }
+
+  .modulo-barra {
+    flex-wrap: wrap;
+    justify-content: stretch;
+    gap: 0.45rem;
+  }
+
+  .modulo-barra > button,
+  .modulo-barra > .exportar-desplegable {
+    flex: 1 1 calc(50% - 0.25rem);
+    min-width: 0;
+  }
+
+  div.dt-container {
+    padding: 0.55rem 0.35rem 0.65rem;
+    border-radius: 0.75rem;
+  }
+
+  div.dt-container div.dt-layout-row:first-child {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  div.dt-container .dt-length,
+  div.dt-container .dt-search {
+    flex: 1 1 100%;
+  }
+
+  div.dt-container .dt-search input {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-top: 0.25rem;
+  }
+
+  div.dt-container .dt-layout-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  div.dt-container table.dataTable {
+    table-layout: auto;
+    min-width: 100%;
+  }
+
+  div.dt-container table.dataTable thead > tr > th,
+  div.dt-container table.dataTable tbody > tr > td {
+    padding: 0.55rem 0.65rem !important;
+    font-size: 0.8rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  div.dt-container table.dataTable tbody > tr > td.dtr-control {
+    white-space: nowrap;
+  }
+
+  div.dt-container table.dataTable > tbody > tr.child ul.dtr-details {
+    margin: 0.35rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  div.dt-container table.dataTable > tbody > tr.child span.dtr-title {
+    display: inline-block;
+    min-width: 7.5rem;
+    margin-right: 0.35rem;
+    color: var(--burgundy);
+    font-weight: 650;
+    font-size: 0.78rem;
+  }
+
+  div.dt-container table.dataTable > tbody > tr.child span.dtr-data {
+    font-size: 0.82rem;
   }
 }
 
