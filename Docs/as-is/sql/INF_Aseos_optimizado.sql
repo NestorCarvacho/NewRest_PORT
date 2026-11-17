@@ -46,7 +46,6 @@ BEGIN
         INNER JOIN dbo.Modulos AS m WITH (NOLOCK) ON m.Id = h.ModuloId
         INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
         INNER JOIN dbo.Campamentos AS c WITH (NOLOCK) ON c.Id = p.CampamentoId
-        INNER JOIN dbo.Empresas AS e WITH (NOLOCK) ON e.Id = c.EmpresaMandanteId
         WHERE (@usuarioCreacion = 0 OR a.UsuarioCreacionId = @usuarioCreacion)
           AND (@grupoServicioId = 0 OR a.GrupoServicioId = @grupoServicioId)
           AND (@tipoModuloId = 0 OR p.TipoModuloId = @tipoModuloId)
@@ -95,7 +94,7 @@ BEGIN
     INNER JOIN dbo.Modulos AS m WITH (NOLOCK) ON m.Id = h.ModuloId
     INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
     INNER JOIN dbo.Campamentos AS c WITH (NOLOCK) ON c.Id = p.CampamentoId
-    INNER JOIN dbo.Empresas AS e WITH (NOLOCK) ON e.Id = c.EmpresaMandanteId
+    LEFT JOIN dbo.Empresas AS e WITH (NOLOCK) ON e.Id = c.EmpresaMandanteId
     LEFT JOIN dbo.AseoCheckList AS ac WITH (NOLOCK) ON ac.AseoId = a.Id
     OUTER APPLY
     (
