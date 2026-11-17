@@ -17,7 +17,9 @@ export function instalarSolicitud(base) {
         cargar: base.cargar,
         mostrarAviso: base.mostrarAviso,
         fechaActual: base.fechaActual,
-        rangoInicial: base.rangoReservaInicial
+        rangoInicial: base.rangoReservaInicial,
+        presetsPeriodo: base.presetsPeriodo,
+        aplicarPresetPeriodo: base.aplicarPresetPeriodo
     });
     return {
         solicitud: solicitud,

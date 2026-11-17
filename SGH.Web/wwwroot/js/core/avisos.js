@@ -1,6 +1,31 @@
 var validacionEnlazada = false;
 
 export function crearAvisos() {
+    var capaBloqueo = null;
+
+    function bloquearPantalla(mensaje) {
+        if (capaBloqueo) return;
+        capaBloqueo = document.createElement("div");
+        capaBloqueo.className = "carga-bloqueo-pantalla";
+        capaBloqueo.setAttribute("role", "status");
+        capaBloqueo.setAttribute("aria-live", "polite");
+        var texto = document.createElement("p");
+        texto.className = "carga-bloqueo-texto";
+        texto.textContent = mensaje || "Cargando datos…";
+        var spinner = document.createElement("div");
+        spinner.className = "carga-bloqueo-spinner";
+        spinner.setAttribute("aria-hidden", "true");
+        capaBloqueo.append(spinner, texto);
+        document.body.append(capaBloqueo);
+    }
+
+    function desbloquearPantalla() {
+        if (capaBloqueo) {
+            capaBloqueo.remove();
+            capaBloqueo = null;
+        }
+    }
+
     function mostrarAviso(mensaje, tipo) {
         var contenedor = document.getElementById("avisos-escritorio");
         if (!contenedor) return;
@@ -54,5 +79,10 @@ export function crearAvisos() {
         }, true);
     }
 
-    return { mostrarAviso: mostrarAviso, mostrarEstado: mostrarEstado };
+    return {
+        mostrarAviso: mostrarAviso,
+        mostrarEstado: mostrarEstado,
+        bloquearPantalla: bloquearPantalla,
+        desbloquearPantalla: desbloquearPantalla
+    };
 }

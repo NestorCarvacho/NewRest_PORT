@@ -77,6 +77,9 @@ export function ensamblarEntorno(idsPantalla) {
             solicitud: instancia.solicitud,
             habitacion: instancia.habitacion,
             mostrarEstado: base.mostrarEstado,
+            mostrarAviso: base.mostrarAviso,
+            bloquearPantalla: base.bloquearPantalla,
+            desbloquearPantalla: base.desbloquearPantalla,
             pintar: renderizador.pintar
         });
         base.cargarDeferido.enlazar(function (id) { return cargador.cargar(id); });

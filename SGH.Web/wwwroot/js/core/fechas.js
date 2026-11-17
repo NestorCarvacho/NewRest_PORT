@@ -25,19 +25,48 @@ export function crearFechas() {
         return partes[3] + "-" + partes[2] + "-" + partes[1];
     }
 
-    function rangoReservaInicial() {
+    function rangoDesdeDias(dias) {
         var hoy = new Date();
-        var fecha = fechaActual();
+        var hasta = fechaActual();
         var inicio = new Date(hoy);
-        inicio.setDate(inicio.getDate() - 30);
+        inicio.setDate(inicio.getDate() - (dias || 30));
         var desde = inicio.getFullYear() + "-" + String(inicio.getMonth() + 1).padStart(2, "0") + "-" + String(inicio.getDate()).padStart(2, "0");
-        return { reservaDesde: desde, reservaHasta: fecha };
+        return { desde: desde, hasta: hasta, reservaDesde: desde, reservaHasta: hasta };
+    }
+
+    function rangoReservaInicial() {
+        return rangoDesdeDias(30);
+    }
+
+    var presetsPeriodo = [
+        { value: "30", text: "Último mes" },
+        { value: "90", text: "Últimos 3 meses" },
+        { value: "180", text: "Últimos 6 meses" },
+        { value: "365", text: "Último año" },
+        { value: "custom", text: "Personalizado" }
+    ];
+
+    function aplicarPresetPeriodo(datos, dias) {
+        if (!datos || dias === "custom") return datos;
+        var n = parseInt(dias, 10);
+        if (!n) return datos;
+        var rango = rangoDesdeDias(n);
+        return Object.assign({}, datos, {
+            periodo: String(dias),
+            desde: rango.desde,
+            hasta: rango.hasta,
+            reservaDesde: rango.reservaDesde,
+            reservaHasta: rango.reservaHasta
+        });
     }
 
     return {
         fechaActual: fechaActual,
         momentoLocal: momentoLocal,
         rangoReservaInicial: rangoReservaInicial,
+        rangoDesdeDias: rangoDesdeDias,
+        presetsPeriodo: presetsPeriodo,
+        aplicarPresetPeriodo: aplicarPresetPeriodo,
         fechaListadoAInput: fechaListadoAInput
     };
 }

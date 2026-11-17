@@ -11,6 +11,8 @@ export function instalarReserva(base) {
         seccion: base.seccion,
         momentoLocal: base.momentoLocal,
         rangoReservaInicial: base.rangoReservaInicial,
+        presetsPeriodo: base.presetsPeriodo,
+        aplicarPresetPeriodo: base.aplicarPresetPeriodo,
         fechaListadoAInput: base.fechaListadoAInput,
         formulario: base.formulario,
         numero: numero,

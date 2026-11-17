@@ -41,7 +41,7 @@ public sealed class VerificacionClaveUsuario : IVerificacionClaveUsuario
         var usuario = await _consulta.ObtenerParaLoginAsync(rutNormalizado, loginInterno, cancellationToken);
         var rechazo = await RechazoDeClaveAsync(
             usuario,
-            usuario is not null && _verificador.Coincide(contrasena, usuario.HashContrasena, usuario.Md5Retirado),
+            usuario is not null && _verificador.Coincide(contrasena, usuario.HashContrasena, usuario.Md5Retirado, usuario.HashContrasenaV2),
             rutNormalizado,
             cancellationToken);
         if (rechazo is not null || usuario is null)
