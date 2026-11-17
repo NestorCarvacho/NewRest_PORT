@@ -27,6 +27,12 @@ BEGIN
 END
 GO
 
+IF COL_LENGTH('dbo.Usuarios', 'PasswordV2') IS NULL
+BEGIN
+    ALTER TABLE dbo.Usuarios ADD PasswordV2 nvarchar(100) NULL;
+END
+GO
+
 IF COL_LENGTH('dbo.Usuarios', 'IntentosFallidos') IS NULL
 BEGIN
     ALTER TABLE dbo.Usuarios ADD IntentosFallidos int NOT NULL
@@ -82,6 +88,7 @@ BEGIN
         u.Nombre,
         u.Apellidos,
         u.Password AS HashContrasena,
+        u.PasswordV2 AS HashContrasenaV2,
         u.PerfilId,
         u.EmpresaMandanteId,
         u.Md5Retirado,
@@ -89,10 +96,13 @@ BEGIN
             WHEN u.BloqueadaHasta IS NOT NULL AND u.BloqueadaHasta > GETDATE() THEN 1
             ELSE 0
         END AS Bloqueada
-    FROM dbo.Usuarios AS u
+    FROM dbo.Usuarios AS u WITH (NOLOCK)
     WHERE u.Rut = @Rut
       AND u.IsActive = 1
-      AND NULLIF(LTRIM(RTRIM(u.Password)), N'') IS NOT NULL
+      AND (
+            NULLIF(LTRIM(RTRIM(u.Password)), N'') IS NOT NULL
+            OR NULLIF(LTRIM(RTRIM(u.PasswordV2)), N'') IS NOT NULL
+          )
     ORDER BY u.FechaCreacion DESC, u.Id DESC;
 END
 GO
@@ -155,7 +165,7 @@ BEGIN
     BEGIN TRANSACTION;
 
     UPDATE dbo.Usuarios
-    SET Password = @PasswordHash,
+    SET PasswordV2 = @PasswordHash,
         Md5Retirado = 1,
         IntentosFallidos = 0,
         BloqueadaHasta = NULL
@@ -207,7 +217,7 @@ BEGIN
     BEGIN TRANSACTION;
 
     UPDATE dbo.Usuarios
-    SET Password = @PasswordHash,
+    SET PasswordV2 = @PasswordHash,
         Md5Retirado = 1,
         IntentosFallidos = 0,
         BloqueadaHasta = NULL
@@ -241,9 +251,10 @@ BEGIN
         RETURN;
 
     UPDATE dbo.Usuarios
-    SET Password = @PasswordHash,
+    SET PasswordV2 = @PasswordHash,
         Md5Retirado = 1
     WHERE Rut = @Rut
+      AND NULLIF(LTRIM(RTRIM(PasswordV2)), N'') IS NULL
       AND LEN(Password) = 32
       AND Password NOT LIKE '%[^0-9A-Fa-f]%';
 
@@ -252,7 +263,7 @@ BEGIN
 END
 GO
 
-/* La clave ya es BCrypt y solo falta apagar MD5, sin reescribir el hash. */
+/* Marca migración dual: copia BCrypt erróneo en Password a PasswordV2 sin tocar Password legado. */
 CREATE OR ALTER PROCEDURE dbo.sp_Usuario_RetirarMd5
     @Rut varchar(20),
     @Ret int OUTPUT
@@ -261,10 +272,18 @@ BEGIN
     SET NOCOUNT ON;
     SET @Ret = -1;
     UPDATE dbo.Usuarios
-    SET Md5Retirado = 1
+    SET Md5Retirado = 1,
+        PasswordV2 = CASE
+            WHEN NULLIF(LTRIM(RTRIM(PasswordV2)), N'') IS NULL
+                 AND Password LIKE '$2%'
+                 AND LEN(Password) >= 50 THEN Password
+            ELSE PasswordV2
+        END
     WHERE Rut = @Rut
-      AND Password LIKE '$2%'
-      AND LEN(Password) >= 50;
+      AND (
+            NULLIF(LTRIM(RTRIM(PasswordV2)), N'') IS NOT NULL
+            OR (Password LIKE '$2%' AND LEN(Password) >= 50)
+          );
 
     IF @@ROWCOUNT > 0
         SET @Ret = 0;

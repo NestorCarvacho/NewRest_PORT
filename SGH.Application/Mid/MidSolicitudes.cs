@@ -1,6 +1,7 @@
 using SGH.Application.Sesion;
 using SGH.Application.Solicitud.DTOs;
 using SGH.Application.Solicitud.Interfaces;
+using SGH.Domain.Consulta;
 
 namespace SGH.Application.Mid;
 
@@ -77,11 +78,10 @@ public sealed class MidSolicitudes(IGestionSolicitudes gestion, INotificadorSoli
     {
         var desde = LecturaPeticion.Fecha(LecturaPeticion.Texto(filtro, "desde"));
         var hasta = LecturaPeticion.Fecha(LecturaPeticion.Texto(filtro, "hasta"));
-        if (desde is null || hasta is null)
-            return EjecucionMid.Fallo(400, "Ingrese fechas y filtros válidos.");
+        var rango = ReglasConsultaListado.NormalizarRango(desde, hasta);
 
         var criterios = new FiltroSolicitudesDto(
-            sesion.EmpresaMandanteId, sesion.CampamentoId, desde.Value, hasta.Value,
+            sesion.EmpresaMandanteId, sesion.CampamentoId, rango.Desde, rango.Hasta,
             LecturaPeticion.Entero(filtro, "grupoId"), LecturaPeticion.Entero(filtro, "solicitanteId"),
             LecturaPeticion.Texto(filtro, "estado") is { Length: > 0 } estado ? estado : "0",
             LecturaPeticion.Entero(filtro, "numero"));

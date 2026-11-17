@@ -15,9 +15,15 @@ public sealed class VerificadorContrasena : IVerificadorContrasena
         _factorTrabajo = factor < 4 ? 4 : factor > 31 ? 31 : factor;
     }
 
-    public bool Coincide(string contrasenaPlana, string hashAlmacenado, bool md5Retirado)
+    public bool Coincide(string contrasenaPlana, string hashAlmacenado, bool md5Retirado, string? hashAlmacenadoV2 = null)
     {
-        if (string.IsNullOrEmpty(contrasenaPlana) || string.IsNullOrWhiteSpace(hashAlmacenado))
+        if (string.IsNullOrEmpty(contrasenaPlana))
+            return false;
+
+        if (!string.IsNullOrWhiteSpace(hashAlmacenadoV2) && EsHashBcrypt(hashAlmacenadoV2))
+            return BCrypt.Net.BCrypt.Verify(contrasenaPlana, hashAlmacenadoV2.Trim());
+
+        if (string.IsNullOrWhiteSpace(hashAlmacenado))
             return false;
 
         if (md5Retirado || EsHashBcrypt(hashAlmacenado))

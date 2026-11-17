@@ -1,17 +1,28 @@
 CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_Buscar
     @EmpresaMandanteId int,
     @CampamentoId int,
-    @Desde date,
-    @Hasta date,
+    @Desde date = NULL,
+    @Hasta date = NULL,
     @GrupoId int,
     @SolicitanteId int,
     @Estado varchar(1),
-    @Numero int
+    @Numero int,
+    @MaxFilas int = 5000
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT s.Id AS Numero, s.FechaSolicitud AS Fecha,
+    IF @Desde IS NULL AND @Hasta IS NULL
+    BEGIN
+        SET @Hasta = CAST(GETDATE() AS date);
+        SET @Desde = DATEADD(day, -30, @Hasta);
+    END
+    ELSE IF @Desde IS NULL
+        SET @Desde = DATEADD(day, -30, @Hasta);
+    ELSE IF @Hasta IS NULL
+        SET @Hasta = CAST(GETDATE() AS date);
+
+    SELECT TOP (@MaxFilas) s.Id AS Numero, s.FechaSolicitud AS Fecha,
            a.Nombre + ' - ' + e.Nombre AS Empresa,
            u.Nombre + ' ' + u.Apellidos AS Solicitante,
            l.Descripcion AS Estado,
@@ -28,11 +39,11 @@ BEGIN
            s.TurnoId,
            s.ConSistemaTurno,
            (SELECT TOP (1) r.Id FROM dbo.Reservas AS r WHERE r.SolicitudAlojamientoId = s.Id ORDER BY r.Id) AS PrimeraReservaGeneradaId
-    FROM dbo.SolicitudesAlojamiento AS s
-    INNER JOIN dbo.AreasEmpresa AS a ON a.Id = s.AreaEmpresaSolicitanteId
-    INNER JOIN dbo.Empresas AS e ON e.Id = a.EmpresaId
-    LEFT JOIN dbo.Usuarios AS u ON u.Id = s.UsuarioSolicitanteId
-    LEFT JOIN dbo.Listas AS l ON l.IdTabla = s.EstadoTabla AND l.Valor1 = s.Estado AND l.Tipo = 'Detalle'
+    FROM dbo.SolicitudesAlojamiento AS s WITH (NOLOCK)
+    INNER JOIN dbo.AreasEmpresa AS a WITH (NOLOCK) ON a.Id = s.AreaEmpresaSolicitanteId
+    INNER JOIN dbo.Empresas AS e WITH (NOLOCK) ON e.Id = a.EmpresaId
+    LEFT JOIN dbo.Usuarios AS u WITH (NOLOCK) ON u.Id = s.UsuarioSolicitanteId
+    LEFT JOIN dbo.Listas AS l WITH (NOLOCK) ON l.IdTabla = s.EstadoTabla AND l.Valor1 = s.Estado AND l.Tipo = 'Detalle'
     WHERE s.EmpresaMandanteId = @EmpresaMandanteId
       AND s.CampamentoId = @CampamentoId
       AND s.FechaSolicitud >= @Desde AND s.FechaSolicitud < DATEADD(day, 1, @Hasta)

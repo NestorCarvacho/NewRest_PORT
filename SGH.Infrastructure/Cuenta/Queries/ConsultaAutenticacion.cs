@@ -37,7 +37,8 @@ public sealed class ConsultaAutenticacion : IConsultaAutenticacion
             fila.PerfilId,
             fila.EmpresaMandanteId,
             fila.Md5Retirado == true,
-            fila.Bloqueada == true);
+            fila.Bloqueada == true,
+            fila.HashContrasenaV2 ?? string.Empty);
     }
 
     public async Task<int> ObtenerEstadoAsync(string rut, CancellationToken cancellationToken)
@@ -99,6 +100,7 @@ public sealed class ConsultaAutenticacion : IConsultaAutenticacion
         public string? Nombre { get; set; }
         public string? Apellidos { get; set; }
         public string? HashContrasena { get; set; }
+        public string? HashContrasenaV2 { get; set; }
         public int PerfilId { get; set; }
         public int? EmpresaMandanteId { get; set; }
         public bool? Md5Retirado { get; set; }

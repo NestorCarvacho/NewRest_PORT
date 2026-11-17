@@ -53,7 +53,16 @@ export function crearPanelModulo(dependencias) {
         estado.hidden = true;
         var barra = document.createElement("div");
         barra.className = "modulo-barra";
+        var ultimaActualizacion = 0;
+        var intervaloMinimoMs = 5000;
         barra.append(dependencias.boton("Actualizar", "boton-secundario", function () {
+            var ahora = Date.now();
+            if (ahora - ultimaActualizacion < intervaloMinimoMs) {
+                var resta = Math.ceil((intervaloMinimoMs - (ahora - ultimaActualizacion)) / 1000);
+                dependencias.mostrarAviso("Espere " + resta + " s antes de actualizar de nuevo.", "warning");
+                return;
+            }
+            ultimaActualizacion = ahora;
             dependencias.cargar(id).catch(function (error) {
                 dependencias.mostrarEstado(nodo, error.message);
             });

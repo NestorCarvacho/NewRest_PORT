@@ -8,9 +8,11 @@ export function crearSolicitud(d) {
     }
     function filtros() {
         var catalogo = d.obtenerCatalogo() || {};
+        var presets = (d.presetsPeriodo || []).map(function (p) { return { value: p.value, text: p.text }; });
         return [
-            d.campo("desde", "Desde", "date", [], { requerido: true }),
-            d.campo("hasta", "Hasta", "date", [], { requerido: true }),
+            d.campo("periodo", "Período", "select", presets, { sinVacio: true, valor: "30" }),
+            d.campo("desde", "Desde", "date", [], { requerido: false }),
+            d.campo("hasta", "Hasta", "date", [], { requerido: false }),
             d.campo("grupoId", "Grupo empresa", "select", opciones(catalogo.grupos)),
             d.campo("solicitanteId", "Solicitante", "select", opciones(catalogo.solicitantes)),
             d.campo("estado", "Estado", "select", opciones(catalogo.estados)),
@@ -19,10 +21,11 @@ export function crearSolicitud(d) {
     }
     function filtroInicial() {
         var rango = d.rangoInicial();
-        return { desde: rango.reservaDesde, hasta: rango.reservaHasta };
+        return { periodo: "30", desde: rango.reservaDesde, hasta: rango.reservaHasta };
     }
     function buscar(filtro) {
-        return mid("listar", filtro);
+        var payload = d.aplicarPresetPeriodo ? d.aplicarPresetPeriodo(filtro, filtro && filtro.periodo) : filtro;
+        return mid("listar", payload);
     }
     function boton(texto, accion) {
         var el = document.createElement("button");

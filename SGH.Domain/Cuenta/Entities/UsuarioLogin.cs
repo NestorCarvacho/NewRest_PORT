@@ -11,13 +11,15 @@ public sealed class UsuarioLogin
         int perfilId,
         int? empresaMandanteId,
         bool md5Retirado,
-        bool bloqueada = false)
+        bool bloqueada = false,
+        string hashContrasenaV2 = "")
     {
         Id = id;
         Rut = rut;
         Nombre = nombre;
         Apellidos = apellidos;
         HashContrasena = hashContrasena;
+        HashContrasenaV2 = hashContrasenaV2 ?? string.Empty;
         PerfilId = perfilId;
         EmpresaMandanteId = empresaMandanteId;
         Md5Retirado = md5Retirado;
@@ -28,7 +30,11 @@ public sealed class UsuarioLogin
     public string Rut { get; }
     public string Nombre { get; }
     public string Apellidos { get; }
+    /// <summary>Campo legado <c>Password</c> (MD5 o estado histórico).</summary>
     public string HashContrasena { get; }
+
+    /// <summary>BCrypt del sistema nuevo; no altera el MD5 legado en <see cref="HashContrasena"/>.</summary>
+    public string HashContrasenaV2 { get; }
     public int PerfilId { get; }
     public int? EmpresaMandanteId { get; }
     public bool Md5Retirado { get; }

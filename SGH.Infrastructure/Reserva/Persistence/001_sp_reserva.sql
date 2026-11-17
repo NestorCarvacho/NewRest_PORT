@@ -21,12 +21,23 @@ CREATE OR ALTER PROCEDURE dbo.sp_Reserva_Buscar
     @CheckOut date = NULL,
     @PasajeroId int = 0,
     @HabitacionId int = 0,
-    @TieneAgua varchar(2) = '0'
+    @TieneAgua varchar(2) = '0',
+    @MaxFilas int = 5000
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT
+    DECLARE @DesdeEfectivo date = @FechaReservaDesde;
+    DECLARE @HastaEfectivo date = @FechaReservaHasta;
+
+    IF @DesdeEfectivo IS NULL AND @HastaEfectivo IS NULL AND @FechaReserva IS NULL
+       AND @FechaLlegada IS NULL AND @FechaSalida IS NULL AND @CheckIn IS NULL AND @CheckOut IS NULL
+    BEGIN
+        SET @HastaEfectivo = CAST(GETDATE() AS date);
+        SET @DesdeEfectivo = DATEADD(day, -30, @HastaEfectivo);
+    END
+
+    SELECT TOP (@MaxFilas)
         r.Id,
         r.AreaEmpresaContratistaId AS AreaId,
         r.PasajeroId,
@@ -65,10 +76,9 @@ BEGIN
             OR (@Estado = 'F' AND r.Estado = 'F')
           )
       AND (
-            (@FechaReservaDesde IS NOT NULL AND r.FechaReserva >= @FechaReservaDesde
-                AND (@FechaReservaHasta IS NULL OR r.FechaReserva < DATEADD(day, 1, @FechaReservaHasta)))
-            OR (@FechaReservaDesde IS NULL AND @FechaReserva IS NULL)
-            OR (@FechaReservaDesde IS NULL AND @FechaReserva IS NOT NULL
+            (@DesdeEfectivo IS NOT NULL AND r.FechaReserva >= @DesdeEfectivo
+                AND (@HastaEfectivo IS NULL OR r.FechaReserva < DATEADD(day, 1, @HastaEfectivo)))
+            OR (@DesdeEfectivo IS NULL AND @FechaReserva IS NOT NULL
                 AND r.FechaReserva >= @FechaReserva
                 AND r.FechaReserva < DATEADD(day, 1, @FechaReserva))
           )

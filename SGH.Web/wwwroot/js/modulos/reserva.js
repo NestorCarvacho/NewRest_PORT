@@ -1,7 +1,11 @@
 export function crearReserva(dependencias) {
     function filtros() {
         var catalogo = dependencias.obtenerCatalogo() || { grupos: [], origenes: [], pasajeros: [], habitaciones: [], turnos: [] };
+        var presets = (dependencias.presetsPeriodo || []).map(function (p) { return { value: p.value, text: p.text }; });
         return [
+            dependencias.campo("periodo", "Período (fecha reserva)", "select", presets, { sinVacio: true, valor: "30" }),
+            dependencias.campo("reservaDesde", "Desde", "date", [], { requerido: false }),
+            dependencias.campo("reservaHasta", "Hasta", "date", [], { requerido: false }),
             dependencias.campo("grupo", "Grupo Empresa", "select", dependencias.aOpcion(catalogo.grupos)),
             dependencias.campo("origen", "Origen reserva", "select", dependencias.aOpcion(catalogo.origenes)),
             dependencias.campo("solicitud", "# Solicitud"),
@@ -25,7 +29,7 @@ export function crearReserva(dependencias) {
 
     function filtroInicial(modo) {
         var rango = dependencias.rangoReservaInicial();
-        if (modo === "reserva") return rango;
+        if (modo === "reserva") return Object.assign({ periodo: "30" }, rango);
         return null;
     }
 
@@ -120,22 +124,25 @@ export function crearReserva(dependencias) {
     }
 
     function buscar(filtro) {
+        var payload = dependencias.aplicarPresetPeriodo
+            ? dependencias.aplicarPresetPeriodo(filtro, filtro && filtro.periodo)
+            : filtro;
         return dependencias.enviar("/Reserva/Mid/MidReservas.cs", {
             opcion: "listar",
-            areaId: filtro.grupo,
-            origen: filtro.origen,
-            solicitudId: filtro.solicitud,
-            estado: filtro.estado,
-            fechaReserva: filtro.reserva,
-            fechaReservaDesde: filtro.reservaDesde,
-            fechaReservaHasta: filtro.reservaHasta,
-            fechaLlegada: filtro.llegada,
-            fechaSalida: filtro.salida,
-            checkIn: filtro.checkin,
-            checkOut: filtro.checkout,
-            pasajeroId: filtro.pasajero,
-            habitacionId: filtro.habitacion,
-            tieneAgua: filtro.agua
+            areaId: payload.grupo,
+            origen: payload.origen,
+            solicitudId: payload.solicitud,
+            estado: payload.estado,
+            fechaReserva: payload.reserva,
+            fechaReservaDesde: payload.reservaDesde,
+            fechaReservaHasta: payload.reservaHasta,
+            fechaLlegada: payload.llegada,
+            fechaSalida: payload.salida,
+            checkIn: payload.checkin,
+            checkOut: payload.checkout,
+            pasajeroId: payload.pasajero,
+            habitacionId: payload.habitacion,
+            tieneAgua: payload.agua
         });
     }
 

@@ -1,6 +1,7 @@
 using SGH.Application.Reserva.DTOs;
 using SGH.Application.Reserva.Interfaces;
 using SGH.Application.Sesion;
+using SGH.Domain.Consulta;
 
 namespace SGH.Application.Mid;
 
@@ -66,6 +67,29 @@ public sealed class MidReservas(
 
     private async Task<EjecucionMid> ListarAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
     {
+        var fechaReserva = FechaDia(LecturaPeticion.Texto(filtro, "fechaReserva"));
+        var fechaReservaDesde = FechaDia(LecturaPeticion.Texto(filtro, "fechaReservaDesde"));
+        var fechaReservaHasta = FechaDia(LecturaPeticion.Texto(filtro, "fechaReservaHasta"));
+        var fechaLlegada = FechaDia(LecturaPeticion.Texto(filtro, "fechaLlegada"));
+        var fechaSalida = FechaDia(LecturaPeticion.Texto(filtro, "fechaSalida"));
+        var checkIn = FechaDia(LecturaPeticion.Texto(filtro, "checkIn"));
+        var checkOut = FechaDia(LecturaPeticion.Texto(filtro, "checkOut"));
+
+        if (ReglasConsultaListado.RangoReservaVacío(
+                fechaReserva, fechaReservaDesde, fechaReservaHasta, fechaLlegada, fechaSalida, checkIn, checkOut)
+            || (fechaReservaDesde is null && fechaReservaHasta is null && fechaReserva is null))
+        {
+            var rango = ReglasConsultaListado.NormalizarRango(null, null);
+            fechaReservaDesde = rango.Desde;
+            fechaReservaHasta = rango.Hasta;
+        }
+        else if (fechaReservaDesde is null || fechaReservaHasta is null)
+        {
+            var rango = ReglasConsultaListado.NormalizarRango(fechaReservaDesde, fechaReservaHasta);
+            fechaReservaDesde = rango.Desde;
+            fechaReservaHasta = rango.Hasta;
+        }
+
         var resultado = await buscar.EjecutarAsync(new SolicitudBuscarReservas(
             sesion.EmpresaMandanteId,
             sesion.CampamentoId,
@@ -74,13 +98,13 @@ public sealed class MidReservas(
             LecturaPeticion.Texto(filtro, "origen") ?? "0",
             LecturaPeticion.Entero(filtro, "solicitudId"),
             LecturaPeticion.Texto(filtro, "estado") ?? "0",
-            FechaDia(LecturaPeticion.Texto(filtro, "fechaReserva")),
-            FechaDia(LecturaPeticion.Texto(filtro, "fechaReservaDesde")),
-            FechaDia(LecturaPeticion.Texto(filtro, "fechaReservaHasta")),
-            FechaDia(LecturaPeticion.Texto(filtro, "fechaLlegada")),
-            FechaDia(LecturaPeticion.Texto(filtro, "fechaSalida")),
-            FechaDia(LecturaPeticion.Texto(filtro, "checkIn")),
-            FechaDia(LecturaPeticion.Texto(filtro, "checkOut")),
+            fechaReserva,
+            fechaReservaDesde,
+            fechaReservaHasta,
+            fechaLlegada,
+            fechaSalida,
+            checkIn,
+            checkOut,
             LecturaPeticion.Entero(filtro, "pasajeroId"),
             LecturaPeticion.Entero(filtro, "habitacionId"),
             string.IsNullOrWhiteSpace(LecturaPeticion.Texto(filtro, "tieneAgua")) ? "0" : LecturaPeticion.Texto(filtro, "tieneAgua")!), cancellationToken);

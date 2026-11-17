@@ -36,7 +36,7 @@ public sealed class CambiarContrasena : ICambiarContrasena
         if (usuario.Bloqueada)
             return new ResultadoCambioContrasena.Rechazado(ReglasCuenta.MensajeCuentaBloqueada, MotivoRechazo.CuentaBloqueada);
 
-        if (!_verificador.Coincide(solicitud.ContrasenaActual, usuario.HashContrasena, usuario.Md5Retirado))
+        if (!_verificador.Coincide(solicitud.ContrasenaActual, usuario.HashContrasena, usuario.Md5Retirado, usuario.HashContrasenaV2))
         {
             var intento = await _comando.RegistrarIntentoFallidoAsync(rut, cancellationToken);
             var aviso = intento.Bloqueada
