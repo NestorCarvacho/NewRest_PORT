@@ -282,6 +282,7 @@
         ["No se pudo registrar el movimiento.", "Could not register the movement.", "Não foi possível registrar o movimento.", "Impossible d'enregistrer le mouvement."],
         ["No se pudo actualizar la reserva.", "Could not update the reservation.", "Não foi possível atualizar a reserva.", "Impossible de mettre à jour la réservation."],
         ["Actualizar", "Refresh", "Atualizar", "Actualiser"],
+        ["Exportar", "Export", "Exportar", "Exporter"],
         ["Exportar Excel", "Export Excel", "Exportar Excel", "Exporter Excel"],
         ["Exportar CSV", "Export CSV", "Exportar CSV", "Exporter CSV"],
         ["No hay datos para exportar.", "No data to export.", "Não há dados para exportar.", "Aucune donnée à exporter."],

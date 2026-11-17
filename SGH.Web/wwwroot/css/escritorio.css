@@ -439,6 +439,58 @@ body.app-body {
   margin-bottom: 0.85rem;
 }
 
+.exportar-desplegable {
+  position: relative;
+}
+
+.exportar-desplegable-dispara::after {
+  content: "▾";
+  margin-left: 0.35rem;
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
+.exportar-desplegable-panel {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 8;
+  display: none;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 11.5rem;
+  padding: 0.45rem;
+  border: 1px solid var(--blizzard);
+  border-radius: 0.65rem;
+  background: var(--white);
+  box-shadow: 0 10px 28px rgb(5 5 3 / 12%);
+}
+
+.exportar-desplegable.abierto .exportar-desplegable-panel {
+  display: flex;
+}
+
+.exportar-desplegable-opcion {
+  width: 100%;
+  height: 2.1rem;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--burgundy);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.exportar-desplegable-opcion:hover,
+.exportar-desplegable-opcion:focus-visible {
+  background: color-mix(in srgb, var(--burgundy) 8%, var(--white));
+  outline: none;
+}
+
 .modulo-estado {
   margin: 0 0 0.75rem;
   color: var(--burgundy);
@@ -1856,6 +1908,21 @@ html:not([data-tema="claro"]) .accion-fila {
   border-color: rgba(255, 255, 255, 0.22) !important;
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
+}
+
+html:not([data-tema="claro"]) .exportar-desplegable-panel {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: #28201c;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 35%);
+}
+
+html:not([data-tema="claro"]) .exportar-desplegable-opcion {
+  color: #fff;
+}
+
+html:not([data-tema="claro"]) .exportar-desplegable-opcion:hover,
+html:not([data-tema="claro"]) .exportar-desplegable-opcion:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 html:not([data-tema="claro"]) .campo input::placeholder,
