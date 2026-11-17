@@ -29,7 +29,7 @@ public sealed class ConsultaSolicitudAlojamiento(IFabricaConexionSql fabrica) : 
             commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
         return filas.Select(p => new PasajeroSolicitudDto(
             p.Id, p.UsuarioPasajeroId, p.NombrePasajero, p.Rut, p.TipoIdentificador,
-            p.Empresa, p.Cargo, p.CheckIn, p.CheckOut, p.HabitacionId, p.Habitacion)).ToList();
+            p.Empresa, p.Cargo, p.CheckIn, p.CheckOut, ResolverHabitacionId(p), p.Habitacion)).ToList();
     }
 
     private sealed class PasajeroFila
@@ -44,7 +44,17 @@ public sealed class ConsultaSolicitudAlojamiento(IFabricaConexionSql fabrica) : 
         public string? CheckIn { get; set; }
         public string? CheckOut { get; set; }
         public int? HabitacionId { get; set; }
+        public int IdHabitacion { get; set; }
         public string? Habitacion { get; set; }
+    }
+
+    private static int? ResolverHabitacionId(PasajeroFila fila)
+    {
+        if (fila.HabitacionId is > 0)
+            return fila.HabitacionId;
+        if (fila.IdHabitacion > 0)
+            return fila.IdHabitacion;
+        return fila.HabitacionId is 0 ? null : fila.HabitacionId;
     }
 
     public async Task<IReadOnlyList<SolicitudListadaDto>> BuscarAsync(FiltroSolicitudesDto filtro, CancellationToken cancellationToken)

@@ -282,9 +282,12 @@ export function crearSolicitud(d) {
         var eliminarSeleccionados;
         var asignarSeleccionados;
         var desasignarSeleccionados;
+        function pasajeroTieneHabitacion(p) {
+            return Number(p.habitacionId) > 0 || !!(p.habitacion && String(p.habitacion).trim());
+        }
         function pasajerosSeleccionadosConHabitacion() {
             return pasajeros.filter(function (p) {
-                return seleccion.has(p.id) && Number(p.habitacionId) > 0;
+                return seleccion.has(p.id) && pasajeroTieneHabitacion(p);
             });
         }
         function actualizarSeleccion() {
@@ -324,6 +327,7 @@ export function crearSolicitud(d) {
                 panel.querySelectorAll("button, input").forEach(function (control) { control.disabled = true; });
                 var realizados = 0;
                 var omitidos = 0;
+                var primerError = "";
                 try {
                     for (var i = 0; i < candidatos.length; i++) {
                         var pasajero = candidatos[i];
@@ -332,10 +336,14 @@ export function crearSolicitud(d) {
                             realizados++;
                         } catch (ex) {
                             omitidos++;
+                            if (!primerError) primerError = ex.message || "Error desconocido.";
                         }
                     }
                     var texto = "Habitaciones quitadas: " + realizados + ".";
-                    if (omitidos) texto += " Sin cambio en " + omitidos + " fila(s).";
+                    if (omitidos) {
+                        texto += " Sin cambio en " + omitidos + " fila(s).";
+                        if (primerError) texto += " " + primerError;
+                    }
                     d.mostrarAviso(texto, omitidos ? "warning" : "success");
                 } catch (ex) {
                     d.mostrarAviso("Quitadas antes del error: " + realizados + ". " + ex.message, "error");

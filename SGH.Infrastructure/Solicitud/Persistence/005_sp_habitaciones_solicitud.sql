@@ -114,17 +114,16 @@ BEGIN
             SELECT 1 FROM dbo.PasajerosSolicitudAlojamiento WITH (UPDLOCK, HOLDLOCK)
             WHERE Id = @PasajeroId AND SolicitudAlojamientoId = @SolicitudId)
             THROW 51045, 'El pasajero no pertenece a la solicitud.', 1;
-        IF NOT EXISTS (
-            SELECT 1 FROM dbo.PasajerosSolicitudAlojamiento
-            WHERE Id = @PasajeroId AND SolicitudAlojamientoId = @SolicitudId AND HabitacionId IS NOT NULL)
-            THROW 51058, 'El pasajero no tiene habitación asignada.', 1;
+        UPDATE dbo.PasajerosSolicitudAlojamiento
+        SET HabitacionId = NULL,
+            FechaActualizacion = GETDATE(),
+            UsuarioActualizacionId = @UsuarioId
+        WHERE Id = @PasajeroId
+          AND SolicitudAlojamientoId = @SolicitudId
+          AND ISNULL(HabitacionId, 0) <> 0;
 
-        DECLARE @Ret int;
-        EXEC dbo.SOL_AsignaHabitacionPasajeroSolicitudEmpresa
-            @id = @PasajeroId, @habitacion = NULL, @usuario = @UsuarioId,
-            @origen = 'solicitud', @ret = @Ret OUTPUT;
-        IF ISNULL(@Ret, 0) <> @PasajeroId
-            THROW 51057, 'El procedimiento legado no pudo quitar la habitación.', 1;
+        IF @@ROWCOUNT = 0
+            THROW 51058, 'El pasajero no tiene habitación asignada.', 1;
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH

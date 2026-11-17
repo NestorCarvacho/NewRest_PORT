@@ -195,8 +195,11 @@ public sealed class MidSolicitudes(IGestionSolicitudes gestion, INotificadorSoli
 
     private async Task<EjecucionMid> DesasignarAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
     {
+        var solicitudId = LecturaPeticion.Entero(filtro, "solicitudId");
+        if (solicitudId == 0)
+            solicitudId = LecturaPeticion.Entero(filtro, "id");
         await gestion.DesasignarHabitacionAsync(
-            LecturaPeticion.Entero(filtro, "solicitudId"), LecturaPeticion.Entero(filtro, "pasajeroId"),
+            solicitudId, LecturaPeticion.Entero(filtro, "pasajeroId"),
             sesion.EmpresaMandanteId, sesion.CampamentoId, sesion.UsuarioId, cancellationToken);
         return EjecucionMid.Ok(new { listo = true });
     }
