@@ -113,7 +113,8 @@ export function crearFormularios(dependencias) {
         if (definicion.deshabilitado) elemento.disabled = true;
         if (definicion.nombre) elemento.name = definicion.nombre;
         if (definicion.valor) elemento.value = definicion.valor;
-        if ((definicion.tipo === "date" || definicion.tipo === "datetime-local") && !definicion.soloLectura && !definicion.deshabilitado) {
+        if ((definicion.tipo === "date" || definicion.tipo === "month" || definicion.tipo === "datetime-local")
+            && !definicion.soloLectura && !definicion.deshabilitado) {
             var linea = document.createElement("span");
             linea.className = "campo-fecha";
             var ahora = document.createElement("button");
