@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using SGH.Application.Cuenta.DTOs;
 using SGH.Application.Cuenta.Opciones;
 using SGH.Application.Cuenta.UseCases;
+using SGH.Domain.Alcance;
 using SGH.Domain.Cuenta;
 using SGH.Domain.Cuenta.Entities;
 using SGH.Infrastructure.Cuenta.Security;
@@ -72,6 +73,7 @@ public class PreautenticarUsuarioTests
     {
         var hash = _verificador.CrearHashBcrypt("abc123");
         _repositorio.Usuario = new UsuarioLogin(3, "123456789", "Ana", "Soto", hash, 2, 9, false);
+        _repositorio.Perfiles.Add(Perfil(4, 15));
 
         var resultado = await Crear().EjecutarAsync(new SolicitudPreautenticacion("123456789", "abc123"), CancellationToken.None);
 
@@ -85,6 +87,7 @@ public class PreautenticarUsuarioTests
     {
         var hash = _verificador.CrearHashBcrypt("abc123");
         _repositorio.Usuario = new UsuarioLogin(3, "123456789", "Ana", "Soto", hash, 2, 9, true);
+        _repositorio.Perfiles.Add(Perfil(4, 15));
 
         var resultado = await Crear().EjecutarAsync(new SolicitudPreautenticacion("123456789", "abc123"), CancellationToken.None);
 
@@ -133,6 +136,20 @@ public class PreautenticarUsuarioTests
         Assert.Equal(ReglasCuenta.MensajeCuentaBloqueada, rechazo.Mensaje);
         Assert.Equal(MotivoRechazo.CuentaBloqueada, rechazo.Motivo);
         Assert.Equal(ReglasCuenta.IntentosAntesDeBloquear, _repositorio.Intentos);
+    }
+
+    [Fact]
+    public async Task SinCampamentosRechazaSinPasarAlSegundoPaso()
+    {
+        _repositorio.Usuario = Usuario("abc123");
+
+        var resultado = await Crear().EjecutarAsync(new SolicitudPreautenticacion("123456789", "abc123"), CancellationToken.None);
+
+        var rechazo = Assert.IsType<ResultadoPreautenticacion.Rechazado>(resultado);
+        Assert.Equal(ReglasAlcance.SinCampamento, rechazo.Mensaje);
+        Assert.Equal(MotivoRechazo.PerfilNoPermitido, rechazo.Motivo);
+        Assert.Equal(1, _repositorio.Reinicios);
+        Assert.Equal(0, _repositorio.Intentos);
     }
 
     [Fact]

@@ -1,5 +1,6 @@
 using SGH.Application.Cuenta.DTOs;
 using SGH.Application.Cuenta.Interfaces;
+using SGH.Domain.Alcance;
 using SGH.Domain.Cuenta;
 using SGH.Domain.Cuenta.Interfaces;
 
@@ -37,6 +38,9 @@ public sealed class PreautenticarUsuario : IPreautenticarUsuario
                 perfil.EmpresaMandanteNombre,
                 perfil.Etiqueta))
             .ToList();
+
+        if (opciones.Count == 0)
+            return new ResultadoPreautenticacion.Rechazado(ReglasAlcance.SinCampamento, MotivoRechazo.PerfilNoPermitido);
 
         return new ResultadoPreautenticacion.Listo(
             valida.Rut,

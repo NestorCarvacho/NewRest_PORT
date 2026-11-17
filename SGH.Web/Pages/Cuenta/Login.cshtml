@@ -54,9 +54,11 @@
             </select>
         </div>
     }
-    else if (Model.Paso == "perfil" && Model.Perfiles.Count == 0)
+    @if (Model.Paso == "perfil")
     {
-        <p class="login-note" role="alert">@ReglasAlcance.SinCampamento</p>
+        <div class="login-links">
+            <a class="login-link" asp-page="/Cuenta/Login" asp-page-handler="Reiniciar" asp-route-returnUrl="@Model.ReturnUrl">Volver a identificarse</a>
+        </div>
     }
 
     <partial name="_BotonEspera" model="@("Entrar")" />

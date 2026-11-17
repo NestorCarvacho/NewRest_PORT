@@ -86,7 +86,7 @@ builder.Services.AddRateLimiter(opciones =>
     };
     opciones.AddPolicy("ingreso", contexto =>
     {
-        if (!HttpMethods.IsPost(contexto.Request.Method))
+        if (!PoliticaLimiteIngreso.CuentaHaciaLimitePorIp(contexto))
             return RateLimitPartition.GetNoLimiter("lectura");
 
         var direccion = contexto.Connection.RemoteIpAddress?.ToString() ?? "desconocido";
@@ -171,8 +171,7 @@ app.UseRateLimiter();
 app.Use(async (contexto, siguiente) =>
 {
     var ruta = contexto.Request.Path;
-    var ingreso = ruta.StartsWithSegments("/Cuenta/Login") || ruta.StartsWithSegments("/Cuenta/CambiarClave");
-    if (ingreso && HttpMethods.IsPost(contexto.Request.Method))
+    if (PoliticaLimiteIngreso.CuentaHaciaLimitePorIp(contexto))
     {
         var direccion = contexto.Connection.RemoteIpAddress?.ToString() ?? "desconocido";
         var registro = contexto.RequestServices.GetRequiredService<RegistroVentanaIngreso>();
