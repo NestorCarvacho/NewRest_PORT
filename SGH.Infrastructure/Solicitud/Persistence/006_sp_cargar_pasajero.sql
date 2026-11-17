@@ -14,28 +14,30 @@ AS
 BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
+
+    DECLARE @Estado nvarchar(450);
+    SELECT @Estado = Estado
+    FROM dbo.SolicitudesAlojamiento
+    WHERE Id = @SolicitudId AND EmpresaMandanteId = @EmpresaMandanteId AND CampamentoId = @CampamentoId;
+    IF @Estado IS NULL
+        THROW 51030, 'La solicitud no existe en el campamento de la sesión.', 1;
+    IF @Estado IN ('R', 'A')
+        THROW 51043, 'No se pueden modificar los pasajeros de una solicitud reservada o anulada.', 1;
+
+    /* Fuera de la transacción: si el masivo rechaza la fila, el cierre no debe revertirse con ROLLBACK. */
+    EXEC dbo.sp_Solicitud_AsegurarPeriodo
+        @SolicitudId = @SolicitudId,
+        @EmpresaMandanteId = @EmpresaMandanteId,
+        @CampamentoId = @CampamentoId,
+        @UsuarioId = @UsuarioId;
+
+    EXEC dbo.sp_Reserva_FinalizarCheckout
+        @EmpresaMandanteId = @EmpresaMandanteId,
+        @IdentificadorRut = @Identificador,
+        @UsuarioId = @UsuarioId;
+
     BEGIN TRY
         BEGIN TRANSACTION;
-        DECLARE @Estado nvarchar(450);
-        SELECT @Estado = Estado
-        FROM dbo.SolicitudesAlojamiento WITH (UPDLOCK, HOLDLOCK)
-        WHERE Id = @SolicitudId AND EmpresaMandanteId = @EmpresaMandanteId AND CampamentoId = @CampamentoId;
-        IF @Estado IS NULL
-            THROW 51030, 'La solicitud no existe en el campamento de la sesión.', 1;
-        IF @Estado IN ('R', 'A')
-            THROW 51043, 'No se pueden modificar los pasajeros de una solicitud reservada o anulada.', 1;
-
-        EXEC dbo.sp_Solicitud_AsegurarPeriodo
-            @SolicitudId = @SolicitudId,
-            @EmpresaMandanteId = @EmpresaMandanteId,
-            @CampamentoId = @CampamentoId,
-            @UsuarioId = @UsuarioId;
-
-        EXEC dbo.sp_Reserva_FinalizarCheckout
-            @EmpresaMandanteId = @EmpresaMandanteId,
-            @IdentificadorRut = @Identificador,
-            @UsuarioId = @UsuarioId;
-
         DECLARE @Resultado TABLE (resultado int, mensaje varchar(1000));
         INSERT INTO @Resultado
         EXEC dbo.SOL_GuardaPasajeroSolicitudAlojamientoMasivo
