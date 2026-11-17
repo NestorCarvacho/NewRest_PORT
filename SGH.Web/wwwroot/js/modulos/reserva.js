@@ -124,9 +124,11 @@ export function crearReserva(dependencias) {
     }
 
     function buscar(filtro) {
-        var payload = dependencias.aplicarPresetPeriodo
-            ? dependencias.aplicarPresetPeriodo(filtro, filtro && filtro.periodo)
-            : filtro;
+        var payload = dependencias.normalizarFiltroPeriodo
+            ? dependencias.normalizarFiltroPeriodo(filtro)
+            : (dependencias.aplicarPresetPeriodo
+                ? dependencias.aplicarPresetPeriodo(filtro, filtro && filtro.periodo)
+                : filtro);
         return dependencias.enviar("/Reserva/Mid/MidReservas.cs", {
             opcion: "listar",
             areaId: payload.grupo,

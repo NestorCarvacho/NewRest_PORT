@@ -13,6 +13,7 @@ export function instalarReserva(base) {
         rangoReservaInicial: base.rangoReservaInicial,
         presetsPeriodo: base.presetsPeriodo,
         aplicarPresetPeriodo: base.aplicarPresetPeriodo,
+        normalizarFiltroPeriodo: base.normalizarFiltroPeriodo,
         fechaListadoAInput: base.fechaListadoAInput,
         formulario: base.formulario,
         numero: numero,

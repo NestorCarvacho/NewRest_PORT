@@ -79,7 +79,9 @@ export function crearPanelModulo(dependencias) {
                     "Aplicar",
                     false,
                     function (datos) {
-                        nodo._filtro = datos;
+                        nodo._filtro = dependencias.normalizarFiltroPeriodo
+                            ? dependencias.normalizarFiltroPeriodo(datos)
+                            : datos;
                         return dependencias.cargar(id);
                     }
                 ));

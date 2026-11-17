@@ -19,7 +19,8 @@ export function instalarSolicitud(base) {
         fechaActual: base.fechaActual,
         rangoInicial: base.rangoReservaInicial,
         presetsPeriodo: base.presetsPeriodo,
-        aplicarPresetPeriodo: base.aplicarPresetPeriodo
+        aplicarPresetPeriodo: base.aplicarPresetPeriodo,
+        normalizarFiltroPeriodo: base.normalizarFiltroPeriodo
     });
     return {
         solicitud: solicitud,

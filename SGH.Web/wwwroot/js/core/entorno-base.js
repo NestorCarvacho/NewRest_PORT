@@ -1,5 +1,6 @@
 import { crearApi } from "./api.js";
 import { crearFechas } from "./fechas.js";
+import { crearPeriodoFiltro } from "./periodo-filtro.js";
 import { crearTablas } from "./tablas.js";
 import { crearFormularios } from "./formularios.js";
 import { crearCatalogos } from "./catalogos.js";
@@ -11,6 +12,7 @@ import { crearExportadorTabla } from "./exportar-tabla.js";
 export function crearEntornoBase() {
     var api = crearApi();
     var fechas = crearFechas();
+    var periodoFiltro = crearPeriodoFiltro(fechas);
     var tablas = crearTablas();
     var catalogos = crearCatalogos(api.enviar);
     var avisos = crearAvisos();
@@ -21,7 +23,10 @@ export function crearEntornoBase() {
 
     var interfazFormularios = crearFormularios({
         momentoLocal: fechas.momentoLocal,
-        enlazar: function (form) { enlazarFormulario(form); },
+        enlazar: function (form) {
+            enlazarFormulario(form);
+            periodoFiltro.enlazarFormulario(form);
+        },
         cerrarPanel: panelLateral.cerrar,
         mostrarAviso: avisos.mostrarAviso
     });
@@ -47,6 +52,8 @@ export function crearEntornoBase() {
         rangoDesdeDias: fechas.rangoDesdeDias,
         presetsPeriodo: fechas.presetsPeriodo,
         aplicarPresetPeriodo: fechas.aplicarPresetPeriodo,
+        normalizarFiltroPeriodo: fechas.normalizarFiltroPeriodo,
+        enlazarPeriodoFiltro: periodoFiltro.enlazarFormulario,
         fechaListadoAInput: fechas.fechaListadoAInput,
         bloquearPantalla: avisos.bloquearPantalla,
         desbloquearPantalla: avisos.desbloquearPantalla,

@@ -24,7 +24,9 @@ export function crearSolicitud(d) {
         return { periodo: "30", desde: rango.reservaDesde, hasta: rango.reservaHasta };
     }
     function buscar(filtro) {
-        var payload = d.aplicarPresetPeriodo ? d.aplicarPresetPeriodo(filtro, filtro && filtro.periodo) : filtro;
+        var payload = d.normalizarFiltroPeriodo
+            ? d.normalizarFiltroPeriodo(filtro)
+            : (d.aplicarPresetPeriodo ? d.aplicarPresetPeriodo(filtro, filtro && filtro.periodo) : filtro);
         return mid("listar", payload);
     }
     function boton(texto, accion) {
