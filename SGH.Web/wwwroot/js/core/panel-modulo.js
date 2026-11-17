@@ -1,3 +1,5 @@
+import { bloquearBotonSegundos } from "./boton-espera.js";
+
 export function crearPanelModulo(dependencias) {
     function crearMenuExportar(nodo, tituloModulo) {
         var envoltorio = document.createElement("div");
@@ -55,18 +57,23 @@ export function crearPanelModulo(dependencias) {
         barra.className = "modulo-barra";
         var ultimaActualizacion = 0;
         var intervaloMinimoMs = 5000;
-        barra.append(dependencias.boton("Actualizar", "boton-secundario", function () {
+        var botonActualizar = dependencias.boton("Actualizar", "boton-secundario", function () {
+            if (botonActualizar.disabled) return;
             var ahora = Date.now();
-            if (ahora - ultimaActualizacion < intervaloMinimoMs) {
-                var resta = Math.ceil((intervaloMinimoMs - (ahora - ultimaActualizacion)) / 1000);
-                dependencias.mostrarAviso("Espere " + resta + " s antes de actualizar de nuevo.", "warning");
+            var transcurrido = ahora - ultimaActualizacion;
+            if (transcurrido < intervaloMinimoMs) {
+                var resta = Math.ceil((intervaloMinimoMs - transcurrido) / 1000);
+                bloquearBotonSegundos(botonActualizar, resta);
                 return;
             }
             ultimaActualizacion = ahora;
+            bloquearBotonSegundos(botonActualizar, Math.ceil(intervaloMinimoMs / 1000));
             dependencias.cargar(id).catch(function (error) {
                 dependencias.mostrarEstado(nodo, error.message);
             });
-        }));
+        });
+        botonActualizar.setAttribute("data-etiqueta", "Actualizar");
+        barra.append(botonActualizar);
         barra.append(crearMenuExportar(nodo, modulo.titulo));
         barra.append(dependencias.boton("Filtros", "boton-secundario", function () {
             dependencias.prepararCatalogo(modulo.modo).then(function () {
