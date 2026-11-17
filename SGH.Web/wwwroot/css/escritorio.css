@@ -1604,6 +1604,49 @@ html:not([data-tema="claro"]) .campo-interruptor input:checked {
   font-weight: 450;
 }
 
+/* El interruptor es checkbox; no debe heredar ancho completo del input de texto */
+.formulario .campo.campo-interruptor {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  width: 100%;
+  padding: 0.15rem 0;
+}
+
+.formulario .campo.campo-interruptor > span:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.campo.campo-interruptor input[type="checkbox"] {
+  width: 3.2rem;
+  min-width: 3.2rem;
+  max-width: 3.2rem;
+  height: 1.8rem;
+  min-height: 1.8rem;
+  padding: 0.15rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.campo.campo-interruptor input[type="checkbox"]:not(:checked) {
+  background: #c4bbb4;
+  border-color: #8a7d76;
+}
+
+html:not([data-tema="claro"]) .campo.campo-interruptor input[type="checkbox"]:not(:checked) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.38);
+}
+
+html:not([data-tema="claro"]) .campo.campo-interruptor input[type="checkbox"]:checked {
+  border-color: #d98532;
+  background: #d98532;
+}
+
 .campo .select2-container {
   width: 100% !important;
 }
