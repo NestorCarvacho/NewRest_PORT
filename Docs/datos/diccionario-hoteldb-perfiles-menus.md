@@ -143,6 +143,8 @@ Misma jerarquía `nav` / `side`. En **Gestión** (`PadreId = 2`) aparecen los m�
 
 En **Configuración** (`PadreId = 4`): **Usuarios** → `/app/config/usuario` → `/Cuenta/Usuarios`; **Habitaciones** → `/app/config/habitaciones` → `/Habitacion/Datos`; **Baños** → `/app/config/banos` → `/Habitacion/Banos` (script `SGH.Infrastructure/Navegacion/Persistence/002_menu_config_habitacion_bano.sql`).
 
+Para que un perfil operativo (p. ej. **68**) vea solo Habitaciones y Baños: tras el `002`, ejecutar `003_menusperfil_habitacion_bano_por_perfil.sql` (ajustar `@PerfilId`) o insertar manualmente en `MenusPerfil` el **nav** de Configuración más los dos `MenuId` de esos enlaces. El menú y la autorización HTTP (`GestionarHabitaciones`) leen el mismo `sp_Menu_ObtenerPorPerfil`.
+
 `Dashboard` (`nav` sin hijos `side`) no se muestra en el menú nuevo hasta tener página destino. **Home** con `Link = #` queda deshabilitado.
 
 El nav **Dashboard** (`Id = 1`) suele no tener filas `side` en `MenusPerfil`; el resto de barras sí.
