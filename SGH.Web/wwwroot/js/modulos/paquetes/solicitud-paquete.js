@@ -20,7 +20,9 @@ export function instalarSolicitud(base) {
         rangoInicial: base.rangoReservaInicial,
         presetsPeriodo: base.presetsPeriodo,
         aplicarPresetPeriodo: base.aplicarPresetPeriodo,
-        normalizarFiltroPeriodo: base.normalizarFiltroPeriodo
+        normalizarFiltroPeriodo: base.normalizarFiltroPeriodo,
+        camposPeriodoFiltro: base.camposPeriodoFiltro,
+        filtroInicialPeriodo: base.filtroInicialPeriodo
     });
     return {
         solicitud: solicitud,

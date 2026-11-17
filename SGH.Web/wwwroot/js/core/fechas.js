@@ -38,6 +38,8 @@ export function crearFechas() {
         return rangoDesdeDias(30);
     }
 
+    var periodoDefault = "30";
+
     var presetsPeriodo = [
         { value: "30", text: "Último mes" },
         { value: "90", text: "Últimos 3 meses" },
@@ -82,8 +84,21 @@ export function crearFechas() {
                 reservaHasta: hasta
             });
         }
-        var periodo = datos.periodo || "30";
+        var periodo = datos.periodo || periodoDefault;
         return aplicarPresetPeriodo(datos, periodo);
+    }
+
+    function fechasEntre(desde, hasta) {
+        if (!desde || !hasta) return [];
+        var lista = [];
+        var actual = new Date(desde.slice(0, 10) + "T12:00:00");
+        var fin = new Date(hasta.slice(0, 10) + "T12:00:00");
+        if (isNaN(actual.getTime()) || isNaN(fin.getTime()) || actual > fin) return [];
+        while (actual <= fin) {
+            lista.push(actual.getFullYear() + "-" + dosDigitos(actual.getMonth() + 1) + "-" + dosDigitos(actual.getDate()));
+            actual.setDate(actual.getDate() + 1);
+        }
+        return lista;
     }
 
     function aplicarPresetPeriodo(datos, dias) {
@@ -105,7 +120,9 @@ export function crearFechas() {
         momentoLocal: momentoLocal,
         rangoReservaInicial: rangoReservaInicial,
         rangoDesdeDias: rangoDesdeDias,
+        periodoDefault: periodoDefault,
         presetsPeriodo: presetsPeriodo,
+        fechasEntre: fechasEntre,
         aplicarPresetPeriodo: aplicarPresetPeriodo,
         normalizarFiltroPeriodo: normalizarFiltroPeriodo,
         fechaListadoAInput: fechaListadoAInput

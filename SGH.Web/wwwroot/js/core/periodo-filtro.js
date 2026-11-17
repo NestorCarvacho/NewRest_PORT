@@ -3,6 +3,31 @@
  * OFF → calendario día a día (desde / hasta) editables.
  */
 export function crearPeriodoFiltro(fechas) {
+    function camposPeriodo(campo, opciones) {
+        opciones = opciones || {};
+        var presets = (fechas.presetsPeriodo || []).map(function (p) { return { value: p.value, text: p.text }; });
+        var reserva = !!opciones.reservaNombres;
+        var nombreDesde = reserva ? "reservaDesde" : "desde";
+        var nombreHasta = reserva ? "reservaHasta" : "hasta";
+        var defecto = fechas.periodoDefault || "30";
+        return [
+            campo("periodoPorRango", "Filtrar por rango", "checkbox", [], { interruptor: true, valor: true }),
+            campo("periodo", opciones.etiquetaPeriodo || "Período", "select", presets, { sinVacio: true, valor: defecto }),
+            campo(nombreDesde, "Desde", "date", [], { requerido: false }),
+            campo(nombreHasta, "Hasta", "date", [], { requerido: false })
+        ];
+    }
+
+    function filtroInicialPeriodo(opciones) {
+        opciones = opciones || {};
+        var defecto = fechas.periodoDefault || "30";
+        var rango = fechas.rangoDesdeDias(parseInt(defecto, 10));
+        var base = { periodoPorRango: true, periodo: defecto };
+        if (opciones.reservaNombres) {
+            return Object.assign(base, { reservaDesde: rango.reservaDesde, reservaHasta: rango.reservaHasta });
+        }
+        return Object.assign(base, { desde: rango.desde, hasta: rango.hasta });
+    }
     function nombresDesdeHasta(form) {
         if (form.querySelector("[name='reservaDesde']")) {
             return { desde: "reservaDesde", hasta: "reservaHasta" };
@@ -63,7 +88,7 @@ export function crearPeriodoFiltro(fechas) {
         }
 
         if (controles.periodo) controles.periodo.disabled = false;
-        var periodo = controles.periodo ? controles.periodo.value : "30";
+        var periodo = controles.periodo ? controles.periodo.value : (fechas.periodoDefault || "30");
         var dias = parseInt(periodo, 10);
         if (dias > 0) {
             var rango = fechas.rangoDesdeDias(dias);
@@ -90,5 +115,9 @@ export function crearPeriodoFiltro(fechas) {
         actualizar();
     }
 
-    return { enlazarFormulario: enlazarFormulario };
+    return {
+        enlazarFormulario: enlazarFormulario,
+        camposPeriodo: camposPeriodo,
+        filtroInicialPeriodo: filtroInicialPeriodo
+    };
 }

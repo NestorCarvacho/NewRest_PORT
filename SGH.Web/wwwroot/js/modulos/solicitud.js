@@ -8,21 +8,15 @@ export function crearSolicitud(d) {
     }
     function filtros() {
         var catalogo = d.obtenerCatalogo() || {};
-        var presets = (d.presetsPeriodo || []).map(function (p) { return { value: p.value, text: p.text }; });
-        return [
-            d.campo("periodoPorRango", "Filtrar por rango", "checkbox", [], { interruptor: true, valor: true }),
-            d.campo("periodo", "Período", "select", presets, { sinVacio: true, valor: "30" }),
-            d.campo("desde", "Desde", "date", [], { requerido: false }),
-            d.campo("hasta", "Hasta", "date", [], { requerido: false }),
+        return d.camposPeriodoFiltro(d.campo, { etiquetaPeriodo: "Período" }).concat([
             d.campo("grupoId", "Grupo empresa", "select", opciones(catalogo.grupos)),
             d.campo("solicitanteId", "Solicitante", "select", opciones(catalogo.solicitantes)),
             d.campo("estado", "Estado", "select", opciones(catalogo.estados)),
             d.campo("numero", "Número", "number")
-        ];
+        ]);
     }
     function filtroInicial() {
-        var rango = d.rangoInicial();
-        return { periodoPorRango: true, periodo: "30", desde: rango.reservaDesde, hasta: rango.reservaHasta };
+        return d.filtroInicialPeriodo();
     }
     function buscar(filtro) {
         var payload = d.normalizarFiltroPeriodo

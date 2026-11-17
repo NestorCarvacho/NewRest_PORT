@@ -1,12 +1,10 @@
 export function crearReserva(dependencias) {
     function filtros() {
         var catalogo = dependencias.obtenerCatalogo() || { grupos: [], origenes: [], pasajeros: [], habitaciones: [], turnos: [] };
-        var presets = (dependencias.presetsPeriodo || []).map(function (p) { return { value: p.value, text: p.text }; });
-        return [
-            dependencias.campo("periodoPorRango", "Filtrar por rango", "checkbox", [], { interruptor: true, valor: true }),
-            dependencias.campo("periodo", "Período (fecha reserva)", "select", presets, { sinVacio: true, valor: "30" }),
-            dependencias.campo("reservaDesde", "Desde", "date", [], { requerido: false }),
-            dependencias.campo("reservaHasta", "Hasta", "date", [], { requerido: false }),
+        return dependencias.camposPeriodoFiltro(dependencias.campo, {
+            etiquetaPeriodo: "Período (fecha reserva)",
+            reservaNombres: true
+        }).concat([
             dependencias.campo("grupo", "Grupo Empresa", "select", dependencias.aOpcion(catalogo.grupos)),
             dependencias.campo("origen", "Origen reserva", "select", dependencias.aOpcion(catalogo.origenes)),
             dependencias.campo("solicitud", "# Solicitud"),
@@ -25,12 +23,11 @@ export function crearReserva(dependencias) {
             dependencias.campo("pasajero", "Pasajero", "select", dependencias.aOpcion(catalogo.pasajeros)),
             dependencias.campo("habitacion", "Habitación", "select", dependencias.aOpcion(catalogo.habitaciones)),
             dependencias.campo("agua", "Tiene Agua?", "select", [{ value: "1", text: "SI" }, { value: "2", text: "NO" }])
-        ];
+        ]);
     }
 
     function filtroInicial(modo) {
-        var rango = dependencias.rangoReservaInicial();
-        if (modo === "reserva") return Object.assign({ periodoPorRango: true, periodo: "30" }, rango);
+        if (modo === "reserva") return dependencias.filtroInicialPeriodo({ reservaNombres: true });
         return null;
     }
 

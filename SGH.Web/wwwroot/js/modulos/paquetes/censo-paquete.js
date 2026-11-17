@@ -14,7 +14,11 @@ export function instalarCenso(base) {
         numero: numero,
         mostrarEstado: base.mostrarEstado,
         enviar: base.enviar,
-        cargar: base.cargar
+        cargar: base.cargar,
+        camposPeriodoFiltro: base.camposPeriodoFiltro,
+        filtroInicialPeriodo: base.filtroInicialPeriodo,
+        normalizarFiltroPeriodo: base.normalizarFiltroPeriodo,
+        fechasEntre: base.fechasEntre
     });
     base.setEnlazarFormulario(function (form) { censo.enlazar(form); });
     var censoQr = crearCensoQr({

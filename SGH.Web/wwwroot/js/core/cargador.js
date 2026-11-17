@@ -10,9 +10,7 @@ export function crearCargador(dependencias) {
       dependencias.bloquearPantalla("Cargando datos, espere…");
     }
     nodo._cargando = true;
-    var solicitud = modulo.modo === "censo" && filtro.censoUltimoMes
-      ? dependencias.censo.buscarUltimoMes(filtro)
-      : obtenerListado(modulo.modo, filtro);
+    var solicitud = obtenerListado(modulo.modo, filtro);
     nodo._cargaPendiente = solicitud;
     return solicitud.then(function (resultado) {
       if (!nodo.isConnected) return;
@@ -35,8 +33,8 @@ export function crearCargador(dependencias) {
 
     function obtenerListado(modo, filtro) {
         if (modo === "solicitud") return dependencias.solicitud.buscar(filtro);
-        if (modo === "censo") return dependencias.censo.buscar(filtro);
-        if (modo === "misCensos") return dependencias.censo.buscarMios(filtro);
+        if (modo === "censo") return dependencias.censo.buscarRango(filtro);
+        if (modo === "misCensos") return dependencias.censo.buscarMiosRango(filtro);
         if (modo === "habitaciones" || modo === "banos") return dependencias.habitacion.buscar(filtro, modo);
         return dependencias.reserva.buscar(filtro);
     }

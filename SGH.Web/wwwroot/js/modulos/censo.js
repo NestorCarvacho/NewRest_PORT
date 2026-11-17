@@ -1,29 +1,39 @@
 export function crearCenso(dependencias) {
-    function buscarUltimoMes(filtro) {
-        var fechas = [];
-        var fecha = new Date();
-        for (var indice = 0; indice <= 30; indice += 1) {
-            var dia = new Date(fecha);
-            dia.setDate(fecha.getDate() - indice);
-            fechas.push(dia.getFullYear() + "-" + String(dia.getMonth() + 1).padStart(2, "0") + "-" + String(dia.getDate()).padStart(2, "0"));
+    var maxDiasRango = 366;
+
+    function combinarFilas(respuestas) {
+        var filas = [];
+        respuestas.forEach(function (respuesta) { filas.push.apply(filas, respuesta.filas || []); });
+        return filas;
+    }
+
+    function fechasDelFiltro(filtro) {
+        var normalizado = dependencias.normalizarFiltroPeriodo
+            ? dependencias.normalizarFiltroPeriodo(filtro)
+            : filtro;
+        return dependencias.fechasEntre(normalizado.desde, normalizado.hasta);
+    }
+
+    function buscarRango(filtro) {
+        var fechas = fechasDelFiltro(filtro);
+        if (!fechas.length) return Promise.reject(new Error("Indique un rango de fechas válido."));
+        if (fechas.length > maxDiasRango) {
+            return Promise.reject(new Error("El rango no puede superar " + maxDiasRango + " días."));
         }
         return Promise.all(fechas.map(function (dia) {
-            return dependencias.enviar("/Censo/Mid/MidCenso.cs", {
-                opcion: "listar",
-                moduloId: filtro.modulo,
-                pisoId: filtro.piso,
-                habitacionId: filtro.habitacion,
-                fecha: dia,
-                turno: filtro.turno,
-                EmpresaMandanteId: filtro.EmpresaMandanteId,
-                campamentoId: filtro.campamentoId
-                
-            });
-        })).then(function (respuestas) {
-            var filas = [];
-            respuestas.forEach(function (respuesta) { filas.push.apply(filas, respuesta.filas || []); });
-            return filas;
-        });
+            return buscar(Object.assign({}, filtro, { fecha: dia }));
+        })).then(combinarFilas);
+    }
+
+    function buscarMiosRango(filtro) {
+        var fechas = fechasDelFiltro(filtro);
+        if (!fechas.length) return Promise.reject(new Error("Indique un rango de fechas válido."));
+        if (fechas.length > maxDiasRango) {
+            return Promise.reject(new Error("El rango no puede superar " + maxDiasRango + " días."));
+        }
+        return Promise.all(fechas.map(function (dia) {
+            return buscarMios(Object.assign({}, filtro, { fecha: dia }));
+        })).then(combinarFilas);
     }
 
     function buscar(filtro) {
@@ -43,17 +53,16 @@ export function crearCenso(dependencias) {
 
     function filtros() {
         var catalogo = dependencias.obtenerCatalogo() || { modulos: [], pisos: [], habitaciones: [] };
-        return [
+        return dependencias.camposPeriodoFiltro(dependencias.campo, { etiquetaPeriodo: "Período (fecha censo)" }).concat([
             dependencias.campo("modulo", "Módulo", "select", dependencias.aOpcion(catalogo.modulos), { requerido: true }),
             dependencias.campo("piso", "Piso", "select", dependencias.aOpcion(catalogo.pisos), { requerido: true }),
             dependencias.campo("habitacion", "Habitación", "select", dependencias.aOpcion(catalogo.habitaciones)),
-            dependencias.campo("turno", "Tipo Turno", "select", [{ value: "D", text: "Día" }, { value: "N", text: "Noche" }], { sinVacio: true }),
-            dependencias.campo("fecha", "Fecha Censo", "date")
-        ];
+            dependencias.campo("turno", "Tipo Turno", "select", [{ value: "D", text: "Día" }, { value: "N", text: "Noche" }], { sinVacio: true })
+        ]);
     }
 
     function filtrosMisCensos() {
-        return [dependencias.campo("fecha", "Fecha de censo", "date", [], { requerido: true })];
+        return dependencias.camposPeriodoFiltro(dependencias.campo, { etiquetaPeriodo: "Período (fecha censo)" });
     }
 
     function enlazar(form) {
@@ -84,8 +93,8 @@ export function crearCenso(dependencias) {
     }
 
     function filtroInicial(modo) {
-        if (modo === "misCensos") return { fecha: dependencias.fechaActual() };
-        if (modo === "censo") return { censoUltimoMes: true, turno: "D" };
+        if (modo === "misCensos") return dependencias.filtroInicialPeriodo();
+        if (modo === "censo") return Object.assign(dependencias.filtroInicialPeriodo(), { turno: "D" });
         return null;
     }
 
@@ -177,7 +186,8 @@ export function crearCenso(dependencias) {
     return {
         filtros: filtros,
         filtrosMisCensos: filtrosMisCensos,
-        buscarUltimoMes: buscarUltimoMes,
+        buscarRango: buscarRango,
+        buscarMiosRango: buscarMiosRango,
         buscar: buscar,
         buscarMios: buscarMios,
         enlazar: enlazar,
