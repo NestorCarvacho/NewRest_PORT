@@ -7,13 +7,19 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace SGH.Web.Pages.Cuenta;
 
 [AllowAnonymous]
+[IgnoreAntiforgeryToken]
 public class SalirModel : PageModel
 {
-    public IActionResult OnGet() => RedirectToPage("/Index");
+    public Task<IActionResult> OnGetAsync() => CerrarSesionYRedirigirAsync();
 
-    public async Task<IActionResult> OnPost()
+    public Task<IActionResult> OnPostAsync() => CerrarSesionYRedirigirAsync();
+
+    private async Task<IActionResult> CerrarSesionYRedirigirAsync()
     {
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return RedirectToPage("/Cuenta/Login");
+        if (User.Identity?.IsAuthenticated == true)
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+        var destino = Url.Page("/Cuenta/Login") ?? "/Cuenta/Login";
+        return LocalRedirect(destino);
     }
 }
