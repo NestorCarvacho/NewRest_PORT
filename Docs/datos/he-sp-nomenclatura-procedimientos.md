@@ -36,8 +36,8 @@ Los procedimientos antiguos `dbo.sp_*` del mismo módulo pueden quedar huérfano
 
 La **aplicación** ya llama `he_sp_*`, pero **HOTELDB** aún solo tiene `sp_*` (u otro nombre). No es un fallo de código: falta alinear la base.
 
-1. **Renombrar en la base (mismo cuerpo, nombre nuevo):** `Docs/datos/migracion/he_sp_renombrar_desde_sp_legacy.sql`  
-   Usa `sp_rename` de cada `dbo.sp_*` → `dbo.he_sp_*` (52 procedimientos). Luego **re-ejecutar** los `.sql` de `SGH.Infrastructure/**/Persistence/` en el orden de `hoteldb-scripts-orden-ejecucion.md`, para que los `EXEC` internos entre wrappers pasen a `he_sp_*` (el cuerpo guardado sigue citando `sp_*` hasta ese paso).
+1. **Renombrar rápido (recomendado en SSMS):** `Docs/datos/migracion/he_sp_renombrar_rapido.sql` — un solo archivo con **PREVIEW** + bucle `sp_rename` (52 pares). Alternativa expandida: `he_sp_renombrar_desde_sp_legacy.sql`.  
+   Luego **re-ejecutar** los `.sql` de `SGH.Infrastructure/**/Persistence/` (orden en `hoteldb-scripts-orden-ejecucion.md`) para actualizar `EXEC` internos que aún citen `sp_*`.
 2. **O crear desde cero:** ejecutar los scripts del repo con `CREATE OR ALTER` (login primero: `Cuenta/Persistence/001_sp_login.sql` y `002_sp_login_passwordv2_dual.sql` si aplica).
 3. **Solo emergencia:** sinónimos (`he_sp_cuenta_login_puente_qa.sql` o `he_sp_sinonimos_desde_sp_legacy.sql`); no sustituye el rename ni el despliegue real.
 
