@@ -10,7 +10,9 @@ public sealed class GestionHabitaciones(
     IConsultaBano consultaBano,
     IComandoBano comandoBano,
     IConsultaCama consultaCama,
-    IComandoCama comandoCama) : IGestionHabitaciones
+    IComandoCama comandoCama,
+    IConsultaTipoCama consultaTipoCama,
+    IComandoTipoCama comandoTipoCama) : IGestionHabitaciones
 {
     public Task<IReadOnlyList<HabitacionListada>> ListarAsync(
         FiltroListadoHabitacion filtro, int usuarioId, CancellationToken cancellationToken) =>
@@ -89,8 +91,8 @@ public sealed class GestionHabitaciones(
     }
 
     public Task<IReadOnlyList<CamaListada>> ListarCamasAsync(
-        int habitacionId, int campamentoId, CancellationToken cancellationToken) =>
-        consultaCama.ListarPorHabitacionAsync(habitacionId, campamentoId, cancellationToken);
+        int habitacionId, int campamentoId, int soloActivas, CancellationToken cancellationToken) =>
+        consultaCama.ListarPorHabitacionAsync(habitacionId, campamentoId, soloActivas, cancellationToken);
 
     public async Task<ResultadoGuardarCama> GuardarCamaAsync(
         DatosGuardarCama datos, int campamentoId, CancellationToken cancellationToken)
@@ -104,6 +106,29 @@ public sealed class GestionHabitaciones(
         if (habitacion is null)
             return new ResultadoGuardarCama(false, "La habitación no existe en el campamento.", datos.Id);
 
+        if (datos.Id > 0)
+        {
+            var habitacionCama = await consultaCama.ObtenerHabitacionIdDeCamaAsync(datos.Id, campamentoId, cancellationToken);
+            var mensajeAlcance = ReglasCama.ValidarPerteneceHabitacion(
+                datos.Id, habitacionCama ?? 0, datos.HabitacionId);
+            if (mensajeAlcance is not null)
+                return new ResultadoGuardarCama(false, mensajeAlcance, datos.Id);
+        }
+
         return await comandoCama.GuardarAsync(datos, campamentoId, cancellationToken);
+    }
+
+    public Task<IReadOnlyList<TipoCamaListado>> ListarTiposCamaAsync(
+        int campamentoId, int soloActivos, CancellationToken cancellationToken) =>
+        consultaTipoCama.ListarAsync(campamentoId, soloActivos, cancellationToken);
+
+    public async Task<ResultadoGuardarTipoCama> GuardarTipoCamaAsync(
+        DatosGuardarTipoCama datos, int campamentoId, CancellationToken cancellationToken)
+    {
+        var mensaje = ReglasTipoCama.ValidarGuardar(datos.Nombre, datos.AnchoCm, datos.LargoCm);
+        if (mensaje is not null)
+            return new ResultadoGuardarTipoCama(false, mensaje, datos.Id);
+
+        return await comandoTipoCama.GuardarAsync(datos, campamentoId, cancellationToken);
     }
 }

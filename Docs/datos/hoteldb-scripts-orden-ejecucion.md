@@ -18,18 +18,20 @@ Convenciones:
 | 4 | `SGH.Infrastructure/Reserva/Persistence/001_sp_reserva.sql` | Reserva | Antes de `004_sp_generar_reservas.sql` (generación llama reserva legada). |
 | 5 | `SGH.Infrastructure/Habitacion/Persistence/002_hotldb_cu_hab_extension.sql` | Habitación | **Primero** del bloque CU-HAB: tablas/columnas. |
 | 6 | `SGH.Infrastructure/Habitacion/Persistence/003_sp_bano_cama.sql` | Habitación | Después de **002**; SP de baño/cama. |
-| 7 | `SGH.Infrastructure/Habitacion/Persistence/001_sp_habitacion.sql` | Habitación | Después de **002** y **003** (referencia `Banos`/`Camas`). |
-| 8 | `SGH.Infrastructure/Habitacion/Persistence/004_banos_isactive_estado.sql` | Habitación | **Opcional**, una vez: `UPDATE` de datos; requiere tabla `Banos` de **002**. |
-| 9 | `SGH.Infrastructure/Solicitud/Persistence/001_sp_solicitud.sql` | Solicitud | Base del módulo; ver `README.md`. |
-| 10 | `SGH.Infrastructure/Solicitud/Persistence/002_sp_pasajeros_solicitud.sql` | Solicitud | Pasajeros en detalle. |
-| 11 | `SGH.Infrastructure/Solicitud/Persistence/003_sp_guardar_pasajero.sql` | Solicitud | Alta/edición pasajero. |
-| 12 | `SGH.Infrastructure/Solicitud/Persistence/005_sp_habitaciones_solicitud.sql` | Solicitud | Disponibles / asignar / desasignar (antes o junto a generar). |
-| 13 | `SGH.Infrastructure/Solicitud/Persistence/004_sp_generar_reservas.sql` | Solicitud | Generar reservas; después de **003** y **005** recomendado. |
-| 14 | `SGH.Infrastructure/Solicitud/Persistence/007_sp_solicitud_asegurar_periodo.sql` | Solicitud | Bloque **importación** masiva (con **008**). |
-| 15 | `SGH.Infrastructure/Solicitud/Persistence/008_sp_reserva_finalizar_checkout.sql` | Solicitud | Importación / checkout. |
-| 16 | `SGH.Infrastructure/Solicitud/Persistence/006_sp_cargar_pasajero.sql` | Solicitud | Carga masiva; después de **007** y **008**. |
-| 17 | `SGH.Infrastructure/Navegacion/Persistence/002_menu_config_habitacion_bano.sql` | Navegación | Entradas de menú Configuración; después de CU-HAB operativo. |
-| 18 | `SGH.Infrastructure/Navegacion/Persistence/003_menusperfil_habitacion_bano_por_perfil.sql` | Navegación | `MenusPerfil` por perfil (p. ej. 68); después del **002**. |
+| 7 | `SGH.Infrastructure/Habitacion/Persistence/005_hotldb_tipo_cama_inventario.sql` | Habitación | Tabla `TipoCama` y columnas inventario en `Camas` (CU-HAB-02). |
+| 8 | `SGH.Infrastructure/Habitacion/Persistence/006_sp_tipo_cama_inventario.sql` | Habitación | SP tipos de cama y catálogo habitación extendido. |
+| 9 | `SGH.Infrastructure/Habitacion/Persistence/001_sp_habitacion.sql` | Habitación | Después de **002**, **003**, **005** y **006** (referencia `Banos`/`Camas`/`TipoCama`). |
+| 10 | `SGH.Infrastructure/Habitacion/Persistence/004_banos_isactive_estado.sql` | Habitación | **Opcional**, una vez: `UPDATE` de datos; requiere tabla `Banos` de **002**. |
+| 11 | `SGH.Infrastructure/Solicitud/Persistence/001_sp_solicitud.sql` | Solicitud | Base del módulo; ver `README.md`. |
+| 12 | `SGH.Infrastructure/Solicitud/Persistence/002_sp_pasajeros_solicitud.sql` | Solicitud | Pasajeros en detalle. |
+| 13 | `SGH.Infrastructure/Solicitud/Persistence/003_sp_guardar_pasajero.sql` | Solicitud | Alta/edición pasajero. |
+| 14 | `SGH.Infrastructure/Solicitud/Persistence/005_sp_habitaciones_solicitud.sql` | Solicitud | Disponibles / asignar / desasignar (antes o junto a generar). |
+| 15 | `SGH.Infrastructure/Solicitud/Persistence/004_sp_generar_reservas.sql` | Solicitud | Generar reservas; después de **003** y **005** recomendado. |
+| 16 | `SGH.Infrastructure/Solicitud/Persistence/007_sp_solicitud_asegurar_periodo.sql` | Solicitud | Bloque **importación** masiva (con **008**). |
+| 17 | `SGH.Infrastructure/Solicitud/Persistence/008_sp_reserva_finalizar_checkout.sql` | Solicitud | Importación / checkout. |
+| 18 | `SGH.Infrastructure/Solicitud/Persistence/006_sp_cargar_pasajero.sql` | Solicitud | Carga masiva; después de **007** y **008**. |
+| 19 | `SGH.Infrastructure/Navegacion/Persistence/002_menu_config_habitacion_bano.sql` | Navegación | Entradas de menú Configuración; después de CU-HAB operativo. |
+| 20 | `SGH.Infrastructure/Navegacion/Persistence/003_menusperfil_habitacion_bano_por_perfil.sql` | Navegación | `MenusPerfil` por perfil (p. ej. 68); después del **002**. |
 
 ### Parches incrementales (QA que ya ejecutó los `001_*` antiguos)
 
@@ -40,6 +42,7 @@ No re-ejecutar los `001` solo para aplicar estos cambios. Usar los archivos nume
 | A | `SGH.Infrastructure/Cuenta/Persistence/002_sp_login_passwordv2_dual.sql` | `001_sp_login.sql` (versión sin `PasswordV2` / dual hash) |
 | B | `SGH.Infrastructure/Reserva/Persistence/002_sp_reserva_buscar_rango_top.sql` | `001_sp_reserva.sql` (sin `@MaxFilas` ni rango 30 días en búsqueda) |
 | C | `SGH.Infrastructure/Solicitud/Persistence/009_sp_solicitud_buscar_listado.sql` | `001_sp_solicitud.sql` y, si aplica, scripts **002–008** del módulo |
+| D | `005_hotldb_tipo_cama_inventario.sql` + `006_sp_tipo_cama_inventario.sql` | Bloque habitación **002** y **003** ya aplicado |
 
 En **instalación nueva**, los `001` del repositorio actual ya incluyen el mismo contenido; los `002` / `009` anteriores son opcionales.
 

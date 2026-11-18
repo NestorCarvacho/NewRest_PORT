@@ -20,6 +20,13 @@ export function definirPantallasHabitacion(habitacion) {
             columnas: ["Acciones", "Código", "Ubicación", "Sexo", "Estado", "Habitaciones"],
             filtros: function () { return habitacion.filtros("banos"); },
             filtroInicial: function () { return habitacion.filtroInicial("banos"); }
+        },
+        tiposcama: {
+            titulo: "Tipos de cama",
+            modo: "tiposcama",
+            columnas: ["Acciones", "Nombre", "Medidas", "Camas", "Estado"],
+            filtros: function () { return habitacion.filtros("tiposcama"); },
+            filtroInicial: function () { return habitacion.filtroInicial("tiposcama"); }
         }
     };
 }
@@ -38,7 +45,8 @@ export function instalarHabitacion(base) {
         prepararCatalogo: base.prepararCatalogo,
         cargar: base.cargar,
         numero: numero,
-        actualizarSelector: base.actualizarSelector
+        actualizarSelector: base.actualizarSelector,
+        boton: base.boton
     });
     var movimientosHabitacion = crearMovimientosHabitacion({
         boton: base.boton,

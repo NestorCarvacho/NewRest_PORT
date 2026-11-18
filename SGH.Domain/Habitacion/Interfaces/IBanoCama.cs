@@ -22,13 +22,39 @@ public sealed record ResultadoGuardarBano(bool Exito, string Mensaje, int Id);
 
 public sealed record HabitacionVinculadaBano(int Id, string Nombre);
 
+public sealed record TipoCamaListado(
+    int Id,
+    string Nombre,
+    short AnchoCm,
+    short LargoCm,
+    bool IsActive,
+    int CamasVinculadas);
+
+public sealed record DatosGuardarTipoCama(
+    int Id,
+    string Nombre,
+    short AnchoCm,
+    short LargoCm,
+    bool IsActive,
+    int UsuarioId);
+
+public sealed record ResultadoGuardarTipoCama(bool Exito, string Mensaje, int Id);
+
 public sealed record CamaListada(
     int Id,
     int HabitacionId,
     string CodigoCama,
     bool Habilitada,
     int Orden,
-    bool IsActive);
+    bool IsActive,
+    int? TipoCamaId,
+    string? TipoCamaNombre,
+    short? TipoCamaAnchoCm,
+    short? TipoCamaLargoCm,
+    DateTime? FechaColchon,
+    string? ColchonObservacion,
+    DateTime? FechaCambioRopa,
+    string? RopaCamaObservacion);
 
 public sealed record DatosGuardarCama(
     int Id,
@@ -37,6 +63,11 @@ public sealed record DatosGuardarCama(
     bool Habilitada,
     int Orden,
     bool IsActive,
+    int? TipoCamaId,
+    DateTime? FechaColchon,
+    string? ColchonObservacion,
+    DateTime? FechaCambioRopa,
+    string? RopaCamaObservacion,
     int UsuarioId);
 
 public sealed record ResultadoGuardarCama(bool Exito, string Mensaje, int Id);
@@ -55,10 +86,23 @@ public interface IComandoBano
 
 public interface IConsultaCama
 {
-    Task<IReadOnlyList<CamaListada>> ListarPorHabitacionAsync(int habitacionId, int campamentoId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<CamaListada>> ListarPorHabitacionAsync(
+        int habitacionId, int campamentoId, int soloActivas, CancellationToken cancellationToken);
+
+    Task<int?> ObtenerHabitacionIdDeCamaAsync(int camaId, int campamentoId, CancellationToken cancellationToken);
 }
 
 public interface IComandoCama
 {
     Task<ResultadoGuardarCama> GuardarAsync(DatosGuardarCama datos, int campamentoId, CancellationToken cancellationToken);
+}
+
+public interface IConsultaTipoCama
+{
+    Task<IReadOnlyList<TipoCamaListado>> ListarAsync(int campamentoId, int soloActivos, CancellationToken cancellationToken);
+}
+
+public interface IComandoTipoCama
+{
+    Task<ResultadoGuardarTipoCama> GuardarAsync(DatosGuardarTipoCama datos, int campamentoId, CancellationToken cancellationToken);
 }

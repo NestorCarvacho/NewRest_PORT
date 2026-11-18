@@ -118,6 +118,11 @@ export function crearPanelModulo(dependencias) {
                 dependencias.habitacion.abrirNuevoBano();
             }));
         }
+        if (modulo.modo === "tiposcama" && dependencias.habitacion) {
+            barra.append(dependencias.boton("Nuevo tipo de cama", "boton-primario", function () {
+                dependencias.habitacion.abrirNuevoTipoCama();
+            }));
+        }
         nodo.append(estado, barra, dependencias.crearTabla(modulo.columnas));
         return nodo;
     }

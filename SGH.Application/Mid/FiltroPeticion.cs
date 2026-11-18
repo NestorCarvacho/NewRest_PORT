@@ -78,6 +78,12 @@ public static class LecturaPeticion
     public static DateTime? Fecha(string? valor) =>
         DateTime.TryParse(valor, out var fecha) ? fecha : null;
 
+    public static DateTime? FechaOpcional(FiltroPeticion filtro, string nombre)
+    {
+        var texto = Texto(filtro, nombre);
+        return string.IsNullOrWhiteSpace(texto) ? null : Fecha(texto);
+    }
+
     public static JsonElement? Lista(FiltroPeticion filtro, string nombre)
     {
         var campo = Campo(filtro, nombre);

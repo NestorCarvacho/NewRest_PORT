@@ -56,6 +56,7 @@ public sealed class ConsultaHabitacion(IFabricaConexionSql fabrica) : IConsultaH
         var tipos = (await multi.ReadAsync<OpcionCatalogo>()).AsList();
         var standards = (await multi.ReadAsync<OpcionCatalogo>()).AsList();
         IReadOnlyList<OpcionCatalogo> banos = [];
+        IReadOnlyList<OpcionCatalogo> tiposCama = [];
         if (!multi.IsConsumed)
         {
             try
@@ -67,7 +68,18 @@ public sealed class ConsultaHabitacion(IFabricaConexionSql fabrica) : IConsultaH
                 /* catálogo sin 7.º result set (pre-002) */
             }
         }
-        return new CatalogoHabitacion(pabellones, modulos, sexos, estados, tipos, standards, banos);
+        if (!multi.IsConsumed)
+        {
+            try
+            {
+                tiposCama = (await multi.ReadAsync<OpcionCatalogo>()).AsList();
+            }
+            catch (InvalidOperationException)
+            {
+                /* catálogo sin 8.º result set (pre CU-HAB-02) */
+            }
+        }
+        return new CatalogoHabitacion(pabellones, modulos, sexos, estados, tipos, standards, banos, tiposCama);
     }
 
     private sealed class OpcionListaFila

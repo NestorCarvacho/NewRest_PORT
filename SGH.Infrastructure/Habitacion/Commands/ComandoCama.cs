@@ -18,6 +18,11 @@ public sealed class ComandoCama(IFabricaConexionSql fabrica) : IComandoCama
         parametros.Add("@Habilitada", datos.Habilitada);
         parametros.Add("@Orden", datos.Orden);
         parametros.Add("@IsActive", datos.IsActive);
+        parametros.Add("@TipoCamaId", datos.TipoCamaId);
+        parametros.Add("@FechaColchon", datos.FechaColchon?.Date);
+        parametros.Add("@ColchonObservacion", datos.ColchonObservacion);
+        parametros.Add("@FechaCambioRopa", datos.FechaCambioRopa?.Date);
+        parametros.Add("@RopaCamaObservacion", datos.RopaCamaObservacion);
         parametros.Add("@CampamentoId", campamentoId);
         parametros.Add("@UsuarioId", datos.UsuarioId);
         parametros.Add("@IdResultado", dbType: DbType.Int32, direction: ParameterDirection.Output);

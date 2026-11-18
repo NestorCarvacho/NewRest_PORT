@@ -41,7 +41,7 @@ export function crearCatalogos(enviar) {
                 return datos;
             });
         }
-        if (modo === "habitaciones" || modo === "banos") return cargarHabitacion();
+        if (modo === "habitaciones" || modo === "banos" || modo === "tiposcama") return cargarHabitacion();
         if (modo === "misCensos") return Promise.resolve(null);
         if (modo === "censo") return cargarCenso();
         return cargarReserva();
