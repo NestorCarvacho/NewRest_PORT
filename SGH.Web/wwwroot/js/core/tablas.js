@@ -73,6 +73,13 @@ export function crearTablas() {
         return id == null ? null : Number(id);
     }
 
+    function idDesdeDatosFila(datos) {
+        if (!datos) return null;
+        if (datos._fila != null) return idRegistro(datos._fila);
+        if (datos.acciones != null && typeof datos.acciones === "object") return idRegistro(datos.acciones);
+        return idRegistro(datos);
+    }
+
     function indiceEnFilas(filas, id) {
         for (var i = 0; i < filas.length; i++) {
             if (idRegistro(filas[i]) === id) return i;
@@ -81,11 +88,10 @@ export function crearTablas() {
     }
 
     function filaApiPorId(api, id) {
+        var numeroId = Number(id);
         var encontrada = null;
         api.rows().every(function () {
-            var datos = this.data();
-            var origen = datos && datos._fila != null ? datos._fila : datos;
-            if (idRegistro(origen) === id) {
+            if (idDesdeDatosFila(this.data()) === numeroId) {
                 encontrada = this;
                 return false;
             }
@@ -115,8 +121,8 @@ export function crearTablas() {
         api.draw(false);
     }
 
-    /** Reemplaza o agrega una fila sin volver a pedir el listado completo. */
-    function sincronizarFila(nodo, id, filaOrigen, mapear) {
+  /** Actualiza una fila en memoria y en DataTables sin repintar todo el listado. */
+    function sincronizarFila(nodo, id, filaOrigen, mapear, repintarAcciones) {
         if (id == null || !filaOrigen) return;
         var numeroId = Number(id);
         var filas = nodo._filas || [];
@@ -128,7 +134,17 @@ export function crearTablas() {
         if (!api) return;
         var mapeada = mapear(filaOrigen);
         var fila = filaApiPorId(api, numeroId);
-        if (fila) fila.remove();
+        if (fila) {
+            fila.data(mapeada);
+            fila.invalidate();
+            api.draw(false);
+            var indice = fila.index();
+            if (repintarAcciones) {
+                var celdaAcciones = api.cell(indice, 0).node();
+                if (celdaAcciones) celdaAcciones.replaceChildren(repintarAcciones(mapeada));
+            }
+            return;
+        }
         api.row.add(mapeada).draw(false);
     }
 

@@ -1,3 +1,5 @@
+var cierreDesplegableEnlazado = false;
+
 /** Agrupa botones de fila en un desplegable para no invadir columnas vecinas. */
 export function crearAccionesDesplegable(botonFactory, etiquetas) {
     var envoltorio = document.createElement("div");
@@ -20,12 +22,16 @@ export function crearAccionesDesplegable(botonFactory, etiquetas) {
         panel.append(item);
     });
     envoltorio.append(dispara, panel);
-    document.addEventListener("click", function (evento) {
-        if (!envoltorio.classList.contains("abierto")) return;
-        if (!envoltorio.contains(evento.target)) {
-            envoltorio.classList.remove("abierto");
-            dispara.setAttribute("aria-expanded", "false");
-        }
-    });
+    if (!cierreDesplegableEnlazado) {
+        cierreDesplegableEnlazado = true;
+        document.addEventListener("click", function (evento) {
+            document.querySelectorAll(".acciones-desplegable.abierto").forEach(function (menu) {
+                if (menu.contains(evento.target)) return;
+                menu.classList.remove("abierto");
+                var boton = menu.querySelector(".acciones-desplegable-dispara");
+                if (boton) boton.setAttribute("aria-expanded", "false");
+            });
+        });
+    }
     return envoltorio;
 }
