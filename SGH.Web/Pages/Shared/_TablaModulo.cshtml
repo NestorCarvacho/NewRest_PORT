@@ -1,0 +1,21 @@
+@using SGH.Web.Escritorio
+@{
+    var moduloId = ViewData["ModuloId"] as string ?? "";
+    var encabezados = EncabezadosTablaModulo.Obtener(moduloId);
+}
+@if (encabezados.Count > 0)
+{
+    <div class="modulo-tabla-contenedor">
+        <table class="tabla modulo-tabla" data-modulo="@moduloId">
+            <thead>
+                <tr>
+                    @foreach (var titulo in encabezados)
+                    {
+                        <th scope="col">@titulo</th>
+                    }
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+}

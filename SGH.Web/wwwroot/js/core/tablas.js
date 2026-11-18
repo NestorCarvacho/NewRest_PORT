@@ -1,17 +1,27 @@
+import { encabezadosModulo } from "./encabezados-tabla.js";
+
 export function crearTablas() {
-    function crear(columnas) {
+    /** Fallback cuando el panel no viene anclado desde Razor: arma la misma tabla “tonta” que _TablaModulo.cshtml. */
+    function crear(encabezados, modo) {
+        var titulos = encabezados;
+        if ((!titulos || !titulos.length) && modo) titulos = encabezadosModulo(modo);
         var tabla = document.createElement("table");
-        tabla.className = "tabla";
+        tabla.className = "tabla modulo-tabla";
+        if (modo) tabla.dataset.modulo = modo;
         var cabecera = document.createElement("thead");
         var fila = document.createElement("tr");
-        columnas.forEach(function (columna) {
+        (titulos || []).forEach(function (columna) {
             var th = document.createElement("th");
+            th.scope = "col";
             th.textContent = columna;
             fila.append(th);
         });
         cabecera.append(fila);
         tabla.append(cabecera, document.createElement("tbody"));
-        return tabla;
+        var envoltorio = document.createElement("div");
+        envoltorio.className = "modulo-tabla-contenedor";
+        envoltorio.append(tabla);
+        return envoltorio;
     }
 
     function inicializar(nodo, columnas, ordenInicial) {
@@ -41,7 +51,11 @@ export function crearTablas() {
             };
         }
         if (ordenInicial) opciones.order = ordenInicial;
-        var tabla = new DataTable(nodo.querySelector("table"), opciones);
+        var elementoTabla = nodo.querySelector("table.modulo-tabla, table.tabla");
+        if (!elementoTabla) {
+            throw new Error("No hay tabla en el panel del módulo.");
+        }
+        var tabla = new DataTable(elementoTabla, opciones);
         tabla.on("draw", function () { completarFilas(tabla); });
         completarFilas(tabla);
         return tabla;

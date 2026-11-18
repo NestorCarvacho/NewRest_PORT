@@ -44,17 +44,7 @@ export function crearPanelModulo(dependencias) {
         return envoltorio;
     }
 
-    function crear(id, modulo) {
-        var nodo = document.createElement("section");
-        nodo.className = "modulo modulo-" + id;
-        nodo.dataset.id = id;
-        nodo.hidden = true;
-        nodo._filtro = modulo.filtroInicial();
-        var estado = document.createElement("p");
-        estado.className = "modulo-estado";
-        estado.hidden = true;
-        var barra = document.createElement("div");
-        barra.className = "modulo-barra";
+    function montarBarra(nodo, id, modulo, barra) {
         var ultimaActualizacion = 0;
         var intervaloMinimoMs = 5000;
         var botonActualizar = dependencias.boton("Actualizar", "boton-secundario", function () {
@@ -123,7 +113,59 @@ export function crearPanelModulo(dependencias) {
                 dependencias.habitacion.abrirNuevoTipoCama();
             }));
         }
-        nodo.append(estado, barra, dependencias.crearTabla(modulo.columnas));
+    }
+
+    function crear(id, modulo) {
+        var anclado = document.querySelector('.modulo-anclado[data-id="' + id + '"]');
+        var nodo;
+        var estado;
+        var barra;
+        if (anclado) {
+            nodo = anclado;
+            nodo.classList.add("modulo", "modulo-" + id);
+            nodo.dataset.id = id;
+            nodo.hidden = true;
+            estado = nodo.querySelector(".modulo-estado");
+            barra = nodo.querySelector(".modulo-barra");
+            if (!estado) {
+                estado = document.createElement("p");
+                estado.className = "modulo-estado";
+                estado.hidden = true;
+                nodo.prepend(estado);
+            }
+            if (!barra) {
+                barra = document.createElement("div");
+                barra.className = "modulo-barra";
+                var contenedorTabla = nodo.querySelector(".modulo-tabla-contenedor");
+                if (contenedorTabla) nodo.insertBefore(barra, contenedorTabla);
+                else nodo.append(barra);
+            }
+        } else {
+            nodo = document.createElement("section");
+            nodo.className = "modulo modulo-" + id;
+            nodo.dataset.id = id;
+            nodo.hidden = true;
+            estado = document.createElement("p");
+            estado.className = "modulo-estado";
+            estado.hidden = true;
+            barra = document.createElement("div");
+            barra.className = "modulo-barra";
+        }
+
+        nodo._filtro = modulo.filtroInicial();
+        if (!barra.dataset.montada) {
+            montarBarra(nodo, id, modulo, barra);
+            barra.dataset.montada = "1";
+        }
+
+        if (!anclado) {
+            nodo.append(estado, barra);
+        }
+
+        if (!nodo.querySelector("table.modulo-tabla")) {
+            nodo.append(dependencias.crearTabla(modulo.columnas, modulo.modo));
+        }
+
         return nodo;
     }
 

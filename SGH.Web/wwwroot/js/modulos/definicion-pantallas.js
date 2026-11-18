@@ -1,13 +1,14 @@
+import { encabezadosModulo } from "../core/encabezados-tabla.js";
+
 function pantalla(titulo, columnas, filtros, secciones, accion, modo) {
     return { titulo: titulo, columnas: columnas, filtros: filtros, secciones: secciones, accion: accion, modo: modo };
 }
 
 export function definirPantallasReserva(reserva) {
-    var columnasReserva = ["Acciones", "N°", "Fecha Reserva", "Grupo Empresa", "Pasajero", "Habitación", "Estado", "Llegada", "Salida", "Check In", "Check Out"];
     var modulos = {
         reserva: pantalla(
             "Reserva",
-            columnasReserva,
+            encabezadosModulo("reserva"),
             reserva.filtros,
             null,
             null,
@@ -22,7 +23,7 @@ export function definirPantallasCenso(censo) {
     var modulos = {
         censo: pantalla(
             "Censo",
-            ["Nº", "Fecha", "Módulo", "Piso", "Habitación", "Estado Censo", "Estado Habitación", "N° Camas", "Camas ocupadas", "Cam. ocupadas (CheckIn)"],
+            encabezadosModulo("censo"),
             censo.filtros,
             null,
             { titulo: "Censo", boton: "Guardar", confirmar: "Guardar" },
@@ -30,7 +31,7 @@ export function definirPantallasCenso(censo) {
         ),
         misCensos: pantalla(
             "Mis Censos",
-            ["N°", "Fecha", "Campamento", "Módulo", "Piso", "Habitación", "N° Camas", "Camas ocupadas", "Turno"],
+            encabezadosModulo("misCensos"),
             censo.filtrosMisCensos,
             null,
             null,
@@ -46,7 +47,7 @@ export function definirPantallasSolicitud(solicitud) {
     var modulos = {
         solicitud: pantalla(
             "Solicitud alojamiento",
-            ["Acciones", "N°", "Fecha", "Grupo empresa", "Solicitante", "Estado"],
+            encabezadosModulo("solicitud"),
             solicitud.filtros,
             null,
             { titulo: "Nueva solicitud", boton: "Nueva solicitud" },
