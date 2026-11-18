@@ -113,11 +113,15 @@ export function ensamblarEntorno(idsPantalla) {
 
     var cancelarCargaNodo = function () { };
 
+    var enlazarSincronizacion = {
+        sincronizarFila: renderizador.sincronizarFila.bind(renderizador),
+        quitarFila: renderizador.quitarFila.bind(renderizador)
+    };
     if (instancia.habitacion && typeof instancia.habitacion.enlazarSincronizacionListado === "function") {
-        instancia.habitacion.enlazarSincronizacionListado({
-            sincronizarFila: renderizador.sincronizarFila.bind(renderizador),
-            quitarFila: renderizador.quitarFila.bind(renderizador)
-        });
+        instancia.habitacion.enlazarSincronizacionListado(enlazarSincronizacion);
+    }
+    if (instancia.reserva && typeof instancia.reserva.enlazarSincronizacionListado === "function") {
+        instancia.reserva.enlazarSincronizacionListado(enlazarSincronizacion);
     }
 
     return Object.assign(instancia, {

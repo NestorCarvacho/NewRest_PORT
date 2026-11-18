@@ -27,8 +27,13 @@ export function crearMovimientosReserva(dependencias) {
                     fecha: datos.fecha,
                     operacion: operacion
                 }).then(function () {
-                    var activo = document.querySelector(".modulo:not([hidden])");
-                    return (activo ? dependencias.cargar(activo.dataset.id, { bloquearPantalla: false }) : Promise.resolve()).then(function () {
+                    var actualizar = dependencias.refrescarFilaReserva
+                        ? dependencias.refrescarFilaReserva(reservaId)
+                        : (dependencias.cargar
+                            ? dependencias.cargar("reserva", { bloquearPantalla: false, avisarConteoFilas: false })
+                            : Promise.resolve());
+                    return actualizar.then(function () {
+                        if (dependencias.cerrarPanel) dependencias.cerrarPanel();
                         dependencias.mostrarAviso(operacion === "I"
                             ? "Check In registrado correctamente."
                             : "Check Out registrado correctamente.", "success");

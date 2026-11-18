@@ -53,7 +53,7 @@ export function crearPanelModulo(dependencias) {
                 }
                 ultimaActualizacion = ahora;
                 bloquearBotonSegundos(btnActualizar, Math.ceil(intervaloMinimoMs / 1000));
-                dependencias.cargar(id, { bloquearPantalla: false }).catch(function (error) {
+                dependencias.cargar(id, { bloquearPantalla: false, avisarConteoFilas: false }).catch(function (error) {
                     dependencias.mostrarEstado(nodo, error.message);
                 });
             });
