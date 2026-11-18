@@ -21,6 +21,16 @@ public static class ReglasConsultaListado
         return (desdeEfectivo, hastaEfectivo);
     }
 
+    /// <summary>Recorta el listado y marca si superó el tope permitido para la UI.</summary>
+    public static (IReadOnlyList<T> Filas, bool Truncado) AplicarTopeFilas<T>(IReadOnlyList<T> filas)
+    {
+        if (filas.Count <= MaxFilas)
+            return (filas, false);
+
+        var recorte = filas.Take(MaxFilas).ToList();
+        return (recorte, true);
+    }
+
     public static bool RangoReservaVacío(
         DateTime? fechaReserva,
         DateTime? fechaReservaDesde,

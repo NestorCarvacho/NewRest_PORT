@@ -121,13 +121,14 @@ export function crearReserva(dependencias) {
         });
     }
 
-    function buscar(filtro) {
+    function buscar(filtro, enviarMid) {
         var payload = dependencias.normalizarFiltroPeriodo
             ? dependencias.normalizarFiltroPeriodo(filtro)
             : (dependencias.aplicarPresetPeriodo
                 ? dependencias.aplicarPresetPeriodo(filtro, filtro && filtro.periodo)
                 : filtro);
-        return dependencias.enviar("/Reserva/Mid/MidReservas.cs", {
+        var enviar = enviarMid || dependencias.enviar;
+        return enviar("/Reserva/Mid/MidReservas.cs", {
             opcion: "listar",
             areaId: payload.grupo,
             origen: payload.origen,

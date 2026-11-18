@@ -86,9 +86,12 @@ public sealed class MidSolicitudes(IGestionSolicitudes gestion, INotificadorSoli
             LecturaPeticion.Texto(filtro, "estado") is { Length: > 0 } estado ? estado : "0",
             LecturaPeticion.Entero(filtro, "numero"));
         var filas = await gestion.BuscarAsync(criterios, cancellationToken);
+        var (filasRecorte, truncado) = ReglasConsultaListado.AplicarTopeFilas(filas);
         return EjecucionMid.Ok(new
         {
-            filas,
+            filas = filasRecorte,
+            truncado,
+            maxFilas = ReglasConsultaListado.MaxFilas,
             depuracion = RegistrosDepuracion.Invocacion("dbo.sp_Solicitud_Buscar", new
             {
                 empresaMandanteId = criterios.EmpresaMandanteId,

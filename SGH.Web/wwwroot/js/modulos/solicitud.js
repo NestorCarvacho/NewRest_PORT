@@ -18,11 +18,12 @@ export function crearSolicitud(d) {
     function filtroInicial() {
         return d.filtroInicialPeriodo();
     }
-    function buscar(filtro) {
+    function buscar(filtro, enviarMid) {
         var payload = d.normalizarFiltroPeriodo
             ? d.normalizarFiltroPeriodo(filtro)
             : (d.aplicarPresetPeriodo ? d.aplicarPresetPeriodo(filtro, filtro && filtro.periodo) : filtro);
-        return mid("listar", payload);
+        var enviar = enviarMid || function (url, cuerpo) { return d.enviar(url, cuerpo); };
+        return enviar(ruta, Object.assign({ opcion: "listar" }, payload));
     }
     function boton(texto, accion) {
         var el = document.createElement("button");

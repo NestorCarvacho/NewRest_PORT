@@ -1,7 +1,16 @@
 export function crearApi() {
+    var reintentosRed = 2;
+    var esperaBaseMs = 400;
+
     function token() {
         var campo = document.querySelector("#antifalsificacion input[name='__RequestVerificationToken']");
         return campo ? campo.value : "";
+    }
+
+    function esFalloRed(error) {
+        if (!error) return false;
+        if (error.name === "AbortError") return false;
+        return error instanceof TypeError;
     }
 
     function leer(respuesta) {
@@ -25,22 +34,39 @@ export function crearApi() {
         });
     }
 
-    function pedir(url, opciones) {
-        return fetch(url, opciones).then(leer);
+    function pedir(url, opciones, intento) {
+        intento = intento || 0;
+        return fetch(url, opciones).then(function (respuesta) {
+            return leer(respuesta);
+        }).catch(function (error) {
+            if (error && error.name === "AbortError") throw error;
+            if (intento < reintentosRed && esFalloRed(error) && (!opciones.signal || !opciones.signal.aborted)) {
+                var espera = esperaBaseMs * (intento + 1);
+                return new Promise(function (resolver) {
+                    window.setTimeout(resolver, espera);
+                }).then(function () {
+                    return pedir(url, opciones, intento + 1);
+                });
+            }
+            throw error;
+        });
     }
 
-    function enviar(url, cuerpo) {
+    function enviar(url, cuerpo, extra) {
+        extra = extra || {};
         return pedir(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "RequestVerificationToken": token()
             },
-            body: JSON.stringify(cuerpo)
+            body: JSON.stringify(cuerpo),
+            signal: extra.signal
         });
     }
 
-    function enviarArchivo(url, archivo, datos) {
+    function enviarArchivo(url, archivo, datos, extra) {
+        extra = extra || {};
         var cuerpo = new FormData();
         cuerpo.append("archivo", archivo);
         if (datos) {
@@ -49,7 +75,8 @@ export function crearApi() {
         return pedir(url, {
             method: "POST",
             headers: { "RequestVerificationToken": token() },
-            body: cuerpo
+            body: cuerpo,
+            signal: extra.signal
         });
     }
 

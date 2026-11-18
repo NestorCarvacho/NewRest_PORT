@@ -73,7 +73,7 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas
             LecturaPeticion.Texto(filtro, "estado"),
             LecturaPeticion.EnteroOpcional(filtro, "soloActivas") ?? 1,
             null), sesion.UsuarioId, cancellationToken);
-        return EjecucionMid.Ok(new { filas });
+        return EjecucionMid.Ok(RespuestaListado.ConTope(filas));
     }
 
     private async Task<EjecucionMid> CatalogoAsync(DatosSesion sesion, CancellationToken cancellationToken)
@@ -150,7 +150,7 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas
     {
         var soloActivos = LecturaPeticion.EnteroOpcional(filtro, "soloActivos") ?? 1;
         var filas = await gestion.ListarBanosAsync(sesion.CampamentoId, soloActivos, cancellationToken);
-        return EjecucionMid.Ok(new { filas });
+        return EjecucionMid.Ok(RespuestaListado.ConTope(filas));
     }
 
     private async Task<EjecucionMid> GuardarBanoAsync(
@@ -247,7 +247,7 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas
     {
         var soloActivos = LecturaPeticion.EnteroOpcional(filtro, "soloActivos") ?? 1;
         var filas = await gestion.ListarTiposCamaAsync(sesion.CampamentoId, soloActivos, cancellationToken);
-        return EjecucionMid.Ok(new { filas });
+        return EjecucionMid.Ok(RespuestaListado.ConTope(filas));
     }
 
     private async Task<EjecucionMid> GuardarTipoCamaAsync(

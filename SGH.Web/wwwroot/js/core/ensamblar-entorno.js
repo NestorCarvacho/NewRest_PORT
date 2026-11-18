@@ -88,6 +88,7 @@ export function ensamblarEntorno(idsPantalla) {
         var cargador = crearCargador({
             obtenerNodo: obtenerNodo,
             obtenerModulo: function (id) { return modulos[id]; },
+            enviar: base.enviar,
             pedir: base.pedir,
             censo: instancia.censo,
             reserva: instancia.reserva,
@@ -100,6 +101,7 @@ export function ensamblarEntorno(idsPantalla) {
             pintar: renderizador.pintar
         });
         base.cargarDeferido.enlazar(function (id) { return cargador.cargar(id); });
+        return cargador;
     }
 
     function enlazarPanelesLaterales() {
@@ -109,6 +111,8 @@ export function ensamblarEntorno(idsPantalla) {
         if (velo) velo.addEventListener("click", base.cerrarPanel);
     }
 
+    var cancelarCargaNodo = function () { };
+
     return Object.assign(instancia, {
         modulos: modulos,
         renderizador: renderizador,
@@ -116,7 +120,11 @@ export function ensamblarEntorno(idsPantalla) {
         tablas: base.tablas,
         prepararCatalogo: base.prepararCatalogo,
         cargar: base.cargar,
-        enlazarCargador: enlazarCargador,
+        enlazarCargador: function (obtenerNodo) {
+            var cargador = enlazarCargador(obtenerNodo);
+            cancelarCargaNodo = cargador.cancelarCargaNodo;
+        },
+        cancelarCargaNodo: function (nodo) { cancelarCargaNodo(nodo); },
         mostrarEstado: base.mostrarEstado,
         cerrarPanel: base.cerrarPanel,
         panelLateral: base.panelLateral,

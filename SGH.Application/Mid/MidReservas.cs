@@ -111,7 +111,7 @@ public sealed class MidReservas(
 
         return resultado switch
         {
-            ResultadoBusquedaReservas.Lista lista => EjecucionMid.Ok(new { filas = lista.Filas }),
+            ResultadoBusquedaReservas.Lista lista => EjecucionMid.Ok(RespuestaListado.ConTope(lista.Filas)),
             ResultadoBusquedaReservas.Rechazada rechazada => EjecucionMid.Fallo(400, rechazada.Mensaje),
             _ => EjecucionMid.Fallo(400, "No se pudo consultar las reservas.")
         };
