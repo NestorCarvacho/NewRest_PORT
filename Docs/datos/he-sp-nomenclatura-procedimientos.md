@@ -36,12 +36,13 @@ Los procedimientos antiguos `dbo.sp_*` del mismo módulo pueden quedar huérfano
 
 La **aplicación** ya llama `he_sp_*`, pero **HOTELDB** aún solo tiene `sp_*` (u otro nombre). No es un fallo de código: falta alinear la base.
 
-1. **Recomendado:** ejecutar los scripts del repo en QA (login primero: `SGH.Infrastructure/Cuenta/Persistence/001_sp_login.sql` y, si aplica, `002_sp_login_passwordv2_dual.sql`).
-2. **Puente rápido solo login:** `Docs/datos/migracion/he_sp_cuenta_login_puente_qa.sql` (sinónimos `he_sp_usuario_*` → `sp_Usuario_*` existentes).
-3. **Puente completo módulos SGH:** `Docs/datos/migracion/he_sp_sinonimos_desde_sp_legacy.sql`.
+1. **Renombrar en la base (mismo cuerpo, nombre nuevo):** `Docs/datos/migracion/he_sp_renombrar_desde_sp_legacy.sql`  
+   Usa `sp_rename` de cada `dbo.sp_*` → `dbo.he_sp_*` (52 procedimientos). Luego **re-ejecutar** los `.sql` de `SGH.Infrastructure/**/Persistence/` en el orden de `hoteldb-scripts-orden-ejecucion.md`, para que los `EXEC` internos entre wrappers pasen a `he_sp_*` (el cuerpo guardado sigue citando `sp_*` hasta ese paso).
+2. **O crear desde cero:** ejecutar los scripts del repo con `CREATE OR ALTER` (login primero: `Cuenta/Persistence/001_sp_login.sql` y `002_sp_login_passwordv2_dual.sql` si aplica).
+3. **Solo emergencia:** sinónimos (`he_sp_cuenta_login_puente_qa.sql` o `he_sp_sinonimos_desde_sp_legacy.sql`); no sustituye el rename ni el despliegue real.
 
-Cuando ejecutes los `CREATE OR ALTER` del repo, elimina los sinónimos `he_sp_*` que apunten al legado antes de crear el procedimiento con el mismo nombre.
+Si ya creaste sinónimos `he_sp_*`, el script de **rename** los elimina antes de renombrar el procedimiento legado.
 
-### Puente temporal en QA
+### Puente temporal en QA (sinónimos)
 
-Si en un ambiente aún existen solo los nombres `sp_*` y no se puede redesplegar de inmediato, usar `Docs/datos/migracion/he_sp_sinonimos_desde_sp_legacy.sql`: crea sinónimos `he_sp_*` que apuntan al `sp_*` homónimo existente. Cuando se ejecuten los scripts del repo, conviene **eliminar esos sinónimos** y crear los procedimientos reales con `CREATE OR ALTER` (los sinónimos bloquean un objeto con el mismo nombre).
+Solo si no podés renombrar ni ejecutar scripts aún: `Docs/datos/migracion/he_sp_sinonimos_desde_sp_legacy.sql`. Al migrar en serio, borrá los sinónimos y usá **rename** o `CREATE OR ALTER`.
