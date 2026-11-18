@@ -31,6 +31,18 @@ Convenciones:
 | 17 | `SGH.Infrastructure/Navegacion/Persistence/002_menu_config_habitacion_bano.sql` | Navegación | Entradas de menú Configuración; después de CU-HAB operativo. |
 | 18 | `SGH.Infrastructure/Navegacion/Persistence/003_menusperfil_habitacion_bano_por_perfil.sql` | Navegación | `MenusPerfil` por perfil (p. ej. 68); después del **002**. |
 
+### Parches incrementales (QA que ya ejecutó los `001_*` antiguos)
+
+No re-ejecutar los `001` solo para aplicar estos cambios. Usar los archivos numerados siguientes (idempotentes con `CREATE OR ALTER`):
+
+| Orden QA | Archivo | Requiere antes |
+|----------|---------|----------------|
+| A | `SGH.Infrastructure/Cuenta/Persistence/002_sp_login_passwordv2_dual.sql` | `001_sp_login.sql` (versión sin `PasswordV2` / dual hash) |
+| B | `SGH.Infrastructure/Reserva/Persistence/002_sp_reserva_buscar_rango_top.sql` | `001_sp_reserva.sql` (sin `@MaxFilas` ni rango 30 días en búsqueda) |
+| C | `SGH.Infrastructure/Solicitud/Persistence/009_sp_solicitud_buscar_listado.sql` | `001_sp_solicitud.sql` y, si aplica, scripts **002–008** del módulo |
+
+En **instalación nueva**, los `001` del repositorio actual ya incluyen el mismo contenido; los `002` / `009` anteriores son opcionales.
+
 Tras actualizar el flujo de **importación**, el `README.md` pide **volver a desplegar**:
 
 - `001_sp_solicitud.sql` (ítem 9)

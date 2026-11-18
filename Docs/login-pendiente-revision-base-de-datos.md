@@ -69,6 +69,8 @@ No guardes credenciales en archivos versionados. `FabricaConexionSql` requiere `
 
 `SGH.Infrastructure/Cuenta/Persistence/001_sp_login.sql` quedó aplicado en la base LocalDB `HOTELDB`. Es idempotente para poder repetir la instalación. En una base productiva, revisa y ejecuta el script mediante el proceso de despliegue aprobado.
 
+Si QA ya ejecutó una versión anterior de `001_sp_login.sql` sin `PasswordV2`, aplicar solo `002_sp_login_passwordv2_dual.sql` (ver `Docs/datos/hoteldb-scripts-orden-ejecucion.md`, parches incrementales).
+
 Pruebas funcionales recomendadas: clave MD5 vigente y vencida, varios perfiles, RUT `767095309`, cambio de clave, reutilización de claves MD5 y BCrypt, cuatro intentos fallidos y bloqueo al quinto.
 
 El cambio administrativo recibe un hash BCrypt, nunca una contraseña en claro:
