@@ -1,4 +1,5 @@
 import { numero } from "../../core/numeros.js";
+import { encabezadosModulo } from "../../core/encabezados-tabla.js";
 import { crearHabitacion } from "../habitacion.js";
 import { crearMovimientosHabitacion } from "../movimientos-habitacion.js";
 
@@ -7,24 +8,21 @@ export function definirPantallasHabitacion(habitacion) {
         habitaciones: {
             titulo: "Habitaciones",
             modo: "habitaciones",
-            columnas: [
-                "Acciones", "Código", "Sexo", "Baño", "Pabellón", "Módulo",
-                "Camas", "Hab./total", "Por turnos", "Exclusivo", "Estado"
-            ],
+            columnas: encabezadosModulo("habitaciones"),
             filtros: function () { return habitacion.filtros("habitaciones"); },
             filtroInicial: function () { return habitacion.filtroInicial("habitaciones"); }
         },
         banos: {
             titulo: "Baños",
             modo: "banos",
-            columnas: ["Acciones", "Código", "Ubicación", "Sexo", "Estado", "Habitaciones"],
+            columnas: encabezadosModulo("banos"),
             filtros: function () { return habitacion.filtros("banos"); },
             filtroInicial: function () { return habitacion.filtroInicial("banos"); }
         },
         tiposcama: {
             titulo: "Tipos de cama",
             modo: "tiposcama",
-            columnas: ["Acciones", "Nombre", "Medidas", "Camas", "Estado"],
+            columnas: encabezadosModulo("tiposcama"),
             filtros: function () { return habitacion.filtros("tiposcama"); },
             filtroInicial: function () { return habitacion.filtroInicial("tiposcama"); }
         }

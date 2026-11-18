@@ -5,6 +5,10 @@ export function crearPanelLateral() {
     function abrir(titulo, contenido) {
         document.getElementById("panel-titulo").textContent = titulo;
         var cuerpo = document.getElementById("panel-cuerpo");
+        if (contenido.hidden) {
+            contenido.hidden = false;
+            contenido.removeAttribute("aria-hidden");
+        }
         cuerpo.replaceChildren(contenido);
         panel.hidden = false;
         velo.hidden = false;
@@ -13,6 +17,13 @@ export function crearPanelLateral() {
     function cerrar() {
         if (document.activeElement && panel.contains(document.activeElement)) {
             document.activeElement.blur();
+        }
+        var cuerpo = document.getElementById("panel-cuerpo");
+        var form = cuerpo && cuerpo.querySelector("form.formulario-filtros-modulo");
+        if (form && form._contenedorPadre) {
+            form._contenedorPadre.append(form);
+            form.hidden = true;
+            form.setAttribute("aria-hidden", "true");
         }
         panel.hidden = true;
         velo.hidden = true;

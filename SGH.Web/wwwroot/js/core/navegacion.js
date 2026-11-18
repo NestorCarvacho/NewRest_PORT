@@ -11,7 +11,8 @@ export function crearNavegacion(dependencias) {
         if (orden.indexOf(id) < 0) {
             orden.push(id);
             solapas.append(crearSolapa(id, modulo.titulo));
-            paneles.append(dependencias.crearPanel(id, modulo));
+            var panel = dependencias.crearPanel(id, modulo);
+            if (!paneles.contains(panel)) paneles.append(panel);
         }
         activar(id);
     }

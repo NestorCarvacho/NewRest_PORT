@@ -250,6 +250,7 @@ export function crearFormularios(dependencias) {
         contenido: contenido,
         aOpcion: aOpcion,
         inicializarSelectores: inicializarSelectores,
-        actualizarSelector: actualizarSelector
+        actualizarSelector: actualizarSelector,
+        leer: leer
     };
 }

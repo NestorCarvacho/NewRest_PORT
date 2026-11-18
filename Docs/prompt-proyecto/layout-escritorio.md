@@ -17,3 +17,5 @@
 - `FiltroPilaAvisos` — avisos tras POST de página.
 
 Ver estilos en `wwwroot/css/escritorio.css` (clases `.estado`, `.layout-minimo-*`).
+
+Listados: estructura de tabla en Razor (`tabla-listado-modulo.md`); filas vía Mid + JS.
