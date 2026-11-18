@@ -40,6 +40,19 @@ public sealed class ConsultaHabitacion(IFabricaConexionSql fabrica) : IConsultaH
             cancellationToken: cancellationToken));
     }
 
+    public async Task<int?> ObtenerIdPorNombreEnCampamentoAsync(
+        int campamentoId, string nombre, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(nombre))
+            return null;
+        using var conexion = fabrica.Crear();
+        return await conexion.QuerySingleOrDefaultAsync<int?>(new CommandDefinition(
+            "dbo.sp_Habitacion_IdPorNombre",
+            new { CampamentoId = campamentoId, Nombre = nombre.Trim() },
+            commandType: CommandType.StoredProcedure,
+            cancellationToken: cancellationToken));
+    }
+
     public async Task<CatalogoHabitacion> CatalogoAsync(int campamentoId, int empresaMandanteId, CancellationToken cancellationToken)
     {
         using var conexion = fabrica.Crear();

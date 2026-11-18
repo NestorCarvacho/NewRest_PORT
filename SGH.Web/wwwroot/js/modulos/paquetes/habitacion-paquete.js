@@ -32,6 +32,7 @@ export function definirPantallasHabitacion(habitacion) {
 export function instalarHabitacion(base) {
     var habitacion = crearHabitacion({
         enviar: base.enviar,
+        enviarArchivo: base.api.enviarArchivo,
         obtenerCatalogoHabitacion: base.catalogos.obtenerHabitacion,
         invalidarCatalogoHabitacion: base.catalogos.invalidarHabitacion,
         campo: base.campo,
@@ -42,6 +43,7 @@ export function instalarHabitacion(base) {
         mostrarAviso: base.mostrarAviso,
         prepararCatalogo: base.prepararCatalogo,
         cargar: base.cargar,
+        cerrarPanel: base.cerrarPanel,
         numero: numero,
         actualizarSelector: base.actualizarSelector,
         boton: base.boton

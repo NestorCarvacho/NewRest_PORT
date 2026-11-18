@@ -800,36 +800,63 @@ div.dt-container table.dataTable tbody > tr > td {
 }
 
 .modulo-habitaciones table.dataTable th:first-child,
-.modulo-habitaciones table.dataTable td:first-child {
-  width: 13.5rem;
-  min-width: 13.5rem;
-}
-
+.modulo-habitaciones table.dataTable td:first-child,
 .modulo-banos table.dataTable th:first-child,
-.modulo-banos table.dataTable td:first-child {
-  width: 13.5rem;
-  min-width: 13.5rem;
+.modulo-banos table.dataTable td:first-child,
+.modulo-tiposcama table.dataTable th:first-child,
+.modulo-tiposcama table.dataTable td:first-child {
+  width: 7.5rem;
+  min-width: 7.5rem;
+  max-width: 7.5rem;
 }
 
 .modulo-habitaciones div.dt-container table.dataTable tbody > tr > td:first-child,
-.modulo-banos div.dt-container table.dataTable tbody > tr > td:first-child {
+.modulo-banos div.dt-container table.dataTable tbody > tr > td:first-child,
+.modulo-tiposcama div.dt-container table.dataTable tbody > tr > td:first-child {
   white-space: normal;
   text-overflow: clip;
   overflow: visible;
+  vertical-align: middle;
 }
 
-.modulo-habitaciones .acciones-fila {
-  display: inline-flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  gap: 0.35rem;
+.celda-truncada {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
 }
 
-.modulo-banos .acciones-fila {
-  display: inline-flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  gap: 0.35rem;
+.acciones-desplegable {
+  position: relative;
+  display: inline-block;
+}
+
+.acciones-desplegable-panel {
+  display: none;
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  top: calc(100% + 0.2rem);
+  min-width: 9rem;
+  padding: 0.35rem;
+  border-radius: var(--radio-borde, 0.5rem);
+  background: var(--white);
+  border: 1px solid var(--gris-borde, #ddd);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.acciones-desplegable.abierto .acciones-desplegable-panel {
+  display: flex;
+}
+
+.acciones-desplegable-opcion {
+  width: 100%;
+  text-align: left;
+  justify-content: flex-start;
 }
 
 .modulo-reserva table.dataTable th:nth-child(2),

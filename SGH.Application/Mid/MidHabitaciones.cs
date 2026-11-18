@@ -4,7 +4,7 @@ using SGH.Domain.Habitacion.Interfaces;
 
 namespace SGH.Application.Mid;
 
-public sealed class MidHabitaciones(IGestionHabitaciones gestion)
+public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas planilla)
 {
     public const string Ruta = "Mid/MidHabitaciones.cs";
 
@@ -27,7 +27,9 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
         Accion("creartipocama", "Crear tipo de cama", "dbo.sp_TipoCama_Guardar", "Alta tipo de cama."),
         Accion("editartipocama", "Editar tipo de cama", "dbo.sp_TipoCama_Guardar", "Edición tipo de cama."),
         Accion("inactivartipocama", "Inactivar tipo de cama", "dbo.sp_TipoCama_Guardar", "Baja lógica tipo de cama."),
-        Accion("activartipocama", "Activar tipo de cama", "dbo.sp_TipoCama_Guardar", "Reactivación tipo de cama.")
+        Accion("activartipocama", "Activar tipo de cama", "dbo.sp_TipoCama_Guardar", "Reactivación tipo de cama."),
+        Accion("plantillacamas", "Plantilla camas", "planilla", "Descarga plantilla Excel de carga masiva."),
+        Accion("cargarcamas", "Cargar camas", "carga", "Importa camas desde la planilla.")
     ];
 
     public async Task<EjecucionMid> EjecutarAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
@@ -410,6 +412,30 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
             (short)largo,
             isActive,
             usuarioId);
+    }
+
+    public async Task<EjecucionMid> PlantillaCamasAsync(DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var bloqueo = AlcanceMid.BloquearSiSinAlcance(sesion);
+        if (bloqueo is not null)
+            return bloqueo;
+
+        var tipos = await gestion.ListarTiposCamaAsync(sesion.CampamentoId, 0, cancellationToken);
+        return EjecucionMid.Descarga(
+            planilla.CrearPlantilla(sesion.CampamentoId, tipos),
+            "PlantillaCamas.xlsx",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    }
+
+    public async Task<EjecucionMid> CargarCamasAsync(Stream archivo, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var bloqueo = AlcanceMid.BloquearSiSinAlcance(sesion);
+        if (bloqueo is not null)
+            return bloqueo;
+
+        var filas = planilla.Leer(archivo);
+        var resultados = await gestion.CargarCamasAsync(sesion.CampamentoId, sesion.UsuarioId, filas, cancellationToken);
+        return EjecucionMid.Ok(new { filas = resultados });
     }
 
     private static AccionApi Accion(string opcion, string etiqueta, string procedimiento, string descripcion) =>

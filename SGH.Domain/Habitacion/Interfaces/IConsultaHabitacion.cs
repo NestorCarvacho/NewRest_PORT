@@ -68,5 +68,6 @@ public interface IConsultaHabitacion
 {
     Task<IReadOnlyList<HabitacionListada>> ListarAsync(FiltroListadoHabitacion filtro, int usuarioId, CancellationToken cancellationToken);
     Task<HabitacionDetalle?> ObtenerAsync(int id, int campamentoId, CancellationToken cancellationToken);
+    Task<int?> ObtenerIdPorNombreEnCampamentoAsync(int campamentoId, string nombre, CancellationToken cancellationToken);
     Task<CatalogoHabitacion> CatalogoAsync(int campamentoId, int empresaMandanteId, CancellationToken cancellationToken);
 }

@@ -1,3 +1,5 @@
+import { renderizadorCeldaTruncada } from "../core/celda-truncada.js";
+
 var rutaMid = "/Habitacion/Mid/MidHabitaciones.cs";
 
 function siNo(valor) {
@@ -175,10 +177,14 @@ export function crearHabitacion(dependencias) {
         return filaHabitacion(origen);
     }
 
+    function columnaDatos(clave) {
+        return { data: clave, render: renderizadorCeldaTruncada() };
+    }
+
     function columnas(modo, crearAcciones) {
         if (modo === "tiposcama") {
             return ["acciones", "nombre", "medidas", "camas", "estado"].map(function (clave) {
-                if (clave !== "acciones") return { data: clave, render: DataTable.render.text() };
+                if (clave !== "acciones") return columnaDatos(clave);
                 return {
                     data: clave,
                     orderable: false,
@@ -190,7 +196,7 @@ export function crearHabitacion(dependencias) {
         }
         if (modo === "banos") {
             return ["acciones", "codigo", "ubicacion", "sexo", "estado", "habitaciones"].map(function (clave) {
-                if (clave !== "acciones") return { data: clave, render: DataTable.render.text() };
+                if (clave !== "acciones") return columnaDatos(clave);
                 return {
                     data: clave,
                     orderable: false,
@@ -201,7 +207,7 @@ export function crearHabitacion(dependencias) {
             });
         }
         return ["acciones", "codigo", "sexo", "bano", "pabellon", "modulo", "camas", "habilitadas", "turnos", "exclusivo", "estado"].map(function (clave) {
-            if (clave !== "acciones") return { data: clave, render: DataTable.render.text() };
+            if (clave !== "acciones") return columnaDatos(clave);
             return {
                 data: clave,
                 orderable: false,
@@ -576,6 +582,83 @@ export function crearHabitacion(dependencias) {
         dependencias.abrirPanel("Editar cama — " + (habitacion.nombre || ""), form);
     }
 
+  function pintarResultadoImportacion(contenedor, datos) {
+        contenedor.replaceChildren();
+        var rechazadas = (datos.filas || []).filter(function (fila) { return !fila.procesada; });
+        var titulo = document.createElement("h3");
+        titulo.textContent = "Resultado de la importación";
+        var resumen = document.createElement("dl");
+        resumen.className = "importacion-resumen";
+        [
+            ["Total de filas", datos.filas.length],
+            ["Procesadas", datos.filas.length - rechazadas.length],
+            ["No procesadas", rechazadas.length]
+        ].forEach(function (dato) {
+            var tarjeta = document.createElement("div");
+            var etiqueta = document.createElement("dt");
+            var cantidad = document.createElement("dd");
+            etiqueta.textContent = dato[0];
+            cantidad.textContent = dato[1];
+            tarjeta.append(etiqueta, cantidad);
+            resumen.append(tarjeta);
+        });
+        contenedor.append(titulo, resumen);
+        if (!rechazadas.length) {
+            var completo = document.createElement("p");
+            completo.className = "importacion-completa";
+            completo.textContent = "No hay filas pendientes de revisión.";
+            contenedor.append(completo);
+            return;
+        }
+        dependencias.mostrarAviso("Hay filas de la importación pendientes de revisión.", "error");
+        var subtitulo = document.createElement("h4");
+        subtitulo.textContent = "Detalle de filas no procesadas";
+        var lista = document.createElement("ol");
+        lista.className = "importacion-errores";
+        rechazadas.forEach(function (x) {
+            var item = document.createElement("li");
+            var fila = document.createElement("span");
+            fila.className = "importacion-fila";
+            fila.textContent = "Fila " + x.numeroFila;
+            var mensaje = document.createElement("span");
+            mensaje.textContent = x.mensaje;
+            item.append(fila, mensaje);
+            lista.append(item);
+        });
+        contenedor.append(subtitulo, lista);
+    }
+
+    function abrirImportacionCamas() {
+        var form = document.querySelector("form[data-formulario='importacion-camas']");
+        if (!form) {
+            dependencias.mostrarAviso("No se encontró el formulario de importación en la página.", "error");
+            return;
+        }
+        var clon = form.cloneNode(true);
+        clon.hidden = false;
+        clon.removeAttribute("aria-hidden");
+        var resultado = clon.querySelector(".importacion-resultado");
+        var importar = clon.querySelector("button[type='submit']");
+        clon.querySelector("[data-accion='cerrar-panel']").addEventListener("click", dependencias.cerrarPanel);
+        clon.addEventListener("submit", function (evento) {
+            evento.preventDefault();
+            if (!clon.reportValidity()) return;
+            var archivoInput = clon.querySelector("input[name='archivo']");
+            if (!archivoInput.files[0]) return;
+            importar.disabled = true;
+            resultado.replaceChildren();
+            dependencias.enviarArchivo(rutaMid, archivoInput.files[0], {}).then(function (info) {
+                var datos = info.registros || info;
+                pintarResultadoImportacion(resultado, datos);
+                var activo = document.querySelector(".modulo.modulo-habitaciones:not([hidden])");
+                if (activo) dependencias.cargar(activo.dataset.id);
+            }).catch(function (error) {
+                dependencias.mostrarAviso(error.message, "error");
+            }).finally(function () { importar.disabled = false; });
+        });
+        dependencias.abrirPanel("Carga masiva de camas", clon);
+    }
+
     return {
         filtros: filtros,
         filtroInicial: filtroInicial,
@@ -593,6 +676,7 @@ export function crearHabitacion(dependencias) {
         abrirNuevoTipoCama: abrirNuevoTipoCama,
         abrirEdicionTipoCama: abrirEdicionTipoCama,
         alternarEstadoTipoCama: alternarEstadoTipoCama,
-        abrirCamasHabitacion: abrirCamasHabitacion
+        abrirCamasHabitacion: abrirCamasHabitacion,
+        abrirImportacionCamas: abrirImportacionCamas
     };
 }

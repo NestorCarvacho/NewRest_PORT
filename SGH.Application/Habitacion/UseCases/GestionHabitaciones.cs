@@ -1,6 +1,7 @@
+using SGH.Application.Habitacion.DTOs;
+using SGH.Application.Habitacion.Interfaces;
 using SGH.Domain.Habitacion;
 using SGH.Domain.Habitacion.Interfaces;
-using SGH.Application.Habitacion.Interfaces;
 
 namespace SGH.Application.Habitacion.UseCases;
 
@@ -130,5 +131,77 @@ public sealed class GestionHabitaciones(
             return new ResultadoGuardarTipoCama(false, mensaje, datos.Id);
 
         return await comandoTipoCama.GuardarAsync(datos, campamentoId, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<ResultadoCargaCamaDto>> CargarCamasAsync(
+        int campamentoId, int usuarioId, IReadOnlyList<FilaCargaCamaDto> filas, CancellationToken cancellationToken)
+    {
+        if (usuarioId <= 0)
+            throw new ArgumentException("Indique un usuario válido.");
+
+        var tiposValidos = (await consultaTipoCama.ListarAsync(campamentoId, 0, cancellationToken))
+            .ToDictionary(t => t.Id);
+        var resultados = new List<ResultadoCargaCamaDto>();
+
+        foreach (var fila in filas)
+        {
+            if (string.IsNullOrWhiteSpace(fila.CodigoHabitacion))
+            {
+                resultados.Add(new ResultadoCargaCamaDto(fila.NumeroFila, false, "CodigoHabitacion es obligatorio."));
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(fila.CodigoCama))
+            {
+                resultados.Add(new ResultadoCargaCamaDto(fila.NumeroFila, false, "CodigoCama es obligatorio."));
+                continue;
+            }
+
+            if (fila.CodigoCama.Length > 50)
+            {
+                resultados.Add(new ResultadoCargaCamaDto(fila.NumeroFila, false, "CodigoCama no puede superar 50 caracteres."));
+                continue;
+            }
+
+            var habitacionId = await consulta.ObtenerIdPorNombreEnCampamentoAsync(
+                campamentoId, fila.CodigoHabitacion, cancellationToken);
+            if (habitacionId is null or <= 0)
+            {
+                resultados.Add(new ResultadoCargaCamaDto(
+                    fila.NumeroFila, false, "No se encontró la habitación en el campamento."));
+                continue;
+            }
+
+            if (fila.TipoCamaId is int tipoId)
+            {
+                if (!tiposValidos.TryGetValue(tipoId, out var tipo) || !tipo.IsActive)
+                {
+                    resultados.Add(new ResultadoCargaCamaDto(fila.NumeroFila, false, "TipoCamaId no válido para el campamento."));
+                    continue;
+                }
+            }
+
+            var datos = new DatosGuardarCama(
+                0,
+                habitacionId.Value,
+                fila.CodigoCama.Trim(),
+                fila.Habilitada,
+                fila.Orden > 0 ? fila.Orden : 1,
+                true,
+                fila.TipoCamaId,
+                fila.FechaColchon,
+                fila.ColchonObservacion,
+                fila.FechaCambioRopa,
+                fila.RopaCamaObservacion,
+                usuarioId);
+
+            var guardado = await GuardarCamaAsync(datos, campamentoId, cancellationToken);
+            resultados.Add(new ResultadoCargaCamaDto(
+                fila.NumeroFila,
+                guardado.Exito,
+                guardado.Exito ? "Procesada" : (string.IsNullOrWhiteSpace(guardado.Mensaje) ? "No se pudo guardar la cama." : guardado.Mensaje)));
+        }
+
+        return resultados;
     }
 }

@@ -1,3 +1,5 @@
+import { crearAccionesDesplegable } from "../core/acciones-desplegable.js";
+
 export function crearMovimientosHabitacion(dependencias) {
     /** En createdCell, DataTables entrega el valor de la columna (registro API), no la fila mapeada. */
     function origen(dato) {
@@ -16,50 +18,46 @@ export function crearMovimientosHabitacion(dependencias) {
     function crearAcciones(dato, modo) {
         var fila = origen(dato);
         if (!fila) return document.createTextNode("");
-        var acciones = document.createElement("span");
-        acciones.className = "acciones-fila";
+        var items = [];
         if (modo === "habitaciones") {
-            acciones.append(dependencias.boton("Editar", "accion-fila", function () {
+            items.push(["Editar", function () {
                 dependencias.prepararCatalogo("habitaciones").then(function () {
                     dependencias.habitacion.abrirEdicionHabitacion(fila);
                 }).catch(function (error) { dependencias.mostrarAviso(error.message, "error"); });
-            }));
-            acciones.append(dependencias.boton("Camas", "accion-fila", function () {
-                dependencias.habitacion.abrirCamasHabitacion(fila);
-            }));
+            }]);
+            items.push(["Camas", function () { dependencias.habitacion.abrirCamasHabitacion(fila); }]);
             if (estaActivo(fila)) {
-                acciones.append(dependencias.boton("Inactivar", "accion-fila", function () {
+                items.push(["Inactivar", function () {
                     dependencias.habitacion.inactivarHabitacion(fila.id).catch(function (error) {
                         dependencias.mostrarAviso(error.message, "error");
                     });
-                }));
+                }]);
             }
         }
         if (modo === "banos") {
             var activo = estaActivo(fila);
-            acciones.append(dependencias.boton("Editar", "accion-fila", function () {
+            items.push(["Editar", function () {
                 dependencias.prepararCatalogo("banos").then(function () {
                     dependencias.habitacion.abrirEdicionBano(fila);
                 }).catch(function (error) { dependencias.mostrarAviso(error.message, "error"); });
-            }));
-            acciones.append(dependencias.boton(activo ? "Inactivar" : "Activar", "accion-fila", function () {
+            }]);
+            items.push([activo ? "Inactivar" : "Activar", function () {
                 dependencias.habitacion.alternarEstadoBano(fila).catch(function (error) {
                     dependencias.mostrarAviso(error.message, "error");
                 });
-            }));
+            }]);
         }
         if (modo === "tiposcama") {
             var tipoActivo = fila.isActive === true || fila.isActive === 1;
-            acciones.append(dependencias.boton("Editar", "accion-fila", function () {
-                dependencias.habitacion.abrirEdicionTipoCama(fila);
-            }));
-            acciones.append(dependencias.boton(tipoActivo ? "Inactivar" : "Activar", "accion-fila", function () {
+            items.push(["Editar", function () { dependencias.habitacion.abrirEdicionTipoCama(fila); }]);
+            items.push([tipoActivo ? "Inactivar" : "Activar", function () {
                 dependencias.habitacion.alternarEstadoTipoCama(fila).catch(function (error) {
                     dependencias.mostrarAviso(error.message, "error");
                 });
-            }));
+            }]);
         }
-        return acciones;
+        if (!items.length) return document.createTextNode("");
+        return crearAccionesDesplegable(dependencias.boton, items);
     }
 
     return { crearAcciones: crearAcciones };

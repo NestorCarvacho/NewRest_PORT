@@ -20,6 +20,7 @@ Convenciones:
 | 6 | `SGH.Infrastructure/Habitacion/Persistence/003_sp_bano_cama.sql` | Habitación | Después de **002**; SP de baño/cama. |
 | 7 | `SGH.Infrastructure/Habitacion/Persistence/005_hotldb_tipo_cama_inventario.sql` | Habitación | Tabla `TipoCama` y columnas inventario en `Camas` (CU-HAB-02). |
 | 8 | `SGH.Infrastructure/Habitacion/Persistence/006_sp_tipo_cama_inventario.sql` | Habitación | SP tipos de cama y catálogo habitación extendido. |
+| 8b | `SGH.Infrastructure/Habitacion/Persistence/007_sp_habitacion_resolver_nombre.sql` | Habitación | Resolver habitación por nombre (carga masiva camas). |
 | 9 | `SGH.Infrastructure/Habitacion/Persistence/001_sp_habitacion.sql` | Habitación | Después de **002**, **003**, **005** y **006** (referencia `Banos`/`Camas`/`TipoCama`). |
 | 10 | `SGH.Infrastructure/Habitacion/Persistence/004_banos_isactive_estado.sql` | Habitación | **Opcional**, una vez: `UPDATE` de datos; requiere tabla `Banos` de **002**. |
 | 11 | `SGH.Infrastructure/Solicitud/Persistence/001_sp_solicitud.sql` | Solicitud | Base del módulo; ver `README.md`. |
