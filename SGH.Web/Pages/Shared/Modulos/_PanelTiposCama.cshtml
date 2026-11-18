@@ -1,0 +1,29 @@
+@{
+    ViewData["ModuloId"] = "tiposcama";
+}
+<section class="modulo modulo-anclado" data-id="tiposcama" hidden>
+    <p class="modulo-estado" hidden></p>
+    <div class="modulo-barra">
+        <button type="button" class="boton-secundario" data-accion="actualizar" data-etiqueta="Actualizar">Actualizar</button>
+        <partial name="Modulos/_ExportarDesplegable" />
+        <button type="button" class="boton-secundario" data-accion="filtros">Filtros</button>
+        <button type="button" class="boton-primario" data-accion="nuevo-tipo-cama">Nuevo tipo de cama</button>
+    </div>
+    <partial name="_TablaModulo" />
+    <form class="formulario formulario-filtros-modulo" data-modulo="tiposcama" hidden aria-hidden="true">
+        <h3 class="formulario-titulo">Criterios</h3>
+        <div class="formulario-grilla">
+            <label class="campo">
+                <span>Solo activos</span>
+                <select name="soloActivos" class="selector-buscable">
+                    <option value="1">Sí</option>
+                    <option value="0" selected>No (todos)</option>
+                </select>
+            </label>
+        </div>
+        <div class="formulario-pie">
+            <button type="button" class="boton-secundario" data-accion="cerrar-panel">Cancelar</button>
+            <button type="submit" class="boton-primario">Aplicar</button>
+        </div>
+    </form>
+</section>

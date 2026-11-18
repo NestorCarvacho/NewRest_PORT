@@ -1,0 +1,28 @@
+@{
+    var prefijo = ViewData["FiltroPrefijoFecha"] as string ?? "";
+    var nombreDesde = string.IsNullOrEmpty(prefijo) ? "desde" : prefijo + "Desde";
+    var nombreHasta = string.IsNullOrEmpty(prefijo) ? "hasta" : prefijo + "Hasta";
+    var etiquetaPeriodo = ViewData["FiltroEtiquetaPeriodo"] as string ?? "Período";
+}
+<label class="campo campo-interruptor">
+    <span>Filtrar por rango</span>
+    <input type="checkbox" name="periodoPorRango" role="switch" checked />
+</label>
+<label class="campo">
+    <span>@etiquetaPeriodo</span>
+    <select name="periodo" class="selector-buscable">
+        <option value="7">Últimos 7 días</option>
+        <option value="15">Últimos 15 días</option>
+        <option value="30" selected>Últimos 30 días</option>
+        <option value="60">Últimos 60 días</option>
+        <option value="90">Últimos 90 días</option>
+    </select>
+</label>
+<label class="campo">
+    <span>Desde</span>
+    <input type="date" name="@nombreDesde" />
+</label>
+<label class="campo">
+    <span>Hasta</span>
+    <input type="date" name="@nombreHasta" />
+</label>

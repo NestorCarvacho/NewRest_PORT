@@ -71,6 +71,7 @@ export function crearEntornoBase() {
         aOpcion: interfazFormularios.aOpcion,
         inicializarSelectores: interfazFormularios.inicializarSelectores,
         actualizarSelector: interfazFormularios.actualizarSelector,
+        leerFormulario: interfazFormularios.leer,
         setEnlazarFormulario: function (fn) { enlazarFormulario = fn; }
     };
 }

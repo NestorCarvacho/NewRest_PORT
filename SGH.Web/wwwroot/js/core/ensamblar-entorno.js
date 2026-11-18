@@ -1,6 +1,7 @@
 import { crearEntornoBase } from "./entorno-base.js";
 import { crearCargador } from "./cargador.js";
 import { crearPanelModulo } from "./panel-modulo.js";
+import { crearFiltrosModulo } from "./filtros-modulo.js";
 import { crearRenderizadorModulos } from "./renderizador-modulos.js";
 import { paquetesParaPantallas, INSTALADORES, PROPIEDADES_PAQUETE } from "./registro-paquetes.js";
 
@@ -49,23 +50,38 @@ export function ensamblarEntorno(idsPantalla) {
         habitacion: instancia.habitacion,
         movimientosHabitacion: instancia.movimientosHabitacion
     });
-    var crearPanel = crearPanelModulo({
-        boton: base.boton,
+    var abrirFiltrosModulo = crearFiltrosModulo({
         prepararCatalogo: base.prepararCatalogo,
         abrirPanel: base.abrirPanel,
+        cerrarPanel: base.cerrarPanel,
         formulario: base.formulario,
         contenido: base.contenido,
         cargar: base.cargar,
         mostrarEstado: base.mostrarEstado,
-        mostrarAviso: base.mostrarAviso,
         normalizarFiltroPeriodo: base.normalizarFiltroPeriodo,
+        aOpcion: base.aOpcion,
+        leerFormulario: base.leerFormulario,
+        enlazarPeriodoFiltro: base.enlazarPeriodoFiltro,
+        inicializarSelectores: base.inicializarSelectores,
+        obtenerCatalogoHabitacion: base.catalogos.obtenerHabitacion,
+        obtenerCatalogoReserva: base.catalogos.obtenerReserva,
+        obtenerCatalogoCenso: base.catalogos.obtenerCenso,
+        obtenerCatalogoSolicitud: base.catalogos.obtenerSolicitud,
+        enlazarFiltrosCenso: instancia.censo ? instancia.censo.enlazar.bind(instancia.censo) : null
+    }).abrir;
+
+    var crearPanel = crearPanelModulo({
+        prepararCatalogo: base.prepararCatalogo,
+        abrirPanel: base.abrirPanel,
+        cargar: base.cargar,
+        mostrarEstado: base.mostrarEstado,
+        mostrarAviso: base.mostrarAviso,
         exportarTabla: base.exportarTabla,
-        reserva: instancia.reserva,
         solicitud: instancia.solicitud,
         censo: instancia.censo,
         censoQr: instancia.censoQr,
         habitacion: instancia.habitacion,
-        crearTabla: base.tablas.crear
+        abrirFiltrosModulo: abrirFiltrosModulo
     });
 
     function enlazarCargador(obtenerNodo) {

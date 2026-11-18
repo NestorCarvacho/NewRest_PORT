@@ -12,8 +12,15 @@ public static class EncabezadosTablaModulo
 
     static EncabezadosTablaModulo()
     {
-        var ruta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "datos", "encabezados-tabla-modulo.json");
-        if (!File.Exists(ruta))
+        var nombre = Path.Combine("wwwroot", "datos", "encabezados-tabla-modulo.json");
+        var candidatos = new[]
+        {
+            Path.Combine(Directory.GetCurrentDirectory(), nombre),
+            Path.Combine(AppContext.BaseDirectory, nombre),
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "SGH.Web", nombre))
+        };
+        var ruta = candidatos.Select(Path.GetFullPath).FirstOrDefault(File.Exists);
+        if (ruta is null)
         {
             PorModo = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
             return;
