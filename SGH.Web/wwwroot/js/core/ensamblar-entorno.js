@@ -113,6 +113,13 @@ export function ensamblarEntorno(idsPantalla) {
 
     var cancelarCargaNodo = function () { };
 
+    if (instancia.habitacion && typeof instancia.habitacion.enlazarSincronizacionListado === "function") {
+        instancia.habitacion.enlazarSincronizacionListado({
+            sincronizarFila: renderizador.sincronizarFila.bind(renderizador),
+            quitarFila: renderizador.quitarFila.bind(renderizador)
+        });
+    }
+
     return Object.assign(instancia, {
         modulos: modulos,
         renderizador: renderizador,

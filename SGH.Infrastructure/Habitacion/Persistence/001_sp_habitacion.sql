@@ -8,7 +8,8 @@ CREATE OR ALTER PROCEDURE dbo.sp_Habitacion_Listar
     @TipoInstalacionId int = 0,
     @Estado varchar(10) = NULL,
     @SoloActivas int = 1,
-    @SoloReservables bit = NULL
+    @SoloReservables bit = NULL,
+    @HabitacionId int = 0
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -42,6 +43,7 @@ BEGIN
       AND (@Estado IS NULL OR @Estado = '' OR h.Estado = @Estado)
       AND (@SoloActivas = 0 OR h.IsActive = 1)
       AND (@SoloReservables IS NULL OR h.IsReservable = @SoloReservables)
+      AND (@HabitacionId = 0 OR h.Id = @HabitacionId)
     ORDER BY p.Nombre, m.Nombre, h.Nombre;
 END
 GO

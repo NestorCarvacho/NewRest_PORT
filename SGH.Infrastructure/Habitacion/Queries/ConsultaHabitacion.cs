@@ -22,7 +22,8 @@ public sealed class ConsultaHabitacion(IFabricaConexionSql fabrica) : IConsultaH
                 filtro.TipoInstalacionId,
                 filtro.Estado,
                 filtro.SoloActivas,
-                filtro.SoloReservables
+                filtro.SoloReservables,
+                HabitacionId = filtro.HabitacionId
             },
             commandType: CommandType.StoredProcedure,
             commandTimeout: 120,

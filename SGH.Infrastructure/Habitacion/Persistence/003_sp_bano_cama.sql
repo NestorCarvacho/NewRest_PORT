@@ -2,7 +2,8 @@
 
 CREATE OR ALTER PROCEDURE dbo.sp_Bano_Listar
     @CampamentoId int,
-    @SoloActivos int = 1
+    @SoloActivos int = 1,
+    @BanoId int = 0
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -19,6 +20,7 @@ BEGIN
     FROM dbo.Banos AS b WITH (NOLOCK)
     WHERE b.CampamentoId = @CampamentoId
       AND (@SoloActivos = 0 OR b.IsActive = 1)
+      AND (@BanoId = 0 OR b.Id = @BanoId)
     ORDER BY b.Ubicacion, b.CodigoNombre;
 END
 GO

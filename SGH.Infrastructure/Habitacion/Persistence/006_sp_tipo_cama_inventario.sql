@@ -2,7 +2,8 @@
 
 CREATE OR ALTER PROCEDURE dbo.sp_TipoCama_Listar
     @CampamentoId int,
-    @SoloActivos int = 1
+    @SoloActivos int = 1,
+    @TipoCamaId int = 0
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -19,6 +20,7 @@ BEGIN
     FROM dbo.TipoCama AS t WITH (NOLOCK)
     WHERE t.CampamentoId = @CampamentoId
       AND (@SoloActivos = 0 OR t.IsActive = 1)
+      AND (@TipoCamaId = 0 OR t.Id = @TipoCamaId)
     ORDER BY t.Nombre;
 END
 GO
