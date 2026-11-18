@@ -50,10 +50,11 @@
     </div>
 </div>
 <div id="modalHabitacion" class="modal" hidden aria-hidden="true">
-    <form id="formHabitacion" class="formulario-modulo">
+    <form id="formHabitacion" class="formulario-modulo" method="post" asp-page="/Habitacion/Datos">
+        @Html.AntiForgeryToken()
         <h2 id="tituloFormHabitacion">Habitación</h2>
         <input type="hidden" id="hdnHabitacionId" value="0" />
-        <input type="hidden" id="hdnOpcion" value="crear" />
+        <input type="hidden" id="hdnOpcion" name="opcion" value="crear" />
         <label>Pabellón
             <select id="selPabellon" required></select>
         </label>
@@ -100,10 +101,11 @@
     </form>
 </div>
 <div id="modalBano" class="modal" hidden aria-hidden="true">
-    <form id="formBano" class="formulario-modulo">
+    <form id="formBano" class="formulario-modulo" method="post" asp-page="/Habitacion/Banos">
+        @Html.AntiForgeryToken()
         <h2 id="tituloFormBano">Baño</h2>
         <input type="hidden" id="hdnBanoId" value="0" />
-        <input type="hidden" id="hdnOpcionBano" value="crearbano" />
+        <input type="hidden" id="hdnOpcionBano" name="opcion" value="crearbano" />
         <label>Código
             <input id="txtBanoCodigo" required maxlength="100" />
         </label>
