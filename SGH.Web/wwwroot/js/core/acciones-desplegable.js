@@ -3,6 +3,7 @@ export function crearAccionesDesplegable(botonFactory, etiquetas) {
     var envoltorio = document.createElement("div");
     envoltorio.className = "acciones-desplegable";
     var dispara = botonFactory("Acciones", "accion-fila acciones-desplegable-dispara", function (evento) {
+        evento.preventDefault();
         evento.stopPropagation();
         var abierto = envoltorio.classList.toggle("abierto");
         dispara.setAttribute("aria-expanded", abierto ? "true" : "false");

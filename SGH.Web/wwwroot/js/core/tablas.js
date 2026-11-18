@@ -1,4 +1,5 @@
 import { encabezadosModulo } from "./encabezados-tabla.js";
+import { enlazarTooltipsCelda, ocultarTooltipCelda } from "./celda-truncada.js";
 
 export function crearTablas() {
     /** Fallback cuando el panel no viene anclado desde Razor: arma la misma tabla “tonta” que _TablaModulo.cshtml. */
@@ -56,8 +57,13 @@ export function crearTablas() {
             throw new Error("No hay tabla en el panel del módulo.");
         }
         var tabla = new DataTable(elementoTabla, opciones);
-        tabla.on("draw", function () { completarFilas(tabla); });
+        tabla.on("draw", function () {
+            completarFilas(tabla);
+            enlazarTooltipsCelda(nodo);
+            ocultarTooltipCelda();
+        });
         completarFilas(tabla);
+        enlazarTooltipsCelda(nodo);
         return tabla;
     }
 

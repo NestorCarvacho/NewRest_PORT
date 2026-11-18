@@ -828,25 +828,53 @@ div.dt-container table.dataTable tbody > tr > td {
   cursor: default;
 }
 
+div.dt-container table.dataTable tbody > tr > td:has(.celda-truncada[data-tooltip]) {
+  overflow: visible;
+}
+
+.tooltip-celda {
+  position: fixed;
+  z-index: 10050;
+  max-width: min(22rem, calc(100vw - 2rem));
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--blizzard);
+  border-radius: 0.55rem;
+  background: var(--white);
+  color: var(--burgundy);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 550;
+  line-height: 1.35;
+  box-shadow: 0 8px 22px rgb(5 5 3 / 14%);
+  pointer-events: none;
+}
+
 .acciones-desplegable {
   position: relative;
   display: inline-block;
 }
 
+.acciones-desplegable-dispara::after {
+  content: "▾";
+  margin-left: 0.35rem;
+  font-size: 0.72rem;
+  opacity: 0.85;
+}
+
 .acciones-desplegable-panel {
-  display: none;
   position: absolute;
-  z-index: 20;
+  top: calc(100% + 0.35rem);
   left: 0;
-  top: calc(100% + 0.2rem);
-  min-width: 9rem;
-  padding: 0.35rem;
-  border-radius: var(--radio-borde, 0.5rem);
-  background: var(--white);
-  border: 1px solid var(--gris-borde, #ddd);
-  box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+  z-index: 20;
+  display: none;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 9.5rem;
+  padding: 0.45rem;
+  border: 1px solid var(--blizzard);
+  border-radius: 0.65rem;
+  background: var(--white);
+  box-shadow: 0 10px 28px rgb(5 5 3 / 12%);
 }
 
 .acciones-desplegable.abierto .acciones-desplegable-panel {
@@ -855,8 +883,23 @@ div.dt-container table.dataTable tbody > tr > td {
 
 .acciones-desplegable-opcion {
   width: 100%;
+  height: 2.1rem;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--burgundy);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
   text-align: left;
-  justify-content: flex-start;
+  cursor: pointer;
+}
+
+.acciones-desplegable-opcion:hover,
+.acciones-desplegable-opcion:focus-visible {
+  background: color-mix(in srgb, var(--burgundy) 8%, var(--white));
+  outline: none;
 }
 
 .modulo-reserva table.dataTable th:nth-child(2),
@@ -2108,6 +2151,28 @@ html:not([data-tema="claro"]) .exportar-desplegable-opcion {
 html:not([data-tema="claro"]) .exportar-desplegable-opcion:hover,
 html:not([data-tema="claro"]) .exportar-desplegable-opcion:focus-visible {
   background: rgba(255, 255, 255, 0.1);
+}
+
+html:not([data-tema="claro"]) .acciones-desplegable-panel {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: #28201c;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 35%);
+}
+
+html:not([data-tema="claro"]) .acciones-desplegable-opcion {
+  color: #fff;
+}
+
+html:not([data-tema="claro"]) .acciones-desplegable-opcion:hover,
+html:not([data-tema="claro"]) .acciones-desplegable-opcion:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+html:not([data-tema="claro"]) .tooltip-celda {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: #28201c;
+  color: #fff;
+  box-shadow: 0 8px 22px rgb(0 0 0 / 35%);
 }
 
 html:not([data-tema="claro"]) .campo input::placeholder,
