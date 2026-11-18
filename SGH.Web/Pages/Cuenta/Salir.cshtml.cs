@@ -19,6 +19,7 @@ public class SalirModel : PageModel
         if (User.Identity?.IsAuthenticated == true)
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-        return RedirectToPage("/Cuenta/Login");
+        var destino = Url.Page("/Cuenta/Login") ?? "/Cuenta/Login";
+        return LocalRedirect(destino);
     }
 }
