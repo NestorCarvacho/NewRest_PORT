@@ -214,40 +214,35 @@ export function crearHabitacion(dependencias) {
         return { data: clave, render: renderizadorCeldaTruncada() };
     }
 
+    function columnaAcciones(crearAcciones, modo) {
+        return {
+            data: "acciones",
+            orderable: false,
+            defaultContent: "",
+            render: function () { return ""; },
+            createdCell: function (td, cellData, rowData) {
+                var registro = rowData && rowData._fila != null ? rowData : { _fila: cellData };
+                td.replaceChildren(crearAcciones(registro, modo));
+            }
+        };
+    }
+
     function columnas(modo, crearAcciones) {
         if (modo === "tiposcama") {
             return ["acciones", "nombre", "medidas", "camas", "estado"].map(function (clave) {
                 if (clave !== "acciones") return columnaDatos(clave);
-                return {
-                    data: clave,
-                    orderable: false,
-                    createdCell: function (td, cellData, rowData) {
-                        td.replaceChildren(crearAcciones(rowData || cellData, modo));
-                    }
-                };
+                return columnaAcciones(crearAcciones, modo);
             });
         }
         if (modo === "banos") {
             return ["acciones", "codigo", "ubicacion", "sexo", "estado", "habitaciones"].map(function (clave) {
                 if (clave !== "acciones") return columnaDatos(clave);
-                return {
-                    data: clave,
-                    orderable: false,
-                    createdCell: function (td, cellData, rowData) {
-                        td.replaceChildren(crearAcciones(rowData || cellData, modo));
-                    }
-                };
+                return columnaAcciones(crearAcciones, modo);
             });
         }
         return ["acciones", "codigo", "sexo", "bano", "pabellon", "modulo", "camas", "habilitadas", "turnos", "exclusivo", "estado"].map(function (clave) {
             if (clave !== "acciones") return columnaDatos(clave);
-            return {
-                data: clave,
-                orderable: false,
-                createdCell: function (td, cellData, rowData) {
-                    td.replaceChildren(crearAcciones(rowData || cellData, modo));
-                }
-            };
+            return columnaAcciones(crearAcciones, modo);
         });
     }
 

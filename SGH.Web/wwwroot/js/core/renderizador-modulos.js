@@ -25,9 +25,21 @@ export function crearRenderizadorModulos(dependencias) {
         });
     }
 
+    function widgetAcciones(mapeada, modo) {
+        if (modo === "habitaciones" || modo === "banos" || modo === "tiposcama") {
+            return dependencias.movimientosHabitacion.crearAcciones(mapeada, modo);
+        }
+        if (modo === "reserva") {
+            return dependencias.movimientosReserva.crearAcciones(mapeada._fila || mapeada, modo);
+        }
+        return document.createTextNode("");
+    }
+
     function sincronizarFila(nodo, id, filaOrigen, modo) {
         dependencias.tablas.sincronizarFila(nodo, id, filaOrigen, function (origen) {
             return fila(origen, modo);
+        }, function (mapeada) {
+            return widgetAcciones(mapeada, modo);
         });
     }
 
