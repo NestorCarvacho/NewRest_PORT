@@ -34,8 +34,10 @@ Los procedimientos antiguos `dbo.sp_*` del mismo módulo pueden quedar huérfano
 
 ### Comparar QA vs local
 
-Ejecutá en **cada** servidor (misma consulta, distinta conexión) el script  
-`Docs/datos/migracion/he_sp_inventario_comparar.sql` y guardá el primer resultado (`servidor`, `legado`, `nuevo`, `estado_newrest`).
+Consulta corta (solo **qué existe**): `Docs/datos/migracion/he_sp_listar_existen.sql` — equivalente a ampliar el `IN (...)` a los **104** nombres (52 `he_sp_*` + 52 `sp_*` legados); incluye bloque de **los que faltan**.
+
+Inventario detallado (estado por par legado/nuevo):  
+`Docs/datos/migracion/he_sp_inventario_comparar.sql` — ejecutar en **cada** servidor y guardar (`servidor`, `legado`, `nuevo`, `estado_newrest`).
 
 - **SSMS:** resultado a Excel/CSV por entorno.
 - **sqlcmd:**
