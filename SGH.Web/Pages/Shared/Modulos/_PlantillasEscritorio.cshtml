@@ -1,24 +1,39 @@
-@* Markup de solapas abiertas desde Index (sin página dedicada): mismas piezas que en cada /Datos.cshtml *@
+@* Solapas del Index: mismo markup que cada /Modulo/Datos.cshtml (partial _Listado en la carpeta del módulo). *@
 <div id="plantillas-modulos" hidden aria-hidden="true">
     <template id="plantilla-modulo-habitaciones">
-        <partial name="Modulos/_PanelHabitaciones" />
+        @{
+            ViewData["ModuloId"] = "habitaciones";
+        }
+        <partial name="~/Pages/Habitacion/_Listado.cshtml" />
     </template>
     <template id="plantilla-modulo-banos">
-        <partial name="Modulos/_PanelBanos" />
+        @{
+            ViewData["ModuloId"] = "banos";
+        }
+        <partial name="~/Pages/Habitacion/_ListadoBanos.cshtml" />
     </template>
     <template id="plantilla-modulo-tiposcama">
-        <partial name="Modulos/_PanelTiposCama" />
+        <partial name="~/Pages/Habitacion/_ListadoTiposCama.cshtml" />
     </template>
     <template id="plantilla-modulo-reserva">
-        <partial name="Modulos/_PanelReserva" />
+        @{
+            ViewData["ModuloId"] = "reserva";
+        }
+        <partial name="~/Pages/Reserva/_Listado.cshtml" />
     </template>
     <template id="plantilla-modulo-censo">
-        <partial name="Modulos/_PanelCenso" />
+        @{
+            ViewData["ModuloId"] = "censo";
+        }
+        <partial name="~/Pages/Censo/_Listado.cshtml" />
     </template>
     <template id="plantilla-modulo-misCensos">
-        <partial name="Modulos/_PanelMisCensos" />
+        <partial name="~/Pages/Censo/_ListadoMisCensos.cshtml" />
     </template>
     <template id="plantilla-modulo-solicitud">
-        <partial name="Modulos/_PanelSolicitud" />
+        @{
+            ViewData["ModuloId"] = "solicitud";
+        }
+        <partial name="~/Pages/Solicitud/_Listado.cshtml" />
     </template>
 </div>
