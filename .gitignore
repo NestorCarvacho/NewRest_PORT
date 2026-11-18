@@ -62,3 +62,6 @@ appsettings.Development.json
 appsettings.*.local.json
 **/secrets.json
 **/user-secrets.json
+
+# Copias locales de scripts HOTELDB (raíz del repo; uso personal)
+/scripts-ejecutar/
