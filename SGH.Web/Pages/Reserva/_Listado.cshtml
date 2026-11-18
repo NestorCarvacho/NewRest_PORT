@@ -1,0 +1,82 @@
+<section class="modulo modulo-anclado" data-id="reserva" hidden>
+    <p class="modulo-estado" hidden></p>
+    <div class="modulo-barra">
+        <button type="button" class="boton-secundario" data-accion="actualizar" data-etiqueta="Actualizar">Actualizar</button>
+        <partial name="Modulos/_ExportarDesplegable" />
+        <button type="button" class="boton-secundario" data-accion="filtros">Filtros</button>
+    </div>
+    <partial name="_TablaModulo" />
+    <form class="formulario formulario-filtros-modulo" data-modulo="reserva" hidden aria-hidden="true">
+        <h3 class="formulario-titulo">Criterios</h3>
+        <div class="formulario-grilla">
+            @{
+                ViewData["FiltroPrefijoFecha"] = "reserva";
+                ViewData["FiltroEtiquetaPeriodo"] = "Período (fecha reserva)";
+            }
+            <partial name="Modulos/_FiltrosPeriodo" />
+            <label class="campo">
+                <span>Grupo Empresa</span>
+                <select name="grupo" class="selector-buscable" data-catalogo="grupos"></select>
+            </label>
+            <label class="campo">
+                <span>Origen reserva</span>
+                <select name="origen" class="selector-buscable" data-catalogo="origenes"></select>
+            </label>
+            <label class="campo">
+                <span># Solicitud</span>
+                <input type="text" name="solicitud" inputmode="numeric" />
+            </label>
+            <label class="campo">
+                <span>Estado</span>
+                <select name="estado" class="selector-buscable">
+                    <option value="">Todos</option>
+                    <option value="A">Asignada</option>
+                    <option value="I">Asignada con Checkin</option>
+                    <option value="O">Asignada con Checkout</option>
+                    <option value="N">Anulada</option>
+                    <option value="F">Finalizada</option>
+                </select>
+            </label>
+            <label class="campo">
+                <span>Fecha Reserva</span>
+                <input type="date" name="reserva" />
+            </label>
+            <label class="campo">
+                <span>Fecha Llegada</span>
+                <input type="date" name="llegada" />
+            </label>
+            <label class="campo">
+                <span>Fecha Salida</span>
+                <input type="date" name="salida" />
+            </label>
+            <label class="campo">
+                <span>Check In</span>
+                <input type="date" name="checkin" />
+            </label>
+            <label class="campo">
+                <span>Check Out</span>
+                <input type="date" name="checkout" />
+            </label>
+            <label class="campo">
+                <span>Pasajero</span>
+                <select name="pasajero" class="selector-buscable" data-catalogo="pasajeros"></select>
+            </label>
+            <label class="campo">
+                <span>Habitación</span>
+                <select name="habitacion" class="selector-buscable" data-catalogo="habitaciones"></select>
+            </label>
+            <label class="campo">
+                <span>Tiene Agua?</span>
+                <select name="agua" class="selector-buscable">
+                    <option value="">Todos</option>
+                    <option value="1">SI</option>
+                    <option value="2">NO</option>
+                </select>
+            </label>
+        </div>
+        <div class="formulario-pie">
+            <button type="button" class="boton-secundario" data-accion="cerrar-panel">Cancelar</button>
+            <button type="submit" class="boton-primario">Aplicar</button>
+        </div>
+    </form>
+</section>

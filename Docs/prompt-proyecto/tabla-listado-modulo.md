@@ -16,9 +16,9 @@ Los formularios de **alta/edición** (panel lateral de una fila) siguen generán
 
 | Archivo | Contenido |
 |---------|-----------|
-| `Pages/Shared/Modulos/_Panel{Modulo}.cshtml` | `section.modulo-anclado`, barra, tabla, `form.formulario-filtros-modulo` |
-| `Pages/{Modulo}/Datos.cshtml` | `_ModuloPagina` + partial del panel |
-| `Pages/Index.cshtml` | `_PlantillasEscritorio` (mismos paneles en `<template>` para menú/solapas) |
+| `Pages/{Modulo}/_Listado.cshtml` (misma carpeta que la página) | `section.modulo-anclado`, barra, tabla, `form.formulario-filtros-modulo` — **no** en `Shared/Modulos/_Panel*` |
+| `Pages/{Modulo}/Datos.cshtml` | Ruta de la pantalla: `_ModuloPagina` + partial `_Listado` local |
+| `Pages/Index.cshtml` | `_PlantillasEscritorio` (apunta a los mismos `_Listado` en `<template>`) |
 | `encabezados-tabla-modulo.json` | Textos de `<th>` |
 | `panel-modulo.js` | `data-accion` → handlers; clona plantilla o adopta panel de la página |
 | `filtros-modulo.js` | Catálogo en selects, aplica filtro, envía `cargar(id)` |
@@ -42,8 +42,8 @@ Los formularios de **alta/edición** (panel lateral de una fila) siguen generán
 ## Agregar un módulo nuevo
 
 1. Añadir fila en `encabezados-tabla-modulo.json`.
-2. Crear `_PanelNuevo.cshtml` (barra + tabla + filtros).
-3. Página `Datos.cshtml` y entrada en `_PlantillasEscritorio.cshtml`.
+2. Crear `Pages/{Modulo}/_Listado.cshtml` (barra + tabla + filtros).
+3. `Pages/{Modulo}/Datos.cshtml` con `<partial name="_Listado" />` y entrada en `_PlantillasEscritorio.cshtml`.
 4. JS: `fila()`, `columnas()` del paquete; acciones nuevas → `data-accion` en Razor y mapa en `panel-modulo.js`.
 
 Ver también: `post-modulo-razor.md` (POST formulario al Mid), `layout-escritorio.md`.
