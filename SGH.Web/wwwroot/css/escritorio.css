@@ -1939,20 +1939,49 @@ html:not([data-tema="claro"]) .campo.campo-interruptor input[type="checkbox"]:ch
   }
 
   div.dt-container table.dataTable {
-    table-layout: auto;
-    min-width: 100%;
+    table-layout: auto !important;
+    width: 100% !important;
+    min-width: 0;
   }
 
   div.dt-container table.dataTable thead > tr > th,
-  div.dt-container table.dataTable tbody > tr > td {
+  div.dt-container table.dataTable tbody > tr > td,
+  .modulo-reserva table.dataTable th,
+  .modulo-reserva table.dataTable td,
+  .modulo-checkin table.dataTable th,
+  .modulo-checkin table.dataTable td,
+  .modulo-checkout table.dataTable th,
+  .modulo-checkout table.dataTable td {
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0;
     padding: 0.55rem 0.65rem !important;
     font-size: 0.8rem;
     white-space: normal;
     overflow-wrap: anywhere;
   }
 
-  div.dt-container table.dataTable tbody > tr > td.dtr-control {
+  .celda-truncada {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: break-word;
+  }
+
+  div.dt-container table.dataTable tbody > tr > td.dtr-control,
+  div.dt-container table.dataTable tbody > tr > td.control {
     white-space: nowrap;
+    width: 2.25rem !important;
+    min-width: 2.25rem !important;
+    max-width: 2.25rem !important;
+    vertical-align: middle;
+  }
+
+  div.dt-container table.dataTable thead > tr > th.control,
+  div.dt-container table.dataTable thead > tr > th.dtr-control {
+    width: 2.25rem !important;
+    min-width: 2.25rem !important;
+    max-width: 2.25rem !important;
   }
 
   div.dt-container table.dataTable > tbody > tr.child ul.dtr-details {
