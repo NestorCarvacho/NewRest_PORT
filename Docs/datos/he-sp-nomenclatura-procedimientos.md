@@ -32,6 +32,21 @@ Los archivos `.sql` bajo `SGH.Infrastructure/**/Persistence/` declaran los objet
 
 Los procedimientos antiguos `dbo.sp_*` del mismo módulo pueden quedar huérfanos en la base hasta que un DBA los elimine; la aplicación ya no los referencia.
 
+### Comparar QA vs local
+
+Ejecutá en **cada** servidor (misma consulta, distinta conexión) el script  
+`Docs/datos/migracion/he_sp_inventario_comparar.sql` y guardá el primer resultado (`servidor`, `legado`, `nuevo`, `estado_newrest`).
+
+- **SSMS:** resultado a Excel/CSV por entorno.
+- **sqlcmd:**
+
+```bash
+sqlcmd -S <QA> -d HOTELDB -E -i Docs/datos/migracion/he_sp_inventario_comparar.sql -s ";" -W -h-1 -o inventario_qa.csv
+sqlcmd -S "(localdb)\MSSQLLocalDB" -d HOTELDB -E -i Docs/datos/migracion/he_sp_inventario_comparar.sql -s ";" -W -h-1 -o inventario_local.csv
+```
+
+En Excel: pegar ambas tablas y comparar por columna `nuevo` y `estado_newrest`. Lo que la app necesita es `estado_newrest = OK app (procedimiento)` en QA.
+
 ### Error «Could not find stored procedure 'he_sp_…'»
 
 La **aplicación** ya llama `he_sp_*`, pero **HOTELDB** aún solo tiene `sp_*` (u otro nombre). No es un fallo de código: falta alinear la base.
