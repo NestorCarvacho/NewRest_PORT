@@ -32,6 +32,16 @@ Los archivos `.sql` bajo `SGH.Infrastructure/**/Persistence/` declaran los objet
 
 Los procedimientos antiguos `dbo.sp_*` del mismo módulo pueden quedar huérfanos en la base hasta que un DBA los elimine; la aplicación ya no los referencia.
 
+### Error «Could not find stored procedure 'he_sp_…'»
+
+La **aplicación** ya llama `he_sp_*`, pero **HOTELDB** aún solo tiene `sp_*` (u otro nombre). No es un fallo de código: falta alinear la base.
+
+1. **Recomendado:** ejecutar los scripts del repo en QA (login primero: `SGH.Infrastructure/Cuenta/Persistence/001_sp_login.sql` y, si aplica, `002_sp_login_passwordv2_dual.sql`).
+2. **Puente rápido solo login:** `Docs/datos/migracion/he_sp_cuenta_login_puente_qa.sql` (sinónimos `he_sp_usuario_*` → `sp_Usuario_*` existentes).
+3. **Puente completo módulos SGH:** `Docs/datos/migracion/he_sp_sinonimos_desde_sp_legacy.sql`.
+
+Cuando ejecutes los `CREATE OR ALTER` del repo, elimina los sinónimos `he_sp_*` que apunten al legado antes de crear el procedimiento con el mismo nombre.
+
 ### Puente temporal en QA
 
 Si en un ambiente aún existen solo los nombres `sp_*` y no se puede redesplegar de inmediato, usar `Docs/datos/migracion/he_sp_sinonimos_desde_sp_legacy.sql`: crea sinónimos `he_sp_*` que apuntan al `sp_*` homónimo existente. Cuando se ejecuten los scripts del repo, conviene **eliminar esos sinónimos** y crear los procedimientos reales con `CREATE OR ALTER` (los sinónimos bloquean un objeto con el mismo nombre).
