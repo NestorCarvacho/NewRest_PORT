@@ -4,6 +4,7 @@ Base de partida: una **HOTELDB legado** ya existente (procedimientos `SOL_*`, `H
 
 Convenciones:
 
+- **Nombres de SP propios del repo:** `dbo.he_sp_{tabla}_{accion}` (prefijo proyecto `he_`). Ver `Docs/datos/he-sp-nomenclatura-procedimientos.md`.
 - **Copias locales en un solo lugar:** carpeta raíz `scripts-ejecutar/` (gitignored). Poblarla con `./tools/sincronizar-scripts-ejecutar.sh`; los archivos se llaman `{Modulo}_{nombre}.sql`.
 - Ejecutar cada archivo en **SSMS / sqlcmd** contra la misma base que usa `ConnectionStrings:Hoteldb`.
 - Abrir los `.sql` como **UTF-8** (mensajes con tildes).
@@ -52,7 +53,7 @@ Tras actualizar el flujo de **importación**, el `README.md` pide **volver a des
 
 - `001_sp_solicitud.sql` (ítem 9)
 - `004_sp_generar_reservas.sql` (ítem 13)
-- Bloque `sp_Reserva_RegistrarMovimiento` en `001_sp_reserva.sql` (ítem 4)
+- Bloque `he_sp_reserva_registrar_movimiento` en `001_sp_reserva.sql` (ítem 4)
 
 ## 2. Por módulo (si solo migrás una parte)
 

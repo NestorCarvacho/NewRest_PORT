@@ -1,4 +1,4 @@
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_HabitacionesDisponibles
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_habitaciones_disponibles
     @SolicitudId int,
     @EmpresaMandanteId int,
     @CampamentoId int
@@ -20,7 +20,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_AsignarHabitacion
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_asignar_habitacion
     @SolicitudId int,
     @PasajeroId int,
     @HabitacionId int,
@@ -35,7 +35,7 @@ BEGIN
         BEGIN TRANSACTION;
         DECLARE @Estado nvarchar(450), @HabitacionActual int, @Bloqueo int;
         DECLARE @Recurso nvarchar(255) = CONCAT('SGH_Solicitud_Habitacion_', @CampamentoId);
-        EXEC @Bloqueo = sys.sp_getapplock @Resource = @Recurso, @LockMode = 'Exclusive',
+        EXEC @Bloqueo = sys.he_sp_getapplock @Resource = @Recurso, @LockMode = 'Exclusive',
             @LockOwner = 'Transaction', @LockTimeout = 10000;
         IF @Bloqueo < 0
             THROW 51055, 'No se pudo bloquear la asignación de habitaciones. Intente nuevamente.', 1;
@@ -60,7 +60,7 @@ BEGIN
                 tipoInstalacion nvarchar(100), StandardHabitacion nvarchar(100),
                 areaEmpresaContratista int, cantidadCamasAsignadas int, cantidadCamasDisponibles int);
             INSERT INTO @Disponibles
-            EXEC dbo.sp_Solicitud_HabitacionesDisponibles @SolicitudId, @EmpresaMandanteId, @CampamentoId;
+            EXEC dbo.he_sp_solicitud_habitaciones_disponibles @SolicitudId, @EmpresaMandanteId, @CampamentoId;
             IF NOT EXISTS (
                 SELECT 1 FROM @Disponibles d
                 WHERE d.habitacionId = @HabitacionId
@@ -85,7 +85,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_DesasignarHabitacion
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_desasignar_habitacion
     @SolicitudId int,
     @PasajeroId int,
     @EmpresaMandanteId int,
@@ -99,7 +99,7 @@ BEGIN
         BEGIN TRANSACTION;
         DECLARE @Estado nvarchar(450), @Bloqueo int;
         DECLARE @Recurso nvarchar(255) = CONCAT('SGH_Solicitud_Habitacion_', @CampamentoId);
-        EXEC @Bloqueo = sys.sp_getapplock @Resource = @Recurso, @LockMode = 'Exclusive',
+        EXEC @Bloqueo = sys.he_sp_getapplock @Resource = @Recurso, @LockMode = 'Exclusive',
             @LockOwner = 'Transaction', @LockTimeout = 10000;
         IF @Bloqueo < 0
             THROW 51055, 'No se pudo bloquear la asignación de habitaciones. Intente nuevamente.', 1;

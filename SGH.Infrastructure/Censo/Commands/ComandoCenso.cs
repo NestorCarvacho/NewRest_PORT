@@ -25,7 +25,7 @@ public sealed class ComandoCenso : IComandoCenso
         using var conexion = _fabrica.Crear();
         var resultado = await conexion.QueryFirstOrDefaultAsync<ResultadoFila>(
             new CommandDefinition(
-                "sp_Censo_Guardar",
+                "he_sp_censo_guardar",
                 new
                 {
                     fila.Id,

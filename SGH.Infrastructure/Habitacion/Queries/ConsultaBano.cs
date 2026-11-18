@@ -12,7 +12,7 @@ public sealed class ConsultaBano(IFabricaConexionSql fabrica) : IConsultaBano
     {
         using var conexion = fabrica.Crear();
         var filas = await conexion.QueryAsync<BanoListado>(new CommandDefinition(
-            "dbo.sp_Bano_Listar",
+            "dbo.he_sp_bano_listar",
             new { CampamentoId = campamentoId, SoloActivos = soloActivos, BanoId = banoId },
             commandType: CommandType.StoredProcedure,
             commandTimeout: 120,
@@ -25,7 +25,7 @@ public sealed class ConsultaBano(IFabricaConexionSql fabrica) : IConsultaBano
     {
         using var conexion = fabrica.Crear();
         var filas = await conexion.QueryAsync<HabitacionVinculadaBano>(new CommandDefinition(
-            "dbo.sp_Bano_HabitacionesActivasPorBano",
+            "dbo.he_sp_bano_habitaciones_activas_por_bano",
             new { BanoId = banoId, CampamentoId = campamentoId },
             commandType: CommandType.StoredProcedure,
             commandTimeout: 120,

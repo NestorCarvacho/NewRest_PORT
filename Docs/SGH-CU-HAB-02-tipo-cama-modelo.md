@@ -27,14 +27,14 @@
 | `IsActive` | La plaza existe en la habitación (inventario). `0` = baja lógica; no se muestra en listados operativos por defecto. |
 | `Habilitada` | La plaza cuenta para disponibilidad / asignación (puede estar activa pero deshabilitada por aseo). |
 
-**Regla:** `HabitacionId` de una cama **no se cambia** al editar. Una cama no puede moverse a otra habitación (`ReglasCama` + `sp_Cama_Guardar`).
+**Regla:** `HabitacionId` de una cama **no se cambia** al editar. Una cama no puede moverse a otra habitación (`ReglasCama` + `he_sp_cama_guardar`).
 
-Los campos operativos (`CodigoCama`, `Habilitada`, `Orden`, `IsActive`) se conservan; el alta solo crea filas en la habitación indicada (`sp_Habitacion_SincronizarCamas`).
+Los campos operativos (`CodigoCama`, `Habilitada`, `Orden`, `IsActive`) se conservan; el alta solo crea filas en la habitación indicada (`he_sp_habitacion_sincronizar_camas`).
 
 ## SQL (orden)
 
 1. `005_hotldb_tipo_cama_inventario.sql`
-2. `006_sp_tipo_cama_inventario.sql` (incluye `sp_Cama_*` y octavo result set de `sp_Habitacion_Catalogo`)
+2. `006_sp_tipo_cama_inventario.sql` (incluye `he_sp_cama_*` y octavo result set de `he_sp_habitacion_catalogo`)
 
 ## Mid (`MidHabitaciones`)
 

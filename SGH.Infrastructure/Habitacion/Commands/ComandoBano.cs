@@ -24,7 +24,7 @@ public sealed class ComandoBano(IFabricaConexionSql fabrica) : IComandoBano
         parametros.Add("@Mensaje", dbType: DbType.String, size: 500, direction: ParameterDirection.Output);
 
         await conexion.ExecuteAsync(new CommandDefinition(
-            "dbo.sp_Bano_Guardar",
+            "dbo.he_sp_bano_guardar",
             parametros,
             commandType: CommandType.StoredProcedure,
             commandTimeout: 120,

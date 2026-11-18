@@ -1,4 +1,4 @@
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_GenerarReservas
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_generar_reservas
     @SolicitudId int,
     @EmpresaMandanteId int,
     @CampamentoId int,
@@ -12,7 +12,7 @@ BEGIN
         BEGIN TRANSACTION;
         DECLARE @Bloqueo int;
         DECLARE @Recurso nvarchar(255) = CONCAT('SGH_Solicitud_Habitacion_', @CampamentoId);
-        EXEC @Bloqueo = sys.sp_getapplock @Resource = @Recurso, @LockMode = 'Exclusive',
+        EXEC @Bloqueo = sys.he_sp_getapplock @Resource = @Recurso, @LockMode = 'Exclusive',
             @LockOwner = 'Transaction', @LockTimeout = 10000;
         IF @Bloqueo < 0
             THROW 51055, 'No se pudo bloquear la generación de reservas. Intente nuevamente.', 1;
@@ -32,7 +32,7 @@ BEGIN
             SELECT 1 FROM dbo.Turnos WHERE Id = @TurnoId AND DiasTrabajados > 0 AND DiasLibres >= 0)
             THROW 51052, 'El turno de la solicitud no tiene una duración válida.', 1;
 
-        EXEC dbo.sp_Solicitud_AsegurarPeriodo
+        EXEC dbo.he_sp_solicitud_asegurar_periodo
             @SolicitudId = @SolicitudId,
             @EmpresaMandanteId = @EmpresaMandanteId,
             @CampamentoId = @CampamentoId,
@@ -44,7 +44,7 @@ BEGIN
             tipoInstalacion nvarchar(100), StandardHabitacion nvarchar(100),
             areaEmpresaContratista int, cantidadCamasAsignadas int, cantidadCamasDisponibles int);
         INSERT INTO @Disponibles
-        EXEC dbo.sp_Solicitud_HabitacionesDisponibles @SolicitudId, @EmpresaMandanteId, @CampamentoId;
+        EXEC dbo.he_sp_solicitud_habitaciones_disponibles @SolicitudId, @EmpresaMandanteId, @CampamentoId;
         IF EXISTS (
             SELECT 1
             FROM dbo.PasajerosSolicitudAlojamiento p

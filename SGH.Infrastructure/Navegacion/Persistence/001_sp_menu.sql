@@ -1,5 +1,5 @@
 /* Menú por perfil — join Menus + MenusPerfil (HOTELDB legado). */
-CREATE OR ALTER PROCEDURE dbo.sp_Menu_ObtenerPorPerfil
+CREATE OR ALTER PROCEDURE dbo.he_sp_menu_obtener_por_perfil
     @PerfilId int
 AS
 SET NOCOUNT ON;

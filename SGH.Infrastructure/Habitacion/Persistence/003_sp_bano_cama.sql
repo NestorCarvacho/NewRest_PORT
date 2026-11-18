@@ -1,6 +1,6 @@
 /* Baños y camas — CRUD CU-HAB-01 */
 
-CREATE OR ALTER PROCEDURE dbo.sp_Bano_Listar
+CREATE OR ALTER PROCEDURE dbo.he_sp_bano_listar
     @CampamentoId int,
     @SoloActivos int = 1,
     @BanoId int = 0
@@ -25,7 +25,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Bano_HabitacionesActivasPorBano
+CREATE OR ALTER PROCEDURE dbo.he_sp_bano_habitaciones_activas_por_bano
     @BanoId int,
     @CampamentoId int
 AS
@@ -45,7 +45,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Bano_Guardar
+CREATE OR ALTER PROCEDURE dbo.he_sp_bano_guardar
     @Id int,
     @CampamentoId int,
     @CodigoNombre nvarchar(100),
@@ -134,7 +134,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Cama_ListarPorHabitacion
+CREATE OR ALTER PROCEDURE dbo.he_sp_cama_listar_por_habitacion
     @HabitacionId int,
     @CampamentoId int,
     @SoloActivas int = 1
@@ -160,7 +160,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Cama_Guardar
+CREATE OR ALTER PROCEDURE dbo.he_sp_cama_guardar
     @Id int,
     @HabitacionId int,
     @CodigoCama nvarchar(50),
@@ -244,7 +244,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Habitacion_SincronizarCamas
+CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_sincronizar_camas
     @HabitacionId int,
     @CantidadObjetivo int,
     @CampamentoId int,

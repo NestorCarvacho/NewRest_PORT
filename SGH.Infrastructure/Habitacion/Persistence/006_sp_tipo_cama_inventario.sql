@@ -1,6 +1,6 @@
 /* CU-HAB-02 — TipoCama y camas con inventario */
 
-CREATE OR ALTER PROCEDURE dbo.sp_TipoCama_Listar
+CREATE OR ALTER PROCEDURE dbo.he_sp_tipo_cama_listar
     @CampamentoId int,
     @SoloActivos int = 1,
     @TipoCamaId int = 0
@@ -25,7 +25,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_TipoCama_Guardar
+CREATE OR ALTER PROCEDURE dbo.he_sp_tipo_cama_guardar
     @Id int,
     @CampamentoId int,
     @Nombre nvarchar(100),
@@ -97,7 +97,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Cama_ListarPorHabitacion
+CREATE OR ALTER PROCEDURE dbo.he_sp_cama_listar_por_habitacion
     @HabitacionId int,
     @CampamentoId int,
     @SoloActivas int = 1
@@ -132,7 +132,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Cama_Guardar
+CREATE OR ALTER PROCEDURE dbo.he_sp_cama_guardar
     @Id int,
     @HabitacionId int,
     @CodigoCama nvarchar(50),
@@ -241,7 +241,7 @@ END
 GO
 
 /* Octavo result set: tipos de cama activos (requiere dbo.TipoCama). */
-CREATE OR ALTER PROCEDURE dbo.sp_Habitacion_Catalogo
+CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_catalogo
     @CampamentoId int,
     @MineraId int
 AS

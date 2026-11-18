@@ -21,7 +21,7 @@ public sealed class ConsultaReserva : IConsultaReserva
         using var conexion = _fabrica.Crear();
         var filas = await conexion.QueryAsync<ReservaFila>(
             new CommandDefinition(
-                "sp_Reserva_Buscar",
+                "he_sp_reserva_buscar",
                 new
                 {
                     filtro.CampamentoId,
@@ -68,7 +68,7 @@ public sealed class ConsultaReserva : IConsultaReserva
         using var conexion = _fabrica.Crear();
         using var lectura = await conexion.QueryMultipleAsync(
             new CommandDefinition(
-                "sp_Reserva_ListarCatalogo",
+                "he_sp_reserva_listar_catalogo",
                 new { EmpresaMandanteId = empresaMandanteId, CampamentoId = campamentoId },
                 commandType: CommandType.StoredProcedure,
                 cancellationToken: cancellationToken));
@@ -92,7 +92,7 @@ public sealed class ConsultaReserva : IConsultaReserva
         using var conexion = _fabrica.Crear();
         var marca = await conexion.QuerySingleAsync<MarcaPertenece>(
             new CommandDefinition(
-                "sp_Reserva_EstaEnCampamento",
+                "he_sp_reserva_esta_en_campamento",
                 new { ReservaId = reservaId, CampamentoId = campamentoId },
                 commandType: CommandType.StoredProcedure,
                 cancellationToken: cancellationToken));

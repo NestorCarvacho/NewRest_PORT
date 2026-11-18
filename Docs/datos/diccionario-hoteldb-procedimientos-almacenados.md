@@ -75,7 +75,7 @@ ORDER BY o.name;
 
 | Procedimiento | Uso en repo |
 |---------------|-------------|
-| `UNG_ObtieneUnidadesNegocio` | `sp_Solicitud_ListarOrganizacion` |
+| `UNG_ObtieneUnidadesNegocio` | `he_sp_solicitud_listar_organizacion` |
 | `DIV_ObtieneDivisiones` | íd. |
 | `DEP_ObtieneDepartamentos` | íd. |
 | `SOL_GuardaSolicitudAlojamiento` | guardar solicitud |
@@ -176,7 +176,7 @@ WHERE OBJECTPROPERTY(d.referencing_id, 'IsProcedure') = 1
 ORDER BY ProcedimientoLlamador, ObjetoReferenciado;
 ```
 
-Ejemplo: `sp_Solicitud_ListarOrganizacion` → `UNG_ObtieneUnidadesNegocio`, `DIV_ObtieneDivisiones`, `DEP_ObtieneDepartamentos`.
+Ejemplo: `he_sp_solicitud_listar_organizacion` → `UNG_ObtieneUnidadesNegocio`, `DIV_ObtieneDivisiones`, `DEP_ObtieneDepartamentos`.
 
 ---
 
@@ -216,11 +216,11 @@ Lista estática extraída del repositorio (regenerar con búsqueda `NameProcedur
 
 | Procedimiento | Módulo |
 |---------------|--------|
-| `sp_Menu_ObtenerPorPerfil` | Navegación |
-| `sp_Usuario_*` | Cuenta |
-| `sp_Censo_*`, `HAB_ObtieneCensos`, `CSO_ObtieneCensoByUser` | Censo |
-| `sp_Reserva_*` | Reserva |
-| `sp_Solicitud_*`, `SOL_*`, `USU_ObtieneUsuarios` | Solicitud |
+| `he_sp_menu_obtener_por_perfil` | Navegación |
+| `he_sp_usuario_*` | Cuenta |
+| `he_sp_censo_*`, `HAB_ObtieneCensos`, `CSO_ObtieneCensoByUser` | Censo |
+| `he_sp_reserva_*` | Reserva |
+| `he_sp_solicitud_*`, `SOL_*`, `USU_ObtieneUsuarios` | Solicitud |
 | `INF_*` | Informes censo |
 
 Cualquier SP de **§2** que no esté en esta tabla es candidato a documentar en **SGH 2.1** (mantenedor legado).

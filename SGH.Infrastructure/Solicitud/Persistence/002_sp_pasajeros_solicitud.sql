@@ -1,4 +1,4 @@
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_ListarPasajeros
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_listar_pasajeros
     @SolicitudId int,
     @EmpresaMandanteId int,
     @CampamentoId int
@@ -15,7 +15,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_AgregarCupos
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_agregar_cupos
     @SolicitudId int,
     @EmpresaMandanteId int,
     @CampamentoId int,
@@ -56,7 +56,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_EliminarPasajero
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_eliminar_pasajero
     @SolicitudId int,
     @PasajeroId int,
     @EmpresaMandanteId int,

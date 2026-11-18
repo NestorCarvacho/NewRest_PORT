@@ -22,7 +22,7 @@ public sealed class ComandoReserva : IComandoReserva
         var oCRB = await oDB.DBOpenAsync(300, cancellationToken);
         if (oCRB.Resultado)
         {
-            oDB.NameProcedure = "dbo.sp_Reserva_Crear";
+            oDB.NameProcedure = "dbo.he_sp_reserva_crear";
             oCRB = oDB.AddParameter("@EmpresaMandanteId", empresaMandanteId);
             oCRB = oDB.AddParameter("@CampamentoId", campamentoId);
             oCRB = oDB.AddParameter("@AreaId", areaId);
@@ -52,7 +52,7 @@ public sealed class ComandoReserva : IComandoReserva
         var oCRB = await oDB.DBOpenAsync(300, cancellationToken);
         if (oCRB.Resultado)
         {
-            oDB.NameProcedure = "dbo.sp_Reserva_RegistrarMovimiento";
+            oDB.NameProcedure = "dbo.he_sp_reserva_registrar_movimiento";
             oCRB = oDB.AddParameter("@ReservaId", reservaId);
             oCRB = oDB.AddParameter("@Fecha", fecha);
             oCRB = oDB.AddParameter("@UsuarioId", usuarioId);
@@ -78,7 +78,7 @@ public sealed class ComandoReserva : IComandoReserva
         var oCRB = await oDB.DBOpenAsync(300, cancellationToken);
         if (oCRB.Resultado)
         {
-            oDB.NameProcedure = "dbo.sp_Reserva_Actualizar";
+            oDB.NameProcedure = "dbo.he_sp_reserva_actualizar";
             oCRB = oDB.AddParameter("@ReservaId", reservaId);
             oCRB = oDB.AddParameter("@EmpresaMandanteId", empresaMandanteId);
             oCRB = oDB.AddParameter("@CampamentoId", campamentoId);

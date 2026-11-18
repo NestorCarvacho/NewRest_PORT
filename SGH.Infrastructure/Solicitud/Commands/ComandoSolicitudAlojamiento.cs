@@ -8,7 +8,7 @@ namespace SGH.Infrastructure.Solicitud.Commands;
 public sealed class ComandoSolicitudAlojamiento : IComandoSolicitudAlojamiento
 {
     public Task AsegurarPeriodoImportacionAsync(int solicitudId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken) =>
-        EjecutarAsync("dbo.sp_Solicitud_AsegurarPeriodo", cancellationToken,
+        EjecutarAsync("dbo.he_sp_solicitud_asegurar_periodo", cancellationToken,
             ("@SolicitudId", solicitudId), ("@EmpresaMandanteId", empresaMandanteId),
             ("@CampamentoId", campamentoId), ("@UsuarioId", usuarioId));
 
@@ -16,7 +16,7 @@ public sealed class ComandoSolicitudAlojamiento : IComandoSolicitudAlojamiento
         int usuarioId, FilaCargaPasajeroDto fila, CancellationToken cancellationToken)
     {
         var oDB = new AD_Global();
-        var oCRB = await AbrirAsync(oDB, "dbo.sp_Solicitud_CargarPasajero", cancellationToken);
+        var oCRB = await AbrirAsync(oDB, "dbo.he_sp_solicitud_cargar_pasajero", cancellationToken);
         if (oCRB.Resultado)
         {
             oCRB = oDB.AddParameter("@SolicitudId", solicitudId);
@@ -47,18 +47,18 @@ public sealed class ComandoSolicitudAlojamiento : IComandoSolicitudAlojamiento
     }
 
     public Task AsignarHabitacionAsync(int solicitudId, int pasajeroId, int habitacionId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken) =>
-        EjecutarAsync("dbo.sp_Solicitud_AsignarHabitacion", cancellationToken,
+        EjecutarAsync("dbo.he_sp_solicitud_asignar_habitacion", cancellationToken,
             ("@SolicitudId", solicitudId), ("@PasajeroId", pasajeroId), ("@HabitacionId", habitacionId),
             ("@EmpresaMandanteId", empresaMandanteId), ("@CampamentoId", campamentoId), ("@UsuarioId", usuarioId));
 
     public Task DesasignarHabitacionAsync(int solicitudId, int pasajeroId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken) =>
-        EjecutarAsync("dbo.sp_Solicitud_DesasignarHabitacion", cancellationToken,
+        EjecutarAsync("dbo.he_sp_solicitud_desasignar_habitacion", cancellationToken,
             ("@SolicitudId", solicitudId), ("@PasajeroId", pasajeroId),
             ("@EmpresaMandanteId", empresaMandanteId), ("@CampamentoId", campamentoId), ("@UsuarioId", usuarioId));
 
     public async Task<int> GenerarReservasAsync(int solicitudId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
     {
-        var id = await EjecutarSalidaAsync("dbo.sp_Solicitud_GenerarReservas", "@PrimeraReservaId", cancellationToken,
+        var id = await EjecutarSalidaAsync("dbo.he_sp_solicitud_generar_reservas", "@PrimeraReservaId", cancellationToken,
             ("@SolicitudId", solicitudId), ("@EmpresaMandanteId", empresaMandanteId),
             ("@CampamentoId", campamentoId), ("@UsuarioId", usuarioId));
         return id > 0 ? id : throw new InvalidOperationException("El procedimiento no devolvió una reserva válida.");
@@ -66,7 +66,7 @@ public sealed class ComandoSolicitudAlojamiento : IComandoSolicitudAlojamiento
 
     public async Task<int> GuardarPasajeroAsync(GuardarPasajeroSolicitudDto pasajero, CancellationToken cancellationToken)
     {
-        var id = await EjecutarSalidaAsync("dbo.sp_Solicitud_GuardarPasajero", "@Ret", cancellationToken,
+        var id = await EjecutarSalidaAsync("dbo.he_sp_solicitud_guardar_pasajero", "@Ret", cancellationToken,
             ("@SolicitudId", pasajero.SolicitudId), ("@PasajeroId", pasajero.PasajeroId),
             ("@UsuarioPasajeroId", pasajero.UsuarioPasajeroId), ("@EmpresaMandanteId", pasajero.EmpresaMandanteId),
             ("@CampamentoId", pasajero.CampamentoId), ("@UsuarioId", pasajero.UsuarioId),
@@ -75,18 +75,18 @@ public sealed class ComandoSolicitudAlojamiento : IComandoSolicitudAlojamiento
     }
 
     public Task AgregarCuposAsync(int solicitudId, int empresaMandanteId, int campamentoId, int usuarioId, int cantidad, CancellationToken cancellationToken) =>
-        EjecutarAsync("dbo.sp_Solicitud_AgregarCupos", cancellationToken,
+        EjecutarAsync("dbo.he_sp_solicitud_agregar_cupos", cancellationToken,
             ("@SolicitudId", solicitudId), ("@EmpresaMandanteId", empresaMandanteId),
             ("@CampamentoId", campamentoId), ("@UsuarioId", usuarioId), ("@Cantidad", cantidad));
 
     public Task EliminarPasajeroAsync(int solicitudId, int pasajeroId, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken) =>
-        EjecutarAsync("dbo.sp_Solicitud_EliminarPasajero", cancellationToken,
+        EjecutarAsync("dbo.he_sp_solicitud_eliminar_pasajero", cancellationToken,
             ("@SolicitudId", solicitudId), ("@PasajeroId", pasajeroId),
             ("@EmpresaMandanteId", empresaMandanteId), ("@CampamentoId", campamentoId));
 
     public async Task<int> GuardarAsync(DatosSolicitudDto solicitud, CancellationToken cancellationToken)
     {
-        var id = await EjecutarSalidaAsync("dbo.sp_Solicitud_Guardar", "@Ret", cancellationToken,
+        var id = await EjecutarSalidaAsync("dbo.he_sp_solicitud_guardar", "@Ret", cancellationToken,
             ("@Id", solicitud.Id), ("@EmpresaMandanteId", solicitud.EmpresaMandanteId),
             ("@CampamentoId", solicitud.CampamentoId), ("@UsuarioId", solicitud.UsuarioId),
             ("@FechaSolicitud", solicitud.FechaSolicitud?.Date), ("@FechaCheckIn", solicitud.FechaCheckIn?.Date),
@@ -102,7 +102,7 @@ public sealed class ComandoSolicitudAlojamiento : IComandoSolicitudAlojamiento
     }
 
     public Task AnularAsync(int id, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken) =>
-        EjecutarAsync("dbo.sp_Solicitud_Anular", cancellationToken,
+        EjecutarAsync("dbo.he_sp_solicitud_anular", cancellationToken,
             ("@Id", id), ("@EmpresaMandanteId", empresaMandanteId),
             ("@CampamentoId", campamentoId), ("@UsuarioId", usuarioId));
 
@@ -143,7 +143,7 @@ public sealed class ComandoSolicitudAlojamiento : IComandoSolicitudAlojamiento
     }
 
     internal static string MensajeError(string procedimiento, LIB_ControlResultado resultado) =>
-        procedimiento == "dbo.sp_Solicitud_GenerarReservas" && resultado.Codigo == "51051"
+        procedimiento == "dbo.he_sp_solicitud_generar_reservas" && resultado.Codigo == "51051"
             ? "Asigne una habitación a todos los pasajeros antes de generar reservas."
             : resultado.Mensaje;
 

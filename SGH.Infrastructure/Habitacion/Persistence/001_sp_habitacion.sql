@@ -1,6 +1,6 @@
 /* Habitaciones — CRUD CU-HAB: legado HAB_* si está sano; si no (p. ej. files.HabitacionFiles), guardado nativo. */
 
-CREATE OR ALTER PROCEDURE dbo.sp_Habitacion_Listar
+CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_listar
     @EmpresaMandanteId int,
     @CampamentoId int,
     @PabellonId int = 0,
@@ -48,7 +48,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Habitacion_Obtener
+CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_obtener
     @Id int,
     @CampamentoId int
 AS
@@ -85,7 +85,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Habitacion_Catalogo
+CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_catalogo
     @CampamentoId int,
     @MineraId int
 AS
@@ -132,7 +132,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Habitacion_Guardar
+CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_guardar
     @Id int,
     @ModuloId int,
     @Nombre varchar(100),
@@ -499,7 +499,7 @@ BEGIN
     END
 
     BEGIN TRY
-        EXEC dbo.sp_Habitacion_SincronizarCamas
+        EXEC dbo.he_sp_habitacion_sincronizar_camas
             @HabitacionId = @IdResultado,
             @CantidadObjetivo = @CantidadCamas,
             @CampamentoId = @CampamentoId,

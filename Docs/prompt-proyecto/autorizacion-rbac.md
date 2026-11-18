@@ -4,7 +4,7 @@
 
 **Parcialmente.** El sistema usa **autorización por políticas de ASP.NET Core** apoyada en el **`PerfilId`** que viene de la base (asignación campamento–perfil al iniciar sesión), no un RBAC clásico con matriz rol→permiso persistida y evaluada por rol.
 
-Desde **SGH 1.5**, las políticas operativas también exigen un ítem en **`MenusPerfil`** para el `PerfilId` de sesión (`MenuAccesoAuthorizationHandler` + `sp_Menu_ObtenerPorPerfil`). Si la BD no devuelve menú, se usa un respaldo mínimo equivalente al escritorio migrado.
+Desde **SGH 1.5**, las políticas operativas también exigen un ítem en **`MenusPerfil`** para el `PerfilId` de sesión (`MenuAccesoAuthorizationHandler` + `he_sp_menu_obtener_por_perfil`). Si la BD no devuelve menú, se usa un respaldo mínimo equivalente al escritorio migrado.
 
 En la práctica hoy hay **dos bandas** (más el filtro por menú anterior):
 
@@ -31,7 +31,7 @@ Complemento importante: el **alcance por campamento/mandante** (`AlcanceMid`, `R
 
 | Concepto | Origen | Uso en autorización HTTP |
 |----------|--------|---------------------------|
-| `PerfilId` | `dbo.Usuarios` / asignación campamento–perfil (`sp_Usuario_*`) | **Sí** — `PerfilAutorizacionHandler` |
+| `PerfilId` | `dbo.Usuarios` / asignación campamento–perfil (`he_sp_usuario_*`) | **Sí** — `PerfilAutorizacionHandler` |
 | `Rol` (`all`, `ideauno`) | `CompletarSesion` según integración | **No** en políticas actuales |
 | Claims `capacidad` | Emitidos en cookie para no-pasajero | **No** — no hay `RequireClaim` ni handler que los lea |
 
@@ -94,7 +94,7 @@ En `_Layout.cshtml` se oculta el ítem “Usuarios” si `tipoPerfil` es `pasaje
 
 ## Relación con el legado
 
-`Docs/login-pendiente-revision-base-de-datos.md` (en el repo de producto) describe perfiles, asignaciones y procedimientos `sp_Usuario_*`. La autorización migrada **reutiliza `PerfilId` de sesión** pero **no** replica aún una matriz fina de permisos del sistema legacy si existía en menús o SPs.
+`Docs/login-pendiente-revision-base-de-datos.md` (en el repo de producto) describe perfiles, asignaciones y procedimientos `he_sp_usuario_*`. La autorización migrada **reutiliza `PerfilId` de sesión** pero **no** replica aún una matriz fina de permisos del sistema legacy si existía en menús o SPs.
 
 ---
 

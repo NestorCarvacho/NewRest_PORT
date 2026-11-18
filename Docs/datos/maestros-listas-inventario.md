@@ -38,7 +38,7 @@ Columnas relevantes para migración MVC+Mid:
 
 ### NewRest hoy (solo lectura)
 
-`sp_Solicitud_ListarOrganizacion` usa `UNG_ObtieneUnidadesNegocio`, `DIV_ObtieneDivisiones`, `DEP_ObtieneDepartamentos` (combos). No hay Mid de mantenimiento.
+`he_sp_solicitud_listar_organizacion` usa `UNG_ObtieneUnidadesNegocio`, `DIV_ObtieneDivisiones`, `DEP_ObtieneDepartamentos` (combos). No hay Mid de mantenimiento.
 
 ## Procedimientos almacenados maestros (extraídos)
 

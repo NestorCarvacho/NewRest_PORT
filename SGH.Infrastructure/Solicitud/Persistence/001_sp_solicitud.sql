@@ -1,4 +1,4 @@
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_Buscar
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_buscar
     @EmpresaMandanteId int,
     @CampamentoId int,
     @Desde date = NULL,
@@ -55,7 +55,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_ObtenerPrimeraReserva
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_obtener_primera_reserva
     @Id int,
     @EmpresaMandanteId int,
     @CampamentoId int
@@ -70,7 +70,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_ListarCatalogo
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_listar_catalogo
     @EmpresaMandanteId int
 AS
 BEGIN
@@ -93,7 +93,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_ListarOrganizacion
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_listar_organizacion
     @EmpresaMandanteId int,
     @UnidadId int,
     @DivisionId int
@@ -117,7 +117,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_Guardar
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_guardar
     @Id int,
     @EmpresaMandanteId int,
     @CampamentoId int,
@@ -212,7 +212,7 @@ BEGIN
             THROW 51032, 'No se pudo guardar la solicitud.', 1;
 
         DECLARE @SolicitudId int = CASE WHEN @Id = 0 THEN @Ret ELSE @Id END;
-        EXEC dbo.sp_Solicitud_AsegurarPeriodo
+        EXEC dbo.he_sp_solicitud_asegurar_periodo
             @SolicitudId = @SolicitudId,
             @EmpresaMandanteId = @EmpresaMandanteId,
             @CampamentoId = @CampamentoId,
@@ -227,7 +227,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_Anular
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_anular
     @Id int,
     @EmpresaMandanteId int,
     @CampamentoId int,

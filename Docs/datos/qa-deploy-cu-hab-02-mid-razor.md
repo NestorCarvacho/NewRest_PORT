@@ -22,8 +22,8 @@ Si **nunca** aplicaste CU-HAB-01 en QA, ejecutar antes (orden fijo):
 | # | Archivo | Objetos principales |
 |---|---------|---------------------|
 | 1 | `SGH.Infrastructure/Habitacion/Persistence/002_hotldb_cu_hab_extension.sql` | Tablas/columnas `Habitaciones`, `Banos`, `Camas`. |
-| 2 | `SGH.Infrastructure/Habitacion/Persistence/003_sp_bano_cama.sql` | `sp_Bano_*`, `sp_Cama_*` (legado sync), `sp_Habitacion_SincronizarCamas`, etc. |
-| 3 | `SGH.Infrastructure/Habitacion/Persistence/001_sp_habitacion.sql` | `sp_Habitacion_*` (catálogo, CRUD habitación). |
+| 2 | `SGH.Infrastructure/Habitacion/Persistence/003_sp_bano_cama.sql` | `he_sp_bano_*`, `he_sp_cama_*` (legado sync), `he_sp_habitacion_sincronizar_camas`, etc. |
+| 3 | `SGH.Infrastructure/Habitacion/Persistence/001_sp_habitacion.sql` | `he_sp_habitacion_*` (catálogo, CRUD habitación). |
 
 Opcional (datos): `004_banos_isactive_estado.sql`.
 
@@ -42,15 +42,15 @@ Ejecutar en **SSMS / sqlcmd** contra `ConnectionStrings:Hoteldb`, en este orden:
 
 | Procedimiento | Uso en aplicación |
 |---------------|-------------------|
-| `dbo.sp_TipoCama_Listar` | Mid `listartiposcama` |
-| `dbo.sp_TipoCama_Guardar` | Mid `creartipocama`, `editartipocama`, `activartipocama`, `inactivartipocama` |
-| `dbo.sp_Cama_ListarPorHabitacion` | Mid `listarcamas` |
-| `dbo.sp_Cama_Guardar` | Mid `guardarcama` (no permite cambiar `HabitacionId`) |
-| `dbo.sp_Habitacion_Catalogo` | Octavo result set con tipos de cama; escritorio habitaciones / baños / tipos |
+| `dbo.he_sp_tipo_cama_listar` | Mid `listartiposcama` |
+| `dbo.he_sp_tipo_cama_guardar` | Mid `creartipocama`, `editartipocama`, `activartipocama`, `inactivartipocama` |
+| `dbo.he_sp_cama_listar_por_habitacion` | Mid `listarcamas` |
+| `dbo.he_sp_cama_guardar` | Mid `guardarcama` (no permite cambiar `HabitacionId`) |
+| `dbo.he_sp_habitacion_catalogo` | Octavo result set con tipos de cama; escritorio habitaciones / baños / tipos |
 
 **Re-ejecutable:** ambos archivos son idempotentes (`IF NOT EXISTS` / `CREATE OR ALTER`).
 
-Si QA ya tenía `001_sp_habitacion.sql` antiguo sin el catálogo extendido, basta con el paso 2 (`006` redefine `sp_Habitacion_Catalogo`). Solo re-ejecutar `001_sp_habitacion.sql` completo si el equipo prefiere alinear todo el módulo habitación con el repo actual.
+Si QA ya tenía `001_sp_habitacion.sql` antiguo sin el catálogo extendido, basta con el paso 2 (`006` redefine `he_sp_habitacion_catalogo`). Solo re-ejecutar `001_sp_habitacion.sql` completo si el equipo prefiere alinear todo el módulo habitación con el repo actual.
 
 ---
 

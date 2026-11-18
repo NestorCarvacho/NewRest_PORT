@@ -29,7 +29,7 @@ sequenceDiagram
 - Si la habitación está activa y reservable, y el usuario pasa `@isReservable = 0`, comprueba `ReservasInstalacion` con `ubicacionId = @id` y `fecHorInicio >=` hora actual (truncada a hora).
 - Mensaje: `Ubicacion se encuentra con reservas activas` (`THROW 50001`).
 
-CU-HAB replica esta regla en `sp_Habitacion_Guardar` (devuelve el mismo texto en `@Mensaje`).
+CU-HAB replica esta regla en `he_sp_habitacion_guardar` (devuelve el mismo texto en `@Mensaje`).
 
 ### `HAB_GuardaHabitacion`
 
@@ -42,7 +42,7 @@ CU-HAB replica esta regla en `sp_Habitacion_Guardar` (devuelve el mismo texto en
 | Archivos | `files.HabitacionFiles` / copia desde `files.PlantillaUbicacionFiles` si `@PlantillaUbicacionId > 0`. |
 | Horario | `HabitacionDiaSemana` desde `@XMLSemana` (ver muestra abajo). |
 
-**Alta:** en esta base, el **INSERT no está** en `HAB_ValidaHabitacion` ni en `HAB_GuardaHabitacion`. Puede existir en otro SP, capa intermedia o pantalla antigua distinta. **CU-HAB usa `INSERT` nativo** en `sp_Habitacion_Guardar`.
+**Alta:** en esta base, el **INSERT no está** en `HAB_ValidaHabitacion` ni en `HAB_GuardaHabitacion`. Puede existir en otro SP, capa intermedia o pantalla antigua distinta. **CU-HAB usa `INSERT` nativo** en `he_sp_habitacion_guardar`.
 
 ## Claves `dbo.Listas` (muestra producción)
 
@@ -72,8 +72,8 @@ En datos reales:
 
 | Pieza | Enfoque |
 |-------|---------|
-| `sp_Habitacion_Catalogo` | `IdTabla 11` sexos, `IdTabla 8` estados habitación. |
-| `sp_Habitacion_Guardar` | Guardado **nativo** (sin depender de `files.HabitacionFiles`). |
+| `he_sp_habitacion_catalogo` | `IdTabla 11` sexos, `IdTabla 8` estados habitación. |
+| `he_sp_habitacion_guardar` | Guardado **nativo** (sin depender de `files.HabitacionFiles`). |
 | Adjuntos / semana | Fuera de alcance hasta reparar esquema `files.*` o implementar RN-06 explícito. |
 
 ## Siguiente investigación en HOTELDB (opcional)

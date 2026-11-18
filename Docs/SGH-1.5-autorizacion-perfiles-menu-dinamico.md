@@ -14,7 +14,7 @@ Implementar las políticas de autorización según tablas y reglas de **`Perfile
 
 | Entregable | Estado |
 |------------|--------|
-| `sp_Menu_ObtenerPorPerfil` + `ConsultaMenuPerfil` | Implementado |
+| `he_sp_menu_obtener_por_perfil` + `ConsultaMenuPerfil` | Implementado |
 | Menú dinámico (`MenuPerfilViewComponent`) | Implementado |
 | Autorización `MenuAccesoAuthorizationHandler` | Implementado |
 | Tests unitarios `SGH.Tests/Navegacion` | Implementado |

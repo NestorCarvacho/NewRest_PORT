@@ -40,7 +40,7 @@ public sealed class ComandoHabitacion(IFabricaConexionSql fabrica) : IComandoHab
         parametros.Add("@Mensaje", dbType: DbType.String, size: 500, direction: ParameterDirection.Output);
 
         await conexion.ExecuteAsync(new CommandDefinition(
-            "dbo.sp_Habitacion_Guardar",
+            "dbo.he_sp_habitacion_guardar",
             parametros,
             commandType: CommandType.StoredProcedure,
             commandTimeout: 120,

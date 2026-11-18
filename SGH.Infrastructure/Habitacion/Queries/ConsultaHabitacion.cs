@@ -12,7 +12,7 @@ public sealed class ConsultaHabitacion(IFabricaConexionSql fabrica) : IConsultaH
     {
         using var conexion = fabrica.Crear();
         var filas = await conexion.QueryAsync<HabitacionListada>(new CommandDefinition(
-            "dbo.sp_Habitacion_Listar",
+            "dbo.he_sp_habitacion_listar",
             new
             {
                 filtro.EmpresaMandanteId,
@@ -35,7 +35,7 @@ public sealed class ConsultaHabitacion(IFabricaConexionSql fabrica) : IConsultaH
     {
         using var conexion = fabrica.Crear();
         return await conexion.QuerySingleOrDefaultAsync<HabitacionDetalle>(new CommandDefinition(
-            "dbo.sp_Habitacion_Obtener",
+            "dbo.he_sp_habitacion_obtener",
             new { Id = id, CampamentoId = campamentoId },
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken));
@@ -48,7 +48,7 @@ public sealed class ConsultaHabitacion(IFabricaConexionSql fabrica) : IConsultaH
             return null;
         using var conexion = fabrica.Crear();
         return await conexion.QuerySingleOrDefaultAsync<int?>(new CommandDefinition(
-            "dbo.sp_Habitacion_IdPorNombre",
+            "dbo.he_sp_habitacion_id_por_nombre",
             new { CampamentoId = campamentoId, Nombre = nombre.Trim() },
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken));
@@ -58,7 +58,7 @@ public sealed class ConsultaHabitacion(IFabricaConexionSql fabrica) : IConsultaH
     {
         using var conexion = fabrica.Crear();
         using var multi = await conexion.QueryMultipleAsync(new CommandDefinition(
-            "dbo.sp_Habitacion_Catalogo",
+            "dbo.he_sp_habitacion_catalogo",
             new { CampamentoId = campamentoId, MineraId = empresaMandanteId },
             commandType: CommandType.StoredProcedure,
             cancellationToken: cancellationToken));

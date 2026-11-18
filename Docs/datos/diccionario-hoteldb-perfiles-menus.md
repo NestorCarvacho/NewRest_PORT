@@ -18,7 +18,7 @@ erDiagram
     Menus ||--o{ Menus : "PadreId"
 ```
 
-- **Sesión NewRest:** el login usa **`PerfilesUsuario.id`** (asignación campamento–perfil) y el **`PerfilId`** de esa fila (`sp_Usuario_ObtenerCampamentosYPerfiles`).
+- **Sesión NewRest:** el login usa **`PerfilesUsuario.id`** (asignación campamento–perfil) y el **`PerfilId`** de esa fila (`he_sp_usuario_obtener_campamentos_y_perfiles`).
 - **Menú legado (datos):** cada fila de **`Menus`** es un ítem (`Link`, jerarquía `PadreId`, campo `Ubicacion`); **`MenusPerfil`** define qué ítems ve cada **`PerfilId`**.
 - **Menú NewRest (UI, directriz actual):** las filas `Ubicacion = nav` son los botones de la **barra superior**; las filas `side` con `PadreId` del `nav` se muestran en el **panel desplegable** bajo ese botón (hover/click), **no** en el panel lateral `#panel-lateral` (ese panel queda para formularios de módulos).
 - **Autorización HTTP (objetivo 1.5):** alinear políticas con el conjunto de `Menus.Link` (o un código derivado de `Menus.Id`) permitido para el `PerfilId` de sesión.
@@ -143,7 +143,7 @@ Misma jerarquía `nav` / `side`. En **Gestión** (`PadreId = 2`) aparecen los m�
 
 En **Configuración** (`PadreId = 4`): **Usuarios** → `/app/config/usuario` → `/Cuenta/Usuarios`; **Habitaciones** → `/app/config/habitaciones` → `/Habitacion/Datos`; **Baños** → `/app/config/banos` → `/Habitacion/Banos` (script `SGH.Infrastructure/Navegacion/Persistence/002_menu_config_habitacion_bano.sql`).
 
-Para que un perfil operativo (p. ej. **68**) vea solo Habitaciones y Baños: tras el `002`, ejecutar `003_menusperfil_habitacion_bano_por_perfil.sql` (ajustar `@PerfilId`) o insertar manualmente en `MenusPerfil` el **nav** de Configuración más los dos `MenuId` de esos enlaces. El menú y la autorización HTTP (`GestionarHabitaciones`) leen el mismo `sp_Menu_ObtenerPorPerfil`.
+Para que un perfil operativo (p. ej. **68**) vea solo Habitaciones y Baños: tras el `002`, ejecutar `003_menusperfil_habitacion_bano_por_perfil.sql` (ajustar `@PerfilId`) o insertar manualmente en `MenusPerfil` el **nav** de Configuración más los dos `MenuId` de esos enlaces. El menú y la autorización HTTP (`GestionarHabitaciones`) leen el mismo `he_sp_menu_obtener_por_perfil`.
 
 `Dashboard` (`nav` sin hijos `side`) no se muestra en el menú nuevo hasta tener página destino. **Home** con `Link = #` queda deshabilitado.
 
@@ -153,7 +153,7 @@ El nav **Dashboard** (`Id = 1`) suele no tener filas `side` en `MenusPerfil`; el
 
 ## Muestra real — `PerfilId = 137`
 
-Estructura legado contrastada con la query `sp_Menu_ObtenerPorPerfil`:
+Estructura legado contrastada con la query `he_sp_menu_obtener_por_perfil`:
 
 | Nivel en BD | `Ubicacion` | `PadreId` | En pantalla NewRest |
 |-------------|-------------|-----------|---------------------|

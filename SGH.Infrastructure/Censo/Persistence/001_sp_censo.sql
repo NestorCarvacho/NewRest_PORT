@@ -4,7 +4,7 @@
     El guardado envuelve CSO_GuardaCenso y conserva resultado y mensaje de cada fila.
 */
 
-CREATE OR ALTER PROCEDURE dbo.sp_Censo_Buscar
+CREATE OR ALTER PROCEDURE dbo.he_sp_censo_buscar
     @EmpresaMandanteId int,
     @CampamentoId int,
     @ModuloId int,
@@ -57,7 +57,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Censo_BuscarPorUsuario
+CREATE OR ALTER PROCEDURE dbo.he_sp_censo_buscar_por_usuario
     @EmpresaMandanteId int,
     @CampamentoId int,
     @Fecha date,
@@ -74,7 +74,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Censo_ListarCatalogo
+CREATE OR ALTER PROCEDURE dbo.he_sp_censo_listar_catalogo
     @CampamentoId int
 AS
 BEGIN
@@ -103,7 +103,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Censo_FiltroPertenece
+CREATE OR ALTER PROCEDURE dbo.he_sp_censo_filtro_pertenece
     @CampamentoId int,
     @ModuloId int,
     @PisoId int,
@@ -148,7 +148,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Censo_Guardar
+CREATE OR ALTER PROCEDURE dbo.he_sp_censo_guardar
     @Id varchar(20),
     @HabitacionId int,
     @Cantidad int,

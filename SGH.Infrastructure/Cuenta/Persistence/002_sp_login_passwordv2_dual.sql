@@ -15,7 +15,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ObtenerParaLogin
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_obtener_para_login
     @Rut varchar(20),
     @LoginInterno int = 0
 AS
@@ -46,7 +46,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ActualizarPassword
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_actualizar_password
     @Rut varchar(20),
     @PasswordHash varchar(200),
     @HuellaMd5 varchar(32) = NULL,
@@ -122,7 +122,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_CambiarPasswordPorRut
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_cambiar_password_por_rut
     @Rut varchar(25),
     @PasswordHash varchar(200),
     @Ret int OUTPUT
@@ -173,7 +173,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ReemplazarHash
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_reemplazar_hash
     @Rut varchar(20),
     @PasswordHash varchar(200),
     @Ret int OUTPUT
@@ -198,7 +198,7 @@ END
 GO
 
 /* Marca migración dual: copia BCrypt erróneo en Password a PasswordV2 sin tocar Password legado. */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_RetirarMd5
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_retirar_md5
     @Rut varchar(20),
     @Ret int OUTPUT
 AS

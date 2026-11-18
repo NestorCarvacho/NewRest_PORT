@@ -17,18 +17,18 @@ public sealed class MidSolicitudes(IGestionSolicitudes gestion, INotificadorSoli
         Accion("detalle", "Detalle", "solicitud", "Devuelve una solicitud."),
         Accion("pasajeros", "Pasajeros", "solicitud", "Devuelve los pasajeros de la solicitud."),
         Accion("habitaciones", "Habitaciones", "solicitud", "Devuelve las habitaciones disponibles."),
-        Accion("crear", "Crear", "dbo.sp_Solicitud_Guardar", "Crea una solicitud."),
-        Accion("editar", "Editar", "dbo.sp_Solicitud_Guardar", "Actualiza una solicitud."),
-        Accion("anular", "Anular", "dbo.sp_Solicitud_Anular", "Anula una solicitud."),
-        Accion("cupos", "Cupos", "dbo.sp_Solicitud_AgregarCupos", "Agrega cupos."),
-        Accion("pasajero", "Pasajero", "dbo.sp_Solicitud_GuardarPasajero", "Guarda un pasajero."),
-        Accion("eliminar", "Eliminar pasajero", "dbo.sp_Solicitud_EliminarPasajero", "Quita un pasajero."),
-        Accion("asignar", "Asignar", "dbo.sp_Solicitud_AsignarHabitacion", "Asigna una habitación."),
-        Accion("desasignar", "Desasignar", "dbo.sp_Solicitud_DesasignarHabitacion", "Quita la habitación preasignada."),
-        Accion("generar", "Generar reservas", "dbo.sp_Solicitud_GenerarReservas", "Genera las reservas de la solicitud."),
+        Accion("crear", "Crear", "dbo.he_sp_solicitud_guardar", "Crea una solicitud."),
+        Accion("editar", "Editar", "dbo.he_sp_solicitud_guardar", "Actualiza una solicitud."),
+        Accion("anular", "Anular", "dbo.he_sp_solicitud_anular", "Anula una solicitud."),
+        Accion("cupos", "Cupos", "dbo.he_sp_solicitud_agregar_cupos", "Agrega cupos."),
+        Accion("pasajero", "Pasajero", "dbo.he_sp_solicitud_guardar_pasajero", "Guarda un pasajero."),
+        Accion("eliminar", "Eliminar pasajero", "dbo.he_sp_solicitud_eliminar_pasajero", "Quita un pasajero."),
+        Accion("asignar", "Asignar", "dbo.he_sp_solicitud_asignar_habitacion", "Asigna una habitación."),
+        Accion("desasignar", "Desasignar", "dbo.he_sp_solicitud_desasignar_habitacion", "Quita la habitación preasignada."),
+        Accion("generar", "Generar reservas", "dbo.he_sp_solicitud_generar_reservas", "Genera las reservas de la solicitud."),
         Accion("notificar", "Notificar", "correo", "Reenvía el correo de reservas generadas."),
         Accion("plantilla", "Plantilla", "planilla", "Devuelve la planilla de pasajeros."),
-        Accion("cargar", "Cargar", "dbo.sp_Solicitud_CargarPasajero", "Importa pasajeros desde la planilla.")
+        Accion("cargar", "Cargar", "dbo.he_sp_solicitud_cargar_pasajero", "Importa pasajeros desde la planilla.")
     ];
 
     public async Task<EjecucionMid> EjecutarAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
@@ -92,7 +92,7 @@ public sealed class MidSolicitudes(IGestionSolicitudes gestion, INotificadorSoli
             filas = filasRecorte,
             truncado,
             maxFilas = ReglasConsultaListado.MaxFilas,
-            depuracion = RegistrosDepuracion.Invocacion("dbo.sp_Solicitud_Buscar", new
+            depuracion = RegistrosDepuracion.Invocacion("dbo.he_sp_solicitud_buscar", new
             {
                 empresaMandanteId = criterios.EmpresaMandanteId,
                 campamentoId = criterios.CampamentoId,
@@ -134,7 +134,7 @@ public sealed class MidSolicitudes(IGestionSolicitudes gestion, INotificadorSoli
         return EjecucionMid.Ok(new
         {
             pasajeros,
-            depuracion = RegistrosDepuracion.Invocacion("dbo.sp_Solicitud_ListarPasajeros", new
+            depuracion = RegistrosDepuracion.Invocacion("dbo.he_sp_solicitud_listar_pasajeros", new
             {
                 solicitudId,
                 empresaMandanteId = sesion.EmpresaMandanteId,
@@ -157,7 +157,7 @@ public sealed class MidSolicitudes(IGestionSolicitudes gestion, INotificadorSoli
             {
                 invocaciones = new object[]
                 {
-                    RegistrosDepuracion.Invocacion("dbo.sp_Solicitud_HabitacionesDisponibles", new
+                    RegistrosDepuracion.Invocacion("dbo.he_sp_solicitud_habitaciones_disponibles", new
                     {
                         solicitudId,
                         empresaMandanteId = sesion.EmpresaMandanteId,

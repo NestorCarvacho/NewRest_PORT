@@ -13,7 +13,7 @@ public sealed class ConsultaSolicitudAlojamiento(IFabricaConexionSql fabrica) : 
     {
         using var conexion = fabrica.Crear();
         var filas = await conexion.QueryAsync<HabitacionDisponibleSolicitudDto>(new CommandDefinition(
-            "dbo.sp_Solicitud_HabitacionesDisponibles",
+            "dbo.he_sp_solicitud_habitaciones_disponibles",
             new { SolicitudId = id, empresaMandanteId, campamentoId },
             commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
         return filas.AsList();
@@ -24,7 +24,7 @@ public sealed class ConsultaSolicitudAlojamiento(IFabricaConexionSql fabrica) : 
     {
         using var conexion = fabrica.Crear();
         var filas = await conexion.QueryAsync<PasajeroFila>(new CommandDefinition(
-            "dbo.sp_Solicitud_ListarPasajeros",
+            "dbo.he_sp_solicitud_listar_pasajeros",
             new { SolicitudId = id, empresaMandanteId, campamentoId },
             commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
         return filas.Select(p => new PasajeroSolicitudDto(
@@ -51,7 +51,7 @@ public sealed class ConsultaSolicitudAlojamiento(IFabricaConexionSql fabrica) : 
     {
         using var conexion = fabrica.Crear();
         var filas = await conexion.QueryAsync<SolicitudListadaFila>(new CommandDefinition(
-            "dbo.sp_Solicitud_Buscar",
+            "dbo.he_sp_solicitud_buscar",
             new { filtro.EmpresaMandanteId, filtro.CampamentoId, filtro.Desde, filtro.Hasta,
                 filtro.GrupoId, filtro.SolicitanteId, filtro.Estado, filtro.Numero },
             commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
@@ -97,7 +97,7 @@ public sealed class ConsultaSolicitudAlojamiento(IFabricaConexionSql fabrica) : 
             return null;
         var primeraReservaId = detalle.Estado == "R"
             ? await conexion.QuerySingleOrDefaultAsync<int?>(new CommandDefinition(
-                "dbo.sp_Solicitud_ObtenerPrimeraReserva", new { id, empresaMandanteId, campamentoId },
+                "dbo.he_sp_solicitud_obtener_primera_reserva", new { id, empresaMandanteId, campamentoId },
                 commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken))
             : null;
         return new SolicitudDetalleDto(detalle.Id, detalle.FechaSolicitud, detalle.UsuarioSolicitanteId,
@@ -115,7 +115,7 @@ public sealed class ConsultaSolicitudAlojamiento(IFabricaConexionSql fabrica) : 
     {
         using var conexion = fabrica.Crear();
         using var multi = await conexion.QueryMultipleAsync(new CommandDefinition(
-            "dbo.sp_Solicitud_ListarCatalogo", new { empresaMandanteId },
+            "dbo.he_sp_solicitud_listar_catalogo", new { empresaMandanteId },
             commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
         var grupos = (await multi.ReadAsync<GrupoSolicitudDto>()).AsList();
         var estados = (await multi.ReadAsync<EstadoSolicitudDto>()).AsList();
@@ -144,7 +144,7 @@ public sealed class ConsultaSolicitudAlojamiento(IFabricaConexionSql fabrica) : 
     {
         using var conexion = fabrica.Crear();
         using var multi = await conexion.QueryMultipleAsync(new CommandDefinition(
-            "dbo.sp_Solicitud_ListarOrganizacion", new { empresaMandanteId, unidadId, divisionId },
+            "dbo.he_sp_solicitud_listar_organizacion", new { empresaMandanteId, unidadId, divisionId },
             commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
         var unidades = (await multi.ReadAsync<OpcionFila>()).Select(x => new OpcionSolicitudDto(x.Id, x.Nombre)).ToList();
         var divisiones = (await multi.ReadAsync<OpcionFila>()).Select(x => new OpcionSolicitudDto(x.Id, x.Nombre)).ToList();
