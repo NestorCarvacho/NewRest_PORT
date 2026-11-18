@@ -3,14 +3,16 @@ export function crearRenderizadorModulos(dependencias) {
         if (modo === "solicitud") return dependencias.solicitud.fila(filaOrigen);
         if (modo === "censo") return dependencias.censo.filaCenso(filaOrigen);
         if (modo === "misCensos") return dependencias.censo.filaMisCensos(filaOrigen);
-        if (modo === "habitaciones" || modo === "banos") return dependencias.habitacion.fila(filaOrigen, modo);
+        if (modo === "habitaciones" || modo === "banos" || modo === "tiposcama") {
+            return dependencias.habitacion.fila(filaOrigen, modo);
+        }
         return dependencias.reserva.fila(filaOrigen);
     }
 
     function columnas(modo) {
         if (modo === "solicitud") return dependencias.solicitud.columnas();
         if (modo === "censo" || modo === "misCensos") return dependencias.censo.columnas(modo);
-        if (modo === "habitaciones" || modo === "banos") {
+        if (modo === "habitaciones" || modo === "banos" || modo === "tiposcama") {
             return dependencias.habitacion.columnas(modo, dependencias.movimientosHabitacion.crearAcciones);
         }
         return dependencias.reserva.columnas(modo, dependencias.movimientosReserva.crearAcciones);

@@ -71,13 +71,23 @@ export function crearHabitacion(dependencias) {
         ];
     }
 
+    function filtrosTiposCama() {
+        return [
+            dependencias.campo("soloActivos", "Solo activos", "select", [
+                { value: "1", text: "Sí" },
+                { value: "0", text: "No (todos)" }
+            ], { valor: "0" })
+        ];
+    }
+
     function filtros(modo) {
         if (modo === "banos") return filtrosBanos();
+        if (modo === "tiposcama") return filtrosTiposCama();
         return filtrosHabitaciones();
     }
 
     function filtroInicial(modo) {
-        if (modo === "banos") return { soloActivos: 0 };
+        if (modo === "banos" || modo === "tiposcama") return { soloActivos: 0 };
         return { soloActivas: 0 };
     }
 
@@ -96,9 +106,26 @@ export function crearHabitacion(dependencias) {
         });
     }
 
+    function buscarTiposCama(filtro) {
+        return mid("listartiposcama", {
+            soloActivos: dependencias.numero(filtro.soloActivos) ?? 0
+        });
+    }
+
     function buscar(filtro, modo) {
         if (modo === "banos") return buscarBanos(filtro);
+        if (modo === "tiposcama") return buscarTiposCama(filtro);
         return buscarHabitaciones(filtro);
+    }
+
+    function fechaCampo(valor) {
+        if (!valor) return "";
+        var s = String(valor);
+        return s.length >= 10 ? s.substring(0, 10) : s;
+    }
+
+    function opcionesTiposCama(catalogo) {
+        return dependencias.aOpcion(catalogo.tiposCama || []);
     }
 
     function filaHabitacion(fila) {
@@ -130,12 +157,37 @@ export function crearHabitacion(dependencias) {
         };
     }
 
+    function filaTipoCama(fila) {
+        var medidas = (fila.anchoCm || 0) + " × " + (fila.largoCm || 0) + " cm";
+        return {
+            acciones: fila,
+            nombre: fila.nombre || "",
+            medidas: medidas,
+            camas: fila.camasVinculadas || 0,
+            estado: fila.isActive ? "Activo" : "Inactivo",
+            _fila: fila
+        };
+    }
+
     function fila(origen, modo) {
         if (modo === "banos") return filaBano(origen);
+        if (modo === "tiposcama") return filaTipoCama(origen);
         return filaHabitacion(origen);
     }
 
     function columnas(modo, crearAcciones) {
+        if (modo === "tiposcama") {
+            return ["acciones", "nombre", "medidas", "camas", "estado"].map(function (clave) {
+                if (clave !== "acciones") return { data: clave, render: DataTable.render.text() };
+                return {
+                    data: clave,
+                    orderable: false,
+                    createdCell: function (td, cellData, rowData) {
+                        td.replaceChildren(crearAcciones(rowData || cellData, modo));
+                    }
+                };
+            });
+        }
         if (modo === "banos") {
             return ["acciones", "codigo", "ubicacion", "sexo", "estado", "habitaciones"].map(function (clave) {
                 if (clave !== "acciones") return { data: clave, render: DataTable.render.text() };
@@ -353,6 +405,177 @@ export function crearHabitacion(dependencias) {
         return activarBano(fila.id);
     }
 
+    function tipoCamaEstaActivo(fila) {
+        return fila.isActive === true || fila.isActive === 1;
+    }
+
+    function abrirNuevoTipoCama() {
+        abrirFormularioTipoCama("creartipocama", null);
+    }
+
+    function abrirEdicionTipoCama(fila) {
+        abrirFormularioTipoCama("editartipocama", fila);
+    }
+
+    function abrirFormularioTipoCama(opcion, fila) {
+        var esAlta = opcion === "creartipocama";
+        var titulo = esAlta ? "Nuevo tipo de cama" : "Editar tipo de cama";
+        var form = dependencias.formulario([
+            dependencias.seccion("", [
+                dependencias.campo("nombre", "Nombre (ej. 1 plaza)", "text", [], {
+                    requerido: true,
+                    valor: fila ? fila.nombre : ""
+                }),
+                dependencias.campo("anchoCm", "Ancho (cm)", "number", [], {
+                    requerido: true,
+                    valor: fila ? fila.anchoCm : ""
+                }),
+                dependencias.campo("largoCm", "Largo (cm)", "number", [], {
+                    requerido: true,
+                    valor: fila ? fila.largoCm : ""
+                })
+            ])
+        ], "Guardar", true, function (datos) {
+            return mid(opcion, {
+                id: fila ? fila.id : 0,
+                nombre: (datos.nombre || "").trim(),
+                anchoCm: dependencias.numero(datos.anchoCm),
+                largoCm: dependencias.numero(datos.largoCm)
+            }).then(function () {
+                if (dependencias.invalidarCatalogoHabitacion) dependencias.invalidarCatalogoHabitacion();
+                var activo = document.querySelector(".modulo:not([hidden])");
+                return activo ? dependencias.cargar(activo.dataset.id) : null;
+            }).then(function () {
+                dependencias.mostrarAviso("Tipo de cama guardado.", "success");
+            });
+        });
+        dependencias.abrirPanel(titulo, form);
+    }
+
+    function inactivarTipoCama(id) {
+        return mid("inactivartipocama", { id: id }).then(function () {
+            if (dependencias.invalidarCatalogoHabitacion) dependencias.invalidarCatalogoHabitacion();
+            var activo = document.querySelector(".modulo:not([hidden])");
+            return activo ? dependencias.cargar(activo.dataset.id) : null;
+        }).then(function () {
+            dependencias.mostrarAviso("Tipo de cama inactivado.", "success");
+        });
+    }
+
+    function activarTipoCama(id) {
+        return mid("activartipocama", { id: id }).then(function () {
+            if (dependencias.invalidarCatalogoHabitacion) dependencias.invalidarCatalogoHabitacion();
+            var activo = document.querySelector(".modulo:not([hidden])");
+            return activo ? dependencias.cargar(activo.dataset.id) : null;
+        }).then(function () {
+            dependencias.mostrarAviso("Tipo de cama activado.", "success");
+        });
+    }
+
+    function alternarEstadoTipoCama(fila) {
+        if (tipoCamaEstaActivo(fila)) return inactivarTipoCama(fila.id);
+        return activarTipoCama(fila.id);
+    }
+
+    function abrirCamasHabitacion(fila) {
+        dependencias.prepararCatalogo("habitaciones").then(function () {
+            var catalogo = obtenerCatalogo() || { tiposCama: [] };
+            return mid("listarcamas", { habitacionId: fila.id, soloActivas: 0 }).then(function (resultado) {
+                var camas = resultado.filas || [];
+                var contenedor = document.createElement("div");
+                contenedor.className = "panel-camas-habitacion";
+                var tituloHab = document.createElement("p");
+                tituloHab.textContent = "Habitación " + (fila.nombre || fila.id) + " — inventario por plaza";
+                contenedor.appendChild(tituloHab);
+                if (!camas.length) {
+                    var vacio = document.createElement("p");
+                    vacio.textContent = "No hay camas activas. Guarde la habitación con N° camas para generarlas.";
+                    contenedor.appendChild(vacio);
+                }
+                camas.forEach(function (cama) {
+                    var tarjeta = document.createElement("div");
+                    tarjeta.className = "tarjeta-cama";
+                    var resumen = document.createElement("p");
+                    var tipo = cama.tipoCamaNombre
+                        ? cama.tipoCamaNombre + " (" + (cama.tipoCamaAnchoCm || "?") + "×" + (cama.tipoCamaLargoCm || "?") + " cm)"
+                        : "Sin tipo asignado";
+                    var estadoPlaza = cama.isActive === false || cama.isActive === 0 ? " — Plaza inactiva (IsActive)" : "";
+                    resumen.textContent = (cama.codigoCama || "Cama") + " — " + tipo
+                        + (cama.habilitada ? " — Habilitada" : " — No habilitada")
+                        + estadoPlaza;
+                    tarjeta.appendChild(resumen);
+                    var editar = dependencias.boton ? dependencias.boton("Editar inventario", "accion-fila", function () {
+                        abrirFormularioCama(fila, cama, catalogo);
+                    }) : document.createElement("button");
+                    if (!dependencias.boton) {
+                        editar.textContent = "Editar inventario";
+                        editar.addEventListener("click", function () { abrirFormularioCama(fila, cama, catalogo); });
+                    }
+                    tarjeta.appendChild(editar);
+                    contenedor.appendChild(tarjeta);
+                });
+                dependencias.abrirPanel("Camas de la habitación", contenedor);
+            });
+        }).catch(function (error) { dependencias.mostrarAviso(error.message, "error"); });
+    }
+
+    function abrirFormularioCama(habitacion, cama, catalogo) {
+        var tiposOpts = opcionesTiposCama(catalogo);
+        var form = dependencias.formulario([
+            dependencias.seccion("Plaza", [
+                dependencias.campo("codigoCama", "Código", "text", [], {
+                    requerido: true,
+                    valor: cama.codigoCama || ""
+                }),
+                dependencias.campo("tipoCamaId", "Tipo de cama", "select", tiposOpts, {
+                    valor: cama.tipoCamaId ? String(cama.tipoCamaId) : ""
+                }),
+                dependencias.campo("habilitada", "Habilitada (operativa)", "select", [
+                    { value: "1", text: "Sí" },
+                    { value: "0", text: "No" }
+                ], { valor: cama.habilitada ? "1" : "0" }),
+                dependencias.campo("plazaActiva", "Plaza activa (IsActive)", "select", [
+                    { value: "1", text: "Sí — en inventario de la habitación" },
+                    { value: "0", text: "No — baja lógica" }
+                ], { valor: cama.isActive === false || cama.isActive === 0 ? "0" : "1" })
+            ]),
+            dependencias.seccion("Colchón", [
+                dependencias.campo("fechaColchon", "Fecha cambio colchón", "date", [], {
+                    valor: fechaCampo(cama.fechaColchon)
+                }),
+                dependencias.campo("colchonObservacion", "Observación colchón", "textarea", [], {
+                    valor: cama.colchonObservacion || ""
+                })
+            ]),
+            dependencias.seccion("Ropa de cama", [
+                dependencias.campo("fechaCambioRopa", "Fecha cambio ropa", "date", [], {
+                    valor: fechaCampo(cama.fechaCambioRopa)
+                }),
+                dependencias.campo("ropaCamaObservacion", "Observación ropa", "textarea", [], {
+                    valor: cama.ropaCamaObservacion || ""
+                })
+            ])
+        ], "Guardar", true, function (datos) {
+            return mid("guardarcama", {
+                id: cama.id,
+                habitacionId: habitacion.id,
+                codigoCama: (datos.codigoCama || "").trim(),
+                tipoCamaId: dependencias.numero(datos.tipoCamaId) || null,
+                habilitada: datos.habilitada === "1",
+                inactivo: datos.plazaActiva === "0",
+                orden: cama.orden || 0,
+                fechaColchon: datos.fechaColchon || null,
+                colchonObservacion: (datos.colchonObservacion || "").trim() || null,
+                fechaCambioRopa: datos.fechaCambioRopa || null,
+                ropaCamaObservacion: (datos.ropaCamaObservacion || "").trim() || null
+            }).then(function () {
+                dependencias.mostrarAviso("Cama guardada.", "success");
+                return abrirCamasHabitacion(habitacion);
+            });
+        });
+        dependencias.abrirPanel("Editar cama — " + (habitacion.nombre || ""), form);
+    }
+
     return {
         filtros: filtros,
         filtroInicial: filtroInicial,
@@ -366,6 +589,10 @@ export function crearHabitacion(dependencias) {
         inactivarHabitacion: inactivarHabitacion,
         inactivarBano: inactivarBano,
         activarBano: activarBano,
-        alternarEstadoBano: alternarEstadoBano
+        alternarEstadoBano: alternarEstadoBano,
+        abrirNuevoTipoCama: abrirNuevoTipoCama,
+        abrirEdicionTipoCama: abrirEdicionTipoCama,
+        alternarEstadoTipoCama: alternarEstadoTipoCama,
+        abrirCamasHabitacion: abrirCamasHabitacion
     };
 }

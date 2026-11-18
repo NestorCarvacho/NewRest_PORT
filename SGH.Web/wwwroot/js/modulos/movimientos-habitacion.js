@@ -24,6 +24,9 @@ export function crearMovimientosHabitacion(dependencias) {
                     dependencias.habitacion.abrirEdicionHabitacion(fila);
                 }).catch(function (error) { dependencias.mostrarAviso(error.message, "error"); });
             }));
+            acciones.append(dependencias.boton("Camas", "accion-fila", function () {
+                dependencias.habitacion.abrirCamasHabitacion(fila);
+            }));
             if (estaActivo(fila)) {
                 acciones.append(dependencias.boton("Inactivar", "accion-fila", function () {
                     dependencias.habitacion.inactivarHabitacion(fila.id).catch(function (error) {
@@ -41,6 +44,17 @@ export function crearMovimientosHabitacion(dependencias) {
             }));
             acciones.append(dependencias.boton(activo ? "Inactivar" : "Activar", "accion-fila", function () {
                 dependencias.habitacion.alternarEstadoBano(fila).catch(function (error) {
+                    dependencias.mostrarAviso(error.message, "error");
+                });
+            }));
+        }
+        if (modo === "tiposcama") {
+            var tipoActivo = fila.isActive === true || fila.isActive === 1;
+            acciones.append(dependencias.boton("Editar", "accion-fila", function () {
+                dependencias.habitacion.abrirEdicionTipoCama(fila);
+            }));
+            acciones.append(dependencias.boton(tipoActivo ? "Inactivar" : "Activar", "accion-fila", function () {
+                dependencias.habitacion.alternarEstadoTipoCama(fila).catch(function (error) {
                     dependencias.mostrarAviso(error.message, "error");
                 });
             }));

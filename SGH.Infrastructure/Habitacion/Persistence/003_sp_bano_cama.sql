@@ -134,7 +134,8 @@ GO
 
 CREATE OR ALTER PROCEDURE dbo.sp_Cama_ListarPorHabitacion
     @HabitacionId int,
-    @CampamentoId int
+    @CampamentoId int,
+    @SoloActivas int = 1
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -152,7 +153,7 @@ BEGIN
     INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
     WHERE c.HabitacionId = @HabitacionId
       AND p.CampamentoId = @CampamentoId
-      AND c.IsActive = 1
+      AND (@SoloActivas = 0 OR c.IsActive = 1)
     ORDER BY c.Orden, c.CodigoCama;
 END
 GO
@@ -184,6 +185,26 @@ BEGIN
         RETURN;
     END
 
+    IF @Id > 0
+    BEGIN
+        DECLARE @HabitacionRegistrada int;
+        SELECT @HabitacionRegistrada = c.HabitacionId
+        FROM dbo.Camas AS c
+        WHERE c.Id = @Id;
+
+        IF @HabitacionRegistrada IS NULL
+        BEGIN
+            SET @Mensaje = N'La cama no existe.';
+            RETURN;
+        END
+
+        IF @HabitacionRegistrada <> @HabitacionId
+        BEGIN
+            SET @Mensaje = N'Una cama no puede asignarse a otra habitación.';
+            RETURN;
+        END
+    END
+
     IF @Id = 0
     BEGIN
         INSERT INTO dbo.Camas (HabitacionId, CodigoCama, Habilitada, Orden, IsActive, UsuarioCreacionId)
@@ -201,6 +222,13 @@ BEGIN
             UsuarioActualizacionId = @UsuarioId
         FROM dbo.Camas AS c
         WHERE c.Id = @Id AND c.HabitacionId = @HabitacionId;
+
+        IF @@ROWCOUNT = 0
+        BEGIN
+            SET @Mensaje = N'No se pudo actualizar la cama.';
+            RETURN;
+        END
+
         SET @IdResultado = @Id;
     END
 

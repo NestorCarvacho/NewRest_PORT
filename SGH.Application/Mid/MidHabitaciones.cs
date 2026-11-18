@@ -22,7 +22,12 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
         Accion("inactivarbano", "Inactivar baño", "dbo.sp_Bano_Guardar", "Baja lógica de baño."),
         Accion("activarbano", "Activar baño", "dbo.sp_Bano_Guardar", "Reactivación de baño."),
         Accion("listarcamas", "Listar camas", "dbo.sp_Cama_ListarPorHabitacion", "Camas de una habitación."),
-        Accion("guardarcama", "Guardar cama", "dbo.sp_Cama_Guardar", "Alta o edición de cama.")
+        Accion("guardarcama", "Guardar cama", "dbo.sp_Cama_Guardar", "Alta o edición de cama."),
+        Accion("listartiposcama", "Listar tipos de cama", "dbo.sp_TipoCama_Listar", "Catálogo tipos de cama."),
+        Accion("creartipocama", "Crear tipo de cama", "dbo.sp_TipoCama_Guardar", "Alta tipo de cama."),
+        Accion("editartipocama", "Editar tipo de cama", "dbo.sp_TipoCama_Guardar", "Edición tipo de cama."),
+        Accion("inactivartipocama", "Inactivar tipo de cama", "dbo.sp_TipoCama_Guardar", "Baja lógica tipo de cama."),
+        Accion("activartipocama", "Activar tipo de cama", "dbo.sp_TipoCama_Guardar", "Reactivación tipo de cama.")
     ];
 
     public async Task<EjecucionMid> EjecutarAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
@@ -46,6 +51,11 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
             "activarbano" => await ActivarBanoAsync(filtro, sesion, cancellationToken),
             "listarcamas" => await ListarCamasAsync(filtro, sesion, cancellationToken),
             "guardarcama" => await GuardarCamaAsync(filtro, sesion, cancellationToken),
+            "listartiposcama" => await ListarTiposCamaAsync(filtro, sesion, cancellationToken),
+            "creartipocama" => await GuardarTipoCamaAsync(filtro, sesion, esAlta: true, cancellationToken),
+            "editartipocama" => await GuardarTipoCamaAsync(filtro, sesion, esAlta: false, cancellationToken),
+            "inactivartipocama" => await InactivarTipoCamaAsync(filtro, sesion, cancellationToken),
+            "activartipocama" => await ActivarTipoCamaAsync(filtro, sesion, cancellationToken),
             _ => EjecucionMid.Fallo(400, $"La opción '{filtro.Opcion}' no está implementada en el Mid.")
         };
     }
@@ -215,7 +225,8 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
             habitacionId = LecturaPeticion.Entero(filtro, "id");
         if (habitacionId <= 0)
             return EjecucionMid.Fallo(400, "Seleccione una habitación.");
-        var filas = await gestion.ListarCamasAsync(habitacionId, sesion.CampamentoId, cancellationToken);
+        var soloActivas = LecturaPeticion.EnteroOpcional(filtro, "soloActivas") ?? 1;
+        var filas = await gestion.ListarCamasAsync(habitacionId, sesion.CampamentoId, soloActivas, cancellationToken);
         return EjecucionMid.Ok(new { filas });
     }
 
@@ -228,6 +239,59 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
         if (!resultado.Exito)
             return EjecucionMid.Fallo(400, resultado.Mensaje);
         return EjecucionMid.Ok(new { resultado = true, id = resultado.Id, mensaje = "Cama guardada." });
+    }
+
+    private async Task<EjecucionMid> ListarTiposCamaAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var soloActivos = LecturaPeticion.EnteroOpcional(filtro, "soloActivos") ?? 1;
+        var filas = await gestion.ListarTiposCamaAsync(sesion.CampamentoId, soloActivos, cancellationToken);
+        return EjecucionMid.Ok(new { filas });
+    }
+
+    private async Task<EjecucionMid> GuardarTipoCamaAsync(
+        FiltroPeticion filtro, DatosSesion sesion, bool esAlta, CancellationToken cancellationToken)
+    {
+        var datos = LeerCuerpoTipoCama(filtro, sesion.UsuarioId, esAlta);
+        if (datos is null)
+            return EjecucionMid.Fallo(400, "Revise los datos del tipo de cama.");
+        var resultado = await gestion.GuardarTipoCamaAsync(datos, sesion.CampamentoId, cancellationToken);
+        if (!resultado.Exito)
+            return EjecucionMid.Fallo(400, resultado.Mensaje);
+        return EjecucionMid.Ok(new { resultado = true, id = resultado.Id, mensaje = "Tipo de cama guardado." });
+    }
+
+    private async Task<EjecucionMid> InactivarTipoCamaAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var id = LecturaPeticion.Entero(filtro, "id");
+        if (id <= 0)
+            return EjecucionMid.Fallo(400, "Seleccione un tipo de cama.");
+        var filas = await gestion.ListarTiposCamaAsync(sesion.CampamentoId, 0, cancellationToken);
+        var actual = filas.FirstOrDefault(t => t.Id == id);
+        if (actual is null)
+            return EjecucionMid.Fallo(404, "El tipo de cama no existe en el campamento.");
+
+        var datos = new DatosGuardarTipoCama(actual.Id, actual.Nombre, actual.AnchoCm, actual.LargoCm, false, sesion.UsuarioId);
+        var resultado = await gestion.GuardarTipoCamaAsync(datos, sesion.CampamentoId, cancellationToken);
+        if (!resultado.Exito)
+            return EjecucionMid.Fallo(400, resultado.Mensaje);
+        return EjecucionMid.Ok(new { resultado = true, mensaje = "Tipo de cama inactivado." });
+    }
+
+    private async Task<EjecucionMid> ActivarTipoCamaAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var id = LecturaPeticion.Entero(filtro, "id");
+        if (id <= 0)
+            return EjecucionMid.Fallo(400, "Seleccione un tipo de cama.");
+        var filas = await gestion.ListarTiposCamaAsync(sesion.CampamentoId, 0, cancellationToken);
+        var actual = filas.FirstOrDefault(t => t.Id == id);
+        if (actual is null)
+            return EjecucionMid.Fallo(404, "El tipo de cama no existe en el campamento.");
+
+        var datos = new DatosGuardarTipoCama(actual.Id, actual.Nombre, actual.AnchoCm, actual.LargoCm, true, sesion.UsuarioId);
+        var resultado = await gestion.GuardarTipoCamaAsync(datos, sesion.CampamentoId, cancellationToken);
+        if (!resultado.Exito)
+            return EjecucionMid.Fallo(400, resultado.Mensaje);
+        return EjecucionMid.Ok(new { resultado = true, mensaje = "Tipo de cama activado." });
     }
 
     private static DatosGuardarHabitacion? LeerCuerpoHabitacion(FiltroPeticion filtro, int usuarioId, bool esAlta)
@@ -304,6 +368,10 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
         var codigo = LecturaPeticion.Texto(filtro, "codigoCama");
         if (habitacionId <= 0 || string.IsNullOrWhiteSpace(codigo))
             return null;
+        var tipoCamaId = LecturaPeticion.EnteroOpcional(filtro, "tipoCamaId");
+        if (tipoCamaId is 0)
+            tipoCamaId = null;
+
         return new DatosGuardarCama(
             LecturaPeticion.Entero(filtro, "id"),
             habitacionId,
@@ -311,6 +379,36 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion)
             LecturaPeticion.Campo(filtro, "habilitada") is null || LecturaPeticion.Bandera(filtro, "habilitada"),
             LecturaPeticion.EnteroOpcional(filtro, "orden") ?? 0,
             !LecturaPeticion.Bandera(filtro, "inactivo"),
+            tipoCamaId,
+            LecturaPeticion.FechaOpcional(filtro, "fechaColchon"),
+            LecturaPeticion.Texto(filtro, "colchonObservacion"),
+            LecturaPeticion.FechaOpcional(filtro, "fechaCambioRopa"),
+            LecturaPeticion.Texto(filtro, "ropaCamaObservacion"),
+            usuarioId);
+    }
+
+    private static DatosGuardarTipoCama? LeerCuerpoTipoCama(FiltroPeticion filtro, int usuarioId, bool esAlta)
+    {
+        var nombre = LecturaPeticion.Texto(filtro, "nombre");
+        var ancho = LecturaPeticion.EnteroOpcional(filtro, "anchoCm") ?? (short)0;
+        var largo = LecturaPeticion.EnteroOpcional(filtro, "largoCm") ?? (short)0;
+        if (string.IsNullOrWhiteSpace(nombre) || ancho <= 0 || largo <= 0)
+            return null;
+
+        var id = esAlta ? 0 : LecturaPeticion.Entero(filtro, "id");
+        if (!esAlta && id <= 0)
+            return null;
+
+        var isActive = !LecturaPeticion.Bandera(filtro, "inactivo");
+        if (esAlta)
+            isActive = true;
+
+        return new DatosGuardarTipoCama(
+            id,
+            nombre.Trim(),
+            (short)ancho,
+            (short)largo,
+            isActive,
             usuarioId);
     }
 

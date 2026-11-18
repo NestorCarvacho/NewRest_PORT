@@ -1,0 +1,13 @@
+@using SGH.Web.Pages.Modulos
+@{
+    var exito = TempData[EjecutorPostModulo.ClaveAvisoExito] as string;
+    var error = TempData[EjecutorPostModulo.ClaveAvisoError] as string;
+}
+@if (!string.IsNullOrWhiteSpace(exito))
+{
+    <div class="aviso aviso-exito" data-aviso-modulo="exito" role="status">@exito</div>
+}
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="aviso aviso-error" data-aviso-modulo="error" role="alert">@error</div>
+}

@@ -61,7 +61,8 @@ public sealed record CatalogoHabitacion(
     IReadOnlyList<OpcionLista> EstadosHabitacion,
     IReadOnlyList<OpcionCatalogo> TiposInstalacion,
     IReadOnlyList<OpcionCatalogo> Standards,
-    IReadOnlyList<OpcionCatalogo> Banos);
+    IReadOnlyList<OpcionCatalogo> Banos,
+    IReadOnlyList<OpcionCatalogo> TiposCama);
 
 public interface IConsultaHabitacion
 {

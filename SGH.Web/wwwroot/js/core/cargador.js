@@ -35,7 +35,9 @@ export function crearCargador(dependencias) {
         if (modo === "solicitud") return dependencias.solicitud.buscar(filtro);
         if (modo === "censo") return dependencias.censo.buscarRango(filtro);
         if (modo === "misCensos") return dependencias.censo.buscarMiosRango(filtro);
-        if (modo === "habitaciones" || modo === "banos") return dependencias.habitacion.buscar(filtro, modo);
+        if (modo === "habitaciones" || modo === "banos" || modo === "tiposcama") {
+            return dependencias.habitacion.buscar(filtro, modo);
+        }
         return dependencias.reserva.buscar(filtro);
     }
 

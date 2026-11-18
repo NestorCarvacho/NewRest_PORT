@@ -7,7 +7,7 @@ import { instalarHabitacion } from "../modulos/paquetes/habitacion-paquete.js";
  * Pantallas del escritorio (solapas en Index).
  * Al agregar módulo: registrar en PANTALLA_A_PAQUETE e INSTALADORES.
  */
-export var PANTALLAS_ESCRITORIO = ["reserva", "censo", "misCensos", "solicitud", "habitaciones", "banos"];
+export var PANTALLAS_ESCRITORIO = ["reserva", "censo", "misCensos", "solicitud", "habitaciones", "banos", "tiposcama"];
 
 export var PANTALLA_A_PAQUETE = {
     reserva: "reserva",
@@ -16,7 +16,8 @@ export var PANTALLA_A_PAQUETE = {
     censoQr: "censo",
     solicitud: "solicitud",
     habitaciones: "habitacion",
-    banos: "habitacion"
+    banos: "habitacion",
+    tiposcama: "habitacion"
 };
 
 /** Nombre de paquete → función instalar(base) que devuelve APIs y definiciones. */

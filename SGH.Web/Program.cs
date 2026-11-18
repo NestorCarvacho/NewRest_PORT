@@ -36,6 +36,7 @@ builder.Services.Configure<RequestLocalizationOptions>(opciones =>
 });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<EjecutorPeticionMid>();
+builder.Services.AddScoped<SGH.Web.Pages.Modulos.IEjecutorPostModulo, SGH.Web.Pages.Modulos.EjecutorPostModulo>();
 builder.Services.AddMemoryCache();
 builder.Services.AddAntiforgery(opciones =>
 {
