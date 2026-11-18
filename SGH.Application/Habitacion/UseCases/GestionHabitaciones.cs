@@ -48,7 +48,7 @@ public sealed class GestionHabitaciones(
 
         if (datos.BanoId is > 0)
         {
-            var banos = await consultaBano.ListarAsync(campamentoId, 0, cancellationToken);
+            var banos = await consultaBano.ListarAsync(campamentoId, 0, 0, cancellationToken);
             var bano = banos.FirstOrDefault(b => b.Id == datos.BanoId);
             if (bano is null || (!bano.IsActive && !string.Equals(bano.Estado, "ACTIVO", StringComparison.OrdinalIgnoreCase)))
                 return new ResultadoGuardarHabitacion(false, "El baño seleccionado no es válido para el campamento.", datos.Id);
@@ -66,8 +66,9 @@ public sealed class GestionHabitaciones(
         return await comando.GuardarAsync(datos, campamentoId, cancellationToken);
     }
 
-    public Task<IReadOnlyList<BanoListado>> ListarBanosAsync(int campamentoId, int soloActivos, CancellationToken cancellationToken) =>
-        consultaBano.ListarAsync(campamentoId, soloActivos, cancellationToken);
+    public Task<IReadOnlyList<BanoListado>> ListarBanosAsync(
+        int campamentoId, int soloActivos, int banoId = 0, CancellationToken cancellationToken = default) =>
+        consultaBano.ListarAsync(campamentoId, soloActivos, banoId, cancellationToken);
 
     public async Task<ResultadoGuardarBano> GuardarBanoAsync(
         DatosGuardarBano datos, int campamentoId, CancellationToken cancellationToken)
@@ -120,8 +121,8 @@ public sealed class GestionHabitaciones(
     }
 
     public Task<IReadOnlyList<TipoCamaListado>> ListarTiposCamaAsync(
-        int campamentoId, int soloActivos, CancellationToken cancellationToken) =>
-        consultaTipoCama.ListarAsync(campamentoId, soloActivos, cancellationToken);
+        int campamentoId, int soloActivos, int tipoCamaId = 0, CancellationToken cancellationToken = default) =>
+        consultaTipoCama.ListarAsync(campamentoId, soloActivos, tipoCamaId, cancellationToken);
 
     public async Task<ResultadoGuardarTipoCama> GuardarTipoCamaAsync(
         DatosGuardarTipoCama datos, int campamentoId, CancellationToken cancellationToken)
@@ -139,7 +140,7 @@ public sealed class GestionHabitaciones(
         if (usuarioId <= 0)
             throw new ArgumentException("Indique un usuario válido.");
 
-        var tiposValidos = (await consultaTipoCama.ListarAsync(campamentoId, 0, cancellationToken))
+        var tiposValidos = (await consultaTipoCama.ListarAsync(campamentoId, 0, 0, cancellationToken))
             .ToDictionary(t => t.Id);
         var resultados = new List<ResultadoCargaCamaDto>();
 

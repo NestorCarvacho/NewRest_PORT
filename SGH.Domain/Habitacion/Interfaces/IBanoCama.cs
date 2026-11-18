@@ -74,7 +74,8 @@ public sealed record ResultadoGuardarCama(bool Exito, string Mensaje, int Id);
 
 public interface IConsultaBano
 {
-    Task<IReadOnlyList<BanoListado>> ListarAsync(int campamentoId, int soloActivos, CancellationToken cancellationToken);
+    Task<IReadOnlyList<BanoListado>> ListarAsync(
+        int campamentoId, int soloActivos, int banoId = 0, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<HabitacionVinculadaBano>> ListarHabitacionesActivasPorBanoAsync(
         int banoId, int campamentoId, CancellationToken cancellationToken);
 }
@@ -99,7 +100,8 @@ public interface IComandoCama
 
 public interface IConsultaTipoCama
 {
-    Task<IReadOnlyList<TipoCamaListado>> ListarAsync(int campamentoId, int soloActivos, CancellationToken cancellationToken);
+    Task<IReadOnlyList<TipoCamaListado>> ListarAsync(
+        int campamentoId, int soloActivos, int tipoCamaId = 0, CancellationToken cancellationToken = default);
 }
 
 public interface IComandoTipoCama

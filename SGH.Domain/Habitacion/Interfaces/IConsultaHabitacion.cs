@@ -8,7 +8,8 @@ public sealed record FiltroListadoHabitacion(
     int TipoInstalacionId,
     string? Estado,
     int SoloActivas,
-    int? SoloReservables);
+    int? SoloReservables,
+    int HabitacionId = 0);
 
 public sealed record HabitacionListada(
     int Id,

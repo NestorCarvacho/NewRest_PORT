@@ -8,12 +8,12 @@ namespace SGH.Infrastructure.Habitacion.Queries;
 public sealed class ConsultaTipoCama(IFabricaConexionSql fabrica) : IConsultaTipoCama
 {
     public async Task<IReadOnlyList<TipoCamaListado>> ListarAsync(
-        int campamentoId, int soloActivos, CancellationToken cancellationToken)
+        int campamentoId, int soloActivos, int tipoCamaId = 0, CancellationToken cancellationToken = default)
     {
         using var conexion = fabrica.Crear();
         var filas = await conexion.QueryAsync<TipoCamaListado>(new CommandDefinition(
             "dbo.sp_TipoCama_Listar",
-            new { CampamentoId = campamentoId, SoloActivos = soloActivos },
+            new { CampamentoId = campamentoId, SoloActivos = soloActivos, TipoCamaId = tipoCamaId },
             commandType: CommandType.StoredProcedure,
             commandTimeout: 120,
             cancellationToken: cancellationToken));

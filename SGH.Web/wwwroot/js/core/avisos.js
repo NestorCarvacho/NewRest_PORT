@@ -2,28 +2,34 @@ var validacionEnlazada = false;
 
 export function crearAvisos() {
     var capaBloqueo = null;
+    var referenciasBloqueo = 0;
 
     function bloquearPantalla(mensaje) {
-        if (capaBloqueo) return;
-        capaBloqueo = document.createElement("div");
-        capaBloqueo.className = "carga-bloqueo-pantalla";
-        capaBloqueo.setAttribute("role", "status");
-        capaBloqueo.setAttribute("aria-live", "polite");
-        var texto = document.createElement("p");
-        texto.className = "carga-bloqueo-texto";
-        texto.textContent = mensaje || "Cargando datos…";
-        var spinner = document.createElement("div");
-        spinner.className = "carga-bloqueo-spinner";
-        spinner.setAttribute("aria-hidden", "true");
-        capaBloqueo.append(spinner, texto);
-        document.body.append(capaBloqueo);
+        referenciasBloqueo += 1;
+        if (!capaBloqueo) {
+            capaBloqueo = document.createElement("div");
+            capaBloqueo.className = "carga-bloqueo-pantalla";
+            capaBloqueo.setAttribute("role", "status");
+            capaBloqueo.setAttribute("aria-live", "polite");
+            var texto = document.createElement("p");
+            texto.className = "carga-bloqueo-texto";
+            texto.textContent = mensaje || "Cargando datos…";
+            var spinner = document.createElement("div");
+            spinner.className = "carga-bloqueo-spinner";
+            spinner.setAttribute("aria-hidden", "true");
+            capaBloqueo.append(spinner, texto);
+            capaBloqueo._texto = texto;
+            document.body.append(capaBloqueo);
+        } else if (capaBloqueo._texto && mensaje) {
+            capaBloqueo._texto.textContent = mensaje;
+        }
     }
 
     function desbloquearPantalla() {
-        if (capaBloqueo) {
-            capaBloqueo.remove();
-            capaBloqueo = null;
-        }
+        if (referenciasBloqueo > 0) referenciasBloqueo -= 1;
+        if (referenciasBloqueo > 0 || !capaBloqueo) return;
+        capaBloqueo.remove();
+        capaBloqueo = null;
     }
 
     function mostrarAviso(mensaje, tipo) {

@@ -72,7 +72,8 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas
             LecturaPeticion.Entero(filtro, "tipoInstalacionId"),
             LecturaPeticion.Texto(filtro, "estado"),
             LecturaPeticion.EnteroOpcional(filtro, "soloActivas") ?? 1,
-            null), sesion.UsuarioId, cancellationToken);
+            null,
+            LecturaPeticion.Entero(filtro, "habitacionId")), sesion.UsuarioId, cancellationToken);
         return EjecucionMid.Ok(RespuestaListado.ConTope(filas));
     }
 
@@ -149,7 +150,8 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas
     private async Task<EjecucionMid> ListarBanosAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
     {
         var soloActivos = LecturaPeticion.EnteroOpcional(filtro, "soloActivos") ?? 1;
-        var filas = await gestion.ListarBanosAsync(sesion.CampamentoId, soloActivos, cancellationToken);
+        var banoId = LecturaPeticion.Entero(filtro, "banoId");
+        var filas = await gestion.ListarBanosAsync(sesion.CampamentoId, soloActivos, banoId, cancellationToken);
         return EjecucionMid.Ok(RespuestaListado.ConTope(filas));
     }
 
@@ -161,7 +163,7 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas
             return EjecucionMid.Fallo(400, "Revise los datos del baño.");
         if (!esAlta && LecturaPeticion.Campo(filtro, "estado") is null)
         {
-            var listado = await gestion.ListarBanosAsync(sesion.CampamentoId, 0, cancellationToken);
+            var listado = await gestion.ListarBanosAsync(sesion.CampamentoId, 0, 0, cancellationToken);
             var actual = listado.FirstOrDefault(b => b.Id == datos.Id);
             if (actual is not null)
                 datos = datos with { Estado = actual.Estado, IsActive = actual.IsActive };
@@ -177,7 +179,7 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas
         var id = LecturaPeticion.Entero(filtro, "id");
         if (id <= 0)
             return EjecucionMid.Fallo(400, "Seleccione un baño.");
-        var filas = await gestion.ListarBanosAsync(sesion.CampamentoId, 0, cancellationToken);
+        var filas = await gestion.ListarBanosAsync(sesion.CampamentoId, 0, 0, cancellationToken);
         var actual = filas.FirstOrDefault(b => b.Id == id);
         if (actual is null)
             return EjecucionMid.Fallo(404, "El baño no existe en el campamento.");
@@ -201,7 +203,7 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas
         var id = LecturaPeticion.Entero(filtro, "id");
         if (id <= 0)
             return EjecucionMid.Fallo(400, "Seleccione un baño.");
-        var filas = await gestion.ListarBanosAsync(sesion.CampamentoId, 0, cancellationToken);
+        var filas = await gestion.ListarBanosAsync(sesion.CampamentoId, 0, 0, cancellationToken);
         var actual = filas.FirstOrDefault(b => b.Id == id);
         if (actual is null)
             return EjecucionMid.Fallo(404, "El baño no existe en el campamento.");
@@ -246,7 +248,8 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas
     private async Task<EjecucionMid> ListarTiposCamaAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
     {
         var soloActivos = LecturaPeticion.EnteroOpcional(filtro, "soloActivos") ?? 1;
-        var filas = await gestion.ListarTiposCamaAsync(sesion.CampamentoId, soloActivos, cancellationToken);
+        var tipoCamaId = LecturaPeticion.Entero(filtro, "tipoCamaId");
+        var filas = await gestion.ListarTiposCamaAsync(sesion.CampamentoId, soloActivos, tipoCamaId, cancellationToken);
         return EjecucionMid.Ok(RespuestaListado.ConTope(filas));
     }
 
@@ -267,7 +270,7 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas
         var id = LecturaPeticion.Entero(filtro, "id");
         if (id <= 0)
             return EjecucionMid.Fallo(400, "Seleccione un tipo de cama.");
-        var filas = await gestion.ListarTiposCamaAsync(sesion.CampamentoId, 0, cancellationToken);
+        var filas = await gestion.ListarTiposCamaAsync(sesion.CampamentoId, 0, 0, cancellationToken);
         var actual = filas.FirstOrDefault(t => t.Id == id);
         if (actual is null)
             return EjecucionMid.Fallo(404, "El tipo de cama no existe en el campamento.");
@@ -284,7 +287,7 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas
         var id = LecturaPeticion.Entero(filtro, "id");
         if (id <= 0)
             return EjecucionMid.Fallo(400, "Seleccione un tipo de cama.");
-        var filas = await gestion.ListarTiposCamaAsync(sesion.CampamentoId, 0, cancellationToken);
+        var filas = await gestion.ListarTiposCamaAsync(sesion.CampamentoId, 0, 0, cancellationToken);
         var actual = filas.FirstOrDefault(t => t.Id == id);
         if (actual is null)
             return EjecucionMid.Fallo(404, "El tipo de cama no existe en el campamento.");
@@ -420,7 +423,7 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas
         if (bloqueo is not null)
             return bloqueo;
 
-        var tipos = await gestion.ListarTiposCamaAsync(sesion.CampamentoId, 0, cancellationToken);
+        var tipos = await gestion.ListarTiposCamaAsync(sesion.CampamentoId, 0, 0, cancellationToken);
         return EjecucionMid.Descarga(
             planilla.CrearPlantilla(sesion.CampamentoId, tipos),
             "PlantillaCamas.xlsx",

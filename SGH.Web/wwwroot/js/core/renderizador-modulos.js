@@ -25,5 +25,15 @@ export function crearRenderizadorModulos(dependencias) {
         });
     }
 
-    return { pintar: pintar, columnas: columnas };
+    function sincronizarFila(nodo, id, filaOrigen, modo) {
+        dependencias.tablas.sincronizarFila(nodo, id, filaOrigen, function (origen) {
+            return fila(origen, modo);
+        });
+    }
+
+    function quitarFila(nodo, id) {
+        dependencias.tablas.quitarFila(nodo, id);
+    }
+
+    return { pintar: pintar, sincronizarFila: sincronizarFila, quitarFila: quitarFila, columnas: columnas };
 }

@@ -67,12 +67,69 @@ export function crearTablas() {
         return tabla;
     }
 
+    function idRegistro(fila) {
+        if (!fila) return null;
+        var id = fila.id != null ? fila.id : fila.Id;
+        return id == null ? null : Number(id);
+    }
+
+    function indiceEnFilas(filas, id) {
+        for (var i = 0; i < filas.length; i++) {
+            if (idRegistro(filas[i]) === id) return i;
+        }
+        return -1;
+    }
+
+    function filaApiPorId(api, id) {
+        var encontrada = null;
+        api.rows().every(function () {
+            var datos = this.data();
+            var origen = datos && datos._fila != null ? datos._fila : datos;
+            if (idRegistro(origen) === id) {
+                encontrada = this;
+                return false;
+            }
+        });
+        return encontrada;
+    }
+
     function pintar(nodo, filas, mapear) {
         nodo._filas = filas;
         var api = nodo._tabla;
         api.clear();
         filas.forEach(function (fila) { api.row.add(mapear(fila)); });
         api.draw();
+    }
+
+    function quitarFila(nodo, id) {
+        if (id == null) return;
+        var numeroId = Number(id);
+        var filas = nodo._filas || [];
+        var idx = indiceEnFilas(filas, numeroId);
+        if (idx >= 0) filas.splice(idx, 1);
+        nodo._filas = filas;
+        var api = nodo._tabla;
+        if (!api) return;
+        var fila = filaApiPorId(api, numeroId);
+        if (fila) fila.remove();
+        api.draw(false);
+    }
+
+    /** Reemplaza o agrega una fila sin volver a pedir el listado completo. */
+    function sincronizarFila(nodo, id, filaOrigen, mapear) {
+        if (id == null || !filaOrigen) return;
+        var numeroId = Number(id);
+        var filas = nodo._filas || [];
+        var idx = indiceEnFilas(filas, numeroId);
+        if (idx >= 0) filas[idx] = filaOrigen;
+        else filas.push(filaOrigen);
+        nodo._filas = filas;
+        var api = nodo._tabla;
+        if (!api) return;
+        var mapeada = mapear(filaOrigen);
+        var fila = filaApiPorId(api, numeroId);
+        if (fila) fila.remove();
+        api.row.add(mapeada).draw(false);
     }
 
     function completarFilas(api) {
@@ -112,5 +169,12 @@ export function crearTablas() {
         if (nodo._tabla) nodo._tabla.destroy();
     }
 
-    return { crear: crear, inicializar: inicializar, pintar: pintar, destruir: destruir };
+    return {
+        crear: crear,
+        inicializar: inicializar,
+        pintar: pintar,
+        sincronizarFila: sincronizarFila,
+        quitarFila: quitarFila,
+        destruir: destruir
+    };
 }

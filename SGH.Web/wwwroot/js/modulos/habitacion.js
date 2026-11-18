@@ -34,6 +34,38 @@ export function crearHabitacion(dependencias) {
         return dependencias.obtenerCatalogoHabitacion ? dependencias.obtenerCatalogoHabitacion() : null;
     }
 
+    var recargaSinBloqueo = { bloquearPantalla: false };
+    var sincronizacionListado = null;
+
+    function enlazarSincronizacionListado(deps) {
+        sincronizacionListado = deps;
+    }
+
+    function recargarModuloVisible() {
+        var activo = document.querySelector(".modulo:not([hidden])");
+        return activo ? dependencias.cargar(activo.dataset.id, recargaSinBloqueo) : null;
+    }
+
+    function filasDeRespuesta(respuesta) {
+        if (!respuesta) return [];
+        if (Array.isArray(respuesta)) return respuesta;
+        if (Array.isArray(respuesta.filas)) return respuesta.filas;
+        return [];
+    }
+
+    function modoDeIdModulo(idModulo) {
+        if (idModulo === "banos") return "banos";
+        if (idModulo === "tiposcama") return "tiposcama";
+        return "habitaciones";
+    }
+
+    function contextoListadoVisible() {
+        var activo = document.querySelector(".modulo:not([hidden])");
+        if (!activo) return null;
+        var idModulo = activo.dataset.id;
+        return { nodo: activo, idModulo: idModulo, modo: modoDeIdModulo(idModulo) };
+    }
+
     function opcionesSexo(catalogo) {
         return (catalogo.sexos || []).map(function (s) {
             return { value: s.codigo, text: s.etiqueta };
@@ -308,10 +340,10 @@ export function crearHabitacion(dependencias) {
                 minutosMin: dependencias.numero(datos.minutosMin) || 0,
                 tiempoHigienizacionMin: dependencias.numero(datos.minutosMin) || 0
             };
-            return mid(opcion, payload).then(function () {
+            return mid(opcion, payload).then(function (resultado) {
                 if (dependencias.invalidarCatalogoHabitacion) dependencias.invalidarCatalogoHabitacion();
-                var activo = document.querySelector(".modulo:not([hidden])");
-                return activo ? dependencias.cargar(activo.dataset.id) : null;
+                var id = fila ? fila.id : (resultado && resultado.id);
+                return refrescarFilaEnListado(id, "habitaciones");
             }).then(function () {
                 dependencias.mostrarAviso("Habitación guardada.", "success");
             });
@@ -360,10 +392,10 @@ export function crearHabitacion(dependencias) {
                 codigoNombre: (datos.codigoNombre || "").trim(),
                 ubicacion: (datos.ubicacion || "").trim(),
                 tipoSexo: datos.tipoSexo
-            }).then(function () {
+            }).then(function (resultado) {
                 if (dependencias.invalidarCatalogoHabitacion) dependencias.invalidarCatalogoHabitacion();
-                var activo = document.querySelector(".modulo:not([hidden])");
-                return activo ? dependencias.cargar(activo.dataset.id) : null;
+                var id = fila ? fila.id : (resultado && resultado.id);
+                return refrescarFilaEnListado(id, "banos");
             }).then(function () {
                 dependencias.mostrarAviso("Baño guardado.", "success");
             });
@@ -373,8 +405,7 @@ export function crearHabitacion(dependencias) {
 
     function inactivarHabitacion(id) {
         return mid("inactivar", { id: id }).then(function () {
-            var activo = document.querySelector(".modulo:not([hidden])");
-            return activo ? dependencias.cargar(activo.dataset.id) : null;
+            return refrescarFilaEnListado(id, "habitaciones");
         }).then(function () {
             dependencias.mostrarAviso("Habitación inactivada.", "success");
         });
@@ -383,8 +414,7 @@ export function crearHabitacion(dependencias) {
     function inactivarBano(id) {
         return mid("inactivarbano", { id: id }).then(function () {
             if (dependencias.invalidarCatalogoHabitacion) dependencias.invalidarCatalogoHabitacion();
-            var activo = document.querySelector(".modulo:not([hidden])");
-            return activo ? dependencias.cargar(activo.dataset.id) : null;
+            return refrescarFilaEnListado(id, "banos");
         }).then(function () {
             dependencias.mostrarAviso("Baño inactivado.", "success");
         });
@@ -393,8 +423,7 @@ export function crearHabitacion(dependencias) {
     function activarBano(id) {
         return mid("activarbano", { id: id }).then(function () {
             if (dependencias.invalidarCatalogoHabitacion) dependencias.invalidarCatalogoHabitacion();
-            var activo = document.querySelector(".modulo:not([hidden])");
-            return activo ? dependencias.cargar(activo.dataset.id) : null;
+            return refrescarFilaEnListado(id, "banos");
         }).then(function () {
             dependencias.mostrarAviso("Baño activado.", "success");
         });
@@ -414,6 +443,61 @@ export function crearHabitacion(dependencias) {
 
     function tipoCamaEstaActivo(fila) {
         return fila.isActive === true || fila.isActive === 1;
+    }
+
+    function debeOcultarPorFiltro(nodo, modo, fila) {
+        var f = nodo._filtro || {};
+        if (modo === "habitaciones") {
+            var soloActivas = dependencias.numero(f.soloActivas);
+            if (soloActivas === 1 && (fila.isActive === false || fila.isActive === 0)) return true;
+        }
+        if (modo === "banos") {
+            var soloActivos = dependencias.numero(f.soloActivos);
+            if (soloActivos === 1 && !banoEstaActivo(fila)) return true;
+        }
+        if (modo === "tiposcama") {
+            var soloTipos = dependencias.numero(f.soloActivos);
+            if (soloTipos === 1 && !tipoCamaEstaActivo(fila)) return true;
+        }
+        return false;
+    }
+
+    function obtenerFilaListado(id, modo) {
+        if (modo === "habitaciones") {
+            return mid("listar", {
+                habitacionId: id,
+                soloActivas: 0,
+                pabellonId: 0,
+                moduloId: 0
+            }).then(filasDeRespuesta).then(function (filas) { return filas[0] || null; });
+        }
+        if (modo === "banos") {
+            return mid("listarbanos", { banoId: id, soloActivos: 0 }).then(filasDeRespuesta).then(function (filas) {
+                return filas[0] || null;
+            });
+        }
+        if (modo === "tiposcama") {
+            return mid("listartiposcama", { tipoCamaId: id, soloActivos: 0 }).then(filasDeRespuesta).then(function (filas) {
+                return filas[0] || null;
+            });
+        }
+        return Promise.resolve(null);
+    }
+
+    function refrescarFilaEnListado(id, modo) {
+        var ctx = contextoListadoVisible();
+        if (!ctx || ctx.modo !== modo || !sincronizacionListado) {
+            return recargarModuloVisible();
+        }
+        return obtenerFilaListado(id, modo).then(function (fila) {
+            if (!fila || debeOcultarPorFiltro(ctx.nodo, modo, fila)) {
+                sincronizacionListado.quitarFila(ctx.nodo, id);
+                return;
+            }
+            sincronizacionListado.sincronizarFila(ctx.nodo, id, fila, modo);
+        }).catch(function () {
+            return recargarModuloVisible();
+        });
     }
 
     function abrirNuevoTipoCama() {
@@ -448,10 +532,10 @@ export function crearHabitacion(dependencias) {
                 nombre: (datos.nombre || "").trim(),
                 anchoCm: dependencias.numero(datos.anchoCm),
                 largoCm: dependencias.numero(datos.largoCm)
-            }).then(function () {
+            }).then(function (resultado) {
                 if (dependencias.invalidarCatalogoHabitacion) dependencias.invalidarCatalogoHabitacion();
-                var activo = document.querySelector(".modulo:not([hidden])");
-                return activo ? dependencias.cargar(activo.dataset.id) : null;
+                var id = fila ? fila.id : (resultado && resultado.id);
+                return refrescarFilaEnListado(id, "tiposcama");
             }).then(function () {
                 dependencias.mostrarAviso("Tipo de cama guardado.", "success");
             });
@@ -462,8 +546,7 @@ export function crearHabitacion(dependencias) {
     function inactivarTipoCama(id) {
         return mid("inactivartipocama", { id: id }).then(function () {
             if (dependencias.invalidarCatalogoHabitacion) dependencias.invalidarCatalogoHabitacion();
-            var activo = document.querySelector(".modulo:not([hidden])");
-            return activo ? dependencias.cargar(activo.dataset.id) : null;
+            return refrescarFilaEnListado(id, "tiposcama");
         }).then(function () {
             dependencias.mostrarAviso("Tipo de cama inactivado.", "success");
         });
@@ -472,8 +555,7 @@ export function crearHabitacion(dependencias) {
     function activarTipoCama(id) {
         return mid("activartipocama", { id: id }).then(function () {
             if (dependencias.invalidarCatalogoHabitacion) dependencias.invalidarCatalogoHabitacion();
-            var activo = document.querySelector(".modulo:not([hidden])");
-            return activo ? dependencias.cargar(activo.dataset.id) : null;
+            return refrescarFilaEnListado(id, "tiposcama");
         }).then(function () {
             dependencias.mostrarAviso("Tipo de cama activado.", "success");
         });
@@ -652,7 +734,7 @@ export function crearHabitacion(dependencias) {
                 var datos = info.registros || info;
                 pintarResultadoImportacion(resultado, datos);
                 var activo = document.querySelector(".modulo.modulo-habitaciones:not([hidden])");
-                if (activo) dependencias.cargar(activo.dataset.id);
+                if (activo) dependencias.cargar(activo.dataset.id, recargaSinBloqueo);
             }).catch(function (error) {
                 dependencias.mostrarAviso(error.message, "error");
             }).finally(function () { importar.disabled = false; });
@@ -678,6 +760,7 @@ export function crearHabitacion(dependencias) {
         abrirEdicionTipoCama: abrirEdicionTipoCama,
         alternarEstadoTipoCama: alternarEstadoTipoCama,
         abrirCamasHabitacion: abrirCamasHabitacion,
-        abrirImportacionCamas: abrirImportacionCamas
+        abrirImportacionCamas: abrirImportacionCamas,
+        enlazarSincronizacionListado: enlazarSincronizacionListado
     };
 }
