@@ -1,4 +1,24 @@
 export function crearReserva(dependencias) {
+  var sincronizacionListado = null;
+
+  function enlazarSincronizacionListado(deps) {
+        sincronizacionListado = deps;
+    }
+
+    function filasDeRespuesta(respuesta) {
+        if (!respuesta) return [];
+        if (Array.isArray(respuesta)) return respuesta;
+        if (Array.isArray(respuesta.filas)) return respuesta.filas;
+        return [];
+    }
+
+    function contextoReservaVisible() {
+        var activo = document.querySelector('.modulo[data-id="reserva"]:not([hidden])');
+        if (!activo) activo = document.querySelector(".modulo:not([hidden])");
+        if (!activo || activo.dataset.id !== "reserva") return null;
+        return { nodo: activo };
+    }
+
     function filtros() {
         var catalogo = dependencias.obtenerCatalogo() || { grupos: [], origenes: [], pasajeros: [], habitaciones: [], turnos: [] };
         return dependencias.camposPeriodoFiltro(dependencias.campo, {
@@ -98,8 +118,7 @@ export function crearReserva(dependencias) {
                 estado: datos.estado || fila.estadoNumero || "P",
                 tieneAgua: false
             }).then(function () {
-                var activo = document.querySelector(".modulo:not([hidden])");
-                return activo ? dependencias.cargar(activo.dataset.id, { bloquearPantalla: false }) : null;
+                return refrescarFilaEnListado(fila.id);
             });
         });
         dependencias.abrirPanel("Editar reserva " + fila.id, form);
@@ -115,20 +134,19 @@ export function crearReserva(dependencias) {
             fechaSalida: datos.salida,
             observacion: datos.observaciones
         }).then(function (resultado) {
-            return dependencias.cargar(id, { bloquearPantalla: false }).then(function () {
+            return refrescarFilaEnListado(resultado.id).then(function () {
                 dependencias.mostrarAviso("Reserva creada N° " + resultado.id + ".", "success");
             });
         });
     }
 
-    function buscar(filtro, enviarMid) {
+    function payloadListar(filtro, reservaId) {
         var payload = dependencias.normalizarFiltroPeriodo
             ? dependencias.normalizarFiltroPeriodo(filtro)
             : (dependencias.aplicarPresetPeriodo
                 ? dependencias.aplicarPresetPeriodo(filtro, filtro && filtro.periodo)
                 : filtro);
-        var enviar = enviarMid || dependencias.enviar;
-        return enviar("/Reserva/Mid/MidReservas.cs", {
+        var cuerpo = {
             opcion: "listar",
             areaId: payload.grupo,
             origen: payload.origen,
@@ -144,6 +162,35 @@ export function crearReserva(dependencias) {
             pasajeroId: payload.pasajero,
             habitacionId: payload.habitacion,
             tieneAgua: payload.agua
+        };
+        if (reservaId) cuerpo.id = reservaId;
+        return cuerpo;
+    }
+
+    function buscar(filtro, enviarMid) {
+        var enviar = enviarMid || dependencias.enviar;
+        return enviar("/Reserva/Mid/MidReservas.cs", payloadListar(filtro, 0));
+    }
+
+    function buscarUnaReserva(reservaId, enviarMid) {
+        var ctx = contextoReservaVisible();
+        var filtro = ctx && ctx.nodo._filtro ? ctx.nodo._filtro : {};
+        var enviar = enviarMid || dependencias.enviar;
+        return enviar("/Reserva/Mid/MidReservas.cs", payloadListar(filtro, reservaId)).then(filasDeRespuesta).then(function (filas) {
+            return filas[0] || null;
+        });
+    }
+
+    function refrescarFilaEnListado(reservaId) {
+        var ctx = contextoReservaVisible();
+        if (!ctx || !sincronizacionListado) {
+            return dependencias.cargar("reserva", { bloquearPantalla: false, avisarConteoFilas: false });
+        }
+        return buscarUnaReserva(reservaId).then(function (fila) {
+            if (!fila) return;
+            sincronizacionListado.sincronizarFila(ctx.nodo, reservaId, fila, "reserva");
+        }).catch(function () {
+            return dependencias.cargar("reserva", { bloquearPantalla: false, avisarConteoFilas: false });
         });
     }
 
@@ -203,6 +250,8 @@ export function crearReserva(dependencias) {
         abrirEdicion: abrirEdicion,
         crear: crear,
         buscar: buscar,
+        refrescarFilaEnListado: refrescarFilaEnListado,
+        enlazarSincronizacionListado: enlazarSincronizacionListado,
         fila: fila,
         columnas: columnas
     };

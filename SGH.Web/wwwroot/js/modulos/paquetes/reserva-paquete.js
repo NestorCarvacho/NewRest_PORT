@@ -26,6 +26,8 @@ export function instalarReserva(base) {
         consulta: base.consulta
     });
     var movimientosReserva = crearMovimientosReserva({
+        refrescarFilaReserva: reserva.refrescarFilaEnListado.bind(reserva),
+        cerrarPanel: base.cerrarPanel,
         boton: base.boton,
         prepararCatalogo: base.prepararCatalogo,
         abrirEdicion: reserva.abrirEdicion,

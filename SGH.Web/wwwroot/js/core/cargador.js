@@ -61,7 +61,9 @@ export function crearCargador(dependencias) {
       if (generacion !== nodo._cargaGeneracion || !nodo.isConnected) return;
       dependencias.mostrarEstado(nodo, "");
       var filas = Array.isArray(resultado) ? resultado : resultado.filas || [];
-      avisarTruncado(nodo, filas, resultado);
+      var avisarConteo = opciones.avisarConteoFilas;
+      if (avisarConteo === undefined) avisarConteo = bloquearPantalla;
+      if (avisarConteo) avisarTruncado(nodo, filas, resultado);
       dependencias.pintar(nodo, filas, modulo.modo);
     }).catch(function (error) {
       if (generacion !== nodo._cargaGeneracion) return;
