@@ -1,10 +1,10 @@
 /*
     Incremental QA — ejecutar después de 001_sp_reserva.sql si ese archivo ya se aplicó
-    sin @MaxFilas, rango por defecto de 30 días ni TOP en sp_Reserva_Buscar.
+    sin @MaxFilas, rango por defecto de 30 días ni TOP en he_sp_reserva_buscar.
 
     Instalación en frío: basta con 001_sp_reserva.sql (ya incluye este contenido).
 */
-CREATE OR ALTER PROCEDURE dbo.sp_Reserva_Buscar
+CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_buscar
     @CampamentoId int,
     @Id int = 0,
     @AreaId int = 0,

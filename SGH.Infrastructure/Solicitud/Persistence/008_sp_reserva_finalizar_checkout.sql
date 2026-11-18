@@ -2,7 +2,7 @@
     Reservas con check-out operativo deben salir de Estado 'A' para que
     SOL_GuardaPasajeroSolicitudAlojamientoMasivo no las trate como activas.
 */
-CREATE OR ALTER PROCEDURE dbo.sp_Reserva_FinalizarCheckout
+CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_finalizar_checkout
     @ReservaId int = NULL,
     @EmpresaMandanteId int = NULL,
     @IdentificadorRut varchar(25) = NULL,

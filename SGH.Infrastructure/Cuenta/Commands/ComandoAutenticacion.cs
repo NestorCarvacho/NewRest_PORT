@@ -14,7 +14,7 @@ public sealed class ComandoAutenticacion : IComandoAutenticacion
         var oCRB = await oDB.DBOpenAsync(300, cancellationToken);
         if (oCRB.Resultado)
         {
-            oDB.NameProcedure = "dbo.sp_Usuario_RegistrarIntentoFallido";
+            oDB.NameProcedure = "dbo.he_sp_usuario_registrar_intento_fallido";
             oCRB = oDB.AddParameter("@Rut", rut);
             oCRB = oDB.AddParameter("@Intentos", null, ParameterDirection.Output, SqlDbType.Int);
             oCRB = oDB.AddParameter("@Bloqueada", null, ParameterDirection.Output, SqlDbType.Bit);
@@ -38,7 +38,7 @@ public sealed class ComandoAutenticacion : IComandoAutenticacion
         var oCRB = await oDB.DBOpenAsync(300, cancellationToken);
         if (oCRB.Resultado)
         {
-            oDB.NameProcedure = "dbo.sp_Usuario_ReiniciarIntentos";
+            oDB.NameProcedure = "dbo.he_sp_usuario_reiniciar_intentos";
             oCRB = oDB.AddParameter("@Rut", rut);
         }
 
@@ -51,13 +51,13 @@ public sealed class ComandoAutenticacion : IComandoAutenticacion
     }
 
     public Task<int> ActualizarPasswordAsync(string rut, string hashBcrypt, string? huellaMd5, CancellationToken cancellationToken) =>
-        EjecutarRetornoAsync("dbo.sp_Usuario_ActualizarPassword", cancellationToken, ("@Rut", rut), ("@PasswordHash", hashBcrypt), ("@HuellaMd5", huellaMd5));
+        EjecutarRetornoAsync("dbo.he_sp_usuario_actualizar_password", cancellationToken, ("@Rut", rut), ("@PasswordHash", hashBcrypt), ("@HuellaMd5", huellaMd5));
 
     public Task<int> ReemplazarHashAsync(string rut, string hashBcrypt, CancellationToken cancellationToken) =>
-        EjecutarRetornoAsync("dbo.sp_Usuario_ReemplazarHash", cancellationToken, ("@Rut", rut), ("@PasswordHash", hashBcrypt));
+        EjecutarRetornoAsync("dbo.he_sp_usuario_reemplazar_hash", cancellationToken, ("@Rut", rut), ("@PasswordHash", hashBcrypt));
 
     public Task<int> RetirarMd5Async(string rut, CancellationToken cancellationToken) =>
-        EjecutarRetornoAsync("dbo.sp_Usuario_RetirarMd5", cancellationToken, ("@Rut", rut));
+        EjecutarRetornoAsync("dbo.he_sp_usuario_retirar_md5", cancellationToken, ("@Rut", rut));
 
     private static async Task<int> EjecutarRetornoAsync(string procedimiento, CancellationToken cancellationToken, params (string Nombre, object? Valor)[] parametros)
     {

@@ -21,7 +21,7 @@ public sealed class ConsultaCenso : IConsultaCenso
         using var conexion = _fabrica.Crear();
         var filas = await conexion.QueryAsync<CensoFila>(
             new CommandDefinition(
-                "sp_Censo_Buscar",
+                "he_sp_censo_buscar",
                 new
                 {
                     filtro.EmpresaMandanteId,
@@ -61,7 +61,7 @@ public sealed class ConsultaCenso : IConsultaCenso
         using var conexion = _fabrica.Crear();
         var filas = await conexion.QueryAsync<CensoUsuarioFila>(
             new CommandDefinition(
-                "sp_Censo_BuscarPorUsuario",
+                "he_sp_censo_buscar_por_usuario",
                 new
                 {
                     EmpresaMandanteId = empresaMandanteId,
@@ -91,7 +91,7 @@ public sealed class ConsultaCenso : IConsultaCenso
         using var conexion = _fabrica.Crear();
         using var lectura = await conexion.QueryMultipleAsync(
             new CommandDefinition(
-                "sp_Censo_ListarCatalogo",
+                "he_sp_censo_listar_catalogo",
                 new { CampamentoId = campamentoId },
                 commandType: CommandType.StoredProcedure,
                 cancellationToken: cancellationToken));
@@ -108,7 +108,7 @@ public sealed class ConsultaCenso : IConsultaCenso
         using var conexion = _fabrica.Crear();
         var marca = await conexion.QuerySingleAsync<MarcaPertenece>(
             new CommandDefinition(
-                "sp_Censo_FiltroPertenece",
+                "he_sp_censo_filtro_pertenece",
                 new
                 {
                     CampamentoId = campamentoId,

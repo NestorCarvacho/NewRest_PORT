@@ -17,13 +17,13 @@ public sealed class MidCenso(
 
     public static readonly IReadOnlyList<AccionApi> Opciones =
     [
-        Accion("listar", "Listar", "sp_Censo_Buscar", "Devuelve el censo del campamento."),
-        Accion("listarrango", "Listar rango", "sp_Censo_Buscar", "Devuelve el censo para cada día del período en una sola petición."),
-        Accion("miscensos", "Mis censos", "sp_Censo_BuscarPorUsuario", "Devuelve los censos del usuario."),
-        Accion("miscensosrango", "Mis censos rango", "sp_Censo_BuscarPorUsuario", "Mis censos por período en una sola petición."),
-        Accion("catalogo", "Catálogo", "sp_Censo_ListarCatalogo", "Devuelve módulos, pisos y habitaciones."),
-        Accion("guardar", "Guardar", "sp_Censo_Guardar", "Guarda las filas del censo."),
-        Accion("guardarqr", "Guardar QR", "sp_Censo_Guardar", "Guarda el censo leído desde un código QR.")
+        Accion("listar", "Listar", "he_sp_censo_buscar", "Devuelve el censo del campamento."),
+        Accion("listarrango", "Listar rango", "he_sp_censo_buscar", "Devuelve el censo para cada día del período en una sola petición."),
+        Accion("miscensos", "Mis censos", "he_sp_censo_buscar_por_usuario", "Devuelve los censos del usuario."),
+        Accion("miscensosrango", "Mis censos rango", "he_sp_censo_buscar_por_usuario", "Mis censos por período en una sola petición."),
+        Accion("catalogo", "Catálogo", "he_sp_censo_listar_catalogo", "Devuelve módulos, pisos y habitaciones."),
+        Accion("guardar", "Guardar", "he_sp_censo_guardar", "Guarda las filas del censo."),
+        Accion("guardarqr", "Guardar QR", "he_sp_censo_guardar", "Guarda el censo leído desde un código QR.")
     ];
 
     public async Task<EjecucionMid> EjecutarAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)

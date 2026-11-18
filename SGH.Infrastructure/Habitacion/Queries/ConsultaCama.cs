@@ -12,7 +12,7 @@ public sealed class ConsultaCama(IFabricaConexionSql fabrica) : IConsultaCama
     {
         using var conexion = fabrica.Crear();
         var filas = await conexion.QueryAsync<CamaListada>(new CommandDefinition(
-            "dbo.sp_Cama_ListarPorHabitacion",
+            "dbo.he_sp_cama_listar_por_habitacion",
             new { HabitacionId = habitacionId, CampamentoId = campamentoId, SoloActivas = soloActivas },
             commandType: CommandType.StoredProcedure,
             commandTimeout: 120,

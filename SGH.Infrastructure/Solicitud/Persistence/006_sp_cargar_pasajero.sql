@@ -1,4 +1,4 @@
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_CargarPasajero
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_cargar_pasajero
     @SolicitudId int,
     @EmpresaMandanteId int,
     @CampamentoId int,
@@ -25,13 +25,13 @@ BEGIN
         THROW 51043, 'No se pueden modificar los pasajeros de una solicitud reservada o anulada.', 1;
 
     /* Fuera de la transacción: si el masivo rechaza la fila, el cierre no debe revertirse con ROLLBACK. */
-    EXEC dbo.sp_Solicitud_AsegurarPeriodo
+    EXEC dbo.he_sp_solicitud_asegurar_periodo
         @SolicitudId = @SolicitudId,
         @EmpresaMandanteId = @EmpresaMandanteId,
         @CampamentoId = @CampamentoId,
         @UsuarioId = @UsuarioId;
 
-    EXEC dbo.sp_Reserva_FinalizarCheckout
+    EXEC dbo.he_sp_reserva_finalizar_checkout
         @EmpresaMandanteId = @EmpresaMandanteId,
         @IdentificadorRut = @Identificador,
         @UsuarioId = @UsuarioId;

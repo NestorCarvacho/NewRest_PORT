@@ -11,14 +11,14 @@ public class ErroresGeneracionTests
         var resultado = new LIB_ControlResultado { Codigo = "51051" };
         resultado.SetBadResult("Error técnico", "(51051) Asigne una habitaciÃ³n a todos los pasajeros.");
 
-        var mensaje = ComandoSolicitudAlojamiento.MensajeError("dbo.sp_Solicitud_GenerarReservas", resultado);
+        var mensaje = ComandoSolicitudAlojamiento.MensajeError("dbo.he_sp_solicitud_generar_reservas", resultado);
 
         Assert.Equal("Asigne una habitación a todos los pasajeros antes de generar reservas.", mensaje);
     }
 
     [Theory]
-    [InlineData("dbo.sp_Solicitud_GenerarReservas", "51056")]
-    [InlineData("dbo.sp_Solicitud_AsignarHabitacion", "51051")]
+    [InlineData("dbo.he_sp_solicitud_generar_reservas", "51056")]
+    [InlineData("dbo.he_sp_solicitud_asignar_habitacion", "51051")]
     public void OtrosErroresConservanDetalleOriginal(string procedimiento, string codigo)
     {
         var resultado = new LIB_ControlResultado { Codigo = codigo };

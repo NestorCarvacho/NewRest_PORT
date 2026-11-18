@@ -18,12 +18,12 @@ public sealed class MidReservas(
 
     public static readonly IReadOnlyList<AccionApi> Opciones =
     [
-        Accion("listar", "Listar", "sp_Reserva_Buscar", "Devuelve las reservas del campamento de la sesión."),
-        Accion("catalogo", "Catálogo", "sp_Reserva_ListarCatalogo", "Devuelve grupos, orígenes, pasajeros, habitaciones y turnos."),
-        Accion("crear", "Crear", "dbo.sp_Reserva_Crear", "Inserta una reserva."),
-        Accion("editar", "Editar", "dbo.sp_Reserva_Actualizar", "Actualiza una reserva."),
-        Accion("movimiento", "Movimiento", "dbo.sp_Reserva_RegistrarMovimiento", "Registra check-in o check-out."),
-        Accion("importar", "Importar", "dbo.sp_Reserva_Crear", "Crea reservas desde una planilla."),
+        Accion("listar", "Listar", "he_sp_reserva_buscar", "Devuelve las reservas del campamento de la sesión."),
+        Accion("catalogo", "Catálogo", "he_sp_reserva_listar_catalogo", "Devuelve grupos, orígenes, pasajeros, habitaciones y turnos."),
+        Accion("crear", "Crear", "dbo.he_sp_reserva_crear", "Inserta una reserva."),
+        Accion("editar", "Editar", "dbo.he_sp_reserva_actualizar", "Actualiza una reserva."),
+        Accion("movimiento", "Movimiento", "dbo.he_sp_reserva_registrar_movimiento", "Registra check-in o check-out."),
+        Accion("importar", "Importar", "dbo.he_sp_reserva_crear", "Crea reservas desde una planilla."),
         Accion("plantilla", "Plantilla", "planilla", "Devuelve la planilla de importación.")
     ];
 

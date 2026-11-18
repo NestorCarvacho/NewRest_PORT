@@ -20,7 +20,7 @@ public sealed class ConsultaAutenticacion : IConsultaAutenticacion
         using var conexion = _fabrica.Crear();
         var fila = await conexion.QueryFirstOrDefaultAsync<UsuarioLoginFila>(
             new CommandDefinition(
-                "sp_Usuario_ObtenerParaLogin",
+                "he_sp_usuario_obtener_para_login",
                 new { Rut = rut, LoginInterno = loginInterno },
                 commandType: CommandType.StoredProcedure,
                 cancellationToken: cancellationToken));
@@ -46,13 +46,13 @@ public sealed class ConsultaAutenticacion : IConsultaAutenticacion
         using var conexion = _fabrica.Crear();
         var fila = await conexion.QueryFirstOrDefaultAsync<EstadoFila>(
             new CommandDefinition(
-                "sp_Usuario_ValidarEstado",
+                "he_sp_usuario_validar_estado",
                 new { Rut = rut },
                 commandType: CommandType.StoredProcedure,
                 cancellationToken: cancellationToken));
 
         if (fila is null)
-            throw new InvalidOperationException("sp_Usuario_ValidarEstado no devolvió un estado.");
+            throw new InvalidOperationException("he_sp_usuario_validar_estado no devolvió un estado.");
 
         return fila.Estado;
     }
@@ -62,7 +62,7 @@ public sealed class ConsultaAutenticacion : IConsultaAutenticacion
         using var conexion = _fabrica.Crear();
         var filas = await conexion.QueryAsync<PerfilCampamentoFila>(
             new CommandDefinition(
-                "sp_Usuario_ObtenerCampamentosYPerfiles",
+                "he_sp_usuario_obtener_campamentos_y_perfiles",
                 new { Rut = rut },
                 commandType: CommandType.StoredProcedure,
                 cancellationToken: cancellationToken));
@@ -85,7 +85,7 @@ public sealed class ConsultaAutenticacion : IConsultaAutenticacion
         using var conexion = _fabrica.Crear();
         var hashes = await conexion.QueryAsync<string>(
             new CommandDefinition(
-                "sp_Usuario_ObtenerHistorialContrasenas",
+                "he_sp_usuario_obtener_historial_contrasenas",
                 new { Rut = rut },
                 commandType: CommandType.StoredProcedure,
                 cancellationToken: cancellationToken));

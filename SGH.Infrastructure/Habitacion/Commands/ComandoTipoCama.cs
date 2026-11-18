@@ -23,7 +23,7 @@ public sealed class ComandoTipoCama(IFabricaConexionSql fabrica) : IComandoTipoC
         parametros.Add("@Mensaje", dbType: DbType.String, size: 500, direction: ParameterDirection.Output);
 
         await conexion.ExecuteAsync(new CommandDefinition(
-            "dbo.sp_TipoCama_Guardar",
+            "dbo.he_sp_tipo_cama_guardar",
             parametros,
             commandType: CommandType.StoredProcedure,
             commandTimeout: 120,

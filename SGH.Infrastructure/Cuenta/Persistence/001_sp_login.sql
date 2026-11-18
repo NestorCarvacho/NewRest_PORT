@@ -47,7 +47,7 @@ END
 GO
 
 /* Envoltorio del legado USU_ValidaEstadoUsuario (@rut, @ret OUTPUT). */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ValidarEstado
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_validar_estado
     @Rut varchar(20)
 AS
 BEGIN
@@ -64,7 +64,7 @@ GO
    Id, PerfilId, PerfilNombre, CampamentoId, CampamentoNombre,
    EmpresaMandanteId, EmpresaMandanteNombre, CampamentoPerfil, UsuarioId,
    UsuarioNombre. Los dos últimos identifican la cuenta asociada al perfil elegido. */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ObtenerCampamentosYPerfiles
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_obtener_campamentos_y_perfiles
     @Rut varchar(20)
 AS
 BEGIN
@@ -76,7 +76,7 @@ GO
 /* Devuelve una fila activa para verificar la clave en la aplicación.
    En RUT duplicados la fila con la fecha de creación más reciente es estable;
    la selección final del usuario se toma de PerfilesUsuario en el segundo paso. */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ObtenerParaLogin
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_obtener_para_login
     @Rut varchar(20),
     @LoginInterno int = 0
 AS
@@ -109,7 +109,7 @@ GO
 
 /* Actualiza las filas del RUT como lo hacía el procedimiento legado y añade el
    nuevo BCrypt al historial. @HuellaMd5 conserva la comprobación histórica MD5. */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ActualizarPassword
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_actualizar_password
     @Rut varchar(20),
     @PasswordHash varchar(200),
     @HuellaMd5 varchar(32) = NULL,
@@ -188,7 +188,7 @@ GO
 /* Migra las huellas MD5 vigentes a BCrypt sin aplicar la regla de historial. */
 /* Cambio administrativo por RUT. La aplicación debe generar el BCrypt antes
    de llamar al procedimiento; nunca se recibe una contraseña en claro. */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_CambiarPasswordPorRut
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_cambiar_password_por_rut
     @Rut varchar(25),
     @PasswordHash varchar(200),
     @Ret int OUTPUT
@@ -239,7 +239,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ReemplazarHash
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_reemplazar_hash
     @Rut varchar(20),
     @PasswordHash varchar(200),
     @Ret int OUTPUT
@@ -264,7 +264,7 @@ END
 GO
 
 /* Marca migración dual: copia BCrypt erróneo en Password a PasswordV2 sin tocar Password legado. */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_RetirarMd5
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_retirar_md5
     @Rut varchar(20),
     @Ret int OUTPUT
 AS
@@ -291,7 +291,7 @@ END
 GO
 
 /* Los umbrales coinciden con ReglasCuenta: cinco intentos y treinta minutos. */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_RegistrarIntentoFallido
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_registrar_intento_fallido
     @Rut varchar(20),
     @Intentos int OUTPUT,
     @Bloqueada bit OUTPUT
@@ -330,7 +330,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ObtenerHistorialContrasenas
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_obtener_historial_contrasenas
     @Rut varchar(20)
 AS
 BEGIN
@@ -352,7 +352,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ReiniciarIntentos
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_reiniciar_intentos
     @Rut varchar(20)
 AS
 BEGIN

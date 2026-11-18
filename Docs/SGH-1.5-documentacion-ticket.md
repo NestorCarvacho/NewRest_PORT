@@ -21,7 +21,7 @@ Rama de implementación: `cursor/sgh-1-5-menu-autorizacion-f6a4`.
 |-------------------|----------------------------|
 | Menú dinámico por `PerfilId` | CRUD pantalla «Perfiles» / administración de menú |
 | Autorización en páginas y controladores con políticas existentes + menú | Autorización por `opcion` dentro de cada Mid |
-| SP nuevo `sp_Menu_ObtenerPorPerfil` | ESS, mensaje autorización, política de aceptación en login |
+| SP nuevo `he_sp_menu_obtener_por_perfil` | ESS, mensaje autorización, política de aceptación en login |
 | Mapeo de `Menus.Link` legado → páginas Razor migradas | Matriz completa de todos los ítems legado (centenares) |
 | Respaldo de menú si la BD no responde o no hay filas | i18n automático de textos que vienen de BD |
 
@@ -46,7 +46,7 @@ Diccionario completo: `Docs/datos/Diccionario_de_datos_HotelDB.xlsx`
 ### 1. Base de datos
 
 - Script: `SGH.Infrastructure/Navegacion/Persistence/001_sp_menu.sql`
-- Procedimiento: `dbo.sp_Menu_ObtenerPorPerfil @PerfilId`
+- Procedimiento: `dbo.he_sp_menu_obtener_por_perfil @PerfilId`
 - **Acción de despliegue:** ejecutar el script en HOTELDB (idempotente) en el mismo proceso que el resto de scripts del repo.
 
 ### 2. Capas
@@ -106,7 +106,7 @@ Mientras dure el respaldo, la autorización usa el **mismo** conjunto de claves 
 
 | ID | Actividad | Estado |
 |----|-----------|--------|
-| B1 | SP `sp_Menu_ObtenerPorPerfil` + consulta infra | Hecho |
+| B1 | SP `he_sp_menu_obtener_por_perfil` + consulta infra | Hecho |
 | D1 | Servicio + ViewComponent menú | Hecho |
 | D2 | Reemplazo menú estático en layout | Hecho |
 | C1 | Handler autorización por menú | Hecho |
@@ -200,7 +200,7 @@ PerfilId de sesión, y reforzar autorización HTTP: políticas existentes más
 validación de ítem de menú para módulos migrados (solicitud, reserva, censo,
 usuarios).
 
-Entregables: sp_Menu_ObtenerPorPerfil, menú dinámico en layout, tests Navegacion.
+Entregables: he_sp_menu_obtener_por_perfil, menú dinámico en layout, tests Navegacion.
 Despliegue: ejecutar 001_sp_menu.sql en HOTELDB.
 
 Doc ticket: Docs/SGH-1.5-documentacion-ticket.md

@@ -1,4 +1,4 @@
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_AsegurarPeriodo
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_asegurar_periodo
     @SolicitudId int,
     @EmpresaMandanteId int,
     @CampamentoId int,

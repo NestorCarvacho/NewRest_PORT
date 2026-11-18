@@ -5,7 +5,7 @@
     Los nombres de columna salen del modelo EF del legado. Si HOTELDB difiere, se ajusta este script.
 */
 
-CREATE OR ALTER PROCEDURE dbo.sp_Reserva_Buscar
+CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_buscar
     @CampamentoId int,
     @Id int = 0,
     @AreaId int = 0,
@@ -98,7 +98,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Reserva_ListarCatalogo
+CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_listar_catalogo
     @EmpresaMandanteId int,
     @CampamentoId int
 AS
@@ -141,7 +141,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Reserva_Crear
+CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_crear
     @EmpresaMandanteId int,
     @CampamentoId int,
     @AreaId int,
@@ -226,7 +226,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Reserva_EstaEnCampamento
+CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_esta_en_campamento
     @ReservaId int,
     @CampamentoId int
 AS
@@ -241,7 +241,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Reserva_Actualizar
+CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_actualizar
     @ReservaId int,
     @EmpresaMandanteId int,
     @CampamentoId int,
@@ -305,7 +305,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Reserva_RegistrarMovimiento
+CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_registrar_movimiento
     @ReservaId int,
     @Fecha datetime2,
     @UsuarioId int,
@@ -334,6 +334,6 @@ BEGIN
         @ret = @Ret OUTPUT;
 
     IF @Operacion = 'O' AND ISNULL(@Ret, 0) > 0
-        EXEC dbo.sp_Reserva_FinalizarCheckout @ReservaId = @ReservaId, @UsuarioId = @UsuarioId;
+        EXEC dbo.he_sp_reserva_finalizar_checkout @ReservaId = @ReservaId, @UsuarioId = @UsuarioId;
 END
 GO

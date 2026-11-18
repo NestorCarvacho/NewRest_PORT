@@ -146,7 +146,7 @@ public LIB_ControlResultado Crear(DatosAlta datos, ref Reserva? creada)
     oCRB = oDB.DBOpen(300);
     if (oCRB.Resultado)
     {
-        oDB.NameProcedure = "dbo.sp_Reserva_Crear";
+        oDB.NameProcedure = "dbo.he_sp_reserva_crear";
         oCRB = oDB.AddParameter("@EmpresaMandanteId", datos.EmpresaMandanteId);
         oCRB = oDB.AddParameter("@CampamentoId", datos.CampamentoId);
     }
@@ -162,7 +162,7 @@ public LIB_ControlResultado Crear(DatosAlta datos, ref Reserva? creada)
 
 `AD_Global` se crea con `new` dentro del método. No se inyecta. `DBOpen(300)` abre `ConnectionStrings:Hoteldb` (SQL Server, base HOTELDB) y pone timeout 300. `NameProcedure` deja `CommandType.StoredProcedure` y limpia los parámetros. `AddParameter` manda `DBNull` cuando el valor es null. `ExecuteDataReader` ejecuta. El mapeo usa `getDBValueInt`, `getDBValueStr`, `getDBValueDec`, `getDBValueDT` y `getDBValueBol` con el alias de la columna. Esos helpers devuelven null si la columna no está o viene `DBNull`. Un `Leer` privado del mismo repositorio es el único lugar donde se puede concentrar el mapeo de una fila.
 
-El nombre y los parámetros del procedimiento que ya existe se respetan (`dbo.sp_Reserva_Crear`, `@Id` de salida, `@Ret`). Si el procedimiento devuelve un parámetro de salida en lugar de un `SELECT`, se lee con `AddParameter` de dirección output, dentro de la misma secuencia. No se reescribe el procedimiento para imitar el `SELECT` del ejemplo.
+El nombre y los parámetros del procedimiento que ya existe se respetan (`dbo.he_sp_reserva_crear`, `@Id` de salida, `@Ret`). Si el procedimiento devuelve un parámetro de salida en lugar de un `SELECT`, se lee con `AddParameter` de dirección output, dentro de la misma secuencia. No se reescribe el procedimiento para imitar el `SELECT` del ejemplo.
 
 `LIB_ControlResultado` nace con `Resultado = true`. `SetBadResult(descripcion, detalle)` lo pasa a false. `Mensaje` es la descripción, o `descripción. detalle` cuando difieren. Un fallo de conexión o de ejecución queda en ese objeto; el método no lo relanza.
 

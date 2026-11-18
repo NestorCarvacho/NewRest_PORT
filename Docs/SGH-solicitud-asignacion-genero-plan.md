@@ -13,7 +13,7 @@ Al usar asignación automática (y opcionalmente al asignar manual), respetar la
 | 1 | Confirmar fuente de género del pasajero en listado solicitud (`PasajeroSolicitudDto` / `SOL_ObtienePasajeros*`) | SQL + consulta |
 | 2 | Exponer `genero` en JSON `pasajeros` del Mid | Dapper / DTO |
 | 3 | Regla en dominio: `ReglasSolicitudHabitacion` (o ampliar `ReglasHabitacion`) — tabla de compatibilidad sexo habitación vs. género pasajero | `SGH.Domain` |
-| 4 | Validación servidor al `asignar` (manual): fallar antes de `SOL_Asigna*` si no compatible | `sp_Solicitud_AsignarHabitacion` o capa C# |
+| 4 | Validación servidor al `asignar` (manual): fallar antes de `SOL_Asigna*` si no compatible | `he_sp_solicitud_asignar_habitacion` o capa C# |
 | 5 | **Asignar automático** en `solicitud.js`: filtrar habitaciones donde `sexo` sea compatible; omitir o avisar pasajeros sin match | UI + mismo contrato que fase 4 |
 | 6 | Pruebas unitarias de reglas + test de Mid con habitación de sexo exclusivo | `SGH.Tests` |
 

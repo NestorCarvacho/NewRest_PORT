@@ -20,7 +20,7 @@ public sealed class ConsultaMenuPerfil : IConsultaMenuPerfil
         using var conexion = _fabrica.Crear();
         var filas = await conexion.QueryAsync<MenuPerfilFila>(
             new CommandDefinition(
-                "sp_Menu_ObtenerPorPerfil",
+                "he_sp_menu_obtener_por_perfil",
                 new { PerfilId = perfilId },
                 commandType: CommandType.StoredProcedure,
                 cancellationToken: cancellationToken));

@@ -13,7 +13,7 @@
 */
 
 /* Envoltorio del legado USU_ValidaEstadoUsuario (@rut, @ret OUTPUT). */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ValidarEstado
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_validar_estado
     @Rut varchar(20)
 AS
 BEGIN
@@ -29,7 +29,7 @@ GO
    Debe devolver, con estos nombres o equivalentes que Dapper ya mapea:
    Id, PerfilId, PerfilNombre, CampamentoId, CampamentoNombre,
    EmpresaMandanteId, EmpresaMandanteNombre, CampamentoPerfil. */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ObtenerCampamentosYPerfiles
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_obtener_campamentos_y_perfiles
     @Rut varchar(20)
 AS
 BEGIN
@@ -44,13 +44,13 @@ GO
    Md5Retirado es bit: 0 sigue en MD5, 1 ya no se usa MD5 para esa fila.
    @LoginInterno llega desde la web en 0. Confirmar si USU_ObtieneUsuarioAuth
    cambia de fila cuando ese valor no es 0. USU_ObtieneUsuarioByRutAndPass no lo recibe. */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ObtenerParaLogin
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_obtener_para_login
     @Rut varchar(20),
     @LoginInterno int = 0
 AS
 BEGIN
     SET NOCOUNT ON;
-    RAISERROR('BORRADOR: sp_Usuario_ObtenerParaLogin sin SELECT hasta contrastar la columna de clave. Ver Docs/login-pendiente-revision-base-de-datos.md', 16, 1);
+    RAISERROR('BORRADOR: he_sp_usuario_obtener_para_login sin SELECT hasta contrastar la columna de clave. Ver Docs/login-pendiente-revision-base-de-datos.md', 16, 1);
     RETURN;
 
     /*
@@ -78,7 +78,7 @@ GO
    Códigos: 0 actualizada, -3 reutilizada, cualquier otro se informa como credencial inválida.
    @PasswordHash es BCrypt (cerca de 60 caracteres). @HuellaMd5 es NULL cuando Md5Retirado ya es 1.
    Si viene informada, solo sirve para comparar histórico legado. El procedimiento deja Md5Retirado = 1. */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ActualizarPassword
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_actualizar_password
     @Rut varchar(20),
     @PasswordHash varchar(200),
     @HuellaMd5 varchar(32) = NULL,
@@ -87,13 +87,13 @@ AS
 BEGIN
     SET NOCOUNT ON;
     SET @Ret = -1;
-    RAISERROR('BORRADOR: sp_Usuario_ActualizarPassword no persiste hasta contrastar histórico y largo de columna. Ver Docs/login-pendiente-revision-base-de-datos.md', 16, 1);
+    RAISERROR('BORRADOR: he_sp_usuario_actualizar_password no persiste hasta contrastar histórico y largo de columna. Ver Docs/login-pendiente-revision-base-de-datos.md', 16, 1);
 END
 GO
 
 /* BORRADOR. Reemplaza MD5 por BCrypt de la misma clave y deja Md5Retirado = 1.
    No pasa por el control de reutilización. */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ReemplazarHash
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_reemplazar_hash
     @Rut varchar(20),
     @PasswordHash varchar(200),
     @Ret int OUTPUT
@@ -101,19 +101,19 @@ AS
 BEGIN
     SET NOCOUNT ON;
     SET @Ret = -1;
-    RAISERROR('BORRADOR: sp_Usuario_ReemplazarHash no persiste hasta contrastar la columna de clave. Ver Docs/login-pendiente-revision-base-de-datos.md', 16, 1);
+    RAISERROR('BORRADOR: he_sp_usuario_reemplazar_hash no persiste hasta contrastar la columna de clave. Ver Docs/login-pendiente-revision-base-de-datos.md', 16, 1);
 END
 GO
 
 /* BORRADOR. La clave ya es BCrypt y solo falta apagar MD5: Md5Retirado = 1, sin reescribir el hash. */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_RetirarMd5
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_retirar_md5
     @Rut varchar(20),
     @Ret int OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
     SET @Ret = -1;
-    RAISERROR('BORRADOR: sp_Usuario_RetirarMd5 no persiste hasta crear la columna Md5Retirado. Ver Docs/login-pendiente-revision-base-de-datos.md', 16, 1);
+    RAISERROR('BORRADOR: he_sp_usuario_retirar_md5 no persiste hasta crear la columna Md5Retirado. Ver Docs/login-pendiente-revision-base-de-datos.md', 16, 1);
 END
 GO
 
@@ -126,7 +126,7 @@ GO
            CONSTRAINT DF_Usuarios_IntentosFallidos DEFAULT (0),
        BloqueadaHasta datetime NULL;
 */
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_RegistrarIntentoFallido
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_registrar_intento_fallido
     @Rut varchar(20),
     @Intentos int OUTPUT,
     @Bloqueada bit OUTPUT
@@ -161,7 +161,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.sp_Usuario_ReiniciarIntentos
+CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_reiniciar_intentos
     @Rut varchar(20)
 AS
 BEGIN

@@ -1,4 +1,4 @@
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_GuardarPasajero
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_guardar_pasajero
     @SolicitudId int,
     @PasajeroId int,
     @UsuarioPasajeroId int,

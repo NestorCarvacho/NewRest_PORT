@@ -5,7 +5,7 @@
     Agrupa: depuración Mid (columnas extra) + listados con período y TOP 5000.
     Instalación en frío: basta con 001_sp_solicitud.sql (ya incluye este contenido).
 */
-CREATE OR ALTER PROCEDURE dbo.sp_Solicitud_Buscar
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_buscar
     @EmpresaMandanteId int,
     @CampamentoId int,
     @Desde date = NULL,

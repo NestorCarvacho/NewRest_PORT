@@ -18,7 +18,7 @@ Este documento complementa el inventario de tablas y las muestras de menú para 
 Proporcionar a desarrollo, QA y operaciones un marco **único y no ambiguo** para:
 
 - Elegir cuentas de prueba con perfil administración (`PerfilId = 1`).
-- Contrastar menú esperado (`MenusPerfil` / `sp_Menu_ObtenerPorPerfil`) con usuarios que realmente pueden seleccionar ese perfil al iniciar sesión.
+- Contrastar menú esperado (`MenusPerfil` / `he_sp_menu_obtener_por_perfil`) con usuarios que realmente pueden seleccionar ese perfil al iniciar sesión.
 - Evitar errores habituales al filtrar por `id` de asignación en lugar de por `perfilId`.
 
 ## Resumen de directrices definidas
@@ -26,7 +26,7 @@ Proporcionar a desarrollo, QA y operaciones un marco **único y no ambiguo** par
 - **Modelo legado:** `Perfiles` (catálogo) ← `PerfilesUsuario` (usuario × campamento × perfil) → `Usuarios`; menú vía `MenusPerfil` × `Menus`. Diagrama y columnas en `Docs/datos/diccionario-hoteldb-perfiles-menus.md`.
 - **Consulta canónica (login):** listar filas activas en `PerfilesUsuario` con `perfilId = 1`, uniendo nombre de perfil y datos de usuario.
 - **Consulta complementaria:** usuarios cuyo **perfil por defecto** en `Usuarios` es `1` (no sustituye a las asignaciones del combo).
-- **Menú del perfil:** `EXEC dbo.sp_Menu_ObtenerPorPerfil @PerfilId = 1` (script en `SGH.Infrastructure/Navegacion/Persistence/001_sp_menu.sql`) o equivalente con join directo a `Menus` / `MenusPerfil`.
+- **Menú del perfil:** `EXEC dbo.he_sp_menu_obtener_por_perfil @PerfilId = 1` (script en `SGH.Infrastructure/Navegacion/Persistence/001_sp_menu.sql`) o equivalente con join directo a `Menus` / `MenusPerfil`.
 - **Convención de nombres:** en documentación y tickets usar **`PerfilId`** para el catálogo `dbo.Perfiles.Id`; usar **`AsignacionId`** o `PerfilesUsuario.id` solo para la fila del selector de campamento–perfil.
 
 ## Resultado / impacto esperado
@@ -91,7 +91,7 @@ WHERE id = 1;
 ### A4. Ítems de menú permitidos para el perfil 1
 
 ```sql
-EXEC dbo.sp_Menu_ObtenerPorPerfil @PerfilId = 1;
+EXEC dbo.he_sp_menu_obtener_por_perfil @PerfilId = 1;
 ```
 
 Equivalente sin procedimiento:
@@ -108,4 +108,4 @@ ORDER BY m.Ubicacion, m.Orden, m.Id;
 
 ## Anexo B — Relación con procedimientos de login
 
-El segundo paso de ingreso consume asignaciones expuestas por `dbo.sp_Usuario_ObtenerCampamentosYPerfiles` (envoltorio de `USU_ObtieneCampamentosYPerfilesUsuario`). Los campos `Id`, `PerfilId` y `UsuarioId` de ese resultado deben alinearse con las columnas documentadas en A1. Ver `SGH.Infrastructure/Cuenta/Persistence/001_sp_login.sql` y `Docs/login-pendiente-revision-base-de-datos.md`.
+El segundo paso de ingreso consume asignaciones expuestas por `dbo.he_sp_usuario_obtener_campamentos_y_perfiles` (envoltorio de `USU_ObtieneCampamentosYPerfilesUsuario`). Los campos `Id`, `PerfilId` y `UsuarioId` de ese resultado deben alinearse con las columnas documentadas en A1. Ver `SGH.Infrastructure/Cuenta/Persistence/001_sp_login.sql` y `Docs/login-pendiente-revision-base-de-datos.md`.
