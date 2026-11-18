@@ -62,7 +62,7 @@ export function enlazarTooltipsCelda(contenedor) {
             if (!texto) return;
             capa.textContent = texto;
             capa.hidden = false;
-            posicionarTooltip(celda, capa);
+            requestAnimationFrame(function () { posicionarTooltip(celda, capa); });
         });
         celda.addEventListener("mousemove", function () {
             if (!capa.hidden) posicionarTooltip(celda, capa);

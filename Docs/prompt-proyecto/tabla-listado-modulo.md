@@ -10,7 +10,7 @@ Cada pantalla `/Modulo/Datos` define en **`.cshtml`**:
 
 El **JavaScript no construye la página**: enlaza `data-accion`, llena catálogos en `<select>`, POST al Mid y pinta filas con DataTables.
 
-Los formularios de **alta/edición** (panel lateral de una fila) siguen generándose en JS por ahora; pueden migrarse a partials como en `Habitacion/_ModuloHabitacionBanos.cshtml`.
+Los formularios de **alta/edición** (panel lateral de una fila) siguen generándose en JS por ahora; el canon de mutaciones sigue siendo POST JSON al Mid.
 
 ## Piezas por módulo
 
@@ -38,6 +38,16 @@ Los formularios de **alta/edición** (panel lateral de una fila) siguen generán
 2. `escritorio.js` → `abrir(id)` mueve/adopta el panel, `inicializar` DataTables sobre `table.modulo-tabla`.
 3. `cargar(id)` → Mid `listar`/`buscar` → `pintar` filas.
 4. Filtros → se abre el `<form>` ya renderizado en el panel lateral (no se arma en JS).
+
+## Rendimiento del escritorio
+
+| Tema | Comportamiento |
+|------|----------------|
+| Censo por período | Una petición `listarrango` / `miscensosrango` (Mid itera días en servidor; ya no N POST desde el navegador). |
+| Listados grandes | Mid devuelve `truncado` y `maxFilas` (5000); el JS avisa y acota la tabla. |
+| Catálogos | Caché en memoria ~5 min por módulo (`catalogos.js`). |
+| Cambio de solapa / nueva carga | `AbortController` cancela el `fetch` anterior; solapas del Index se mantienen. |
+| Red | Hasta 2 reintentos en fallo de red (`api.js`). |
 
 ## Agregar un módulo nuevo
 

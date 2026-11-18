@@ -2,6 +2,8 @@ using System.Text.Json;
 using SGH.Application.Censo.DTOs;
 using SGH.Application.Censo.Interfaces;
 using SGH.Application.Sesion;
+using SGH.Domain.Censo;
+using SGH.Domain.Consulta;
 
 namespace SGH.Application.Mid;
 
@@ -16,7 +18,9 @@ public sealed class MidCenso(
     public static readonly IReadOnlyList<AccionApi> Opciones =
     [
         Accion("listar", "Listar", "sp_Censo_Buscar", "Devuelve el censo del campamento."),
+        Accion("listarrango", "Listar rango", "sp_Censo_Buscar", "Devuelve el censo para cada día del período en una sola petición."),
         Accion("miscensos", "Mis censos", "sp_Censo_BuscarPorUsuario", "Devuelve los censos del usuario."),
+        Accion("miscensosrango", "Mis censos rango", "sp_Censo_BuscarPorUsuario", "Mis censos por período en una sola petición."),
         Accion("catalogo", "Catálogo", "sp_Censo_ListarCatalogo", "Devuelve módulos, pisos y habitaciones."),
         Accion("guardar", "Guardar", "sp_Censo_Guardar", "Guarda las filas del censo."),
         Accion("guardarqr", "Guardar QR", "sp_Censo_Guardar", "Guarda el censo leído desde un código QR.")
@@ -31,7 +35,9 @@ public sealed class MidCenso(
         return filtro.Opcion switch
         {
             "listar" => await ListarAsync(filtro, sesion, cancellationToken),
+            "listarrango" => await ListarRangoAsync(filtro, sesion, cancellationToken),
             "miscensos" => await MiosAsync(filtro, sesion, cancellationToken),
+            "miscensosrango" => await MiosRangoAsync(filtro, sesion, cancellationToken),
             "catalogo" => await CatalogoAsync(sesion, cancellationToken),
             "guardar" => await GuardarAsync(filtro, sesion, cancellationToken),
             "guardarqr" => await GuardarQrAsync(filtro, sesion, cancellationToken),
@@ -56,6 +62,91 @@ public sealed class MidCenso(
             ResultadoBusquedaCenso.Rechazada rechazada => EjecucionMid.Fallo(400, rechazada.Mensaje),
             _ => EjecucionMid.Fallo(400, "No se pudo consultar el censo.")
         };
+    }
+
+    private async Task<EjecucionMid> ListarRangoAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var desde = LecturaPeticion.FechaOpcional(filtro, "desde");
+        var hasta = LecturaPeticion.FechaOpcional(filtro, "hasta");
+        var rango = ReglasConsultaListado.NormalizarRango(desde, hasta);
+        var turno = LecturaPeticion.Texto(filtro, "turno") ?? ReglasCenso.TurnoDia;
+
+        var mensajeTurno = ReglasCenso.ValidarBusqueda(rango.Desde, turno);
+        if (mensajeTurno is not null)
+            return EjecucionMid.Fallo(400, mensajeTurno);
+
+        var moduloId = LecturaPeticion.Entero(filtro, "moduloId");
+        if (moduloId == 0)
+            moduloId = LecturaPeticion.Entero(filtro, "modulo");
+        var pisoId = LecturaPeticion.Entero(filtro, "pisoId");
+        if (pisoId == 0)
+            pisoId = LecturaPeticion.Entero(filtro, "piso");
+        var habitacionId = LecturaPeticion.Entero(filtro, "habitacionId");
+        if (habitacionId == 0)
+            habitacionId = LecturaPeticion.Entero(filtro, "habitacion");
+
+        var acumulado = new List<CensoFilaDto>();
+        for (var dia = rango.Desde.Date; dia <= rango.Hasta.Date; dia = dia.AddDays(1))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var resultado = await buscar.EjecutarAsync(new SolicitudBuscarCensos(
+                sesion.EmpresaMandanteId,
+                sesion.CampamentoId,
+                moduloId,
+                pisoId,
+                habitacionId,
+                dia,
+                turno), cancellationToken);
+
+            switch (resultado)
+            {
+                case ResultadoBusquedaCenso.Lista lista:
+                    acumulado.AddRange(lista.Filas);
+                    break;
+                case ResultadoBusquedaCenso.Rechazada rechazada:
+                    return EjecucionMid.Fallo(400, rechazada.Mensaje);
+                default:
+                    return EjecucionMid.Fallo(400, "No se pudo consultar el censo.");
+            }
+
+            if (acumulado.Count > ReglasConsultaListado.MaxFilas)
+                break;
+        }
+
+        var (filas, truncado) = ReglasConsultaListado.AplicarTopeFilas(acumulado);
+        return EjecucionMid.Ok(new { filas, truncado, maxFilas = ReglasConsultaListado.MaxFilas });
+    }
+
+    private async Task<EjecucionMid> MiosRangoAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var desde = LecturaPeticion.FechaOpcional(filtro, "desde");
+        var hasta = LecturaPeticion.FechaOpcional(filtro, "hasta");
+        var rango = ReglasConsultaListado.NormalizarRango(desde, hasta);
+
+        var acumulado = new List<CensoUsuarioFilaDto>();
+        for (var dia = rango.Desde.Date; dia <= rango.Hasta.Date; dia = dia.AddDays(1))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var resultado = await buscarMios.EjecutarAsync(new SolicitudBuscarMisCensos(
+                sesion.EmpresaMandanteId, sesion.CampamentoId, dia, sesion.UsuarioId), cancellationToken);
+
+            switch (resultado)
+            {
+                case ResultadoBusquedaMisCensos.Lista lista:
+                    acumulado.AddRange(lista.Filas);
+                    break;
+                case ResultadoBusquedaMisCensos.Rechazada rechazada:
+                    return EjecucionMid.Fallo(400, rechazada.Mensaje);
+                default:
+                    return EjecucionMid.Fallo(400, "No se pudieron consultar mis censos.");
+            }
+
+            if (acumulado.Count > ReglasConsultaListado.MaxFilas)
+                break;
+        }
+
+        var (filas, truncado) = ReglasConsultaListado.AplicarTopeFilas(acumulado);
+        return EjecucionMid.Ok(new { filas, truncado, maxFilas = ReglasConsultaListado.MaxFilas });
     }
 
     private async Task<EjecucionMid> MiosAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)

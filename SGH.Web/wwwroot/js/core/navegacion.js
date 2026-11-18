@@ -47,6 +47,7 @@ export function crearNavegacion(dependencias) {
         });
         paneles.querySelectorAll(".modulo").forEach(function (nodo) {
             var visible = nodo.dataset.id === id;
+            if (!visible && dependencias.cancelarCargaNodo) dependencias.cancelarCargaNodo(nodo);
             nodo.hidden = !visible;
             if (!visible) return;
             if (!window.DataTable) {
@@ -81,6 +82,7 @@ export function crearNavegacion(dependencias) {
         orden.splice(indice, 1);
         solapas.querySelector('[data-id="' + id + '"]').remove();
         var nodo = paneles.querySelector('[data-id="' + id + '"]');
+        if (dependencias.cancelarCargaNodo) dependencias.cancelarCargaNodo(nodo);
         dependencias.mostrarEstado(nodo, "");
         dependencias.destruirTabla(nodo);
         nodo.remove();

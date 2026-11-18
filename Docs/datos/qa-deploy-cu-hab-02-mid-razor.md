@@ -80,6 +80,6 @@ Si la base ya corre con `001_*` viejos, el repo documenta parches **A–D** en `
 
 1. Escritorio: solapa **Tipos de cama** — listar, crear, inactivar.
 2. Escritorio: habitación → **Camas** — listar, guardar inventario (tipo, colchón, ropa).
-3. Razor (opcional): formulario con `method="post"` en `_ModuloHabitacionBanos.cshtml` u otra página módulo — misma `opcion` que el JSON; ver `TempData` en `_AvisosModuloPost`.
+3. Razor (opcional): formulario con `method="post"` en `*/Datos.cshtml` — misma `opcion` que el JSON; ver `TempData` en `_AvisosModuloPost` y `post-modulo-razor.md`.
 
 Sin los scripts **005** y **006**, las opciones Mid de TipoCama/Cama fallan al ejecutar procedimientos o por columnas faltantes.

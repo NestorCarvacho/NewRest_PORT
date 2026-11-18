@@ -25,8 +25,9 @@ function opcionesTipoSexoBano() {
 }
 
 export function crearHabitacion(dependencias) {
-    function mid(opcion, datos) {
-        return dependencias.enviar(rutaMid, Object.assign({ opcion: opcion }, datos || {}));
+    function mid(opcion, datos, enviarMid) {
+        var enviar = enviarMid || dependencias.enviar;
+        return enviar(rutaMid, Object.assign({ opcion: opcion }, datos || {}));
     }
 
     function obtenerCatalogo() {
@@ -93,31 +94,31 @@ export function crearHabitacion(dependencias) {
         return { soloActivas: 0 };
     }
 
-    function buscarHabitaciones(filtro) {
+    function buscarHabitaciones(filtro, enviarMid) {
         return mid("listar", {
             pabellonId: dependencias.numero(filtro.pabellonId) || null,
             moduloId: dependencias.numero(filtro.moduloId) || null,
             estado: filtro.estado || null,
             soloActivas: dependencias.numero(filtro.soloActivas) ?? 0
-        });
+        }, enviarMid);
     }
 
-    function buscarBanos(filtro) {
+    function buscarBanos(filtro, enviarMid) {
         return mid("listarbanos", {
             soloActivos: dependencias.numero(filtro.soloActivos) ?? 0
-        });
+        }, enviarMid);
     }
 
-    function buscarTiposCama(filtro) {
+    function buscarTiposCama(filtro, enviarMid) {
         return mid("listartiposcama", {
             soloActivos: dependencias.numero(filtro.soloActivos) ?? 0
-        });
+        }, enviarMid);
     }
 
-    function buscar(filtro, modo) {
-        if (modo === "banos") return buscarBanos(filtro);
-        if (modo === "tiposcama") return buscarTiposCama(filtro);
-        return buscarHabitaciones(filtro);
+    function buscar(filtro, modo, enviarMid) {
+        if (modo === "banos") return buscarBanos(filtro, enviarMid);
+        if (modo === "tiposcama") return buscarTiposCama(filtro, enviarMid);
+        return buscarHabitaciones(filtro, enviarMid);
     }
 
     function fechaCampo(valor) {

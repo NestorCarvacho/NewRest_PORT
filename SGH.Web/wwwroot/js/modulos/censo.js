@@ -1,39 +1,46 @@
 export function crearCenso(dependencias) {
-    var maxDiasRango = 366;
-
     function combinarFilas(respuestas) {
         var filas = [];
         respuestas.forEach(function (respuesta) { filas.push.apply(filas, respuesta.filas || []); });
         return filas;
     }
 
-    function fechasDelFiltro(filtro) {
-        var normalizado = dependencias.normalizarFiltroPeriodo
+    function normalizarFiltroRango(filtro) {
+        return dependencias.normalizarFiltroPeriodo
             ? dependencias.normalizarFiltroPeriodo(filtro)
             : filtro;
-        return dependencias.fechasEntre(normalizado.desde, normalizado.hasta);
     }
 
-    function buscarRango(filtro) {
-        var fechas = fechasDelFiltro(filtro);
-        if (!fechas.length) return Promise.reject(new Error("Indique un rango de fechas válido."));
-        if (fechas.length > maxDiasRango) {
-            return Promise.reject(new Error("El rango no puede superar " + maxDiasRango + " días."));
-        }
-        return Promise.all(fechas.map(function (dia) {
-            return buscar(Object.assign({}, filtro, { fecha: dia }));
-        })).then(combinarFilas);
+    function payloadRangoCenso(filtro) {
+        var payload = normalizarFiltroRango(filtro);
+        return {
+            opcion: "listarrango",
+            moduloId: payload.modulo,
+            pisoId: payload.piso,
+            habitacionId: payload.habitacion,
+            desde: payload.desde,
+            hasta: payload.hasta,
+            turno: payload.turno || "D"
+        };
     }
 
-    function buscarMiosRango(filtro) {
-        var fechas = fechasDelFiltro(filtro);
-        if (!fechas.length) return Promise.reject(new Error("Indique un rango de fechas válido."));
-        if (fechas.length > maxDiasRango) {
-            return Promise.reject(new Error("El rango no puede superar " + maxDiasRango + " días."));
-        }
-        return Promise.all(fechas.map(function (dia) {
-            return buscarMios(Object.assign({}, filtro, { fecha: dia }));
-        })).then(combinarFilas);
+    function payloadRangoMisCensos(filtro) {
+        var payload = normalizarFiltroRango(filtro);
+        return {
+            opcion: "miscensosrango",
+            desde: payload.desde,
+            hasta: payload.hasta
+        };
+    }
+
+    function buscarRango(filtro, enviarMid) {
+        var enviar = enviarMid || dependencias.enviar;
+        return enviar("/Censo/Mid/MidCenso.cs", payloadRangoCenso(filtro));
+    }
+
+    function buscarMiosRango(filtro, enviarMid) {
+        var enviar = enviarMid || dependencias.enviar;
+        return enviar("/Censo/Mid/MidCenso.cs", payloadRangoMisCensos(filtro));
     }
 
     function buscar(filtro) {
@@ -159,8 +166,6 @@ export function crearCenso(dependencias) {
     }
 
     function guardar(nodo) {
-        // Validar que las camas ocupadas no superen el número de camas y que no sean menor a 0
-        // pero pueden ser = 0
         for (var i = 0; i < (nodo._filas || []).length; i++) {
             var fila = nodo._filas[i];
             if (!validarCamasOcupadas(fila) || fila.camasOcupadas < 0) {

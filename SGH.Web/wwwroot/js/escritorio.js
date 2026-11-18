@@ -23,6 +23,7 @@ import { crearEntornoEscritorio } from "./core/fabrica-escritorio.js";
         inicializarTabla: entorno.tablas.inicializar,
         destruirTabla: entorno.tablas.destruir,
         cargar: entorno.cargar,
+        cancelarCargaNodo: entorno.cancelarCargaNodo,
         mostrarEstado: entorno.mostrarEstado
     });
 
