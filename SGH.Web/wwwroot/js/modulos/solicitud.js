@@ -158,7 +158,7 @@ export function crearSolicitud(d) {
             mid(edicion ? "editar" : "crear", cuerpo)
                 .then(function (resultado) {
                     d.mostrarAviso("Solicitud guardada N° " + resultado.id + ".", "success");
-                    d.cargar("solicitud");
+                    d.cargar("solicitud", { bloquearPantalla: false });
                     abrirDetalle(resultado.id);
                 }).catch(function (ex) { errorEn(ex); }).finally(function () { guardar.disabled = false; });
         });
@@ -209,7 +209,10 @@ export function crearSolicitud(d) {
             accionesSolicitud.append(boton("Editar solicitud", function () { abrirFormulario(detalle); }));
             var anular = boton("Anular solicitud", function () {
                 if (!window.confirm("¿Anular esta solicitud?")) return;
-                ejecutar(anular, "anular", { id: detalle.id }, function () { d.cargar("solicitud"); abrirDetalle(detalle.id); });
+                ejecutar(anular, "anular", { id: detalle.id }, function () {
+                    d.cargar("solicitud", { bloquearPantalla: false });
+                    abrirDetalle(detalle.id);
+                });
             });
             accionesSolicitud.append(anular);
         }
@@ -251,7 +254,7 @@ export function crearSolicitud(d) {
                 ejecutar(generar, "generar", { id: detalle.id }, function (resultado) {
                     d.mostrarAviso("Reservas generadas. Primera reserva N° " + resultado.primeraReservaId + ".", "success");
                     if (resultado.advertenciaCorreo) d.mostrarAviso(resultado.advertenciaCorreo, "error");
-                    d.cargar("solicitud");
+                    d.cargar("solicitud", { bloquearPantalla: false });
                     abrirDetalle(detalle.id);
                 });
             });

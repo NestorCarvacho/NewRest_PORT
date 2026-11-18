@@ -99,7 +99,7 @@ export function crearReserva(dependencias) {
                 tieneAgua: false
             }).then(function () {
                 var activo = document.querySelector(".modulo:not([hidden])");
-                return activo ? dependencias.cargar(activo.dataset.id) : null;
+                return activo ? dependencias.cargar(activo.dataset.id, { bloquearPantalla: false }) : null;
             });
         });
         dependencias.abrirPanel("Editar reserva " + fila.id, form);
@@ -115,7 +115,7 @@ export function crearReserva(dependencias) {
             fechaSalida: datos.salida,
             observacion: datos.observaciones
         }).then(function (resultado) {
-            return dependencias.cargar(id).then(function () {
+            return dependencias.cargar(id, { bloquearPantalla: false }).then(function () {
                 dependencias.mostrarAviso("Reserva creada N° " + resultado.id + ".", "success");
             });
         });

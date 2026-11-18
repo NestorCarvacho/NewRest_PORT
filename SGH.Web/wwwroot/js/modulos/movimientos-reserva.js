@@ -28,7 +28,7 @@ export function crearMovimientosReserva(dependencias) {
                     operacion: operacion
                 }).then(function () {
                     var activo = document.querySelector(".modulo:not([hidden])");
-                    return (activo ? dependencias.cargar(activo.dataset.id) : Promise.resolve()).then(function () {
+                    return (activo ? dependencias.cargar(activo.dataset.id, { bloquearPantalla: false }) : Promise.resolve()).then(function () {
                         dependencias.mostrarAviso(operacion === "I"
                             ? "Check In registrado correctamente."
                             : "Check Out registrado correctamente.", "success");

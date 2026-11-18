@@ -184,7 +184,7 @@ export function crearCenso(dependencias) {
         });
         dependencias.mostrarEstado(nodo, "");
         return dependencias.enviar("/Censo/Mid/MidCenso.cs", { opcion: "guardar", fecha: filtro.fecha, filas: filas })
-            .then(function () { return dependencias.cargar("censo"); })
+            .then(function () { return dependencias.cargar("censo", { bloquearPantalla: false }); })
             .catch(function (error) { dependencias.mostrarEstado(nodo, error.message); });
     }
 

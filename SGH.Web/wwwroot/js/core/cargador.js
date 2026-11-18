@@ -10,6 +10,7 @@ export function crearCargador(dependencias) {
     nodo._cargaGeneracion = (nodo._cargaGeneracion || 0) + 1;
     nodo._cargando = false;
     nodo._cargaPendiente = null;
+    dependencias.mostrarEstado(nodo, "");
   }
 
   function avisarTruncado(nodo, filas, resultado) {
@@ -26,7 +27,8 @@ export function crearCargador(dependencias) {
     }
   }
 
-  function cargar(id) {
+  function cargar(id, opciones) {
+    opciones = opciones || {};
     var nodo = dependencias.obtenerNodo(id);
     var modulo = dependencias.obtenerModulo(id);
     if (!nodo || !modulo) return Promise.resolve();
@@ -36,8 +38,9 @@ export function crearCargador(dependencias) {
     }
 
     var filtro = nodo._filtro || {};
-    dependencias.mostrarEstado(nodo, "Cargando datos...");
-    if (dependencias.bloquearPantalla) {
+    var bloquearPantalla = opciones.bloquearPantalla !== false && !!dependencias.bloquearPantalla;
+    dependencias.mostrarEstado(nodo, bloquearPantalla ? "Cargando datos..." : "");
+    if (bloquearPantalla) {
       dependencias.bloquearPantalla("Cargando datos, espere…");
     }
 
@@ -67,11 +70,13 @@ export function crearCargador(dependencias) {
       dependencias.pintar(nodo, [], modulo.modo);
       dependencias.mostrarEstado(nodo, error.message);
     }).finally(function () {
+      if (bloquearPantalla && dependencias.desbloquearPantalla) {
+        dependencias.desbloquearPantalla();
+      }
       if (generacion === nodo._cargaGeneracion) {
         nodo._cargando = false;
         nodo._cargaPendiente = null;
         if (nodo._abortCarga === controlador) nodo._abortCarga = null;
-        if (dependencias.desbloquearPantalla) dependencias.desbloquearPantalla();
       }
     });
   }
