@@ -1,3 +1,4 @@
+using SGH.Application.Habitacion.DTOs;
 using SGH.Domain.Habitacion.Interfaces;
 
 namespace SGH.Application.Habitacion.Interfaces;
@@ -16,4 +17,6 @@ public interface IGestionHabitaciones
     Task<ResultadoGuardarCama> GuardarCamaAsync(DatosGuardarCama datos, int campamentoId, CancellationToken cancellationToken);
     Task<IReadOnlyList<TipoCamaListado>> ListarTiposCamaAsync(int campamentoId, int soloActivos, CancellationToken cancellationToken);
     Task<ResultadoGuardarTipoCama> GuardarTipoCamaAsync(DatosGuardarTipoCama datos, int campamentoId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<ResultadoCargaCamaDto>> CargarCamasAsync(
+        int campamentoId, int usuarioId, IReadOnlyList<FilaCargaCamaDto> filas, CancellationToken cancellationToken);
 }

@@ -74,7 +74,8 @@ export function crearPanelModulo(dependencias) {
             "guardar-censo": function () { dependencias.censo.guardar(nodo); },
             "nueva-habitacion": function () { dependencias.habitacion.abrirNuevaHabitacion(); },
             "nuevo-bano": function () { dependencias.habitacion.abrirNuevoBano(); },
-            "nuevo-tipo-cama": function () { dependencias.habitacion.abrirNuevoTipoCama(); }
+            "nuevo-tipo-cama": function () { dependencias.habitacion.abrirNuevoTipoCama(); },
+            "cargar-camas": function () { dependencias.habitacion.abrirImportacionCamas(); }
         };
         Object.keys(acciones).forEach(function (clave) {
             var boton = barra.querySelector("[data-accion='" + clave + "']");

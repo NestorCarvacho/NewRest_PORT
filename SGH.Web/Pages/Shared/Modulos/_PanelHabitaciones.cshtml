@@ -8,8 +8,22 @@
         <partial name="Modulos/_ExportarDesplegable" />
         <button type="button" class="boton-secundario" data-accion="filtros">Filtros</button>
         <button type="button" class="boton-primario" data-accion="nueva-habitacion">Nueva habitación</button>
+        <button type="button" class="boton-secundario" data-accion="cargar-camas">Carga masiva camas</button>
     </div>
     <partial name="_TablaModulo" />
+    <form class="formulario habitacion-importacion" data-formulario="importacion-camas" hidden aria-hidden="true">
+        <p>La importación crea camas en las habitaciones del campamento de su sesión. Revise la hoja «TiposCama» de la plantilla.</p>
+        <p><a href="/Habitacion/PlantillaCamas" class="enlace-plantilla">Descargar plantilla</a></p>
+        <label class="campo">
+            <span>Planilla de camas (.xlsx)</span>
+            <input type="file" name="archivo" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required />
+        </label>
+        <div class="importacion-resultado" aria-live="polite"></div>
+        <div class="formulario-pie">
+            <button type="button" class="boton-secundario" data-accion="cerrar-panel">Cancelar</button>
+            <button type="submit" class="boton-primario">Importar</button>
+        </div>
+    </form>
     <form class="formulario formulario-filtros-modulo" data-modulo="habitaciones" hidden aria-hidden="true">
         <h3 class="formulario-titulo">Criterios</h3>
         <div class="formulario-grilla">
