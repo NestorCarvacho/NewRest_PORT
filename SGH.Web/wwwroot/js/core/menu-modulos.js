@@ -32,16 +32,24 @@ export function inicializarMenuModulos(dependencias) {
     }
 
     function cerrarMenus() {
-        document.querySelectorAll(".menu-item.abierto").forEach(cerrarMenu);
+        cerrarMenusModulo();
         var menuUsuario = document.querySelector(".usuario-menu");
         var usuario = document.querySelector(".usuario-boton");
         if (menuUsuario) menuUsuario.hidden = true;
         if (usuario) usuario.setAttribute("aria-expanded", "false");
+    }
+
+    function cerrarMenusModulo() {
+        document.querySelectorAll(".menu-item.abierto").forEach(cerrarMenu);
         if (resultados) resultados.hidden = true;
     }
 
     function abrirMenu(item) {
-        cerrarMenus();
+        cerrarMenusModulo();
+        var menuUsuario = document.querySelector(".usuario-menu");
+        var usuario = document.querySelector(".usuario-boton");
+        if (menuUsuario) menuUsuario.hidden = true;
+        if (usuario) usuario.setAttribute("aria-expanded", "false");
         item.classList.add("abierto");
         item.querySelector(".menu-boton").setAttribute("aria-expanded", "true");
     }
@@ -65,6 +73,8 @@ export function inicializarMenuModulos(dependencias) {
     document.addEventListener("click", function (evento) {
         if (!esMenuCompacto()) return;
         if (evento.target.closest(".menu-item")) return;
+        if (evento.target.closest(".usuario")) return;
+        if (evento.target.closest(".menu-desplegable")) return;
         cerrarMenus();
     });
 
