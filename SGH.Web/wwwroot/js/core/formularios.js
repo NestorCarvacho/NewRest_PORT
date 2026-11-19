@@ -152,6 +152,12 @@ export function crearFormularios(dependencias) {
             return window.SGHI18n ? window.SGHI18n.traducir(texto) : texto;
         }
 
+        window.jQuery(form).find("select.selector-buscable").each(function () {
+            var elemento = window.jQuery(this);
+            if (elemento.hasClass("select2-hidden-accessible")) {
+                elemento.select2("destroy");
+            }
+        });
         window.jQuery(form).find("select.selector-buscable").select2({
             width: "100%",
             minimumResultsForSearch: 0,

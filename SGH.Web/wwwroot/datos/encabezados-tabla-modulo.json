@@ -4,6 +4,6 @@
   "tiposcama": ["Acciones", "Nombre", "Medidas", "Camas", "Estado"],
   "reserva": ["Acciones", "N°", "Fecha Reserva", "Grupo Empresa", "Pasajero", "Habitación", "Estado", "Llegada", "Salida", "Check In", "Check Out"],
   "solicitud": ["Acciones", "N°", "Fecha", "Grupo empresa", "Solicitante", "Estado"],
-  "censo": ["Nº", "Fecha", "Módulo", "Piso", "Habitación", "Estado Censo", "Estado Habitación", "N° Camas", "Camas ocupadas", "Cam. ocupadas (CheckIn)"],
+  "censo": ["Nº", "Fecha", "Módulo", "Piso", "Habitación", "Est. censo", "Est. hab.", "Camas", "Ocupadas", "Ocup. check-in"],
   "misCensos": ["N°", "Fecha", "Campamento", "Módulo", "Piso", "Habitación", "N° Camas", "Camas ocupadas", "Turno"]
 }

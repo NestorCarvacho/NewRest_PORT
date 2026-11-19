@@ -5,6 +5,7 @@ export function crearCatalogos(enviar) {
     var reservaPendiente = null;
     var censo = null;
     var censoObtenidaEn = 0;
+    var censoPendiente = null;
     var solicitud = null;
     var solicitudObtenidaEn = 0;
     var habitacion = null;
@@ -30,11 +31,16 @@ export function crearCatalogos(enviar) {
 
     function cargarCenso() {
         if (censo && vigente(censoObtenidaEn)) return Promise.resolve(censo);
-        return enviar("/Censo/Mid/MidCenso.cs", { opcion: "catalogo" }).then(function (datos) {
+        if (censoPendiente) return censoPendiente;
+        censoPendiente = enviar("/Censo/Mid/MidCenso.cs", { opcion: "catalogo" }).then(function (datos) {
             censo = datos;
             censoObtenidaEn = Date.now();
             return datos;
+        }).catch(function (error) {
+            censoPendiente = null;
+            throw error;
         });
+        return censoPendiente;
     }
 
     function cargarHabitacion() {
@@ -69,7 +75,7 @@ export function crearCatalogos(enviar) {
         obtenerHabitacion: function () { return habitacion; },
         invalidarHabitacion: function () { habitacion = null; habitacionObtenidaEn = 0; },
         invalidarReserva: function () { reserva = null; reservaObtenidaEn = 0; reservaPendiente = null; },
-        invalidarCenso: function () { censo = null; censoObtenidaEn = 0; },
+        invalidarCenso: function () { censo = null; censoObtenidaEn = 0; censoPendiente = null; },
         invalidarSolicitud: function () { solicitud = null; solicitudObtenidaEn = 0; }
     };
 }

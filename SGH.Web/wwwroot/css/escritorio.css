@@ -971,6 +971,39 @@ div.dt-container table.dataTable tbody > tr > td {
   max-width: 7.5rem;
 }
 
+.modulo-censo div.dt-container table.dataTable thead > tr > th {
+  font-size: 0.74rem;
+  line-height: 1.2;
+  vertical-align: bottom;
+  padding: 0.5rem 0.4rem !important;
+}
+
+.modulo-censo div.dt-container table.dataTable thead > tr > th.col-ocupadas-censo,
+.modulo-censo div.dt-container table.dataTable tbody > tr > td.col-ocupadas-censo {
+  width: 4.5rem;
+  min-width: 4.5rem;
+  max-width: 5.25rem;
+  text-align: center;
+}
+
+.modulo-censo div.dt-container table.dataTable thead > tr > th.col-compacta-censo,
+.modulo-censo div.dt-container table.dataTable tbody > tr > td.col-compacta-censo {
+  white-space: nowrap;
+}
+
+.modulo-censo input.cama-ocupada {
+  box-sizing: border-box;
+  width: 3.35rem;
+  max-width: 100%;
+  height: 2rem;
+  padding: 0.2rem 0.35rem;
+  border: 1px solid var(--blizzard);
+  border-radius: 0.45rem;
+  font: inherit;
+  font-size: 0.86rem;
+  text-align: center;
+}
+
 .modulo-habitaciones div.dt-container table.dataTable tbody > tr > td:first-child,
 .modulo-banos div.dt-container table.dataTable tbody > tr > td:first-child,
 .modulo-tiposcama div.dt-container table.dataTable tbody > tr > td:first-child {
