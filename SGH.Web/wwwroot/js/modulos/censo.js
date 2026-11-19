@@ -262,18 +262,22 @@ export function crearCenso(dependencias) {
 
     function prioridadColumnaCenso(clave) {
         if (clave === "habitacion") return 1;
-        if (clave === "fecha") return 2;
-        if (clave === "ocupadas") return 3;
-        if (clave === "camas") return 4;
-        if (clave === "modulo" || clave === "piso") return 5;
-        if (clave === "estadoCenso" || clave === "estadoHabitacion" || clave === "ocupadasCheckIn") return 90;
-        if (clave === "numero") return 95;
-        return 50;
+        if (clave === "ocupadas") return 2;
+        if (clave === "camas") return 3;
+        if (clave === "ocupadasCheckIn") return 4;
+        if (clave === "fecha") return 10007;
+        if (clave === "turno") return 10008;
+        if (clave === "numero") return 10001;
+        if (clave === "modulo" || clave === "campamento") return 10002;
+        if (clave === "piso") return 10003;
+        if (clave === "estadoCenso") return 10005;
+        if (clave === "estadoHabitacion") return 10006;
+        return 10000;
     }
 
     function columnas(modo) {
         var renderTruncada = renderizadorCeldaTruncada();
-        var celdaTextoAncho = { modulo: true, piso: true, habitacion: true };
+        var celdaTextoAncho = { modulo: true, piso: true, habitacion: true, campamento: true };
         var celdaCompacta = { numero: true, camas: true, estadoCenso: true, estadoHabitacion: true, ocupadasCheckIn: true };
 
         if (modo === "censo") {
@@ -300,14 +304,24 @@ export function crearCenso(dependencias) {
                     responsivePriority: prioridadColumnaCenso(clave)
                 };
                 if (celdaTextoAncho[clave]) columna.render = renderTruncada;
-                if (celdaCompacta[clave]) columna.className = "col-compacta-censo";
+                if (clave === "habitacion") columna.className = "col-habitacion-censo";
+                else if (celdaCompacta[clave]) columna.className = "col-compacta-censo";
                 return columna;
             });
         }
         if (modo === "misCensos") {
             return ["numero", "fecha", "campamento", "modulo", "piso", "habitacion", "camas", "ocupadas", "turno"]
                 .map(function (clave) {
-                    return { data: clave, responsivePriority: prioridadColumnaCenso(clave === "campamento" ? "modulo" : clave) };
+                    var columna = {
+                        data: clave,
+                        responsivePriority: prioridadColumnaCenso(clave)
+                    };
+                    if (celdaTextoAncho[clave]) columna.render = renderTruncada;
+                    if (clave === "habitacion") columna.className = "col-habitacion-censo";
+                    else if (clave === "camas" || clave === "ocupadas" || clave === "turno") {
+                        columna.className = "col-compacta-censo";
+                    }
+                    return columna;
                 });
         }
         return null;

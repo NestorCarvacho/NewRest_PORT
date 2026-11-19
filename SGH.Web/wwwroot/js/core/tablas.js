@@ -45,6 +45,11 @@ export function crearTablas() {
         };
         if (window.DataTable && DataTable.Responsive) {
             opciones.responsive = {
+                breakpoints: [
+                    { name: "desktop", width: Infinity },
+                    { name: "tablet", width: 1024 },
+                    { name: "mobile", width: 768 }
+                ],
                 details: {
                     type: "column",
                     target: "tr"
