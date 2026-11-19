@@ -157,18 +157,6 @@ html:not([data-tema="claro"]) .campo .select2-container--disabled .select2-selec
     padding: 0 0.5rem;
   }
 
-  .menu-app {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    padding-bottom: 0.15rem;
-  }
-
-  .menu-columna {
-    flex-shrink: 0;
-  }
-
   .selector-idioma {
     max-width: 6rem;
     padding: 0 0.3rem;
