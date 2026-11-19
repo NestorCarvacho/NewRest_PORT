@@ -174,14 +174,22 @@ export function crearCenso(dependencias) {
         return null;
     }
 
+    function camasComoEntero(valor) {
+        var convertido = parseInt(String(valor).trim(), 10);
+        return Number.isFinite(convertido) ? convertido : NaN;
+    }
+
     function validarCamasOcupadas(fila) {
-        return fila.camasOcupadas <= fila.numeroCamas;
+        var ocupadas = camasComoEntero(fila.camasOcupadas);
+        var total = camasComoEntero(fila.numeroCamas);
+        if (!Number.isFinite(ocupadas) || !Number.isFinite(total)) return false;
+        return ocupadas >= 0 && ocupadas <= total;
     }
 
     function guardar(nodo) {
         for (var i = 0; i < (nodo._filas || []).length; i++) {
             var fila = nodo._filas[i];
-            if (!validarCamasOcupadas(fila) || fila.camasOcupadas < 0) {
+            if (!validarCamasOcupadas(fila)) {
                 dependencias.mostrarEstado(nodo, "Las camas ocupadas deben estar entre 0 y el número de camas, revisar id: " + (fila.id) + "");
                 return Promise.reject(new Error("Las camas ocupadas deben estar entre 0 y el número de camas"));
             }
@@ -191,7 +199,7 @@ export function crearCenso(dependencias) {
             return {
                 id: fila.id,
                 habitacionId: dependencias.numero(fila.habitacionId),
-                cantidad: fila.camasOcupadas,
+                cantidad: camasComoEntero(fila.camasOcupadas),
                 turno: fila.turno || filtro.turno || "D"
             };
         });
