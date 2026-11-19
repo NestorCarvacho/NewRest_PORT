@@ -15,6 +15,10 @@
             @{
                 ViewData["FiltroEtiquetaPeriodo"] = "Período (fecha censo)";
             }
+            <label class="campo campo-interruptor">
+                <span>Solo hoy</span>
+                <input type="checkbox" name="censoSoloHoy" role="switch" checked />
+            </label>
             <partial name="Modulos/_FiltrosPeriodo" />
             <label class="campo">
                 <span>Módulo</span>

@@ -19,10 +19,14 @@ export function crearRenderizadorModulos(dependencias) {
     }
 
     function pintar(nodo, filas, modo) {
-        if (nodo._guardar) nodo._guardar.hidden = modo !== "censo" || filas.length === 0;
         dependencias.tablas.pintar(nodo, filas, function (filaOrigen) {
             return fila(filaOrigen, modo);
         });
+        if (modo === "censo" && dependencias.censo && dependencias.censo.actualizarBotonGuardar) {
+            dependencias.censo.actualizarBotonGuardar(nodo);
+        } else if (nodo._guardar) {
+            nodo._guardar.hidden = modo !== "censo" || filas.length === 0;
+        }
     }
 
     function widgetAcciones(mapeada, modo) {

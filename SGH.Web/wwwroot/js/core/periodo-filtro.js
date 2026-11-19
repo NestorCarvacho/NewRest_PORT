@@ -115,8 +115,15 @@ export function crearPeriodoFiltro(fechas) {
         actualizar();
     }
 
+    function refrescarFormulario(form) {
+        if (!form || !form.querySelector("[name='periodo']")) return;
+        var nombres = nombresDesdeHasta(form);
+        aplicarModo(controlesFecha(form, nombres));
+    }
+
     return {
         enlazarFormulario: enlazarFormulario,
+        refrescarFormulario: refrescarFormulario,
         camposPeriodo: camposPeriodo,
         filtroInicialPeriodo: filtroInicialPeriodo
     };

@@ -19,7 +19,8 @@ export function instalarCenso(base) {
         filtroInicialPeriodo: base.filtroInicialPeriodo,
         normalizarFiltroPeriodo: base.normalizarFiltroPeriodo,
         fechasEntre: base.fechasEntre,
-        actualizarSelector: base.actualizarSelector
+        actualizarSelector: base.actualizarSelector,
+        refrescarPeriodoFiltro: base.refrescarPeriodoFiltro
     });
     base.setEnlazarFormulario(function (form) { censo.enlazar(form); });
     var censoQr = crearCensoQr({

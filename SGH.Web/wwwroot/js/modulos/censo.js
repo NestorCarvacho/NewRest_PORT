@@ -7,10 +7,22 @@ export function crearCenso(dependencias) {
         return filas;
     }
 
+    function esVerdadero(valor) {
+        return valor === true || valor === "true" || valor === "on" || valor === 1 || valor === "1";
+    }
+
     function normalizarFiltroRango(filtro) {
-        return dependencias.normalizarFiltroPeriodo
+        var base = dependencias.normalizarFiltroPeriodo
             ? dependencias.normalizarFiltroPeriodo(filtro)
-            : filtro;
+            : filtro || {};
+        if (!esVerdadero(base.censoSoloHoy)) return base;
+        var hoy = dependencias.fechaActual();
+        return Object.assign({}, base, {
+            censoSoloHoy: true,
+            periodoPorRango: false,
+            desde: hoy,
+            hasta: hoy
+        });
     }
 
     function payloadRangoCenso(filtro) {
@@ -109,6 +121,83 @@ export function crearCenso(dependencias) {
         llenarSelectDependiente(habitacion, opcionesFiltradas(habitacion, piso.value));
     }
 
+    function camposPeriodoCenso(form) {
+        return [
+            form.querySelector("[name='periodoPorRango']"),
+            form.querySelector("[name='periodo']"),
+            form.querySelector("[name='desde']"),
+            form.querySelector("[name='hasta']")
+        ].map(function (control) {
+            return control ? control.closest(".campo") : null;
+        });
+    }
+
+    function enlazarPeriodoCenso(form) {
+        if (form.dataset.enlazadoPeriodoCenso === "1") return;
+        form.dataset.enlazadoPeriodoCenso = "1";
+        var soloHoy = form.querySelector("[name='censoSoloHoy']");
+        if (!soloHoy) return;
+        var porRango = form.querySelector("[name='periodoPorRango']");
+        var periodo = form.querySelector("[name='periodo']");
+        var desde = form.querySelector("[name='desde']");
+        var hasta = form.querySelector("[name='hasta']");
+
+        function aplicarModoSoloHoy() {
+            var hoy = dependencias.fechaActual();
+            var activo = soloHoy.checked;
+            camposPeriodoCenso(form).forEach(function (campo) {
+                if (campo) campo.hidden = activo;
+            });
+            if (activo) {
+                if (desde) {
+                    desde.value = hoy;
+                    desde.readOnly = true;
+                }
+                if (hasta) {
+                    hasta.value = hoy;
+                    hasta.readOnly = true;
+                }
+                if (porRango) {
+                    porRango.checked = false;
+                    porRango.disabled = true;
+                }
+                if (periodo) periodo.disabled = true;
+                return;
+            }
+            if (porRango) porRango.disabled = false;
+            if (periodo) periodo.disabled = false;
+            if (desde) desde.readOnly = false;
+            if (hasta) hasta.readOnly = false;
+            if (dependencias.refrescarPeriodoFiltro) dependencias.refrescarPeriodoFiltro(form);
+        }
+
+        soloHoy.addEventListener("change", aplicarModoSoloHoy);
+        form._aplicarCensoSoloHoy = aplicarModoSoloHoy;
+        aplicarModoSoloHoy();
+    }
+
+    function sincronizarPeriodoCenso(form) {
+        if (form && typeof form._aplicarCensoSoloHoy === "function") {
+            form._aplicarCensoSoloHoy();
+        }
+    }
+
+    function permiteGuardarCenso(filtro) {
+        return !!fechaUnicaCenso(filtro);
+    }
+
+    function actualizarBotonGuardar(nodo) {
+        if (!nodo || !nodo._guardar) return;
+        var filas = nodo._filas || [];
+        var filtro = normalizarFiltroRango(nodo._filtro || {});
+        var puedeGuardar = permiteGuardarCenso(filtro);
+        nodo._guardar.hidden = filas.length === 0;
+        nodo._guardar.disabled = !puedeGuardar;
+        nodo._guardar.title = puedeGuardar
+            ? ""
+            : "Para guardar, filtre un solo día (active «Solo hoy» o iguale desde y hasta).";
+    }
+
     function enlazar(form) {
         if (form.dataset.enlazadoCenso === "1") return;
         form.dataset.enlazadoCenso = "1";
@@ -127,7 +216,16 @@ export function crearCenso(dependencias) {
 
     function filtroInicial(modo) {
         if (modo === "misCensos") return dependencias.filtroInicialPeriodo();
-        if (modo === "censo") return Object.assign(dependencias.filtroInicialPeriodo(), { turno: "D" });
+        if (modo === "censo") {
+            var hoy = dependencias.fechaActual();
+            return {
+                censoSoloHoy: true,
+                periodoPorRango: false,
+                desde: hoy,
+                hasta: hoy,
+                turno: "D"
+            };
+        }
         return null;
     }
 
@@ -229,9 +327,11 @@ export function crearCenso(dependencias) {
 
     function fechaUnicaCenso(filtro) {
         if (!filtro) return null;
-        if (filtro.fecha) return String(filtro.fecha).slice(0, 10);
-        var desde = (filtro.desde || "").slice(0, 10);
-        var hasta = (filtro.hasta || "").slice(0, 10);
+        var normalizado = normalizarFiltroRango(filtro);
+        if (esVerdadero(normalizado.censoSoloHoy)) return dependencias.fechaActual();
+        if (normalizado.fecha) return String(normalizado.fecha).slice(0, 10);
+        var desde = (normalizado.desde || "").slice(0, 10);
+        var hasta = (normalizado.hasta || "").slice(0, 10);
         if (desde && desde === hasta) return desde;
         return null;
     }
@@ -273,7 +373,11 @@ export function crearCenso(dependencias) {
         buscar: buscar,
         buscarMios: buscarMios,
         enlazar: enlazar,
+        enlazarPeriodoCenso: enlazarPeriodoCenso,
+        sincronizarPeriodoCenso: sincronizarPeriodoCenso,
         sincronizarFiltros: sincronizarFiltros,
+        actualizarBotonGuardar: actualizarBotonGuardar,
+        permiteGuardarCenso: permiteGuardarCenso,
         filtroInicial: filtroInicial,
         filaCenso: filaCenso,
         filaMisCensos: filaMisCensos,

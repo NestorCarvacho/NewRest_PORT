@@ -73,6 +73,9 @@ export function crearFiltrosModulo(dependencias) {
             nodo._filtro = dependencias.normalizarFiltroPeriodo
                 ? dependencias.normalizarFiltroPeriodo(datos)
                 : datos;
+            if (modo === "censo" && dependencias.actualizarBotonGuardarCenso) {
+                dependencias.actualizarBotonGuardarCenso(nodo);
+            }
             dependencias.cerrarPanel();
             dependencias.cargar(id).catch(function (error) {
                 dependencias.mostrarEstado(nodo, error.message);
@@ -91,9 +94,13 @@ export function crearFiltrosModulo(dependencias) {
                 dependencias.enlazarFiltrosCenso(form);
             }
             dependencias.enlazarPeriodoFiltro(form);
+            if (modulo.modo === "censo" && dependencias.enlazarPeriodoCenso) {
+                dependencias.enlazarPeriodoCenso(form);
+            }
             dependencias.inicializarSelectores(form);
-            if (modulo.modo === "censo" && dependencias.sincronizarFiltrosCenso) {
-                dependencias.sincronizarFiltrosCenso(form);
+            if (modulo.modo === "censo") {
+                if (dependencias.sincronizarPeriodoCenso) dependencias.sincronizarPeriodoCenso(form);
+                if (dependencias.sincronizarFiltrosCenso) dependencias.sincronizarFiltrosCenso(form);
             }
             enlazarSubmit(form, nodo, id, modulo);
             form._contenedorPadre = nodo;
