@@ -1,0 +1,41 @@
+@model SGH.Application.Navegacion.MenuEscritorioVm
+<div id="velo-menu-modulos" class="velo velo-menu-modulos" hidden></div>
+<aside id="menu-modulos-lateral" class="menu-modulos-lateral" hidden aria-label="Menú de módulos">
+    <div class="menu-modulos-lateral-cabeza">
+        <h2 class="menu-modulos-lateral-titulo">Módulos</h2>
+        <button type="button" class="menu-modulos-lateral-cerrar" id="menu-modulos-lateral-cerrar" aria-label="Cerrar menú">×</button>
+    </div>
+    <div class="menu-modulos-lateral-cuerpo">
+        @foreach (var grupo in Model.Grupos)
+        {
+            <section class="menu-modulos-seccion">
+                <h3 class="menu-modulos-seccion-titulo">@grupo.Titulo</h3>
+                @foreach (var columna in grupo.Columnas)
+                {
+                    <div class="menu-modulos-bloque">
+                        <h4 class="menu-modulos-bloque-titulo">@columna.Titulo</h4>
+                        <ul class="menu-modulos-lista">
+                            @foreach (var item in columna.Items)
+                            {
+                                <li>
+                                    @if (item.Disponible && !string.IsNullOrEmpty(item.RutaPagina))
+                                    {
+                                        <a class="menu-enlace menu-modulos-enlace" asp-page="@item.RutaPagina" data-modulo="@item.ClaveModulo">@item.Nombre</a>
+                                    }
+                                    else if (item.Disponible && !string.IsNullOrEmpty(item.ClaveModulo))
+                                    {
+                                        <button type="button" class="menu-enlace menu-modulos-enlace" data-modulo="@item.ClaveModulo">@item.Nombre</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="menu-modulos-enlace-deshabilitado" disabled title="@(item.TituloDeshabilitado ?? "No disponible")">@item.Nombre</button>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+            </section>
+        }
+    </div>
+</aside>

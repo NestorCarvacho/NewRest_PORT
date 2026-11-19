@@ -4,15 +4,34 @@ import { inicializarMenuModulos } from "./core/menu-modulos.js";
 import { crearEntornoEscritorio } from "./core/fabrica-escritorio.js";
 
 (function () {
-    var solapas = document.getElementById("solapas");
-    var paneles = document.getElementById("paneles");
-    if (!solapas || !paneles) return;
-
     inicializarCuenta();
     var entorno = crearEntornoEscritorio();
+    var solapas = document.getElementById("solapas");
+    var paneles = document.getElementById("paneles");
     var vista = document.getElementById("vista-inicial");
+    var navegacion = null;
+    var menuModulos;
 
-    var navegacion = crearNavegacion({
+    if (!solapas || !paneles) {
+        menuModulos = inicializarMenuModulos({
+            abrirModulo: function (modulo) {
+                if (!modulo) return;
+                window.location.assign("/Index?modulo=" + encodeURIComponent(modulo));
+            },
+            abrirCensoQr: entorno.censoQr ? entorno.censoQr.abrir : function () { },
+            esModuloSolapa: function (id) { return !!entorno.modulos[id]; }
+        });
+        entorno.enlazarPanelesLaterales();
+        document.addEventListener("keydown", function (evento) {
+            if (evento.key === "Escape") {
+                entorno.cerrarPanel();
+                menuModulos.cerrarMenus();
+            }
+        });
+        return;
+    }
+
+    navegacion = crearNavegacion({
         solapas: solapas,
         paneles: paneles,
         vista: vista,
@@ -31,7 +50,7 @@ import { crearEntornoEscritorio } from "./core/fabrica-escritorio.js";
         return navegacion.paneles.querySelector('[data-id="' + id + '"]');
     });
 
-    var menuModulos = inicializarMenuModulos({
+    menuModulos = inicializarMenuModulos({
         abrirModulo: navegacion.abrir,
         abrirCensoQr: entorno.censoQr ? entorno.censoQr.abrir : function () { },
         esModuloSolapa: function (id) { return !!entorno.modulos[id]; }

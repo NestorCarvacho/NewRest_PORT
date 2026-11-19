@@ -318,6 +318,167 @@ body.app-body {
   color: var(--deep);
 }
 
+.menu-hamburguesa {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.28rem;
+  box-sizing: border-box;
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0;
+  border: 1px solid var(--blizzard);
+  border-radius: 0.65rem;
+  background: transparent;
+  color: var(--burgundy);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.menu-hamburguesa:hover,
+.menu-hamburguesa[aria-expanded="true"] {
+  background: rgba(101, 28, 50, 0.08);
+}
+
+.menu-hamburguesa-linea {
+  display: block;
+  width: 1.1rem;
+  height: 2px;
+  margin: 0 auto;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.menu-modulos-lateral {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 52;
+  display: flex;
+  flex-direction: column;
+  width: min(19rem, 88vw);
+  height: 100%;
+  height: 100dvh;
+  border-right: 1px solid var(--blizzard);
+  background: var(--white);
+  box-shadow: 12px 0 36px rgba(5, 5, 3, 0.16);
+  transform: translateX(-105%);
+  transition: transform 0.24s ease;
+}
+
+.menu-modulos-lateral.abierto {
+  transform: translateX(0);
+}
+
+.menu-modulos-lateral-cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--blizzard);
+}
+
+.menu-modulos-lateral-titulo {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 650;
+  color: var(--burgundy);
+}
+
+.menu-modulos-lateral-cerrar {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: var(--gray);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.menu-modulos-lateral-cerrar:hover {
+  background: var(--eggshell);
+  color: var(--deep);
+}
+
+.menu-modulos-lateral-cuerpo {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.75rem 1rem 1.25rem;
+}
+
+.menu-modulos-seccion + .menu-modulos-seccion {
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--blizzard);
+}
+
+.menu-modulos-seccion-titulo {
+  margin: 0 0 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--burgundy);
+}
+
+.menu-modulos-bloque + .menu-modulos-bloque {
+  margin-top: 0.85rem;
+}
+
+.menu-modulos-bloque-titulo {
+  margin: 0 0 0.35rem;
+  font-size: 0.86rem;
+  font-weight: 650;
+  color: var(--deep);
+}
+
+.menu-modulos-lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menu-modulos-lista .menu-modulos-enlace,
+.menu-modulos-lista .menu-modulos-enlace-deshabilitado {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.42rem 0.5rem;
+  margin: 0.08rem 0;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--gray);
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.menu-modulos-lista .menu-modulos-enlace:hover {
+  background: var(--eggshell);
+  color: var(--deep);
+}
+
+.menu-modulos-lista .menu-modulos-enlace-deshabilitado {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.velo-menu-modulos {
+  z-index: 51;
+}
+
+body.menu-lateral-abierto {
+  overflow: hidden;
+}
+
 .pagina-modulo {
   padding: 1rem 1.25rem 2rem;
 }
@@ -1880,61 +2041,21 @@ html:not([data-tema="claro"]) .campo.campo-interruptor input[type="checkbox"]:ch
 }
 
 @media (max-width: 768px) {
-  .app-cromo {
-    overflow: visible;
+  :root {
+    --alto-menu: 0px;
   }
 
-  .menu-app {
-    overflow: visible;
+  .menu-hamburguesa {
+    display: inline-flex;
   }
 
-  .menu-grupo {
+  .menu-app-escritorio {
+    display: none !important;
+  }
+
+  .navbar-app .marca {
     flex: 1;
     min-width: 0;
-    overflow-x: auto;
-    overflow-y: visible;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    padding-bottom: 0.15rem;
-  }
-
-  .menu-item:hover .menu-desplegable {
-    display: none;
-  }
-
-  .menu-item.abierto .menu-desplegable,
-  .menu-item.abierto:hover .menu-desplegable {
-    display: block;
-  }
-
-  .menu-desplegable {
-    position: fixed;
-    top: var(--alto-cromo);
-    right: 0.5rem;
-    left: 0.5rem;
-    z-index: 45;
-    width: auto;
-    max-height: min(70vh, calc(100dvh - var(--alto-cromo) - 0.5rem));
-    padding-top: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .menu-config .menu-desplegable {
-    right: 0.5rem;
-    left: 0.5rem;
-  }
-
-  .menu-panel {
-    width: 100%;
-    box-sizing: border-box;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .menu-columna {
-    flex: 1 1 8.5rem;
-    min-width: min(100%, 8.5rem);
   }
 
   .marca span,
@@ -2106,6 +2227,46 @@ html:not([data-tema="claro"]) .menu-app {
 
 html:not([data-tema="claro"]) .buscador input::placeholder {
   color: rgba(255, 255, 255, 0.6);
+}
+
+html:not([data-tema="claro"]) .menu-hamburguesa {
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #d98532;
+}
+
+html:not([data-tema="claro"]) .menu-hamburguesa:hover,
+html:not([data-tema="claro"]) .menu-hamburguesa[aria-expanded="true"] {
+  background: rgba(217, 133, 50, 0.18);
+  color: #fff;
+}
+
+html:not([data-tema="claro"]) .menu-modulos-lateral {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(32, 26, 22, 0.98);
+  box-shadow: 12px 0 40px rgba(0, 0, 0, 0.45);
+}
+
+html:not([data-tema="claro"]) .menu-modulos-lateral-cabeza,
+html:not([data-tema="claro"]) .menu-modulos-seccion + .menu-modulos-seccion {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+html:not([data-tema="claro"]) .menu-modulos-lateral-titulo,
+html:not([data-tema="claro"]) .menu-modulos-seccion-titulo {
+  color: #d98532;
+}
+
+html:not([data-tema="claro"]) .menu-modulos-bloque-titulo {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+html:not([data-tema="claro"]) .menu-modulos-lista .menu-modulos-enlace {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+html:not([data-tema="claro"]) .menu-modulos-lista .menu-modulos-enlace:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
 }
 
 html:not([data-tema="claro"]) .buscador-lista,
