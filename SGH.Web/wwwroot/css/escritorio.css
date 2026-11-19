@@ -971,11 +971,21 @@ div.dt-container table.dataTable tbody > tr > td {
   max-width: 7.5rem;
 }
 
-.modulo-censo div.dt-container table.dataTable thead > tr > th {
+.modulo-censo div.dt-container table.dataTable thead > tr > th,
+.modulo-misCensos div.dt-container table.dataTable thead > tr > th {
   font-size: 0.74rem;
   line-height: 1.2;
   vertical-align: bottom;
   padding: 0.5rem 0.4rem !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 6.5rem;
+}
+
+.modulo-censo div.dt-container table.dataTable thead > tr > th:nth-child(5),
+.modulo-misCensos div.dt-container table.dataTable thead > tr > th:nth-child(6) {
+  max-width: 8.5rem;
 }
 
 .modulo-censo div.dt-container table.dataTable thead > tr > th.col-ocupadas-censo,

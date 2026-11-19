@@ -1,4 +1,4 @@
-import { encabezadosModulo } from "./encabezados-tabla.js";
+import { encabezadosModulo, pintarEncabezadosTabla, tituloLargoEncabezado } from "./encabezados-tabla.js";
 import { enlazarTooltipsCelda, ocultarTooltipCelda } from "./celda-truncada.js";
 
 export function crearTablas() {
@@ -30,8 +30,23 @@ export function crearTablas() {
             return window.SGHI18n ? window.SGHI18n.traducir(texto) : texto;
         }
 
+        var elementoTabla = nodo.querySelector("table.modulo-tabla, table.tabla");
+        if (!elementoTabla) {
+            throw new Error("No hay tabla en el panel del módulo.");
+        }
+        var modoTabla = elementoTabla.dataset.modulo || "";
+        var titulosEncabezado = encabezadosModulo(modoTabla);
+        pintarEncabezadosTabla(elementoTabla, modoTabla);
+        var columnasConTitulo = (columnas || []).map(function (columna, indice) {
+            var copia = Object.assign({}, columna);
+            if (titulosEncabezado[indice]) {
+                copia.title = titulosEncabezado[indice];
+            }
+            return copia;
+        });
+
         var opciones = {
-            columns: columnas,
+            columns: columnasConTitulo,
             autoWidth: false,
             language: {
                 emptyTable: t("No hay registros para mostrar"),
@@ -63,12 +78,15 @@ export function crearTablas() {
             });
         }
         if (ordenInicial) opciones.order = ordenInicial;
-        var elementoTabla = nodo.querySelector("table.modulo-tabla, table.tabla");
-        if (!elementoTabla) {
-            throw new Error("No hay tabla en el panel del módulo.");
-        }
         var tabla = new DataTable(elementoTabla, opciones);
         tabla.on("draw", function () {
+            tabla.columns().every(function (indice) {
+                var th = this.header();
+                var corto = titulosEncabezado[indice];
+                if (th && corto) {
+                    th.title = tituloLargoEncabezado(modoTabla, corto);
+                }
+            });
             completarFilas(tabla);
             enlazarTooltipsCelda(nodo);
             ocultarTooltipCelda();
