@@ -26,6 +26,14 @@
 <body class="app-body">
     <header class="app-cromo">
         <div class="navbar-app">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <button type="button" class="menu-hamburguesa" id="menu-hamburguesa" aria-expanded="false" aria-controls="menu-modulos-lateral" aria-label="Abrir menú de módulos">
+                    <span class="menu-hamburguesa-linea" aria-hidden="true"></span>
+                    <span class="menu-hamburguesa-linea" aria-hidden="true"></span>
+                    <span class="menu-hamburguesa-linea" aria-hidden="true"></span>
+                </button>
+            }
             <a class="marca" asp-page="/Index">
                 <img src="~/img/hosteat-logo-vertical.svg" alt="" />
                 <span title="Gestión Hotelera - @nombreEmpresa">Gestión Hotelera - @nombreEmpresa</span>

@@ -3,7 +3,7 @@
     var principales = Model.Grupos.Where(g => !g.EsConfiguracion).ToList();
     var configuracion = Model.Grupos.Where(g => g.EsConfiguracion).ToList();
 }
-<nav class="menu-app" aria-label="Módulos">
+<nav class="menu-app menu-app-escritorio" aria-label="Módulos">
     @if (principales.Count > 0)
     {
         <div class="menu-grupo">
@@ -83,3 +83,4 @@
         </div>
     }
 </nav>
+<partial name="_MenuLateralMovil" model="Model" />
