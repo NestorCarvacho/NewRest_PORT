@@ -124,6 +124,15 @@ body.login-body {
   box-shadow: 0 0 0 3px rgba(255, 152, 83, 0.35);
 }
 
+.login-input:-webkit-autofill,
+.login-input:-webkit-autofill:hover,
+.login-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--deep);
+  caret-color: var(--deep);
+  transition: background-color 9999s ease-out 0s;
+  box-shadow: 0 0 0 1000px var(--white) inset;
+}
+
 .login-input[readonly] {
   background: #fff7f0;
   color: #3f3f3a;
@@ -513,6 +522,35 @@ body.con-aviso-cookies .avisos {
 @keyframes aviso-sale {
   from { opacity: 1; }
   to { opacity: 0; }
+}
+
+/* Notebook con poca altura (p. ej. 768px): permite scroll sin recortar footer */
+@media (max-height: 820px) and (min-width: 481px) {
+  html:has(body.login-body) {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  body.login-body {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .login-page {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+    padding-top: 0.85rem;
+    padding-bottom: 1rem;
+  }
+
+  .login-card {
+    max-height: none;
+  }
+
+  .login-logo {
+    height: clamp(3.5rem, 11vh, 4.75rem);
+  }
 }
 
 @media (max-width: 480px), (max-height: 740px) {
