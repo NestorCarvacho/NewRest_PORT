@@ -991,6 +991,11 @@ div.dt-container table.dataTable tbody > tr > td {
   white-space: nowrap;
 }
 
+.modulo-censo .modulo-barra [data-rol="guardar-censo"]:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .modulo-censo input.cama-ocupada {
   box-sizing: border-box;
   width: 3.35rem;

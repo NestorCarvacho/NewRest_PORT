@@ -54,6 +54,7 @@ export function crearEntornoBase() {
         aplicarPresetPeriodo: fechas.aplicarPresetPeriodo,
         normalizarFiltroPeriodo: fechas.normalizarFiltroPeriodo,
         enlazarPeriodoFiltro: periodoFiltro.enlazarFormulario,
+        refrescarPeriodoFiltro: periodoFiltro.refrescarFormulario,
         camposPeriodoFiltro: periodoFiltro.camposPeriodo,
         filtroInicialPeriodo: periodoFiltro.filtroInicialPeriodo,
         fechasEntre: fechas.fechasEntre,

@@ -69,6 +69,10 @@ export function ensamblarEntorno(idsPantalla) {
         obtenerCatalogoSolicitud: base.catalogos.obtenerSolicitud,
         enlazarFiltrosCenso: instancia.censo ? instancia.censo.enlazar.bind(instancia.censo) : null,
         sincronizarFiltrosCenso: instancia.censo ? instancia.censo.sincronizarFiltros.bind(instancia.censo) : null,
+        enlazarPeriodoCenso: instancia.censo ? instancia.censo.enlazarPeriodoCenso.bind(instancia.censo) : null,
+        sincronizarPeriodoCenso: instancia.censo ? instancia.censo.sincronizarPeriodoCenso.bind(instancia.censo) : null,
+        actualizarBotonGuardarCenso: instancia.censo ? instancia.censo.actualizarBotonGuardar.bind(instancia.censo) : null,
+        refrescarPeriodoFiltro: base.refrescarPeriodoFiltro,
         actualizarSelector: base.actualizarSelector
     }).abrir;
 
