@@ -1,3 +1,5 @@
+import { renderizadorCeldaTruncada } from "../core/celda-truncada.js";
+
 export function crearCenso(dependencias) {
     function combinarFilas(respuestas) {
         var filas = [];
@@ -72,30 +74,54 @@ export function crearCenso(dependencias) {
         return dependencias.camposPeriodoFiltro(dependencias.campo, { etiquetaPeriodo: "Período (fecha censo)" });
     }
 
-    function enlazar(form) {
-        var catalogo = dependencias.obtenerCatalogo();
+    function opcionesFiltradas(select, padre) {
+        var todas = select._opciones || [];
+        if (!padre) return todas;
+        return todas.filter(function (opcion) {
+            return String(opcion.padre) === String(padre);
+        });
+    }
+
+    function llenarSelectDependiente(select, opciones) {
+        var valorPrevio = select.value;
+        var vacio = document.createElement("option");
+        vacio.value = "";
+        vacio.textContent = "Todos";
+        select.replaceChildren(vacio);
+        (opciones || []).forEach(function (opcion) {
+            var item = document.createElement("option");
+            item.value = String(opcion.value);
+            item.textContent = opcion.text;
+            select.append(item);
+        });
+        if (valorPrevio && Array.from(select.options).some(function (o) { return o.value === valorPrevio; })) {
+            select.value = valorPrevio;
+        }
+        if (dependencias.actualizarSelector) dependencias.actualizarSelector(select);
+    }
+
+    function sincronizarFiltros(form) {
         var modulo = form.querySelector("[name='modulo']");
         var piso = form.querySelector("[name='piso']");
         var habitacion = form.querySelector("[name='habitacion']");
-        if (!modulo || !piso || !habitacion || !catalogo) return;
-        function llenar(select, padre) {
-            var vacio = select.querySelector("option[value='']");
-            select.replaceChildren();
-            if (vacio) select.append(vacio);
-            (select._opciones || []).forEach(function (opcion) {
-                if (padre && opcion.padre !== padre) return;
-                var item = document.createElement("option");
-                item.value = opcion.value;
-                item.textContent = opcion.text;
-                select.append(item);
-            });
-        }
+        if (!modulo || !piso || !habitacion) return;
+        llenarSelectDependiente(piso, opcionesFiltradas(piso, modulo.value));
+        llenarSelectDependiente(habitacion, opcionesFiltradas(habitacion, piso.value));
+    }
+
+    function enlazar(form) {
+        if (form.dataset.enlazadoCenso === "1") return;
+        form.dataset.enlazadoCenso = "1";
+        var modulo = form.querySelector("[name='modulo']");
+        var piso = form.querySelector("[name='piso']");
+        var habitacion = form.querySelector("[name='habitacion']");
+        if (!modulo || !piso || !habitacion) return;
         modulo.addEventListener("change", function () {
-            llenar(piso, modulo.value);
-            llenar(habitacion, "");
+            llenarSelectDependiente(piso, opcionesFiltradas(piso, modulo.value));
+            llenarSelectDependiente(habitacion, []);
         });
         piso.addEventListener("change", function () {
-            llenar(habitacion, piso.value);
+            llenarSelectDependiente(habitacion, opcionesFiltradas(habitacion, piso.value));
         });
     }
 
@@ -140,29 +166,44 @@ export function crearCenso(dependencias) {
         if (clave === "habitacion") return 1;
         if (clave === "fecha") return 2;
         if (clave === "ocupadas") return 3;
-        if (clave === "numero") return 4;
+        if (clave === "camas") return 4;
+        if (clave === "modulo" || clave === "piso") return 5;
+        if (clave === "estadoCenso" || clave === "estadoHabitacion" || clave === "ocupadasCheckIn") return 90;
+        if (clave === "numero") return 95;
         return 50;
     }
 
     function columnas(modo) {
+        var renderTruncada = renderizadorCeldaTruncada();
+        var celdaTextoAncho = { modulo: true, piso: true, habitacion: true };
+        var celdaCompacta = { numero: true, camas: true, estadoCenso: true, estadoHabitacion: true, ocupadasCheckIn: true };
+
         if (modo === "censo") {
             return ["numero", "fecha", "modulo", "piso", "habitacion", "estadoCenso", "estadoHabitacion", "camas", "ocupadas", "ocupadasCheckIn"].map(function (clave) {
-                if (clave !== "ocupadas") {
-                    return { data: clave, responsivePriority: prioridadColumnaCenso(clave) };
+                if (clave === "ocupadas") {
+                    return {
+                        data: clave,
+                        className: "col-ocupadas-censo",
+                        responsivePriority: prioridadColumnaCenso(clave),
+                        createdCell: function (td, valor, row) {
+                            var input = document.createElement("input");
+                            input.type = "number";
+                            input.min = "0";
+                            input.className = "cama-ocupada";
+                            input.inputMode = "numeric";
+                            input.value = row._fila.camasOcupadas || "0";
+                            input.addEventListener("input", function () { row._fila.camasOcupadas = input.value; });
+                            td.replaceChildren(input);
+                        }
+                    };
                 }
-                return {
+                var columna = {
                     data: clave,
-                    responsivePriority: prioridadColumnaCenso(clave),
-                    createdCell: function (td, valor, row) {
-                        var input = document.createElement("input");
-                        input.type = "number";
-                        input.min = "0";
-                        input.className = "cama-ocupada";
-                        input.value = row._fila.camasOcupadas || "0";
-                        input.addEventListener("input", function () { row._fila.camasOcupadas = input.value; });
-                        td.replaceChildren(input);
-                    }
+                    responsivePriority: prioridadColumnaCenso(clave)
                 };
+                if (celdaTextoAncho[clave]) columna.render = renderTruncada;
+                if (celdaCompacta[clave]) columna.className = "col-compacta-censo";
+                return columna;
             });
         }
         if (modo === "misCensos") {
@@ -186,6 +227,15 @@ export function crearCenso(dependencias) {
         return ocupadas >= 0 && ocupadas <= total;
     }
 
+    function fechaUnicaCenso(filtro) {
+        if (!filtro) return null;
+        if (filtro.fecha) return String(filtro.fecha).slice(0, 10);
+        var desde = (filtro.desde || "").slice(0, 10);
+        var hasta = (filtro.hasta || "").slice(0, 10);
+        if (desde && desde === hasta) return desde;
+        return null;
+    }
+
     function guardar(nodo) {
         for (var i = 0; i < (nodo._filas || []).length; i++) {
             var fila = nodo._filas[i];
@@ -195,6 +245,12 @@ export function crearCenso(dependencias) {
             }
         }
         var filtro = nodo._filtro || {};
+        var fecha = fechaUnicaCenso(filtro);
+        if (!fecha) {
+            var mensaje = "Para guardar, el período del filtro debe ser un solo día de censo.";
+            dependencias.mostrarEstado(nodo, mensaje);
+            return Promise.reject(new Error(mensaje));
+        }
         var filas = (nodo._filas || []).map(function (fila) {
             return {
                 id: fila.id,
@@ -204,7 +260,7 @@ export function crearCenso(dependencias) {
             };
         });
         dependencias.mostrarEstado(nodo, "");
-        return dependencias.enviar("/Censo/Mid/MidCenso.cs", { opcion: "guardar", fecha: filtro.fecha, filas: filas })
+        return dependencias.enviar("/Censo/Mid/MidCenso.cs", { opcion: "guardar", fecha: fecha, filas: filas })
             .then(function () { return dependencias.cargar("censo", { bloquearPantalla: false }); })
             .catch(function (error) { dependencias.mostrarEstado(nodo, error.message); });
     }
@@ -217,6 +273,7 @@ export function crearCenso(dependencias) {
         buscar: buscar,
         buscarMios: buscarMios,
         enlazar: enlazar,
+        sincronizarFiltros: sincronizarFiltros,
         filtroInicial: filtroInicial,
         filaCenso: filaCenso,
         filaMisCensos: filaMisCensos,

@@ -67,7 +67,9 @@ export function ensamblarEntorno(idsPantalla) {
         obtenerCatalogoReserva: base.catalogos.obtenerReserva,
         obtenerCatalogoCenso: base.catalogos.obtenerCenso,
         obtenerCatalogoSolicitud: base.catalogos.obtenerSolicitud,
-        enlazarFiltrosCenso: instancia.censo ? instancia.censo.enlazar.bind(instancia.censo) : null
+        enlazarFiltrosCenso: instancia.censo ? instancia.censo.enlazar.bind(instancia.censo) : null,
+        sincronizarFiltrosCenso: instancia.censo ? instancia.censo.sincronizarFiltros.bind(instancia.censo) : null,
+        actualizarSelector: base.actualizarSelector
     }).abrir;
 
     var crearPanel = crearPanelModulo({

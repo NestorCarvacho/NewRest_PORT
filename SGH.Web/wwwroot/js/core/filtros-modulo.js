@@ -92,6 +92,9 @@ export function crearFiltrosModulo(dependencias) {
             }
             dependencias.enlazarPeriodoFiltro(form);
             dependencias.inicializarSelectores(form);
+            if (modulo.modo === "censo" && dependencias.sincronizarFiltrosCenso) {
+                dependencias.sincronizarFiltrosCenso(form);
+            }
             enlazarSubmit(form, nodo, id, modulo);
             form._contenedorPadre = nodo;
             dependencias.abrirPanel("Filtros de " + modulo.titulo, form);
