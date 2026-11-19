@@ -2218,6 +2218,41 @@ html:not([data-tema="claro"]) .campo.campo-interruptor input[type="checkbox"]:ch
   div.dt-container table.dataTable > tbody > tr.child span.dtr-data {
     font-size: 0.82rem;
   }
+
+  .modulo-censo div.dt-container table.dataTable > tbody > tr:not(.child):not(.fila-relleno):not(.fila-vacia),
+  .modulo-misCensos div.dt-container table.dataTable > tbody > tr:not(.child):not(.fila-relleno):not(.fila-vacia) {
+    cursor: pointer;
+  }
+
+  .modulo-censo div.dt-container table.dataTable > tbody > tr:not(.child):not(.fila-relleno):not(.fila-vacia) > td,
+  .modulo-misCensos div.dt-container table.dataTable > tbody > tr:not(.child):not(.fila-relleno):not(.fila-vacia) > td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    word-break: normal;
+    overflow-wrap: normal;
+  }
+
+  .modulo-censo div.dt-container table.dataTable > tbody > tr:not(.child) > td.col-habitacion-censo,
+  .modulo-misCensos div.dt-container table.dataTable > tbody > tr:not(.child) > td.col-habitacion-censo {
+    min-width: 5.5rem;
+    max-width: 9.5rem;
+  }
+
+  .modulo-censo div.dt-container table.dataTable > tbody > tr:not(.child) > td .celda-truncada,
+  .modulo-misCensos div.dt-container table.dataTable > tbody > tr:not(.child) > td .celda-truncada {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .modulo-censo div.dt-container table.dataTable > tbody > tr.child ul.dtr-details > li,
+  .modulo-misCensos div.dt-container table.dataTable > tbody > tr.child ul.dtr-details > li {
+    padding: 0.15rem 0;
+  }
 }
 
 html:not([data-tema="claro"]) body.app-body {
