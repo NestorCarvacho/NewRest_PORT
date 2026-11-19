@@ -32,6 +32,34 @@ Los archivos `.sql` bajo `SGH.Infrastructure/**/Persistence/` declaran los objet
 
 Los procedimientos antiguos `dbo.sp_*` del mismo módulo pueden quedar huérfanos en la base hasta que un DBA los elimine; la aplicación ya no los referencia.
 
-### Puente temporal en QA
+### Comparar QA vs local
 
-Si en un ambiente aún existen solo los nombres `sp_*` y no se puede redesplegar de inmediato, usar `Docs/datos/migracion/he_sp_sinonimos_desde_sp_legacy.sql`: crea sinónimos `he_sp_*` que apuntan al `sp_*` homónimo existente. Cuando se ejecuten los scripts del repo, conviene **eliminar esos sinónimos** y crear los procedimientos reales con `CREATE OR ALTER` (los sinónimos bloquean un objeto con el mismo nombre).
+Consulta corta (solo **qué existe**): `Docs/datos/migracion/he_sp_listar_existen.sql` — equivalente a ampliar el `IN (...)` a los **104** nombres (52 `he_sp_*` + 52 `sp_*` legados); incluye bloque de **los que faltan**.
+
+Inventario detallado (estado por par legado/nuevo):  
+`Docs/datos/migracion/he_sp_inventario_comparar.sql` — ejecutar en **cada** servidor y guardar (`servidor`, `legado`, `nuevo`, `estado_newrest`).
+
+- **SSMS:** resultado a Excel/CSV por entorno.
+- **sqlcmd:**
+
+```bash
+sqlcmd -S <QA> -d HOTELDB -E -i Docs/datos/migracion/he_sp_inventario_comparar.sql -s ";" -W -h-1 -o inventario_qa.csv
+sqlcmd -S "(localdb)\MSSQLLocalDB" -d HOTELDB -E -i Docs/datos/migracion/he_sp_inventario_comparar.sql -s ";" -W -h-1 -o inventario_local.csv
+```
+
+En Excel: pegar ambas tablas y comparar por columna `nuevo` y `estado_newrest`. Lo que la app necesita es `estado_newrest = OK app (procedimiento)` en QA.
+
+### Error «Could not find stored procedure 'he_sp_…'»
+
+La **aplicación** ya llama `he_sp_*`, pero **HOTELDB** aún solo tiene `sp_*` (u otro nombre). No es un fallo de código: falta alinear la base.
+
+1. **Renombrar rápido (recomendado en SSMS):** `Docs/datos/migracion/he_sp_renombrar_rapido.sql` — un solo archivo con **PREVIEW** + bucle `sp_rename` (52 pares). Alternativa expandida: `he_sp_renombrar_desde_sp_legacy.sql`.  
+   Luego **re-ejecutar** los `.sql` de `SGH.Infrastructure/**/Persistence/` (orden en `hoteldb-scripts-orden-ejecucion.md`) para actualizar `EXEC` internos que aún citen `sp_*`.
+2. **O crear desde cero:** ejecutar los scripts del repo con `CREATE OR ALTER` (login primero: `Cuenta/Persistence/001_sp_login.sql` y `002_sp_login_passwordv2_dual.sql` si aplica).
+3. **Solo emergencia:** sinónimos (`he_sp_cuenta_login_puente_qa.sql` o `he_sp_sinonimos_desde_sp_legacy.sql`); no sustituye el rename ni el despliegue real.
+
+Si ya creaste sinónimos `he_sp_*`, el script de **rename** los elimina antes de renombrar el procedimiento legado.
+
+### Puente temporal en QA (sinónimos)
+
+Solo si no podés renombrar ni ejecutar scripts aún: `Docs/datos/migracion/he_sp_sinonimos_desde_sp_legacy.sql`. Al migrar en serio, borrá los sinónimos y usá **rename** o `CREATE OR ALTER`.

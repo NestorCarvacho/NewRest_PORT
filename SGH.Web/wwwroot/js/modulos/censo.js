@@ -136,12 +136,23 @@ export function crearCenso(dependencias) {
         };
     }
 
+    function prioridadColumnaCenso(clave) {
+        if (clave === "habitacion") return 1;
+        if (clave === "fecha") return 2;
+        if (clave === "ocupadas") return 3;
+        if (clave === "numero") return 4;
+        return 50;
+    }
+
     function columnas(modo) {
         if (modo === "censo") {
             return ["numero", "fecha", "modulo", "piso", "habitacion", "estadoCenso", "estadoHabitacion", "camas", "ocupadas", "ocupadasCheckIn"].map(function (clave) {
-                if (clave !== "ocupadas") return { data: clave };
+                if (clave !== "ocupadas") {
+                    return { data: clave, responsivePriority: prioridadColumnaCenso(clave) };
+                }
                 return {
                     data: clave,
+                    responsivePriority: prioridadColumnaCenso(clave),
                     createdCell: function (td, valor, row) {
                         var input = document.createElement("input");
                         input.type = "number";
@@ -156,7 +167,9 @@ export function crearCenso(dependencias) {
         }
         if (modo === "misCensos") {
             return ["numero", "fecha", "campamento", "modulo", "piso", "habitacion", "camas", "ocupadas", "turno"]
-                .map(function (clave) { return { data: clave }; });
+                .map(function (clave) {
+                    return { data: clave, responsivePriority: prioridadColumnaCenso(clave === "campamento" ? "modulo" : clave) };
+                });
         }
         return null;
     }

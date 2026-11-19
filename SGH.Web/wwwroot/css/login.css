@@ -515,6 +515,59 @@ body.con-aviso-cookies .avisos {
   to { opacity: 0; }
 }
 
+@media (max-width: 480px), (max-height: 740px) {
+  html:has(body.login-body) {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  body.login-body {
+    height: auto;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .login-page {
+    height: auto;
+    min-height: 100dvh;
+    align-items: flex-start;
+    overflow: visible;
+    padding: 0.65rem 0.85rem 1.15rem;
+  }
+
+  .login-card {
+    width: 100%;
+    max-height: none;
+    margin: 0 auto;
+    padding: 1rem 1.1rem 0.9rem;
+  }
+
+  .login-logo {
+    height: 3.75rem;
+  }
+
+  .login-title {
+    margin-bottom: 0.65rem;
+    font-size: 1.15rem;
+  }
+
+  .login-company {
+    height: 1.85rem;
+    margin-top: 0.55rem;
+  }
+
+  .login-meta {
+    margin-top: 0.45rem;
+  }
+
+  .selectores-apariencia {
+    margin-bottom: 0.15rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .aviso-nuevo,
   .aviso-sale {
@@ -555,8 +608,17 @@ html:not([data-tema="claro"]) .login-texto li {
 html:not([data-tema="claro"]) .login-input,
 html:not([data-tema="claro"]) .login-select {
   border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.1);
+  background-image: none;
   color: #fff;
+}
+
+html:not([data-tema="claro"]) .login-input:-webkit-autofill,
+html:not([data-tema="claro"]) .login-input:-webkit-autofill:hover,
+html:not([data-tema="claro"]) .login-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff;
+  transition: background-color 9999s ease-out 0s;
+  box-shadow: 0 0 0 1000px rgba(40, 32, 28, 0.92) inset;
 }
 
 html:not([data-tema="claro"]) .login-select {

@@ -19,6 +19,14 @@ while IFS= read -r -d '' archivo; do
   cp -a "$archivo" "$destino"
 done < <(find "$INFRA" -path '*/Persistence/*.sql' -type f -print0)
 
+MIGR="$ROOT/Docs/datos/migracion"
+if [[ -d "$MIGR" ]]; then
+  while IFS= read -r -d '' archivo; do
+    base="$(basename "$archivo")"
+    cp -a "$archivo" "$DEST/Migracion_${base}"
+  done < <(find "$MIGR" -maxdepth 1 -name '*.sql' -type f -print0)
+fi
+
 cat >"$DEST/LEEME.md" <<'EOF'
 # Scripts HOTELDB — copia local (no versionada)
 

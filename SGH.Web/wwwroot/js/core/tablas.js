@@ -46,10 +46,16 @@ export function crearTablas() {
         if (window.DataTable && DataTable.Responsive) {
             opciones.responsive = {
                 details: {
-                    type: "inline",
+                    type: "column",
                     target: "tr"
                 }
             };
+            opciones.columnDefs = (columnas || []).map(function (columna, indice) {
+                var prioridad = columna && columna.responsivePriority != null
+                    ? columna.responsivePriority
+                    : (indice < 2 ? indice + 1 : 100 + indice);
+                return { targets: indice, responsivePriority: prioridad };
+            });
         }
         if (ordenInicial) opciones.order = ordenInicial;
         var elementoTabla = nodo.querySelector("table.modulo-tabla, table.tabla");
