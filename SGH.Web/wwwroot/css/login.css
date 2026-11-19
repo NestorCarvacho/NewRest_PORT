@@ -553,7 +553,8 @@ body.con-aviso-cookies .avisos {
   }
 }
 
-@media (max-width: 480px), (max-height: 740px) {
+/* Solo teléfono: tarjeta a ancho útil. La altura sola no debe ensanchar la tarjeta en notebook. */
+@media (max-width: 480px) {
   html:has(body.login-body) {
     height: auto;
     min-height: 100%;
@@ -577,7 +578,7 @@ body.con-aviso-cookies .avisos {
   }
 
   .login-card {
-    width: 100%;
+    width: min(100%, 26.5rem);
     max-height: none;
     margin: 0 auto;
     padding: 1rem 1.1rem 0.9rem;
