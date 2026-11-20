@@ -24,6 +24,7 @@ public sealed record HabitacionVinculadaBano(int Id, string Nombre);
 
 public sealed record TipoCamaListado(
     int Id,
+    int CampamentoId,
     string Nombre,
     short AnchoCm,
     short LargoCm,
