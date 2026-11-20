@@ -18,7 +18,7 @@ Convenciones:
 | 1 | `SGH.Infrastructure/Cuenta/Persistence/001_sp_login.sql` | Login | Independiente; contrato documentado en `Docs/login-pendiente-revision-base-de-datos.md`. |
 | 2 | `SGH.Infrastructure/Navegacion/Persistence/001_navegacion_hotldb.sql` | Menú / navegación | `he_sp_menu_obtener_por_perfil` + datos Menus/MenusPerfil CU-HAB. |
 | 3 | `SGH.Infrastructure/Censo/Persistence/001_sp_censo.sql` | Censo | Envuelve SP legado `HAB_ObtieneCensos` / `CSO_GuardaCenso`. |
-| 4 | `SGH.Infrastructure/Reserva/Persistence/001_sp_reserva.sql` | Reserva | Antes de `004_sp_generar_reservas.sql` (generación llama reserva legada). |
+| 4 | `SGH.Infrastructure/Reserva/Persistence/001_reserva_hotldb.sql` | Reserva | Todos los `he_sp_reserva_*`; antes de `004_sp_generar_reservas.sql` en Solicitud. |
 | 5 | `SGH.Infrastructure/Habitacion/Persistence/001_habitacion_hotldb.sql` | Habitación | CU-HAB-01/02: tablas, columnas y todos los `he_sp_*` en un solo script. |
 | 6 | `SGH.Infrastructure/Solicitud/Persistence/001_sp_solicitud.sql` | Solicitud | Base del módulo; ver `README.md`. |
 | 7 | `SGH.Infrastructure/Solicitud/Persistence/002_sp_pasajeros_solicitud.sql` | Solicitud | Pasajeros en detalle. |
@@ -36,7 +36,7 @@ No re-ejecutar los `001` solo para aplicar estos cambios. Usar los archivos nume
 | Orden QA | Archivo | Requiere antes |
 |----------|---------|----------------|
 | A | ~~`002_sp_login_passwordv2_dual.sql`~~ | **Obsoleto.** Volver a ejecutar solo `001_sp_login.sql` o `Docs/datos/paquetes-ssms/Login_ejecutar_HOTELDB.sql`. |
-| B | `SGH.Infrastructure/Reserva/Persistence/002_sp_reserva_buscar_rango_top.sql` | `001_sp_reserva.sql` (sin `@MaxFilas` ni rango 30 días en búsqueda) |
+| B | ~~`002_sp_reserva_buscar_rango_top.sql`~~ | **Obsoleto.** Re-ejecutar `001_reserva_hotldb.sql` o `Docs/datos/paquetes-ssms/Reserva_ejecutar_HOTELDB.sql`. |
 | C | `SGH.Infrastructure/Solicitud/Persistence/009_sp_solicitud_buscar_listado.sql` | `001_sp_solicitud.sql` y, si aplica, scripts **002–008** del módulo |
 | D | ~~parches CU-HAB por archivo~~ | **Obsoleto.** Re-ejecutar `001_habitacion_hotldb.sql` o `Docs/datos/paquetes-ssms/Habitacion_ejecutar_HOTELDB.sql`. |
 
@@ -46,7 +46,7 @@ Tras actualizar el flujo de **importación**, el `README.md` pide **volver a des
 
 - `001_sp_solicitud.sql` (ítem 9)
 - `004_sp_generar_reservas.sql` (ítem 13)
-- Bloque `he_sp_reserva_registrar_movimiento` en `001_sp_reserva.sql` (ítem 4)
+- `001_reserva_hotldb.sql` (ítem 4)
 
 ## 2. Por módulo (si solo migrás una parte)
 
@@ -74,9 +74,11 @@ Sincronizar paquete: `python3 tools/empaquetar-navegacion-ssms.py`.
 
 Sincronizar copia SSMS tras editar Persistence: `python3 tools/empaquetar-habitacion-ssms.py`.
 
-### Reserva
+### Reserva (un solo archivo)
 
-1. `001_sp_reserva.sql`
+1. `Docs/datos/paquetes-ssms/Reserva_ejecutar_HOTELDB.sql` en SSMS contra **HOTELDB**, **o** `SGH.Infrastructure/Reserva/Persistence/001_reserva_hotldb.sql`.
+
+Sincronizar paquete: `python3 tools/empaquetar-reserva-ssms.py`.
 
 ### Censo
 
@@ -97,7 +99,7 @@ Sincronizar copia SSMS tras editar Persistence: `python3 tools/empaquetar-habita
 1. `007_sp_solicitud_asegurar_periodo.sql`
 2. `008_sp_reserva_finalizar_checkout.sql`
 3. `006_sp_cargar_pasajero.sql`
-4. Re-ejecutar `001_sp_solicitud.sql`, `004_sp_generar_reservas.sql`, `001_sp_reserva.sql` (movimientos).
+4. Re-ejecutar `001_sp_solicitud.sql`, `004_sp_generar_reservas.sql`, `001_reserva_hotldb.sql`.
 
 ### Informe legado `INF_Aseos` (optimización, fuera del MVC)
 

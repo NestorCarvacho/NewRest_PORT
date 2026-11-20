@@ -79,7 +79,7 @@ Una fila por **`IdTabla`** (definición del catálogo). Columna **Editable** = e
 | 2 | 2 | Cargos Trabajador | 1012 | Sí | `LIS_ObtenerListasPorMinera` | `LIS_GuardaItemLista` / `LIS_EliminaItemLista` | 2.1.1c | Pendiente |
 | 3 | 3 | Tipos de Empresa | 4 | No | `LIS_ObtenerListasPorMinera` | `LIS_GuardaItemLista` / `LIS_EliminaItemLista` | 2.1.1b | Pendiente |
 | 4 | 4 | Area Pabellón | 3 | Sí | `LIS_ObtenerListasPorMinera` | `LIS_GuardaItemLista` / `LIS_EliminaItemLista` | 2.1.1b | Pendiente |
-| 5 | 5 | Origen Reserva | 4 | No | `LIS_ObtenerListasPorMinera` | `LIS_GuardaItemLista` / `LIS_EliminaItemLista` | 2.1.1a | Reserva — origen (`001_sp_reserva.sql`) |
+| 5 | 5 | Origen Reserva | 4 | No | `LIS_ObtenerListasPorMinera` | `LIS_GuardaItemLista` / `LIS_EliminaItemLista` | 2.1.1a | Reserva — origen (`001_reserva_hotldb.sql`) |
 | 6 | 6 | Estados Reserva | 5 | No | `LIS_ObtenerListasPorMinera` | `LIS_GuardaItemLista` / `LIS_EliminaItemLista` | 2.1.1a | Reserva — estados (`EstadoTabla`) |
 | 7 | 7 | Estados Cama | 3 | No | `LIS_ObtenerListasPorMinera` | `LIS_GuardaItemLista` / `LIS_EliminaItemLista` | 2.1.1a | Pendiente |
 | 8 | 8 | Estados Habitación | 5 | No | `LIS_ObtenerListasPorMinera` | `LIS_GuardaItemLista` / `LIS_EliminaItemLista` | 2.1.1a | Pendiente |

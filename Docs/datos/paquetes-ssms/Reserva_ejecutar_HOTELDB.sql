@@ -1,9 +1,6 @@
-/*
-    Reserva. La búsqueda y el alta reproducen el repositorio legado:
-    el listado era LINQ y el alta grababa estado P, origen R, tablas 6, 5 y 10.
-    Check-in y check-out envuelven RES_RealizaCheckX (operación I u O).
-    Los nombres de columna salen del modelo EF del legado. Si HOTELDB difiere, se ajusta este script.
-*/
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+GO
 
 CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_buscar
     @CampamentoId int,
@@ -25,6 +22,12 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_buscar
     @MaxFilas int = 5000
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Listado de reservas con filtros; rango 30 días y TOP @MaxFilas por defecto.
+    --======================================================
+
     SET NOCOUNT ON;
 
     DECLARE @DesdeEfectivo date = @FechaReservaDesde;
@@ -103,6 +106,12 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_listar_catalogo
     @CampamentoId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Catálogos para formulario: áreas, estados, pasajeros, habitaciones y turnos.
+    --======================================================
+
     SET NOCOUNT ON;
 
     SELECT a.Id, e.Nombre + ' - ' + a.Nombre AS Etiqueta
@@ -154,6 +163,12 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_crear
     @Id int OUTPUT
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Alta de reserva manual (origen R, estado P) con tablas legado 5, 6 y 10.
+    --======================================================
+
     SET NOCOUNT ON;
 
     DECLARE @TipoTurno varchar(20);
@@ -231,6 +246,12 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_esta_en_campamento
     @CampamentoId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Indica si la reserva pertenece al campamento de sesión.
+    --======================================================
+
     SET NOCOUNT ON;
     SELECT CAST(CASE WHEN EXISTS (
         SELECT 1
@@ -258,6 +279,12 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_actualizar
     @UsuarioId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Edición de reserva; valida turno, área, fechas y cupo en habitación.
+    --======================================================
+
     SET NOCOUNT ON;
 
     IF NOT EXISTS (SELECT 1 FROM dbo.Reservas WITH (NOLOCK) WHERE Id = @ReservaId AND CampamentoId = @CampamentoId)
@@ -314,6 +341,12 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_registrar_movimiento
     @Ret int OUTPUT
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Check-in u out vía RES_RealizaCheckX; en out invoca he_sp_reserva_finalizar_checkout.
+    --======================================================
+
     SET NOCOUNT ON;
 
     IF NOT EXISTS (

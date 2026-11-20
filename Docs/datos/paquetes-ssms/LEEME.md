@@ -16,6 +16,18 @@ Tras editar Persistence, copiar al paquete:
 python3 tools/empaquetar-habitacion-ssms.py
 ```
 
+## Reserva — qué ejecutar
+
+| Archivo | Base de datos | Cuándo |
+|---------|---------------|--------|
+| `Reserva_ejecutar_HOTELDB.sql` | **HOTELDB** | Todos los `he_sp_reserva_*` (búsqueda, catálogo, CRUD, check-in/out) |
+
+Fuente: `SGH.Infrastructure/Reserva/Persistence/001_reserva_hotldb.sql`.
+
+```bash
+python3 tools/empaquetar-reserva-ssms.py
+```
+
 ## Navegación / menú — qué ejecutar
 
 | Archivo | Base de datos | Cuándo |
