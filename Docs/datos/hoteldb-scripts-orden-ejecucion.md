@@ -57,6 +57,10 @@ Tras actualizar el flujo de **importación**, el `README.md` pide **volver a des
 
 ## 2. Por módulo (si solo migrás una parte)
 
+### Censo (solo este módulo, un archivo)
+
+1. `Docs/datos/paquetes-ssms/Censo_ejecutar_HOTELDB.sql` en SSMS contra **HOTELDB** (equivale a `SGH.Infrastructure/Censo/Persistence/001_sp_censo.sql`).
+
 ### Cuenta
 
 1. `001_sp_login.sql`
