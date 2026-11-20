@@ -14,6 +14,12 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_censo_buscar
     @Turno varchar(10)
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-19
+    --  description: Obtiene los censos de un campamento, con opción de filtrar por módulo, piso y habitación.
+    --======================================================
+
     SET NOCOUNT ON;
 
     IF @CampamentoId <= 0
@@ -21,7 +27,7 @@ BEGIN
 
     IF @ModuloId > 0 AND NOT EXISTS (
         SELECT 1
-        FROM dbo.Pabellones
+        FROM dbo.Pabellones WITH (NOLOCK)
         WHERE Id = @ModuloId
           AND CampamentoId = @CampamentoId
           AND IsActive = 1)
@@ -29,8 +35,8 @@ BEGIN
 
     IF @PisoId > 0 AND NOT EXISTS (
         SELECT 1
-        FROM dbo.Modulos AS m
-        INNER JOIN dbo.Pabellones AS p ON p.Id = m.PabellonId
+        FROM dbo.Modulos AS m WITH (NOLOCK)
+        INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
         WHERE m.Id = @PisoId
           AND p.CampamentoId = @CampamentoId
           AND m.IsActive = 1)
@@ -38,9 +44,9 @@ BEGIN
 
     IF @HabitacionId > 0 AND NOT EXISTS (
         SELECT 1
-        FROM dbo.Habitaciones AS h
-        INNER JOIN dbo.Modulos AS m ON m.Id = h.ModuloId
-        INNER JOIN dbo.Pabellones AS p ON p.Id = m.PabellonId
+        FROM dbo.Habitaciones AS h WITH (NOLOCK)
+        INNER JOIN dbo.Modulos AS m WITH (NOLOCK) ON m.Id = h.ModuloId
+        INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
         WHERE h.Id = @HabitacionId
           AND p.CampamentoId = @CampamentoId
           AND h.IsActive = 1)
@@ -64,6 +70,12 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_censo_buscar_por_usuario
     @UsuarioId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-19
+    --  description: Obtiene los censos de un usuario en un campamento específico.
+    --======================================================
+
     SET NOCOUNT ON;
 
     EXEC dbo.CSO_ObtieneCensoByUser
@@ -78,25 +90,31 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_censo_listar_catalogo
     @CampamentoId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-19
+    --  description: Lista los pabellones, módulos y habitaciones de un campamento específico.
+    --======================================================
+
     SET NOCOUNT ON;
 
     SELECT p.Id, p.Nombre AS Etiqueta, 0 AS PadreId
-    FROM dbo.Pabellones AS p
+    FROM dbo.Pabellones AS p WITH (NOLOCK)
     WHERE p.IsActive = 1
       AND p.CampamentoId = @CampamentoId
     ORDER BY p.Nombre;
 
     SELECT m.Id, m.Nombre AS Etiqueta, m.PabellonId AS PadreId
-    FROM dbo.Modulos AS m
-    INNER JOIN dbo.Pabellones AS p ON p.Id = m.PabellonId
+    FROM dbo.Modulos AS m WITH (NOLOCK)
+    INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
     WHERE m.IsActive = 1
       AND p.CampamentoId = @CampamentoId
     ORDER BY m.Nombre;
 
     SELECT h.Id, h.Nombre AS Etiqueta, h.ModuloId AS PadreId
-    FROM dbo.Habitaciones AS h
-    INNER JOIN dbo.Modulos AS m ON m.Id = h.ModuloId
-    INNER JOIN dbo.Pabellones AS p ON p.Id = m.PabellonId
+    FROM dbo.Habitaciones AS h WITH (NOLOCK)
+    INNER JOIN dbo.Modulos AS m WITH (NOLOCK) ON m.Id = h.ModuloId
+    INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
     WHERE h.IsActive = 1
       AND p.CampamentoId = @CampamentoId
     ORDER BY h.Nombre;
@@ -110,6 +128,12 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_censo_filtro_pertenece
     @HabitacionId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-19
+    --  description: Verifica si pabellón, piso (módulo) u habitación del filtro pertenecen al campamento.
+    --======================================================
+
     SET NOCOUNT ON;
 
     DECLARE @pertenece bit = 1;
@@ -119,7 +143,7 @@ BEGIN
 
     IF @ModuloId > 0 AND NOT EXISTS (
         SELECT 1
-        FROM dbo.Pabellones
+        FROM dbo.Pabellones WITH (NOLOCK)
         WHERE Id = @ModuloId
           AND CampamentoId = @CampamentoId
           AND IsActive = 1)
@@ -127,8 +151,8 @@ BEGIN
 
     IF @PisoId > 0 AND NOT EXISTS (
         SELECT 1
-        FROM dbo.Modulos AS m
-        INNER JOIN dbo.Pabellones AS p ON p.Id = m.PabellonId
+        FROM dbo.Modulos AS m WITH (NOLOCK)
+        INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
         WHERE m.Id = @PisoId
           AND p.CampamentoId = @CampamentoId
           AND m.IsActive = 1)
@@ -136,9 +160,9 @@ BEGIN
 
     IF @HabitacionId > 0 AND NOT EXISTS (
         SELECT 1
-        FROM dbo.Habitaciones AS h
-        INNER JOIN dbo.Modulos AS m ON m.Id = h.ModuloId
-        INNER JOIN dbo.Pabellones AS p ON p.Id = m.PabellonId
+        FROM dbo.Habitaciones AS h WITH (NOLOCK)
+        INNER JOIN dbo.Modulos AS m WITH (NOLOCK) ON m.Id = h.ModuloId
+        INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
         WHERE h.Id = @HabitacionId
           AND p.CampamentoId = @CampamentoId
           AND h.IsActive = 1)
@@ -158,13 +182,19 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_censo_guardar
     @CampamentoId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-19
+    --  description: Persiste camas ocupadas de una fila de censo vía CSO_GuardaCenso; valida habitación en campamento.
+    --======================================================
+
     SET NOCOUNT ON;
 
     IF NOT EXISTS (
         SELECT 1
-        FROM dbo.Habitaciones AS h
-        INNER JOIN dbo.Modulos AS m ON m.Id = h.ModuloId
-        INNER JOIN dbo.Pabellones AS p ON p.Id = m.PabellonId
+        FROM dbo.Habitaciones AS h WITH (NOLOCK)
+        INNER JOIN dbo.Modulos AS m WITH (NOLOCK) ON m.Id = h.ModuloId
+        INNER JOIN dbo.Pabellones AS p WITH (NOLOCK) ON p.Id = m.PabellonId
         WHERE h.Id = @HabitacionId
           AND p.CampamentoId = @CampamentoId
           AND h.IsActive = 1)
