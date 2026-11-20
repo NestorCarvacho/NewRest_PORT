@@ -6,6 +6,7 @@ Convenciones:
 
 - **Nombres de SP propios del repo:** `dbo.he_sp_{tabla}_{accion}` (prefijo proyecto `he_`). Ver `Docs/datos/he-sp-nomenclatura-procedimientos.md`.
 - **Copias locales en un solo lugar:** carpeta raíz `scripts-ejecutar/` (gitignored). Poblarla con `./tools/sincronizar-scripts-ejecutar.sh`; los archivos se llaman `{Modulo}_{nombre}.sql`.
+- **SSMS sin terminal:** paquetes por módulo en `Docs/datos/paquetes-ssms/` (ej. `Censo_ejecutar_HOTELDB.sql` + `LEEME.md`).
 - Ejecutar cada archivo en **SSMS / sqlcmd** contra la misma base que usa `ConnectionStrings:Hoteldb`.
 - Abrir los `.sql` como **UTF-8** (mensajes con tildes).
 - Los scripts con `CREATE OR ALTER` son **re-ejecutables** salvo que el comentario del archivo diga lo contrario.
