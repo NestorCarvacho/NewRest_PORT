@@ -16,6 +16,18 @@ Tras editar Persistence, copiar al paquete:
 python3 tools/empaquetar-habitacion-ssms.py
 ```
 
+## Navegación / menú — qué ejecutar
+
+| Archivo | Base de datos | Cuándo |
+|---------|---------------|--------|
+| `Navegacion_ejecutar_HOTELDB.sql` | **HOTELDB** | Menú por perfil + ítems Config habitaciones/baños y `MenusPerfil` |
+
+Fuente: `SGH.Infrastructure/Navegacion/Persistence/001_navegacion_hotldb.sql`.
+
+```bash
+python3 tools/empaquetar-navegacion-ssms.py
+```
+
 ## Login / Cuenta — qué ejecutar
 
 | Archivo | Base de datos | Cuándo |

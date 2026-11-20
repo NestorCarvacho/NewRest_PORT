@@ -31,5 +31,5 @@ UI: solapas del escritorio (`habitaciones`, `banos`), igual que Censo/Reserva; p
 ## Próximos pasos
 
 1. `HabitacionDiaSemana` / `XMLSemana` en guardado para RN-06 horaria.
-2. Menú Configuración en HOTELDB: `002_menu_config_habitacion_bano.sql` + mapeo `/app/config/habitaciones` y `/app/config/banos`.
+2. Menú Configuración en HOTELDB: `001_navegacion_hotldb.sql` (bloques de datos tras `he_sp_menu_obtener_por_perfil`).
 3. Reserva por `CamaId` si el negocio exige RN-03 a nivel de plaza.

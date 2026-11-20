@@ -16,7 +16,7 @@ Convenciones:
 | # | Ruta del archivo | Módulo | Cuándo / dependencia |
 |---|------------------|--------|----------------------|
 | 1 | `SGH.Infrastructure/Cuenta/Persistence/001_sp_login.sql` | Login | Independiente; contrato documentado en `Docs/login-pendiente-revision-base-de-datos.md`. |
-| 2 | `SGH.Infrastructure/Navegacion/Persistence/001_sp_menu.sql` | Menú | Requiere tablas `Menus`, `MenusPerfil`. |
+| 2 | `SGH.Infrastructure/Navegacion/Persistence/001_navegacion_hotldb.sql` | Menú / navegación | `he_sp_menu_obtener_por_perfil` + datos Menus/MenusPerfil CU-HAB. |
 | 3 | `SGH.Infrastructure/Censo/Persistence/001_sp_censo.sql` | Censo | Envuelve SP legado `HAB_ObtieneCensos` / `CSO_GuardaCenso`. |
 | 4 | `SGH.Infrastructure/Reserva/Persistence/001_sp_reserva.sql` | Reserva | Antes de `004_sp_generar_reservas.sql` (generación llama reserva legada). |
 | 5 | `SGH.Infrastructure/Habitacion/Persistence/001_habitacion_hotldb.sql` | Habitación | CU-HAB-01/02: tablas, columnas y todos los `he_sp_*` en un solo script. |
@@ -28,8 +28,6 @@ Convenciones:
 | 11 | `SGH.Infrastructure/Solicitud/Persistence/007_sp_solicitud_asegurar_periodo.sql` | Solicitud | Bloque **importación** masiva (con **008**). |
 | 12 | `SGH.Infrastructure/Solicitud/Persistence/008_sp_reserva_finalizar_checkout.sql` | Solicitud | Importación / checkout. |
 | 13 | `SGH.Infrastructure/Solicitud/Persistence/006_sp_cargar_pasajero.sql` | Solicitud | Carga masiva; después de **007** y **008**. |
-| 14 | `SGH.Infrastructure/Navegacion/Persistence/002_menu_config_habitacion_bano.sql` | Navegación | Entradas de menú Configuración; después de CU-HAB operativo. |
-| 15 | `SGH.Infrastructure/Navegacion/Persistence/003_menusperfil_habitacion_bano_por_perfil.sql` | Navegación | `MenusPerfil` por perfil (p. ej. 68); después del **002**. |
 
 ### Parches incrementales (QA que ya ejecutó los `001_*` antiguos)
 
@@ -62,10 +60,13 @@ Tras actualizar el flujo de **importación**, el `README.md` pide **volver a des
 
 No ejecutar: `001_sp_login_borrador.sql` ni `002_sp_login_passwordv2_dual.sql` (obsoleto; unificado en `001`).
 
-### Navegación
+### Navegación (un solo archivo)
 
-1. `001_sp_menu.sql`
-2. `002_menu_config_habitacion_bano.sql` (solo si usás pantallas Config habitaciones/baños)
+1. `Docs/datos/paquetes-ssms/Navegacion_ejecutar_HOTELDB.sql` en SSMS contra **HOTELDB**, **o** `SGH.Infrastructure/Navegacion/Persistence/001_navegacion_hotldb.sql`.
+
+Incluye el SP de menú, alta de ítems Config habitaciones/baños y asignación `MenusPerfil` (perfil 1 y 68). Cambiar `@PerfilId` en el último bloque si aplica otro perfil.
+
+Sincronizar paquete: `python3 tools/empaquetar-navegacion-ssms.py`.
 
 ### Habitación (CU-HAB — un solo archivo)
 

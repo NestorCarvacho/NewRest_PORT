@@ -47,10 +47,9 @@ Misma definición: `SGH.Infrastructure/Habitacion/Persistence/001_habitacion_hot
 
 Para ver la solapa **Tipos de cama** (`modo: tiposcama`):
 
-| # | Archivo |
-|---|---------|
-| 1 | `SGH.Infrastructure/Navegacion/Persistence/002_menu_config_habitacion_bano.sql` (si no está aplicado) |
-| 2 | Entrada `tiposcama` en `Menus` / `MenusPerfil` según perfil (p. ej. script `003_menusperfil_habitacion_bano_por_perfil.sql` o alta manual documentada en CU-HAB). |
+| Archivo |
+|---------|
+| `Docs/datos/paquetes-ssms/Navegacion_ejecutar_HOTELDB.sql` o `001_navegacion_hotldb.sql` (menú CU-HAB + perfil 68; añadir `tiposcama` manual si aplica). |
 
 ---
 

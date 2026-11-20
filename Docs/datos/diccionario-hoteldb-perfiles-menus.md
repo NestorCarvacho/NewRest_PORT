@@ -141,9 +141,9 @@ Misma jerarquía `nav` / `side`. En **Gestión** (`PadreId = 2`) aparecen los m�
 | Solicitud Empresa | `/app/gestion/solicitudempresa` | No migrado |
 | Gestión OT, etc. | … | No migrado |
 
-En **Configuración** (`PadreId = 4`): **Usuarios** → `/app/config/usuario` → `/Cuenta/Usuarios`; **Habitaciones** → `/app/config/habitaciones` → `/Habitacion/Datos`; **Baños** → `/app/config/banos` → `/Habitacion/Banos` (script `SGH.Infrastructure/Navegacion/Persistence/002_menu_config_habitacion_bano.sql`).
+En **Configuración** (`PadreId = 4`): **Usuarios** → `/app/config/usuario` → `/Cuenta/Usuarios`; **Habitaciones** → `/app/config/habitaciones` → `/Habitacion/Datos`; **Baños** → `/app/config/banos` → `/Habitacion/Banos` (incluido en `001_navegacion_hotldb.sql`).
 
-Para que un perfil operativo (p. ej. **68**) vea solo Habitaciones y Baños: tras el `002`, ejecutar `003_menusperfil_habitacion_bano_por_perfil.sql` (ajustar `@PerfilId`) o insertar manualmente en `MenusPerfil` el **nav** de Configuración más los dos `MenuId` de esos enlaces. El menú y la autorización HTTP (`GestionarHabitaciones`) leen el mismo `he_sp_menu_obtener_por_perfil`.
+Para un perfil operativo (p. ej. **68**): el mismo script asigna `MenusPerfil`; ajustar `@PerfilId` en el último bloque o insertar manualmente. El menú y la autorización HTTP leen `he_sp_menu_obtener_por_perfil`.
 
 `Dashboard` (`nav` sin hijos `side`) no se muestra en el menú nuevo hasta tener página destino. **Home** con `Link = #` queda deshabilitado.
 
