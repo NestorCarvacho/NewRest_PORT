@@ -123,8 +123,11 @@ def main() -> None:
         for name in SP_FILES
     )
 
+    merged = strip_sql(header + section1 + section2)
+    merged = re.sub(r"\nGO\s*\n(?:\s*\n)*GO\s*\n", "\nGO\n", merged, flags=re.IGNORECASE)
+
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(strip_sql(header + section1 + section2), encoding="utf-8")
+    OUT.write_text(merged, encoding="utf-8")
     print(f"Escrito {OUT} ({OUT.stat().st_size} bytes)")
 
 

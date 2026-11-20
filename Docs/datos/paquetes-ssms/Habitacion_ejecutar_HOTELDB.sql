@@ -103,9 +103,6 @@ FROM dbo.Habitaciones AS h
 WHERE h.PermiteUsoPorTurnos = 0
   AND (ISNULL(h.MinutosMin, 0) > 0 OR ISNULL(h.MinutosMax, 0) > 0);
 GO
-
-GO
-
 IF OBJECT_ID(N'dbo.TipoCama', N'U') IS NULL
 BEGIN
     CREATE TABLE dbo.TipoCama
@@ -159,17 +156,11 @@ GO
 IF COL_LENGTH(N'dbo.Camas', N'RopaCamaObservacion') IS NULL
     ALTER TABLE dbo.Camas ADD RopaCamaObservacion nvarchar(500) NULL;
 GO
-
-GO
-
 UPDATE dbo.Banos
 SET IsActive = 1
 WHERE Estado = N'ACTIVO'
   AND IsActive = 0;
 GO
-
-GO
-
 CREATE OR ALTER PROCEDURE dbo.he_sp_bano_listar
     @CampamentoId int,
     @SoloActivos int = 1,
@@ -484,9 +475,6 @@ SET NOCOUNT ON;
     UPDATE dbo.Habitaciones SET CantidadCamas = @CantidadObjetivo WHERE Id = @HabitacionId;
 END
 GO
-
-GO
-
 CREATE OR ALTER PROCEDURE dbo.he_sp_tipo_cama_listar
     @CampamentoId int,
     @SoloActivos int = 1,
@@ -811,9 +799,6 @@ SET NOCOUNT ON;
         ORDER BY tc.Nombre;
 END
 GO
-
-GO
-
 CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_id_por_nombre
     @CampamentoId int,
     @Nombre       nvarchar(100)
@@ -835,9 +820,6 @@ SET NOCOUNT ON;
       AND LTRIM(RTRIM(h.Nombre)) = LTRIM(RTRIM(@Nombre));
 END
 GO
-
-GO
-
 CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_listar
     @EmpresaMandanteId int,
     @CampamentoId int,
@@ -1369,6 +1351,4 @@ SET NOCOUNT ON;
         RETURN;
     END CATCH
 END
-GO
-
 GO
