@@ -73,14 +73,21 @@ No ejecutar: `001_sp_login_borrador.sql` ni `002_sp_login_passwordv2_dual.sql` (
 1. `001_sp_menu.sql`
 2. `002_menu_config_habitacion_bano.sql` (solo si usás pantallas Config habitaciones/baños)
 
-### Habitación (CU-HAB-01)
+### Habitación (CU-HAB — un solo archivo en SSMS)
 
-Orden fijo — ver `Docs/SGH-CU-HAB-01-implementacion.md`:
+1. `Docs/datos/paquetes-ssms/Habitacion_ejecutar_HOTELDB.sql` contra **HOTELDB** (incluye los 7 scripts en orden).
+
+Desglose para desarrollo (mismo orden que el paquete):
 
 1. `002_hotldb_cu_hab_extension.sql`
-2. `003_sp_bano_cama.sql`
-3. `001_sp_habitacion.sql`
-4. `004_banos_isactive_estado.sql` (opcional, corrección de datos)
+2. `005_hotldb_tipo_cama_inventario.sql`
+3. `004_banos_isactive_estado.sql` (opcional)
+4. `003_sp_bano_cama.sql`
+5. `006_sp_tipo_cama_inventario.sql`
+6. `007_sp_habitacion_resolver_nombre.sql`
+7. `001_sp_habitacion.sql`
+
+Regenerar paquete: `python3 tools/empaquetar-habitacion-ssms.py`. Ver `Docs/SGH-CU-HAB-01-implementacion.md`.
 
 ### Reserva
 

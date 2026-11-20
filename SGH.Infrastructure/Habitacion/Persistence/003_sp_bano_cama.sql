@@ -6,7 +6,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_bano_listar
     @BanoId int = 0
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Lista baños del campamento y cantidad de habitaciones vinculadas.
+    --======================================================
+
+SET NOCOUNT ON;
 
     SELECT
         b.Id,
@@ -30,7 +36,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_bano_habitaciones_activas_por_bano
     @CampamentoId int
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Habitaciones activas asociadas a un baño en el campamento.
+    --======================================================
+
+SET NOCOUNT ON;
 
     SELECT
         h.Id,
@@ -58,7 +70,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_bano_guardar
     @Mensaje nvarchar(500) OUTPUT
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Alta y edición de baño; aplica RN-01 inactivación y RN-02 compatibilidad de sexo.
+    --======================================================
+
+SET NOCOUNT ON;
     SET @Mensaje = NULL;
     SET @IdResultado = 0;
 
@@ -140,7 +158,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_cama_listar_por_habitacion
     @SoloActivas int = 1
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Camas de una habitación con tipo e inventario (CU-HAB-02).
+    --======================================================
+
+SET NOCOUNT ON;
 
     SELECT
         c.Id,
@@ -173,7 +197,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_cama_guardar
     @Mensaje nvarchar(500) OUTPUT
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Alta y edición de cama; actualiza conteos en Habitaciones.
+    --======================================================
+
+SET NOCOUNT ON;
     SET @Mensaje = NULL;
     SET @IdResultado = 0;
 
@@ -251,7 +281,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_sincronizar_camas
     @UsuarioId int
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Crea o ajusta filas en Camas según CantidadCamas de la habitación.
+    --======================================================
+
+SET NOCOUNT ON;
 
     IF @CantidadObjetivo < 1
         THROW 51080, 'La habitación debe tener al menos 1 cama.', 1;

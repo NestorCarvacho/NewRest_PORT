@@ -4,7 +4,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_id_por_nombre
     @Nombre       nvarchar(100)
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Obtiene Id de habitación por nombre en el campamento (carga masiva).
+    --======================================================
+
+SET NOCOUNT ON;
 
     SELECT TOP (1) h.Id
     FROM dbo.Habitaciones AS h WITH (NOLOCK)

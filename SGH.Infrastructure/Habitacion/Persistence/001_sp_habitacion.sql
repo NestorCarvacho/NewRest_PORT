@@ -12,7 +12,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_listar
     @HabitacionId int = 0
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Listado de habitaciones con baño y flags de uso CU-HAB.
+    --======================================================
+
+SET NOCOUNT ON;
 
     SELECT
         h.Id,
@@ -53,7 +59,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_obtener
     @CampamentoId int
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Detalle de habitación para edición.
+    --======================================================
+
+SET NOCOUNT ON;
 
     SELECT
         h.Id,
@@ -90,7 +102,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_catalogo
     @MineraId int
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Result sets de catálogo para formularios (pabellones, listas, baños, tipos).
+    --======================================================
+
+SET NOCOUNT ON;
 
     SELECT p.Id, p.Nombre AS Etiqueta, 0 AS PadreId
     FROM dbo.Pabellones AS p
@@ -160,7 +178,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_guardar
     @Mensaje nvarchar(500) OUTPUT
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Alta y edición de habitación; legado HAB_* o guardado nativo.
+    --======================================================
+
+SET NOCOUNT ON;
     SET @Mensaje = NULL;
     SET @IdResultado = 0;
 

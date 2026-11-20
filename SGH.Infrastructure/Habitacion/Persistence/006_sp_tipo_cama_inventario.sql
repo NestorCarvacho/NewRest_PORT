@@ -6,7 +6,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_tipo_cama_listar
     @TipoCamaId int = 0
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Catálogo de tipos de cama por campamento.
+    --======================================================
+
+SET NOCOUNT ON;
 
     SELECT
         t.Id,
@@ -37,7 +43,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_tipo_cama_guardar
     @Mensaje nvarchar(500) OUTPUT
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Alta y edición de tipo de cama.
+    --======================================================
+
+SET NOCOUNT ON;
     SET @Mensaje = NULL;
     SET @IdResultado = 0;
 
@@ -103,7 +115,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_cama_listar_por_habitacion
     @SoloActivas int = 1
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Camas de una habitación con tipo e inventario (CU-HAB-02).
+    --======================================================
+
+SET NOCOUNT ON;
 
     SELECT
         c.Id,
@@ -150,7 +168,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_cama_guardar
     @Mensaje nvarchar(500) OUTPUT
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Alta y edición de cama; actualiza conteos en Habitaciones.
+    --======================================================
+
+SET NOCOUNT ON;
     SET @Mensaje = NULL;
     SET @IdResultado = 0;
 
@@ -246,7 +270,13 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_catalogo
     @MineraId int
 AS
 BEGIN
-    SET NOCOUNT ON;
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Result sets de catálogo para formularios (pabellones, listas, baños, tipos).
+    --======================================================
+
+SET NOCOUNT ON;
 
     SELECT p.Id, p.Nombre AS Etiqueta, 0 AS PadreId
     FROM dbo.Pabellones AS p
