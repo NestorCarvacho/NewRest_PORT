@@ -55,7 +55,7 @@ La **aplicación** ya llama `he_sp_*`, pero **HOTELDB** aún solo tiene `sp_*` (
 
 1. **Renombrar rápido (recomendado en SSMS):** `Docs/datos/migracion/he_sp_renombrar_rapido.sql` — un solo archivo con **PREVIEW** + bucle `sp_rename` (52 pares). Alternativa expandida: `he_sp_renombrar_desde_sp_legacy.sql`.  
    Luego **re-ejecutar** los `.sql` de `SGH.Infrastructure/**/Persistence/` (orden en `hoteldb-scripts-orden-ejecucion.md`) para actualizar `EXEC` internos que aún citen `sp_*`.
-2. **O crear desde cero:** ejecutar los scripts del repo con `CREATE OR ALTER` (login primero: `Cuenta/Persistence/001_sp_login.sql` y `002_sp_login_passwordv2_dual.sql` si aplica).
+2. **O crear desde cero:** ejecutar los scripts del repo con `CREATE OR ALTER` (login: un solo archivo `Cuenta/Persistence/001_sp_login.sql` o `Docs/datos/paquetes-ssms/Login_ejecutar_HOTELDB.sql`).
 3. **Solo emergencia:** sinónimos (`he_sp_cuenta_login_puente_qa.sql` o `he_sp_sinonimos_desde_sp_legacy.sql`); no sustituye el rename ni el despliegue real.
 
 Si ya creaste sinónimos `he_sp_*`, el script de **rename** los elimina antes de renombrar el procedimiento legado.

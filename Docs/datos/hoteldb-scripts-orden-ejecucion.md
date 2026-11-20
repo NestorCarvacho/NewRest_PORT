@@ -43,7 +43,7 @@ No re-ejecutar los `001` solo para aplicar estos cambios. Usar los archivos nume
 
 | Orden QA | Archivo | Requiere antes |
 |----------|---------|----------------|
-| A | `SGH.Infrastructure/Cuenta/Persistence/002_sp_login_passwordv2_dual.sql` | `001_sp_login.sql` (versión sin `PasswordV2` / dual hash) |
+| A | ~~`002_sp_login_passwordv2_dual.sql`~~ | **Obsoleto.** Volver a ejecutar solo `001_sp_login.sql` o `Docs/datos/paquetes-ssms/Login_ejecutar_HOTELDB.sql`. |
 | B | `SGH.Infrastructure/Reserva/Persistence/002_sp_reserva_buscar_rango_top.sql` | `001_sp_reserva.sql` (sin `@MaxFilas` ni rango 30 días en búsqueda) |
 | C | `SGH.Infrastructure/Solicitud/Persistence/009_sp_solicitud_buscar_listado.sql` | `001_sp_solicitud.sql` y, si aplica, scripts **002–008** del módulo |
 | D | `005_hotldb_tipo_cama_inventario.sql` + `006_sp_tipo_cama_inventario.sql` | Bloque habitación **002** y **003** ya aplicado |
@@ -62,11 +62,11 @@ Tras actualizar el flujo de **importación**, el `README.md` pide **volver a des
 
 1. `Docs/datos/paquetes-ssms/Censo_ejecutar_HOTELDB.sql` en SSMS contra **HOTELDB** (equivale a `SGH.Infrastructure/Censo/Persistence/001_sp_censo.sql`).
 
-### Cuenta
+### Cuenta / Login (un solo archivo)
 
-1. `001_sp_login.sql`
+1. `Docs/datos/paquetes-ssms/Login_ejecutar_HOTELDB.sql` en SSMS contra **HOTELDB**, **o** `SGH.Infrastructure/Cuenta/Persistence/001_sp_login.sql` (mismo contenido: ALTER arriba, SP abajo).
 
-No ejecutar: `001_sp_login_borrador.sql` (borrador / checklist en `Docs/login-pendiente-revision-base-de-datos.md`).
+No ejecutar: `001_sp_login_borrador.sql` ni `002_sp_login_passwordv2_dual.sql` (obsoleto; unificado en `001`).
 
 ### Navegación
 

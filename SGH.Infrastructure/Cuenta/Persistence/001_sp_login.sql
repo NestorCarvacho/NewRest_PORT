@@ -1,12 +1,20 @@
 /*
     Login de SGH para el esquema HOTELDB contrastado en LocalDB.
+    Ejecutar de una sola vez: primero ALTER TABLE, luego procedimientos he_sp_usuario_*.
+
     Password y el historial se amplían a nvarchar(100), suficiente para BCrypt.
     La aplicación compara los hashes del historial porque SQL Server no puede
     verificar BCrypt; el límite histórico se toma de Listas.usrpasshist.
+
+    Incluye PasswordV2 y lógica dual MD5/BCrypt (antes en 002_sp_login_passwordv2_dual.sql).
 */
 SET ANSI_NULLS ON;
 SET QUOTED_IDENTIFIER ON;
 GO
+
+/* ==================================================================================
+   SECCIÓN 1 — ALTER TABLE (columnas login, BCrypt, bloqueo)
+   ================================================================================== */
 
 IF COL_LENGTH('dbo.Usuarios', 'Password') IS NULL
     THROW 51000, 'No existe dbo.Usuarios.Password.', 1;
@@ -46,11 +54,20 @@ BEGIN
 END
 GO
 
-/* Envoltorio del legado USU_ValidaEstadoUsuario (@rut, @ret OUTPUT). */
+/* ==================================================================================
+   SECCIÓN 2 — PROCEDIMIENTOS dbo.he_sp_usuario_*
+   ================================================================================== */
+
 CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_validar_estado
     @Rut varchar(20)
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Envoltorio de USU_ValidaEstadoUsuario; devuelve el código de estado del RUT.
+    --======================================================
+
     SET NOCOUNT ON;
 
     DECLARE @ret int;
@@ -59,28 +76,32 @@ BEGIN
 END
 GO
 
-/* Envoltorio del legado USU_ObtieneCampamentosYPerfilesUsuario (@UsuarioRut).
-   Debe devolver, con estos nombres o equivalentes que Dapper ya mapea:
-   Id, PerfilId, PerfilNombre, CampamentoId, CampamentoNombre,
-   EmpresaMandanteId, EmpresaMandanteNombre, CampamentoPerfil, UsuarioId,
-   UsuarioNombre. Los dos últimos identifican la cuenta asociada al perfil elegido. */
 CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_obtener_campamentos_y_perfiles
     @Rut varchar(20)
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Envoltorio de USU_ObtieneCampamentosYPerfilesUsuario; perfiles y campamentos del login.
+    --======================================================
+
     SET NOCOUNT ON;
     EXEC dbo.USU_ObtieneCampamentosYPerfilesUsuario @UsuarioRut = @Rut;
 END
 GO
 
-/* Devuelve una fila activa para verificar la clave en la aplicación.
-   En RUT duplicados la fila con la fecha de creación más reciente es estable;
-   la selección final del usuario se toma de PerfilesUsuario en el segundo paso. */
 CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_obtener_para_login
     @Rut varchar(20),
     @LoginInterno int = 0
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Fila activa del usuario con hashes MD5/BCrypt y bloqueo para verificar credenciales.
+    --======================================================
+
     SET NOCOUNT ON;
     SELECT TOP (1)
         u.Id,
@@ -107,8 +128,6 @@ BEGIN
 END
 GO
 
-/* Actualiza las filas del RUT como lo hacía el procedimiento legado y añade el
-   nuevo BCrypt al historial. @HuellaMd5 conserva la comprobación histórica MD5. */
 CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_actualizar_password
     @Rut varchar(20),
     @PasswordHash varchar(200),
@@ -116,6 +135,12 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_actualizar_password
     @Ret int OUTPUT
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Graba BCrypt en PasswordV2, historial y valida huella MD5 según Listas.usrpasshist.
+    --======================================================
+
     SET NOCOUNT ON;
     SET @Ret = -1;
     SET XACT_ABORT ON;
@@ -185,15 +210,18 @@ BEGIN
 END
 GO
 
-/* Migra las huellas MD5 vigentes a BCrypt sin aplicar la regla de historial. */
-/* Cambio administrativo por RUT. La aplicación debe generar el BCrypt antes
-   de llamar al procedimiento; nunca se recibe una contraseña en claro. */
 CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_cambiar_password_por_rut
     @Rut varchar(25),
     @PasswordHash varchar(200),
     @Ret int OUTPUT
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Cambio administrativo por RUT; solo hash BCrypt generado en la aplicación.
+    --======================================================
+
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
     SET @Ret = -1;
@@ -245,6 +273,12 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_reemplazar_hash
     @Ret int OUTPUT
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Migra huella MD5 vigente en Password a PasswordV2 cuando V2 está vacío.
+    --======================================================
+
     SET NOCOUNT ON;
     SET @Ret = -1;
     IF @PasswordHash IS NULL OR LEN(@PasswordHash) <> 60 OR @PasswordHash NOT LIKE '$2%'
@@ -263,12 +297,17 @@ BEGIN
 END
 GO
 
-/* Marca migración dual: copia BCrypt erróneo en Password a PasswordV2 sin tocar Password legado. */
 CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_retirar_md5
     @Rut varchar(20),
     @Ret int OUTPUT
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Marca Md5Retirado; copia BCrypt desde Password a PasswordV2 sin alterar Password legado.
+    --======================================================
+
     SET NOCOUNT ON;
     SET @Ret = -1;
     UPDATE dbo.Usuarios
@@ -290,13 +329,18 @@ BEGIN
 END
 GO
 
-/* Los umbrales coinciden con ReglasCuenta: cinco intentos y treinta minutos. */
 CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_registrar_intento_fallido
     @Rut varchar(20),
     @Intentos int OUTPUT,
     @Bloqueada bit OUTPUT
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Registra intento fallido y bloqueo temporal según ReglasCuenta (umbrales en aplicación).
+    --======================================================
+
     SET NOCOUNT ON;
 
     DECLARE @Ahora datetime = GETDATE();
@@ -334,6 +378,12 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_obtener_historial_contrasenas
     @Rut varchar(20)
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Devuelve las últimas contraseñas del historial según usrpasshist en Listas.
+    --======================================================
+
     SET NOCOUNT ON;
 
     DECLARE @Cantidad int;
@@ -356,6 +406,12 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_reiniciar_intentos
     @Rut varchar(20)
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-20
+    --  description: Limpia intentos fallidos y bloqueo tras autenticación exitosa.
+    --======================================================
+
     SET NOCOUNT ON;
 
     UPDATE dbo.Usuarios

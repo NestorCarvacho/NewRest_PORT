@@ -2,6 +2,21 @@
 
 Para quien **no usa terminal**: un solo archivo por módulo, listo para **SQL Server Management Studio** o **Azure Data Studio**.
 
+## Login / Cuenta — qué ejecutar
+
+| Archivo | Base de datos | Cuándo |
+|---------|---------------|--------|
+| `Login_ejecutar_HOTELDB.sql` | **HOTELDB** | Instalación o actualización login: columnas, BCrypt (`PasswordV2`), bloqueo e `he_sp_usuario_*` en un solo F5 |
+
+Origen: `SGH.Infrastructure/Cuenta/Persistence/001_sp_login.sql` (reemplaza el antiguo parche `002_sp_login_passwordv2_dual.sql`).
+
+Estructura del archivo:
+
+1. **Sección 1** — `ALTER TABLE` en `Usuarios` / `HistoricoPassword`
+2. **Sección 2** — procedimientos con cabecera `author` / `date` / `description`
+
+Requisitos: procedimientos legados `USU_ValidaEstadoUsuario`, `USU_ObtieneCampamentosYPerfilesUsuario`, tablas `Usuarios`, `HistoricoPassword`, `Listas`.
+
 ## Censo — qué ejecutar
 
 | Archivo | Base de datos | Cuándo |
