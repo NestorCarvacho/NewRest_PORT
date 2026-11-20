@@ -12,9 +12,7 @@
 
 ## Scripts SQL (aplicar en HOTELDB, en orden)
 
-1. `SGH.Infrastructure/Habitacion/Persistence/002_hotldb_cu_hab_extension.sql` — tablas y columnas
-2. `SGH.Infrastructure/Habitacion/Persistence/003_sp_bano_cama.sql` — procedimientos baño/cama
-3. `SGH.Infrastructure/Habitacion/Persistence/001_sp_habitacion.sql` — habitación (lee `Banos`/`Camas`)
+1. `SGH.Infrastructure/Habitacion/Persistence/001_habitacion_hotldb.sql` — tablas, columnas y todos los procedimientos CU-HAB (un solo archivo; QA: `Docs/datos/paquetes-ssms/Habitacion_ejecutar_HOTELDB.sql`)
 
 Sin **002** y **003**, **001** referencia columnas/objetos inexistentes.
 

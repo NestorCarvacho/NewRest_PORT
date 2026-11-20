@@ -44,9 +44,7 @@ Los archivos se nombran `{Modulo}_{nombre-original}.sql` para evitar colisiones 
 
 Parche listado por fila (escritorio): re-ejecutar en HOTELDB:
 
-- `Habitacion_001_sp_habitacion.sql`
-- `Habitacion_003_sp_bano_cama.sql`
-- `Habitacion_006_sp_tipo_cama_inventario.sql`
+- `Habitacion_001_habitacion_hotldb.sql`
 EOF
 
 echo "Copiados $(find "$DEST" -maxdepth 1 -name '*.sql' | wc -l) scripts en $DEST"

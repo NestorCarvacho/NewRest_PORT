@@ -6,16 +6,11 @@ Para quien **no usa terminal**: un solo archivo por módulo, listo para **SQL Se
 
 | Archivo | Base de datos | Cuándo |
 |---------|---------------|--------|
-| `Habitacion_ejecutar_HOTELDB.sql` | **HOTELDB** | Un solo F5: tablas/columnas y todos los SP del módulo (sustituye los 7 `.sql` de Persistence) |
+| `Habitacion_ejecutar_HOTELDB.sql` | **HOTELDB** | Un solo F5: tablas, columnas y todos los `he_sp_*` del módulo |
 
-**Orden interno del paquete** (no hay que ejecutar archivos sueltos):
+Fuente en el repo: `SGH.Infrastructure/Habitacion/Persistence/001_habitacion_hotldb.sql` (único archivo del módulo).
 
-| Sección | Archivos origen |
-|---------|-----------------|
-| 1 — DDL / datos | `002_hotldb_cu_hab_extension.sql`, `005_hotldb_tipo_cama_inventario.sql`, `004_banos_isactive_estado.sql` (opcional) |
-| 2 — SP | `003_sp_bano_cama.sql`, `006_sp_tipo_cama_inventario.sql`, `007_sp_habitacion_resolver_nombre.sql`, `001_sp_habitacion.sql` |
-
-Tras editar cualquier script en `SGH.Infrastructure/Habitacion/Persistence/`, regenerar:
+Tras editar Persistence, copiar al paquete:
 
 ```bash
 python3 tools/empaquetar-habitacion-ssms.py

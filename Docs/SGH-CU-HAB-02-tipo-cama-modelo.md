@@ -33,8 +33,7 @@ Los campos operativos (`CodigoCama`, `Habilitada`, `Orden`, `IsActive`) se conse
 
 ## SQL (orden)
 
-1. `005_hotldb_tipo_cama_inventario.sql`
-2. `006_sp_tipo_cama_inventario.sql` (incluye `he_sp_cama_*` y octavo result set de `he_sp_habitacion_catalogo`)
+1. `001_habitacion_hotldb.sql` (incluye `TipoCama`, inventario en `Camas` y SP `he_sp_tipo_cama_*` / catálogo extendido)
 
 ## Mid (`MidHabitaciones`)
 

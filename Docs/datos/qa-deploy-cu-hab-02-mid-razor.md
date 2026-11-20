@@ -17,26 +17,17 @@ Referencias: `Docs/SGH-CU-HAB-02-tipo-cama-modelo.md`, `Docs/prompt-proyecto/pos
 
 ## Prerrequisitos en HOTELDB
 
-Si **nunca** aplicaste CU-HAB-01 en QA, ejecutar antes (orden fijo):
+Ejecutar en **SSMS** contra **HOTELDB** (una sola vez, idempotente):
 
-| # | Archivo | Objetos principales |
-|---|---------|---------------------|
-| 1 | `SGH.Infrastructure/Habitacion/Persistence/002_hotldb_cu_hab_extension.sql` | Tablas/columnas `Habitaciones`, `Banos`, `Camas`. |
-| 2 | `SGH.Infrastructure/Habitacion/Persistence/003_sp_bano_cama.sql` | `he_sp_bano_*`, `he_sp_cama_*` (legado sync), `he_sp_habitacion_sincronizar_camas`, etc. |
-| 3 | `SGH.Infrastructure/Habitacion/Persistence/001_sp_habitacion.sql` | `he_sp_habitacion_*` (catálogo, CRUD habitación). |
+| Archivo | Contenido |
+|---------|-----------|
+| `Docs/datos/paquetes-ssms/Habitacion_ejecutar_HOTELDB.sql` | CU-HAB-01/02: tablas `Banos`, `Camas`, `TipoCama`, columnas, `UPDATE` baños y todos los `he_sp_*` habitación/baño/cama. |
 
-Opcional (datos): `004_banos_isactive_estado.sql`.
+Misma definición: `SGH.Infrastructure/Habitacion/Persistence/001_habitacion_hotldb.sql`.
 
 ---
 
-## Scripts obligatorios para este merge (CU-HAB-02)
-
-Ejecutar en **SSMS / sqlcmd** contra `ConnectionStrings:Hoteldb`, en este orden:
-
-| # | Archivo | Qué deja listo |
-|---|---------|----------------|
-| 1 | `SGH.Infrastructure/Habitacion/Persistence/005_hotldb_tipo_cama_inventario.sql` | Tabla `dbo.TipoCama`; columnas inventario en `dbo.Camas` (`TipoCamaId`, fechas/observaciones colchón y ropa). |
-| 2 | `SGH.Infrastructure/Habitacion/Persistence/006_sp_tipo_cama_inventario.sql` | Procedimientos listados abajo. |
+## Procedimientos relevantes para CU-HAB-02 (dentro del archivo único)
 
 ### Procedimientos creados o actualizados en el paso 2
 
@@ -48,9 +39,7 @@ Ejecutar en **SSMS / sqlcmd** contra `ConnectionStrings:Hoteldb`, en este orden:
 | `dbo.he_sp_cama_guardar` | Mid `guardarcama` (no permite cambiar `HabitacionId`) |
 | `dbo.he_sp_habitacion_catalogo` | Octavo result set con tipos de cama; escritorio habitaciones / baños / tipos |
 
-**Re-ejecutable:** ambos archivos son idempotentes (`IF NOT EXISTS` / `CREATE OR ALTER`).
-
-Si QA ya tenía `001_sp_habitacion.sql` antiguo sin el catálogo extendido, basta con el paso 2 (`006` redefine `he_sp_habitacion_catalogo`). Solo re-ejecutar `001_sp_habitacion.sql` completo si el equipo prefiere alinear todo el módulo habitación con el repo actual.
+**Re-ejecutable:** `CREATE OR ALTER` e `IF NOT EXISTS` en el script único.
 
 ---
 
@@ -67,12 +56,7 @@ Para ver la solapa **Tipos de cama** (`modo: tiposcama`):
 
 ## Parches incrementales QA (no bloquean este merge)
 
-Si la base ya corre con `001_*` viejos, el repo documenta parches **A–D** en `Docs/datos/hoteldb-scripts-orden-ejecucion.md`. Para CU-HAB-02 solo importa la fila **D**:
-
-- `005_hotldb_tipo_cama_inventario.sql`
-- `006_sp_tipo_cama_inventario.sql`
-
-(Requieren bloque habitación **002** + **003** aplicado.)
+Parches viejos por archivo **obsoletos**: volver a ejecutar `001_habitacion_hotldb.sql` o el paquete SSMS (ver fila **D** en `hoteldb-scripts-orden-ejecucion.md`).
 
 ---
 
