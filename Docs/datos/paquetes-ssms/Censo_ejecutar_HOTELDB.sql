@@ -1,16 +1,3 @@
-/*
-================================================================================
-  MÓDULO: Censo — paquete único para QA / SSMS
-  Base:   HOTELDB
-  Origen: SGH.Infrastructure/Censo/Persistence/001_sp_censo.sql (mantener en sync)
-  Uso:    Abrir en SSMS, seleccionar HOTELDB, Ejecutar (F5).
-          No requiere scripts .sh ni carpeta scripts-ejecutar.
-  Instrucciones: Docs/datos/paquetes-ssms/LEEME.md
-================================================================================
-    Censo. La búsqueda envuelve HAB_ObtieneCensos.
-    Módulo de la pantalla es @modulo (pabellón) y Piso es @piso (módulo físico).
-    El guardado envuelve CSO_GuardaCenso y conserva resultado y mensaje de cada fila.
-*/
 
 CREATE OR ALTER PROCEDURE dbo.he_sp_censo_buscar
     @EmpresaMandanteId int,

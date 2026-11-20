@@ -1,7 +1,3 @@
-/*
-  CU-HAB-01 — Extensión HOTELDB: Baños, Camas y columnas en Habitaciones.
-  Ejecutar una vez en HOTELDB (idempotente donde aplica).
-*/
 
 IF OBJECT_ID(N'dbo.Banos', N'U') IS NULL
 BEGIN
@@ -76,7 +72,6 @@ IF COL_LENGTH(N'dbo.Habitaciones', N'TiempoHigienizacionMin') IS NULL
     ALTER TABLE dbo.Habitaciones ADD TiempoHigienizacionMin int NULL;
 GO
 
-/* Backfill: una cama por cada unidad de CantidadCamas (solo si no hay camas aún). */
 IF OBJECT_ID(N'dbo.Camas', N'U') IS NOT NULL
 BEGIN
     ;WITH n AS (
@@ -97,7 +92,6 @@ BEGIN
 END
 GO
 
-/* Sincronizar flags desde columnas legado cuando están vacías */
 UPDATE h
 SET PermiteUsoPorTurnos = CASE WHEN ISNULL(h.MinutosMin, 0) > 0 OR ISNULL(h.MinutosMax, 0) > 0 THEN 1 ELSE 0 END,
     PermiteUsoExclusivo = CASE WHEN ISNULL(h.PersonasCantidadMax, 0) >= ISNULL(h.CantidadCamas, 1) AND h.CantidadCamas > 0 THEN 1 ELSE 0 END,

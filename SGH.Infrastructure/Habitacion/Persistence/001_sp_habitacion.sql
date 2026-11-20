@@ -1,4 +1,3 @@
-/* Habitaciones — CRUD CU-HAB: legado HAB_* si está sano; si no (p. ej. files.HabitacionFiles), guardado nativo. */
 
 CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_listar
     @EmpresaMandanteId int,
@@ -254,7 +253,6 @@ SET NOCOUNT ON;
         RETURN;
     END
 
-    /* HAB_ValidaHabitacion (as-is HOTELDB): no permite quitar reservable con reservas activas. */
     IF @Id > 0
        AND @IsReservable = 0
        AND EXISTS (
@@ -269,7 +267,6 @@ SET NOCOUNT ON;
         RETURN;
     END
 
-    /* HAB_GuardaHabitacion legado solo hace UPDATE (Id > 0); el alta va por INSERT nativo CU-HAB. */
     DECLARE @UsarNativo bit = 1;
     DECLARE @GuardadoLegado bit = 0;
     DECLARE @ret int;
@@ -376,7 +373,6 @@ SET NOCOUNT ON;
     BEGIN
         SET @UsarNativo = 1;
 
-        /* HOTELDB (HAB_GuardaHabitacion + muestra): SexoTabla=11, Sexo varchar(1); EstadoTabla=8, Estado varchar(2). */
         DECLARE @EstadoTabla int = 8;
         DECLARE @SexoTabla int = 11;
         DECLARE @SexoLista varchar(1);

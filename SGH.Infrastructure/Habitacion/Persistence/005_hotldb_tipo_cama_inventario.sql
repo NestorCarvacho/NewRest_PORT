@@ -1,7 +1,4 @@
-/*
-    CU-HAB-02 — TipoCama (catálogo por campamento) e inventario en dbo.Camas.
-    Ejecutar después de 002_hotldb_cu_hab_extension.sql y 003_sp_bano_cama.sql.
-*/
+
 IF OBJECT_ID(N'dbo.TipoCama', N'U') IS NULL
 BEGIN
     CREATE TABLE dbo.TipoCama

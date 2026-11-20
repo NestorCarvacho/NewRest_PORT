@@ -72,12 +72,4 @@ Deberían existir: `he_sp_censo_buscar`, `he_sp_censo_buscar_por_usuario`, `he_s
 
 Si se edita `001_sp_censo.sql` en el código, **regenerar** este paquete copiando el contenido (o pedir al dev que actualice el archivo en el mismo commit).
 
-Cada procedimiento lleva cabecera interna:
-
-```text
---  author: ...
---  date: ...
---  description: ...
-```
-
-Cuando cambie la lógica o el responsable, actualizar **author**, **date** y **description** en ambos archivos.
+En SQL solo quedan comentarios de **auditoría** por procedimiento (`author`, `date`, `description`). Para limpiar otros comentarios: `python3 tools/strip_sql_comments.py <archivos.sql>`.

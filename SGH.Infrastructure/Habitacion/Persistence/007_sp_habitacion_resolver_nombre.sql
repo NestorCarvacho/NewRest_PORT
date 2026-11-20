@@ -1,4 +1,4 @@
-/* Resolver habitación por nombre/código en el campamento (carga masiva de camas). */
+
 CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_id_por_nombre
     @CampamentoId int,
     @Nombre       nvarchar(100)

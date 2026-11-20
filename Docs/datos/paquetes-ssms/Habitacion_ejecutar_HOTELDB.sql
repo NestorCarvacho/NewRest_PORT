@@ -1,24 +1,6 @@
-/*
-================================================================================
-  MÓDULO: Habitación (CU-HAB) — paquete único para QA / SSMS
-  Base:   HOTELDB
-  Origen: SGH.Infrastructure/Habitacion/Persistence/*.sql (7 archivos, este orden)
-  Uso:    Abrir en SSMS, seleccionar HOTELDB, Ejecutar (F5) una sola vez.
-  Instrucciones: Docs/datos/paquetes-ssms/LEEME.md
-  Regenerar: python3 tools/empaquetar-habitacion-ssms.py
-================================================================================
-*/
 SET ANSI_NULLS ON;
 SET QUOTED_IDENTIFIER ON;
 GO
-
-/* ========== SECCIÓN 1 — Tablas, ALTER y datos (orden fijo) ========== */
-
-/* --- 002_hotldb_cu_hab_extension.sql --- */
-/*
-  CU-HAB-01 — Extensión HOTELDB: Baños, Camas y columnas en Habitaciones.
-  Ejecutar una vez en HOTELDB (idempotente donde aplica).
-*/
 
 IF OBJECT_ID(N'dbo.Banos', N'U') IS NULL
 BEGIN
@@ -93,7 +75,6 @@ IF COL_LENGTH(N'dbo.Habitaciones', N'TiempoHigienizacionMin') IS NULL
     ALTER TABLE dbo.Habitaciones ADD TiempoHigienizacionMin int NULL;
 GO
 
-/* Backfill: una cama por cada unidad de CantidadCamas (solo si no hay camas aún). */
 IF OBJECT_ID(N'dbo.Camas', N'U') IS NOT NULL
 BEGIN
     ;WITH n AS (
@@ -114,7 +95,6 @@ BEGIN
 END
 GO
 
-/* Sincronizar flags desde columnas legado cuando están vacías */
 UPDATE h
 SET PermiteUsoPorTurnos = CASE WHEN ISNULL(h.MinutosMin, 0) > 0 OR ISNULL(h.MinutosMax, 0) > 0 THEN 1 ELSE 0 END,
     PermiteUsoExclusivo = CASE WHEN ISNULL(h.PersonasCantidadMax, 0) >= ISNULL(h.CantidadCamas, 1) AND h.CantidadCamas > 0 THEN 1 ELSE 0 END,
@@ -126,11 +106,6 @@ GO
 
 GO
 
-/* --- 005_hotldb_tipo_cama_inventario.sql --- */
-/*
-    CU-HAB-02 — TipoCama (catálogo por campamento) e inventario en dbo.Camas.
-    Ejecutar después de 002_hotldb_cu_hab_extension.sql y 003_sp_bano_cama.sql.
-*/
 IF OBJECT_ID(N'dbo.TipoCama', N'U') IS NULL
 BEGIN
     CREATE TABLE dbo.TipoCama
@@ -187,8 +162,6 @@ GO
 
 GO
 
-/* --- 004_banos_isactive_estado.sql (opcional: corrección de datos) --- */
-/* Alinea IsActive con Estado en filas ya guardadas con estado ACTIVO e IsActive=0 */
 UPDATE dbo.Banos
 SET IsActive = 1
 WHERE Estado = N'ACTIVO'
@@ -197,11 +170,6 @@ GO
 
 GO
 
-/* ========== SECCIÓN 2 — Procedimientos he_sp_* ========== */
-
-/* --- 003_sp_bano_cama.sql --- */
-/* Baños y camas — CRUD CU-HAB-01 */
-
 CREATE OR ALTER PROCEDURE dbo.he_sp_bano_listar
     @CampamentoId int,
     @SoloActivos int = 1,
@@ -209,14 +177,6 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_bano_listar
 AS
 BEGIN
     --======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Lista baños del campamento y cantidad de habitaciones vinculadas.
-    --======================================================
-
-SET NOCOUNT ON;
-
---======================================================
     --  author: Nestor Carvacho
     --  date: 2026-11-20
     --  description: Lista baños del campamento y cantidad de habitaciones vinculadas.
@@ -254,14 +214,6 @@ BEGIN
 
 SET NOCOUNT ON;
 
---======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Habitaciones activas asociadas a un baño en el campamento.
-    --======================================================
-
-SET NOCOUNT ON;
-
     SELECT
         h.Id,
         h.Nombre
@@ -289,14 +241,6 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_bano_guardar
 AS
 BEGIN
     --======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Alta y edición de baño; aplica RN-01 inactivación y RN-02 compatibilidad de sexo.
-    --======================================================
-
-SET NOCOUNT ON;
-
---======================================================
     --  author: Nestor Carvacho
     --  date: 2026-11-20
     --  description: Alta y edición de baño; aplica RN-01 inactivación y RN-02 compatibilidad de sexo.
@@ -347,7 +291,6 @@ SET NOCOUNT ON;
             RETURN;
         END
 
-        /* RN-02 al cambiar sexo: habitaciones vinculadas deben ser compatibles */
         IF EXISTS (
             SELECT 1
             FROM dbo.Habitaciones AS h WITH (NOLOCK)
@@ -392,14 +335,6 @@ BEGIN
 
 SET NOCOUNT ON;
 
---======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Camas de una habitación con tipo e inventario (CU-HAB-02).
-    --======================================================
-
-SET NOCOUNT ON;
-
     SELECT
         c.Id,
         c.HabitacionId,
@@ -432,14 +367,6 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_cama_guardar
 AS
 BEGIN
     --======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Alta y edición de cama; actualiza conteos en Habitaciones.
-    --======================================================
-
-SET NOCOUNT ON;
-
---======================================================
     --  author: Nestor Carvacho
     --  date: 2026-11-20
     --  description: Alta y edición de cama; actualiza conteos en Habitaciones.
@@ -531,14 +458,6 @@ BEGIN
 
 SET NOCOUNT ON;
 
---======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Crea o ajusta filas en Camas según CantidadCamas de la habitación.
-    --======================================================
-
-SET NOCOUNT ON;
-
     IF @CantidadObjetivo < 1
         THROW 51080, 'La habitación debe tener al menos 1 cama.', 1;
 
@@ -566,8 +485,7 @@ SET NOCOUNT ON;
 END
 GO
 
-/* --- 006_sp_tipo_cama_inventario.sql --- */
-/* CU-HAB-02 — TipoCama y camas con inventario */
+GO
 
 CREATE OR ALTER PROCEDURE dbo.he_sp_tipo_cama_listar
     @CampamentoId int,
@@ -576,14 +494,6 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_tipo_cama_listar
 AS
 BEGIN
     --======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Catálogo de tipos de cama por campamento.
-    --======================================================
-
-SET NOCOUNT ON;
-
---======================================================
     --  author: Nestor Carvacho
     --  date: 2026-11-20
     --  description: Catálogo de tipos de cama por campamento.
@@ -621,14 +531,6 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_tipo_cama_guardar
 AS
 BEGIN
     --======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Alta y edición de tipo de cama.
-    --======================================================
-
-SET NOCOUNT ON;
-
---======================================================
     --  author: Nestor Carvacho
     --  date: 2026-11-20
     --  description: Alta y edición de tipo de cama.
@@ -708,14 +610,6 @@ BEGIN
 
 SET NOCOUNT ON;
 
---======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Camas de una habitación con tipo e inventario (CU-HAB-02).
-    --======================================================
-
-SET NOCOUNT ON;
-
     SELECT
         c.Id,
         c.HabitacionId,
@@ -762,14 +656,6 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_cama_guardar
 AS
 BEGIN
     --======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Alta y edición de cama; actualiza conteos en Habitaciones.
-    --======================================================
-
-SET NOCOUNT ON;
-
---======================================================
     --  author: Nestor Carvacho
     --  date: 2026-11-20
     --  description: Alta y edición de cama; actualiza conteos en Habitaciones.
@@ -865,21 +751,12 @@ SET NOCOUNT ON;
 END
 GO
 
-/* Octavo result set: tipos de cama activos (requiere dbo.TipoCama). */
 CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_catalogo
     @CampamentoId int,
     @MineraId int
 AS
 BEGIN
     --======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Result sets de catálogo para formularios (pabellones, listas, baños, tipos).
-    --======================================================
-
-SET NOCOUNT ON;
-
---======================================================
     --  author: Nestor Carvacho
     --  date: 2026-11-20
     --  description: Result sets de catálogo para formularios (pabellones, listas, baños, tipos).
@@ -935,22 +812,14 @@ SET NOCOUNT ON;
 END
 GO
 
-/* --- 007_sp_habitacion_resolver_nombre.sql --- */
-/* Resolver habitación por nombre/código en el campamento (carga masiva de camas). */
+GO
+
 CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_id_por_nombre
     @CampamentoId int,
     @Nombre       nvarchar(100)
 AS
 BEGIN
     --======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Obtiene Id de habitación por nombre en el campamento (carga masiva).
-    --======================================================
-
-SET NOCOUNT ON;
-
---======================================================
     --  author: Nestor Carvacho
     --  date: 2026-11-20
     --  description: Obtiene Id de habitación por nombre en el campamento (carga masiva).
@@ -967,8 +836,7 @@ SET NOCOUNT ON;
 END
 GO
 
-/* --- 001_sp_habitacion.sql --- */
-/* Habitaciones — CRUD CU-HAB: legado HAB_* si está sano; si no (p. ej. files.HabitacionFiles), guardado nativo. */
+GO
 
 CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_listar
     @EmpresaMandanteId int,
@@ -983,14 +851,6 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_listar
 AS
 BEGIN
     --======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Listado de habitaciones con baño y flags de uso CU-HAB.
-    --======================================================
-
-SET NOCOUNT ON;
-
---======================================================
     --  author: Nestor Carvacho
     --  date: 2026-11-20
     --  description: Listado de habitaciones con baño y flags de uso CU-HAB.
@@ -1045,14 +905,6 @@ BEGIN
 
 SET NOCOUNT ON;
 
---======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Detalle de habitación para edición.
-    --======================================================
-
-SET NOCOUNT ON;
-
     SELECT
         h.Id,
         h.Nombre,
@@ -1089,14 +941,6 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_catalogo
 AS
 BEGIN
     --======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Result sets de catálogo para formularios (pabellones, listas, baños, tipos).
-    --======================================================
-
-SET NOCOUNT ON;
-
---======================================================
     --  author: Nestor Carvacho
     --  date: 2026-11-20
     --  description: Result sets de catálogo para formularios (pabellones, listas, baños, tipos).
@@ -1179,14 +1023,6 @@ BEGIN
     --======================================================
 
 SET NOCOUNT ON;
-
---======================================================
-    --  author: Nestor Carvacho
-    --  date: 2026-11-20
-    --  description: Alta y edición de habitación; legado HAB_* o guardado nativo.
-    --======================================================
-
-SET NOCOUNT ON;
     SET @Mensaje = NULL;
     SET @IdResultado = 0;
 
@@ -1256,7 +1092,6 @@ SET NOCOUNT ON;
         RETURN;
     END
 
-    /* HAB_ValidaHabitacion (as-is HOTELDB): no permite quitar reservable con reservas activas. */
     IF @Id > 0
        AND @IsReservable = 0
        AND EXISTS (
@@ -1271,7 +1106,6 @@ SET NOCOUNT ON;
         RETURN;
     END
 
-    /* HAB_GuardaHabitacion legado solo hace UPDATE (Id > 0); el alta va por INSERT nativo CU-HAB. */
     DECLARE @UsarNativo bit = 1;
     DECLARE @GuardadoLegado bit = 0;
     DECLARE @ret int;
@@ -1378,7 +1212,6 @@ SET NOCOUNT ON;
     BEGIN
         SET @UsarNativo = 1;
 
-        /* HOTELDB (HAB_GuardaHabitacion + muestra): SexoTabla=11, Sexo varchar(1); EstadoTabla=8, Estado varchar(2). */
         DECLARE @EstadoTabla int = 8;
         DECLARE @SexoTabla int = 11;
         DECLARE @SexoLista varchar(1);
@@ -1538,3 +1371,4 @@ SET NOCOUNT ON;
 END
 GO
 
+GO

@@ -1,29 +1,7 @@
-/*
-================================================================================
-  MÓDULO: Login / Cuenta — paquete único para QA / SSMS
-  Base:   HOTELDB
-  Origen: SGH.Infrastructure/Cuenta/Persistence/001_sp_login.sql (mantener en sync)
-  Uso:    Abrir en SSMS, seleccionar HOTELDB, Ejecutar (F5) una sola vez.
-          Sustituye 001_sp_login.sql + 002_sp_login_passwordv2_dual.sql.
-  Instrucciones: Docs/datos/paquetes-ssms/LEEME.md
-================================================================================
-*/
-    Login de SGH para el esquema HOTELDB contrastado en LocalDB.
-    Ejecutar de una sola vez: primero ALTER TABLE, luego procedimientos he_sp_usuario_*.
 
-    Password y el historial se amplían a nvarchar(100), suficiente para BCrypt.
-    La aplicación compara los hashes del historial porque SQL Server no puede
-    verificar BCrypt; el límite histórico se toma de Listas.usrpasshist.
-
-    Incluye PasswordV2 y lógica dual MD5/BCrypt (antes en 002_sp_login_passwordv2_dual.sql).
-*/
 SET ANSI_NULLS ON;
 SET QUOTED_IDENTIFIER ON;
 GO
-
-/* ==================================================================================
-   SECCIÓN 1 — ALTER TABLE (columnas login, BCrypt, bloqueo)
-   ================================================================================== */
 
 IF COL_LENGTH('dbo.Usuarios', 'Password') IS NULL
     THROW 51000, 'No existe dbo.Usuarios.Password.', 1;
@@ -62,10 +40,6 @@ BEGIN
     ALTER TABLE dbo.Usuarios ADD BloqueadaHasta datetime NULL;
 END
 GO
-
-/* ==================================================================================
-   SECCIÓN 2 — PROCEDIMIENTOS dbo.he_sp_usuario_*
-   ================================================================================== */
 
 CREATE OR ALTER PROCEDURE dbo.he_sp_usuario_validar_estado
     @Rut varchar(20)

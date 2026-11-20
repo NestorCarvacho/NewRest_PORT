@@ -1,8 +1,3 @@
-/*
-    Censo. La búsqueda envuelve HAB_ObtieneCensos.
-    Módulo de la pantalla es @modulo (pabellón) y Piso es @piso (módulo físico).
-    El guardado envuelve CSO_GuardaCenso y conserva resultado y mensaje de cada fila.
-*/
 
 CREATE OR ALTER PROCEDURE dbo.he_sp_censo_buscar
     @EmpresaMandanteId int,

@@ -1,4 +1,3 @@
-/* Baños y camas — CRUD CU-HAB-01 */
 
 CREATE OR ALTER PROCEDURE dbo.he_sp_bano_listar
     @CampamentoId int,
@@ -121,7 +120,6 @@ SET NOCOUNT ON;
             RETURN;
         END
 
-        /* RN-02 al cambiar sexo: habitaciones vinculadas deben ser compatibles */
         IF EXISTS (
             SELECT 1
             FROM dbo.Habitaciones AS h WITH (NOLOCK)

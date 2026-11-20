@@ -1,4 +1,3 @@
-/* CU-HAB-02 — TipoCama y camas con inventario */
 
 CREATE OR ALTER PROCEDURE dbo.he_sp_tipo_cama_listar
     @CampamentoId int,
@@ -264,7 +263,6 @@ SET NOCOUNT ON;
 END
 GO
 
-/* Octavo result set: tipos de cama activos (requiere dbo.TipoCama). */
 CREATE OR ALTER PROCEDURE dbo.he_sp_habitacion_catalogo
     @CampamentoId int,
     @MineraId int

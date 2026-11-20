@@ -100,39 +100,31 @@ def write_sources() -> None:
 
 
 def main() -> None:
-    header = """/*
-================================================================================
-  MÓDULO: Habitación (CU-HAB) — paquete único para QA / SSMS
-  Base:   HOTELDB
-  Origen: SGH.Infrastructure/Habitacion/Persistence/*.sql (7 archivos, este orden)
-  Uso:    Abrir en SSMS, seleccionar HOTELDB, Ejecutar (F5) una sola vez.
-  Instrucciones: Docs/datos/paquetes-ssms/LEEME.md
-  Regenerar: python3 tools/empaquetar-habitacion-ssms.py
-================================================================================
-*/
-SET ANSI_NULLS ON;
-SET QUOTED_IDENTIFIER ON;
-GO
+    import sys
 
-"""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from strip_sql_comments import strip_sql
 
-    section1 = "/* ========== SECCIÓN 1 — Tablas, ALTER y datos (orden fijo) ========== */\n\n"
-    for name in DDL_FILES:
-        block = read_file(name).strip()
-        if name.startswith("004"):
-            section1 += f"/* --- {name} (opcional: corrección de datos) --- */\n"
-        else:
-            section1 += f"/* --- {name} --- */\n"
-        section1 += block + "\n\nGO\n\n"
+    header = "SET ANSI_NULLS ON;\nSET QUOTED_IDENTIFIER ON;\nGO\n\n"
 
-    section2 = "/* ========== SECCIÓN 2 — Procedimientos he_sp_* ========== */\n\n"
-    for name in SP_FILES:
-        block = inject_audit(read_file(name).strip())
-        section2 += f"/* --- {name} --- */\n"
-        section2 += block + "\n\n"
+    def append_batch(sql: str) -> str:
+        sql = strip_sql(sql.strip())
+        if not sql.upper().endswith("GO"):
+            sql += "\nGO"
+        return sql + "\n\n"
+
+    section1 = "".join(append_batch(read_file(name)) for name in DDL_FILES)
+    section2 = "".join(
+        append_batch(
+            inject_audit(read_file(name).strip())
+            if "--  author:" not in read_file(name)
+            else read_file(name).strip()
+        )
+        for name in SP_FILES
+    )
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(header + section1 + section2, encoding="utf-8")
+    OUT.write_text(strip_sql(header + section1 + section2), encoding="utf-8")
     print(f"Escrito {OUT} ({OUT.stat().st_size} bytes)")
 
 
