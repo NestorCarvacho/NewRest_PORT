@@ -75,7 +75,7 @@ Una fila por **`IdTabla`** (definición del catálogo). Columna **Editable** = e
 
 | # | `IdTabla` | Catálogo | Ítems | Editable | SP lectura | SP mutación | Lote propuesto | NewRest hoy |
 |---|-----------|----------|-------|----------|------------|-------------|----------------|-------------|
-| 1 | 1 | Estados de Solicitud de Alojamiento | 4 | No | `LIS_ObtenerListasPorMinera` | `LIS_GuardaItemLista` / `LIS_EliminaItemLista` | 2.1.1a | Solicitud (`001_sp_solicitud.sql`) |
+| 1 | 1 | Estados de Solicitud de Alojamiento | 4 | No | `LIS_ObtenerListasPorMinera` | `LIS_GuardaItemLista` / `LIS_EliminaItemLista` | 2.1.1a | Solicitud (`001_solicitud_hotldb.sql`) |
 | 2 | 2 | Cargos Trabajador | 1012 | Sí | `LIS_ObtenerListasPorMinera` | `LIS_GuardaItemLista` / `LIS_EliminaItemLista` | 2.1.1c | Pendiente |
 | 3 | 3 | Tipos de Empresa | 4 | No | `LIS_ObtenerListasPorMinera` | `LIS_GuardaItemLista` / `LIS_EliminaItemLista` | 2.1.1b | Pendiente |
 | 4 | 4 | Area Pabellón | 3 | Sí | `LIS_ObtenerListasPorMinera` | `LIS_GuardaItemLista` / `LIS_EliminaItemLista` | 2.1.1b | Pendiente |

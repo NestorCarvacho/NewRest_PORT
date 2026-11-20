@@ -16,6 +16,18 @@ Tras editar Persistence, copiar al paquete:
 python3 tools/empaquetar-habitacion-ssms.py
 ```
 
+## Solicitud — qué ejecutar
+
+| Archivo | Base de datos | Cuándo |
+|---------|---------------|--------|
+| `Solicitud_ejecutar_HOTELDB.sql` | **HOTELDB** | Un F5: solicitudes, pasajeros, habitaciones, generación e importación masiva |
+
+Fuente: `SGH.Infrastructure/Solicitud/Persistence/001_solicitud_hotldb.sql`.
+
+```bash
+python3 tools/empaquetar-solicitud-ssms.py
+```
+
 ## Reserva — qué ejecutar
 
 | Archivo | Base de datos | Cuándo |

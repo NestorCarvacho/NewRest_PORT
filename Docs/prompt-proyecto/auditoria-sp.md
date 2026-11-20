@@ -35,4 +35,4 @@ WHERE Id = @Id;
 
 Alias legados (`UsuarioCreacion`, `fechaCreacion`) conservar el nombre del SP existente; no renombrar en migración parcial.
 
-Referencia: `SGH.Infrastructure/Reserva/Persistence/001_reserva_hotldb.sql`, `Solicitud/Persistence/001_sp_solicitud.sql`.
+Referencia: `SGH.Infrastructure/Reserva/Persistence/001_reserva_hotldb.sql`, `Solicitud/Persistence/001_solicitud_hotldb.sql`.

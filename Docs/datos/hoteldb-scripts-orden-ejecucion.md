@@ -18,16 +18,9 @@ Convenciones:
 | 1 | `SGH.Infrastructure/Cuenta/Persistence/001_sp_login.sql` | Login | Independiente; contrato documentado en `Docs/login-pendiente-revision-base-de-datos.md`. |
 | 2 | `SGH.Infrastructure/Navegacion/Persistence/001_navegacion_hotldb.sql` | Menú / navegación | `he_sp_menu_obtener_por_perfil` + datos Menus/MenusPerfil CU-HAB. |
 | 3 | `SGH.Infrastructure/Censo/Persistence/001_sp_censo.sql` | Censo | Envuelve SP legado `HAB_ObtieneCensos` / `CSO_GuardaCenso`. |
-| 4 | `SGH.Infrastructure/Reserva/Persistence/001_reserva_hotldb.sql` | Reserva | Todos los `he_sp_reserva_*`; antes de `004_sp_generar_reservas.sql` en Solicitud. |
+| 4 | `SGH.Infrastructure/Reserva/Persistence/001_reserva_hotldb.sql` | Reserva | Todos los `he_sp_reserva_*`; desplegar antes o junto con solicitud (generación/movimientos). |
 | 5 | `SGH.Infrastructure/Habitacion/Persistence/001_habitacion_hotldb.sql` | Habitación | CU-HAB-01/02: tablas, columnas y todos los `he_sp_*` en un solo script. |
-| 6 | `SGH.Infrastructure/Solicitud/Persistence/001_sp_solicitud.sql` | Solicitud | Base del módulo; ver `README.md`. |
-| 7 | `SGH.Infrastructure/Solicitud/Persistence/002_sp_pasajeros_solicitud.sql` | Solicitud | Pasajeros en detalle. |
-| 8 | `SGH.Infrastructure/Solicitud/Persistence/003_sp_guardar_pasajero.sql` | Solicitud | Alta/edición pasajero. |
-| 9 | `SGH.Infrastructure/Solicitud/Persistence/005_sp_habitaciones_solicitud.sql` | Solicitud | Disponibles / asignar / desasignar (antes o junto a generar). |
-| 10 | `SGH.Infrastructure/Solicitud/Persistence/004_sp_generar_reservas.sql` | Solicitud | Generar reservas; después de **003** y **005** recomendado. |
-| 11 | `SGH.Infrastructure/Solicitud/Persistence/007_sp_solicitud_asegurar_periodo.sql` | Solicitud | Bloque **importación** masiva (con **008**). |
-| 12 | `SGH.Infrastructure/Solicitud/Persistence/008_sp_reserva_finalizar_checkout.sql` | Solicitud | Importación / checkout. |
-| 13 | `SGH.Infrastructure/Solicitud/Persistence/006_sp_cargar_pasajero.sql` | Solicitud | Carga masiva; después de **007** y **008**. |
+| 6 | `SGH.Infrastructure/Solicitud/Persistence/001_solicitud_hotldb.sql` | Solicitud | Todos los `he_sp_solicitud_*` e importación (`006`–`008` incluidos). Requiere **reserva** desplegada para generar/movimientos. |
 
 ### Parches incrementales (QA que ya ejecutó los `001_*` antiguos)
 
@@ -37,15 +30,14 @@ No re-ejecutar los `001` solo para aplicar estos cambios. Usar los archivos nume
 |----------|---------|----------------|
 | A | ~~`002_sp_login_passwordv2_dual.sql`~~ | **Obsoleto.** Volver a ejecutar solo `001_sp_login.sql` o `Docs/datos/paquetes-ssms/Login_ejecutar_HOTELDB.sql`. |
 | B | ~~`002_sp_reserva_buscar_rango_top.sql`~~ | **Obsoleto.** Re-ejecutar `001_reserva_hotldb.sql` o `Docs/datos/paquetes-ssms/Reserva_ejecutar_HOTELDB.sql`. |
-| C | `SGH.Infrastructure/Solicitud/Persistence/009_sp_solicitud_buscar_listado.sql` | `001_sp_solicitud.sql` y, si aplica, scripts **002–008** del módulo |
+| C | ~~`009_sp_solicitud_buscar_listado.sql`~~ | **Obsoleto.** Re-ejecutar `001_solicitud_hotldb.sql` o `Docs/datos/paquetes-ssms/Solicitud_ejecutar_HOTELDB.sql`. |
 | D | ~~parches CU-HAB por archivo~~ | **Obsoleto.** Re-ejecutar `001_habitacion_hotldb.sql` o `Docs/datos/paquetes-ssms/Habitacion_ejecutar_HOTELDB.sql`. |
 
 En **instalación nueva**, los `001` del repositorio actual ya incluyen el mismo contenido; los `002` / `009` anteriores son opcionales.
 
 Tras actualizar el flujo de **importación**, el `README.md` pide **volver a desplegar**:
 
-- `001_sp_solicitud.sql` (ítem 9)
-- `004_sp_generar_reservas.sql` (ítem 13)
+- `001_solicitud_hotldb.sql` (ítem 6)
 - `001_reserva_hotldb.sql` (ítem 4)
 
 ## 2. Por módulo (si solo migrás una parte)
@@ -84,22 +76,15 @@ Sincronizar paquete: `python3 tools/empaquetar-reserva-ssms.py`.
 
 1. `001_sp_censo.sql`
 
-### Solicitud
+### Solicitud (un solo archivo)
 
-**Uso estándar (sin importación):**
+1. `Docs/datos/paquetes-ssms/Solicitud_ejecutar_HOTELDB.sql` en SSMS contra **HOTELDB**, **o** `SGH.Infrastructure/Solicitud/Persistence/001_solicitud_hotldb.sql`.
 
-1. `001_sp_solicitud.sql`
-2. `002_sp_pasajeros_solicitud.sql`
-3. `003_sp_guardar_pasajero.sql`
-4. `005_sp_habitaciones_solicitud.sql`
-5. `004_sp_generar_reservas.sql`
+Incluye flujo estándar (buscar, pasajeros, habitaciones, generar reservas) e **importación masiva** (`asegurar_periodo`, `he_sp_reserva_finalizar_checkout`, `cargar_pasajero`). Desplegar **reserva** antes si aún no está.
 
-**Importación de pasajeros (además o actualización):**
-
-1. `007_sp_solicitud_asegurar_periodo.sql`
-2. `008_sp_reserva_finalizar_checkout.sql`
-3. `006_sp_cargar_pasajero.sql`
-4. Re-ejecutar `001_sp_solicitud.sql`, `004_sp_generar_reservas.sql`, `001_reserva_hotldb.sql`.
+```bash
+python3 tools/empaquetar-solicitud-ssms.py
+```
 
 ### Informe legado `INF_Aseos` (optimización, fuera del MVC)
 
