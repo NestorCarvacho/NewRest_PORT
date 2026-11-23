@@ -1510,6 +1510,14 @@ html:not([data-tema="claro"]) .tabla-vacia {
   vertical-align: middle;
 }
 
+.modulo-reserva table.dataTable td.col-seleccion-masiva .seleccion-reserva {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
 .modulo-reserva table.dataTable th:first-child,
 .modulo-reserva table.dataTable td:first-child {
   width: 2.75rem;
