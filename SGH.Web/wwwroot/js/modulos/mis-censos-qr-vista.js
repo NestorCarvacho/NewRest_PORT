@@ -5,6 +5,7 @@ function turnoLegible(valor) {
     var t = String(valor).trim();
     if (t === "D" || /d[ií]a/i.test(t)) return "Día";
     if (t === "N" || /noche/i.test(t)) return "Noche";
+    if (t === "A" || /ambos/i.test(t)) return "Ambos";
     return t;
 }
 
@@ -39,6 +40,14 @@ function crearTarjeta(opciones) {
     return li;
 }
 
+function normalizarFilas(resp) {
+    if (!resp) return [];
+    if (Array.isArray(resp)) return resp;
+    if (Array.isArray(resp.filas)) return resp.filas;
+    if (resp.registros && Array.isArray(resp.registros.filas)) return resp.registros.filas;
+    return [];
+}
+
 export function montarVistaMisCensosQr(dependencias, nodo) {
     var raiz = nodo.querySelector(".censo-qr-vista");
     if (!raiz || raiz._enlazado) return;
@@ -48,11 +57,22 @@ export function montarVistaMisCensosQr(dependencias, nodo) {
     var listaRegistrados = raiz.querySelector("[data-lista='registrados']");
     var inputFecha = raiz.querySelector("[name='fechaCenso']");
     var fab = raiz.querySelector("[data-accion='nuevo-censo-qr']");
+    var btnSync = raiz.querySelector("[data-accion='sincronizar-censo-qr']");
+
+    function tituloBase(meta, cuerpo) {
+        var tituloPartes = [];
+        if (meta.creadoEn) tituloPartes.push(formatearFechaHora(meta.creadoEn));
+        if (meta.habitacion) tituloPartes.push(meta.habitacion);
+        return tituloPartes;
+    }
 
     function pintarPendientes() {
         if (!listaPendientes) return;
         listaPendientes.replaceChildren();
         var items = listarPendientesCensoQr();
+        if (btnSync) {
+            btnSync.hidden = items.length === 0;
+        }
         if (!items.length) {
             var vacio = document.createElement("div");
             vacio.className = "censo-qr-sin-resultados";
@@ -63,16 +83,34 @@ export function montarVistaMisCensosQr(dependencias, nodo) {
         items.forEach(function (item) {
             var meta = item.meta || {};
             var cuerpo = item.cuerpo || {};
-            var camas = cuerpo.turno === "N" ? cuerpo.cantidad : (cuerpo.turno === "A" ? cuerpo.cantidad : cuerpo.cantidad);
-            var tituloPartes = [];
-            if (meta.creadoEn) tituloPartes.push(formatearFechaHora(meta.creadoEn));
-            if (meta.habitacion) tituloPartes.push(meta.habitacion);
-            tituloPartes.push("Turno: " + turnoLegible(meta.turnoNombre || cuerpo.turno));
+            var subt = [meta.modulo, meta.piso].filter(Boolean).join(" | ");
+            var turno = cuerpo.turno || meta.turno || "D";
+
+            if (turno === "A") {
+                var camasDia = meta.camasOcupadasDia != null ? meta.camasOcupadasDia : (cuerpo.cantidad != null ? cuerpo.cantidad : "0");
+                var camasNoche = meta.camasOcupadasNoche != null ? meta.camasOcupadasNoche : (cuerpo.cantidadNoche != null ? cuerpo.cantidadNoche : "0");
+                ["Día", "Noche"].forEach(function (etiqueta, indice) {
+                    var partes = tituloBase(meta, cuerpo).slice();
+                    partes.push("Turno: " + etiqueta);
+                    listaPendientes.append(crearTarjeta({
+                        pendiente: true,
+                        camas: indice === 0 ? camasDia : camasNoche,
+                        titulo: partes.join(" | "),
+                        subtitulo: subt
+                    }));
+                });
+                return;
+            }
+
+            var camas = cuerpo.turno === "N" ? cuerpo.cantidad : cuerpo.cantidad;
+            if (meta.camasOcupadas != null) camas = meta.camasOcupadas;
+            var partes = tituloBase(meta, cuerpo);
+            partes.push("Turno: " + turnoLegible(meta.turnoNombre || turno));
             listaPendientes.append(crearTarjeta({
                 pendiente: true,
-                camas: meta.camasOcupadas != null ? meta.camasOcupadas : camas,
-                titulo: tituloPartes.join(" | "),
-                subtitulo: [meta.modulo, meta.piso].filter(Boolean).join(" | ")
+                camas: camas,
+                titulo: partes.join(" | "),
+                subtitulo: subt
             }));
         });
     }
@@ -104,7 +142,7 @@ export function montarVistaMisCensosQr(dependencias, nodo) {
         var fecha = inputFecha.value;
         return dependencias.enviar("/Censo/Mid/MidCenso.cs", { opcion: "miscensos", fecha: fecha })
             .then(function (resp) {
-                var filas = (resp && resp.registros) || [];
+                var filas = normalizarFilas(resp);
                 pintarRegistrados(filas);
                 nodo._filasMisCensosQr = filas;
             })
@@ -126,8 +164,17 @@ export function montarVistaMisCensosQr(dependencias, nodo) {
             dependencias.abrirFlujoCensoQr({ alCerrar: refrescar });
         });
     }
+    if (btnSync && dependencias.sincronizar) {
+        btnSync.addEventListener("click", function () {
+            btnSync.disabled = true;
+            dependencias.sincronizar()
+                .then(function () { return refrescar(); })
+                .catch(function () { })
+                .finally(function () { btnSync.disabled = false; });
+        });
+    }
 
-    window.addEventListener(nombreEventoPendientesCensoQr(), pintarPendientes);
+    window.addEventListener(nombreEventoPendientesCensoQr(), function () { refrescar(); });
     window.addEventListener("online", function () { setTimeout(refrescar, 500); });
 
     nodo._refrescarVistaCensoQr = refrescar;

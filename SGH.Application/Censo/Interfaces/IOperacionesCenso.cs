@@ -19,6 +19,11 @@ public interface IObtenerCatalogoCenso
     Task<ResultadoCatalogoCenso> EjecutarAsync(int empresaMandanteId, int campamentoId, CancellationToken cancellationToken);
 }
 
+public interface IObtenerHabitacionCensoQr
+{
+    Task<ResultadoHabitacionCensoQr> EjecutarAsync(int campamentoId, int habitacionId, CancellationToken cancellationToken);
+}
+
 public interface IGuardarCensos
 {
     Task<ResultadoGuardadoCenso> EjecutarAsync(SolicitudGuardarCensos solicitud, CancellationToken cancellationToken);

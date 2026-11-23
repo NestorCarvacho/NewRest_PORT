@@ -99,8 +99,41 @@ public sealed class ConsultaCenso : IConsultaCenso
         var modulos = (await lectura.ReadAsync<OpcionFila>()).ToList();
         var pisos = (await lectura.ReadAsync<OpcionFila>()).ToList();
         var habitaciones = (await lectura.ReadAsync<OpcionFila>()).ToList();
+        var tiposInstalacion = (await lectura.ReadAsync<OpcionFila>()).ToList();
+        var habitacionesQr = (await lectura.ReadAsync<HabitacionQrFila>()).ToList();
 
-        return new CatalogoCenso(ALista(modulos), ALista(pisos), ALista(habitaciones));
+        return new CatalogoCenso(
+            ALista(modulos),
+            ALista(pisos),
+            ALista(habitaciones),
+            ALista(tiposInstalacion),
+            habitacionesQr.Select(f => new OpcionHabitacionCenso(
+                f.Id,
+                f.Etiqueta ?? string.Empty,
+                f.PadreId,
+                f.TipoInstalacionId,
+                Math.Clamp(f.Capacidad, 0, ReglasCenso.MaxCamasAbsoluto))).ToList());
+    }
+
+    public async Task<HabitacionCensoQr?> ObtenerHabitacionQrAsync(int campamentoId, int habitacionId, CancellationToken cancellationToken)
+    {
+        using var conexion = _fabrica.Crear();
+        var fila = await conexion.QuerySingleOrDefaultAsync<HabitacionDetalleFila>(
+            new CommandDefinition(
+                "he_sp_censo_obtener_habitacion_qr",
+                new { CampamentoId = campamentoId, HabitacionId = habitacionId },
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken));
+
+        if (fila is null || fila.HabitacionId <= 0)
+            return null;
+
+        return new HabitacionCensoQr(
+            fila.HabitacionId,
+            fila.Habitacion ?? string.Empty,
+            fila.Modulo ?? string.Empty,
+            fila.Piso ?? string.Empty,
+            Math.Clamp(fila.Capacidad, 0, ReglasCenso.MaxCamasAbsoluto));
     }
 
     public async Task<bool> FiltroEstaEnCampamentoAsync(int campamentoId, int moduloId, int pisoId, int habitacionId, CancellationToken cancellationToken)
@@ -164,5 +197,23 @@ public sealed class ConsultaCenso : IConsultaCenso
         public int Id { get; set; }
         public string? Etiqueta { get; set; }
         public int PadreId { get; set; }
+    }
+
+    private sealed class HabitacionQrFila
+    {
+        public int Id { get; set; }
+        public string? Etiqueta { get; set; }
+        public int PadreId { get; set; }
+        public int TipoInstalacionId { get; set; }
+        public int Capacidad { get; set; }
+    }
+
+    private sealed class HabitacionDetalleFila
+    {
+        public int HabitacionId { get; set; }
+        public string? Habitacion { get; set; }
+        public string? Modulo { get; set; }
+        public string? Piso { get; set; }
+        public int Capacidad { get; set; }
     }
 }

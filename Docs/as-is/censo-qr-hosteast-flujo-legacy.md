@@ -22,7 +22,7 @@ Documentación del flujo observado en el legacy **HostEast / SGH móvil** para c
 | Turno **Ambos** → **dos filas** en lista (Día y Noche separados) | `guardarqr` con `A` persiste dos filas en servidor; en UI escritorio aparecen como **dos registros** en tabla, no como tarjeta unificada |
 | Filtro fecha único `fechaCenso` sobre registrados | `misCensos` usa filtro **período** (desde/hasta), no un solo date picker «día de hoy» |
 
-Referencias de código actual: `SGH.Web/wwwroot/js/modulos/censo-qr.js`, `SGH.Web/wwwroot/js/core/colaOffline.js`, `SGH.Web/Pages/Censo/_ListadoMisCensos.cshtml`.
+Referencias de código actual: `censo-qr-flujo.js` (wizard), `mis-censos-qr-vista.js` (tarjetas móvil), `colaCensoQr.js`, `censo-qr.js`, `colaOffline.js`, `Pages/Censo/_ListadoMisCensos.cshtml`.
 
 ---
 

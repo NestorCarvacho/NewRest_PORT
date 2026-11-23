@@ -15,5 +15,7 @@ public interface IConsultaCenso
 
     Task<CatalogoCenso> ObtenerCatalogoAsync(int campamentoId, CancellationToken cancellationToken);
 
+    Task<HabitacionCensoQr?> ObtenerHabitacionQrAsync(int campamentoId, int habitacionId, CancellationToken cancellationToken);
+
     Task<bool> FiltroEstaEnCampamentoAsync(int campamentoId, int moduloId, int pisoId, int habitacionId, CancellationToken cancellationToken);
 }

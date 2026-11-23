@@ -28,10 +28,21 @@ public sealed record CensoUsuarioFilaDto(
 
 public sealed record OpcionCensoDto(int Id, string Etiqueta, int PadreId);
 
+public sealed record OpcionHabitacionCensoDto(int Id, string Etiqueta, int PadreId, int TipoInstalacionId, int Capacidad);
+
+public sealed record HabitacionCensoQrDto(
+    int HabitacionId,
+    string Habitacion,
+    string Modulo,
+    string Piso,
+    int Capacidad);
+
 public sealed record CatalogoCensoDto(
     IReadOnlyList<OpcionCensoDto> Modulos,
     IReadOnlyList<OpcionCensoDto> Pisos,
-    IReadOnlyList<OpcionCensoDto> Habitaciones);
+    IReadOnlyList<OpcionCensoDto> Habitaciones,
+    IReadOnlyList<OpcionCensoDto> TiposInstalacion,
+    IReadOnlyList<OpcionHabitacionCensoDto> HabitacionesQr);
 
 public sealed record SolicitudBuscarCensos(
     int EmpresaMandanteId,
@@ -52,6 +63,17 @@ public sealed record FilaGuardarCensoDto(string? Id, int HabitacionId, string? C
 
 public sealed record SolicitudGuardarCensos(
     int UsuarioId, int EmpresaMandanteId, int CampamentoId, DateTime Fecha, IReadOnlyList<FilaGuardarCensoDto> Filas);
+
+public abstract record ResultadoHabitacionCensoQr
+{
+    private ResultadoHabitacionCensoQr() { }
+
+    public sealed record Listo(HabitacionCensoQrDto Detalle) : ResultadoHabitacionCensoQr;
+
+    public sealed record NoEncontrada : ResultadoHabitacionCensoQr;
+
+    public sealed record Rechazado(string Mensaje) : ResultadoHabitacionCensoQr;
+}
 
 public abstract record ResultadoCatalogoCenso
 {

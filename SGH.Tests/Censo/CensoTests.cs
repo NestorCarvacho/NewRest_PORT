@@ -151,7 +151,10 @@ public class GuardarCensosTests
             Task.FromResult<IReadOnlyList<CensoUsuarioListado>>([]);
 
         public Task<CatalogoCenso> ObtenerCatalogoAsync(int campamentoId, CancellationToken cancellationToken) =>
-            Task.FromResult(new CatalogoCenso([], [], []));
+            Task.FromResult(new CatalogoCenso([], [], [], [], []));
+
+        public Task<HabitacionCensoQr?> ObtenerHabitacionQrAsync(int campamentoId, int habitacionId, CancellationToken cancellationToken) =>
+            Task.FromResult<HabitacionCensoQr?>(null);
 
         public Task<bool> FiltroEstaEnCampamentoAsync(int campamentoId, int moduloId, int pisoId, int habitacionId, CancellationToken cancellationToken) =>
             Task.FromResult(HabitacionesPropias is null || HabitacionesPropias.Contains(habitacionId));

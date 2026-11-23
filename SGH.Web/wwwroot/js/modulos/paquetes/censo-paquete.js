@@ -1,3 +1,4 @@
+import { sincronizarTodo } from "../../core/colaOffline.js";
 import { numero } from "../../core/numeros.js";
 import { crearCenso } from "../censo.js";
 import { crearCensoQr } from "../censo-qr.js";
@@ -56,6 +57,7 @@ export function instalarCenso(base) {
         montarVistaMisCensosQr({
             enviar: base.enviar,
             fechaActual: base.fechaActual,
+            sincronizar: function () { return sincronizarTodo(base.enviar); },
             abrirFlujoCensoQr: function (opts) { censoQrFlujo.abrir(opts); }
         }, nodo);
         var fecha = nodo.querySelector("[name='fechaCenso']");

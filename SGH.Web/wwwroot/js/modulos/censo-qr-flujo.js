@@ -60,23 +60,46 @@ export function crearCensoQrFlujo(dependencias) {
         });
     }
 
+    function consultarHabitacionQr(habitacionId) {
+        return dependencias.enviar("/Censo/Mid/MidCenso.cs", {
+            opcion: "obtenerhabitacionqr",
+            habitacionId: String(habitacionId)
+        });
+    }
+
+    function aplicarDetalleHabitacion(estado, detalle, textoQr) {
+        estado.habitacionId = String(detalle.habitacionId);
+        estado.habitacion = detalle.habitacion || ("Habitación " + detalle.habitacionId);
+        estado.moduloEtiqueta = detalle.modulo || "";
+        estado.pisoEtiqueta = detalle.piso || "";
+        estado.capacidad = capacidadEfectiva(detalle.capacidad);
+        if (textoQr) estado.qrJson = textoQr;
+    }
+
     function aplicarHabitacionDesdeQr(estado, textoQr) {
         var qr;
         try {
             qr = JSON.parse(textoQr);
         } catch (_) {
             dependencias.mostrarAviso("El código QR no es un JSON válido.", "error");
-            return false;
+            return Promise.resolve(false);
         }
         if (!qr || qr.h == null) {
             dependencias.mostrarAviso("El código QR no contiene una habitación.", "error");
-            return false;
+            return Promise.resolve(false);
         }
-        estado.habitacionId = String(qr.h);
-        estado.qrJson = textoQr;
-        estado.capacidad = capacidadEfectiva(qr.c != null ? qr.c : (qr.nc != null ? qr.nc : 4));
-        estado.habitacion = qr.n || qr.habitacion || ("Habitación " + qr.h);
-        return true;
+        return consultarHabitacionQr(qr.h).then(function (detalle) {
+            aplicarDetalleHabitacion(estado, detalle, textoQr);
+            return true;
+        }).catch(function () {
+            estado.habitacionId = String(qr.h);
+            estado.qrJson = textoQr;
+            estado.capacidad = capacidadEfectiva(qr.c != null ? qr.c : (qr.nc != null ? qr.nc : 4));
+            estado.habitacion = qr.n || qr.habitacion || ("Habitación " + qr.h);
+            estado.moduloEtiqueta = qr.m || qr.modulo || "";
+            estado.pisoEtiqueta = qr.p || qr.piso || "";
+            return true;
+        });
     }
 
     function guardar(estado, alTerminar) {
@@ -103,6 +126,10 @@ export function crearCensoQrFlujo(dependencias) {
             turnoNombre: turnoLegible(estado.turno),
             camasOcupadas: estado.turno === "N" ? camasNoche : camasDia
         };
+        if (estado.turno === "A") {
+            meta.camasOcupadasDia = camasDia;
+            meta.camasOcupadasNoche = camasNoche;
+        }
         return dependencias.enviar("/Censo/Mid/MidCenso.cs", payload).then(function () {
             dependencias.mostrarAviso("Censo QR guardado correctamente.", "success");
             cerrar();
@@ -136,7 +163,9 @@ export function crearCensoQrFlujo(dependencias) {
         visorAncla.append(btnManual);
         cont.append(titulo, visorAncla);
         iniciarEscaner(visorAncla, function (texto) {
-            if (aplicarHabitacionDesdeQr(estado, texto)) navegar("censo");
+            aplicarHabitacionDesdeQr(estado, texto).then(function (ok) {
+                if (ok) navegar("censo");
+            });
         }, dependencias.mostrarAviso);
     }
 
@@ -171,26 +200,33 @@ export function crearCensoQrFlujo(dependencias) {
         selModulo.className = "selector-buscable";
         var selPiso = document.createElement("select");
         selPiso.name = "piso";
+        var selTipo = document.createElement("select");
+        selTipo.name = "tipoInstalacion";
         var selHab = document.createElement("select");
         selHab.name = "habitacion";
         form.append(
             dependencias.etiquetaCampo("Módulo", selModulo),
             dependencias.etiquetaCampo("Piso", selPiso),
+            dependencias.etiquetaCampo("Tipo de instalación", selTipo),
             dependencias.etiquetaCampo("Habitación", selHab)
         );
         cont.append(titulo, form);
 
-        var catalogo = { modulos: [], pisos: [], habitaciones: [] };
+        var catalogo = { modulos: [], pisos: [], habitaciones: [], tiposInstalacion: [], habitacionesQr: [] };
         dependencias.obtenerCatalogo().then(function (cat) {
             catalogo = cat || catalogo;
             llenarSelect(selModulo, catalogo.modulos, "Seleccione Módulo");
+            llenarSelect(selTipo, catalogo.tiposInstalacion, "Seleccione Tipo");
         });
 
         function pisosFiltrados(idModulo) {
             return (catalogo.pisos || []).filter(function (p) { return String(p.padreId) === String(idModulo); });
         }
-        function habitacionesFiltradas(idPiso) {
-            return (catalogo.habitaciones || []).filter(function (h) { return String(h.padreId) === String(idPiso); });
+        function habitacionesQrFiltradas(idPiso, idTipo) {
+            return (catalogo.habitacionesQr || []).filter(function (h) {
+                return String(h.padreId) === String(idPiso)
+                    && String(h.tipoInstalacionId) === String(idTipo);
+            });
         }
 
         selModulo.addEventListener("change", function () {
@@ -198,7 +234,10 @@ export function crearCensoQrFlujo(dependencias) {
             llenarSelect(selHab, [], "Seleccione Habitación");
         });
         selPiso.addEventListener("change", function () {
-            llenarSelect(selHab, habitacionesFiltradas(selPiso.value), "Seleccione Habitación");
+            llenarSelect(selHab, habitacionesQrFiltradas(selPiso.value, selTipo.value), "Seleccione Habitación");
+        });
+        selTipo.addEventListener("change", function () {
+            llenarSelect(selHab, habitacionesQrFiltradas(selPiso.value, selTipo.value), "Seleccione Habitación");
         });
 
         var btnAtras = dependencias.boton("Regresar", "boton-secundario", function () { navegar("escanear"); });
@@ -207,16 +246,23 @@ export function crearCensoQrFlujo(dependencias) {
                 dependencias.mostrarAviso("Seleccione una habitación.", "error");
                 return;
             }
-            var hab = (catalogo.habitaciones || []).find(function (h) { return String(h.id) === selHab.value; });
+            var hab = (catalogo.habitacionesQr || []).find(function (h) { return String(h.id) === selHab.value; });
             var mod = (catalogo.modulos || []).find(function (m) { return String(m.id) === selModulo.value; });
             var piso = (catalogo.pisos || []).find(function (p) { return String(p.id) === selPiso.value; });
-            estado.habitacionId = selHab.value;
-            estado.habitacion = hab ? hab.etiqueta : selHab.value;
-            estado.moduloEtiqueta = mod ? mod.etiqueta : "";
-            estado.pisoEtiqueta = piso ? piso.etiqueta : "";
-            estado.capacidad = 4;
-            estado.qrJson = JSON.stringify({ h: parseInt(selHab.value, 10), c: 4 });
-            navegar("censo");
+            var capacidadLocal = hab && hab.capacidad != null ? hab.capacidad : 4;
+            consultarHabitacionQr(selHab.value).then(function (detalle) {
+                aplicarDetalleHabitacion(estado, detalle, null);
+                estado.qrJson = JSON.stringify({ h: parseInt(selHab.value, 10), c: detalle.capacidad });
+                navegar("censo");
+            }).catch(function () {
+                estado.habitacionId = selHab.value;
+                estado.habitacion = hab ? hab.etiqueta : selHab.value;
+                estado.moduloEtiqueta = mod ? mod.etiqueta : "";
+                estado.pisoEtiqueta = piso ? piso.etiqueta : "";
+                estado.capacidad = capacidadEfectiva(capacidadLocal);
+                estado.qrJson = JSON.stringify({ h: parseInt(selHab.value, 10), c: capacidadLocal });
+                navegar("censo");
+            });
         });
         pie.append(btnAtras, btnOk);
     }

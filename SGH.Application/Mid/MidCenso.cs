@@ -11,6 +11,7 @@ public sealed class MidCenso(
     IBuscarCensos buscar,
     IBuscarMisCensos buscarMios,
     IObtenerCatalogoCenso catalogo,
+    IObtenerHabitacionCensoQr habitacionQr,
     IGuardarCensos guardar)
 {
     public const string Ruta = "Mid/MidCenso.cs";
@@ -21,7 +22,8 @@ public sealed class MidCenso(
         Accion("listarrango", "Listar rango", "he_sp_censo_buscar", "Devuelve el censo para cada día del período en una sola petición."),
         Accion("miscensos", "Mis censos", "he_sp_censo_buscar_por_usuario", "Devuelve los censos del usuario."),
         Accion("miscensosrango", "Mis censos rango", "he_sp_censo_buscar_por_usuario", "Mis censos por período en una sola petición."),
-        Accion("catalogo", "Catálogo", "he_sp_censo_listar_catalogo", "Devuelve módulos, pisos y habitaciones."),
+        Accion("catalogo", "Catálogo", "he_sp_censo_listar_catalogo", "Devuelve módulos, pisos, tipos de instalación y habitaciones."),
+        Accion("obtenerhabitacionqr", "Habitación QR", "he_sp_censo_obtener_habitacion_qr", "Detalle de habitación para censo QR."),
         Accion("guardar", "Guardar", "he_sp_censo_guardar", "Guarda las filas del censo."),
         Accion("guardarqr", "Guardar QR", "he_sp_censo_guardar", "Guarda el censo leído desde un código QR.")
     ];
@@ -39,6 +41,7 @@ public sealed class MidCenso(
             "miscensos" => await MiosAsync(filtro, sesion, cancellationToken),
             "miscensosrango" => await MiosRangoAsync(filtro, sesion, cancellationToken),
             "catalogo" => await CatalogoAsync(sesion, cancellationToken),
+            "obtenerhabitacionqr" => await HabitacionQrAsync(filtro, sesion, cancellationToken),
             "guardar" => await GuardarAsync(filtro, sesion, cancellationToken),
             "guardarqr" => await GuardarQrAsync(filtro, sesion, cancellationToken),
             _ => EjecucionMid.Fallo(400, $"La opción '{filtro.Opcion}' no está implementada en el Mid.")
@@ -195,32 +198,51 @@ public sealed class MidCenso(
         };
     }
 
-    private Task<EjecucionMid> GuardarQrAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    private async Task<EjecucionMid> HabitacionQrAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var habitacion = LecturaPeticion.Entero(filtro, "habitacionId");
+        if (habitacion <= 0)
+            return EjecucionMid.Fallo(400, "El código QR no contiene una habitación válida.");
+
+        var resultado = await habitacionQr.EjecutarAsync(sesion.CampamentoId, habitacion, cancellationToken);
+        return resultado switch
+        {
+            ResultadoHabitacionCensoQr.Listo listo => EjecucionMid.Ok(listo.Detalle),
+            ResultadoHabitacionCensoQr.NoEncontrada => EjecucionMid.Fallo(404, ReglasCenso.HabitacionAjena),
+            ResultadoHabitacionCensoQr.Rechazado rechazado => EjecucionMid.Fallo(400, rechazado.Mensaje),
+            _ => EjecucionMid.Fallo(400, "No se pudo consultar la habitación.")
+        };
+    }
+
+    private async Task<EjecucionMid> GuardarQrAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
     {
         var habitacion = LecturaPeticion.Texto(filtro, "habitacionId");
         var cantidad = LecturaPeticion.Texto(filtro, "cantidad");
         var turno = LecturaPeticion.Texto(filtro, "turno");
         if (!int.TryParse(habitacion, out var habitacionId) || habitacionId <= 0)
-            return Task.FromResult(EjecucionMid.Fallo(400, "El código QR no contiene una habitación válida."));
+            return EjecucionMid.Fallo(400, "El código QR no contiene una habitación válida.");
         if (!int.TryParse(cantidad, out var camas) || camas < 0)
-            return Task.FromResult(EjecucionMid.Fallo(400, "La cantidad de camas no es válida."));
+            return EjecucionMid.Fallo(400, "La cantidad de camas no es válida.");
         if (turno is not ("D" or "N" or "A"))
-            return Task.FromResult(EjecucionMid.Fallo(400, "Seleccione un turno válido."));
+            return EjecucionMid.Fallo(400, "Seleccione un turno válido.");
 
         var noche = LecturaPeticion.Texto(filtro, "cantidadNoche");
         var cantidadNoche = 0;
         if (turno == "A" && (!int.TryParse(noche, out cantidadNoche) || cantidadNoche < 0))
-            return Task.FromResult(EjecucionMid.Fallo(400, "La cantidad de camas nocturnas no es válida."));
+            return EjecucionMid.Fallo(400, "La cantidad de camas nocturnas no es válida.");
 
         var capacidadHabitacion = LecturaPeticion.Entero(filtro, "capacidadHabitacion");
-        if (capacidadHabitacion <= 0)
+        var detalle = await habitacionQr.EjecutarAsync(sesion.CampamentoId, habitacionId, cancellationToken);
+        if (detalle is ResultadoHabitacionCensoQr.Listo listo && listo.Detalle.Capacidad > 0)
+            capacidadHabitacion = listo.Detalle.Capacidad;
+        else if (capacidadHabitacion <= 0)
             capacidadHabitacion = ReglasCenso.MaxCamasAbsoluto;
 
         var camasDia = turno == "N" ? 0 : camas;
         var camasNoche = turno == "D" ? 0 : (turno == "N" ? camas : cantidadNoche);
         var mensajeCapacidad = ReglasCenso.ValidarOcupacionCamas(capacidadHabitacion, turno, camasDia, camasNoche);
         if (mensajeCapacidad is not null)
-            return Task.FromResult(EjecucionMid.Fallo(400, mensajeCapacidad));
+            return EjecucionMid.Fallo(400, mensajeCapacidad);
 
         var filas = new List<FilaGuardarCensoDto>
         {
@@ -231,9 +253,9 @@ public sealed class MidCenso(
 
         var fecha = LecturaPeticion.Fecha(LecturaPeticion.Texto(filtro, "fecha"));
         if (fecha is null)
-            return Task.FromResult(EjecucionMid.Fallo(400, "Debe ingresar la fecha de censo."));
+            return EjecucionMid.Fallo(400, "Debe ingresar la fecha de censo.");
 
-        return GuardarListaAsync(sesion, fecha.Value, filas, cancellationToken);
+        return await GuardarListaAsync(sesion, fecha.Value, filas, cancellationToken);
     }
 
     private async Task<EjecucionMid> GuardarListaAsync(DatosSesion sesion, DateTime fecha, IReadOnlyList<FilaGuardarCensoDto> filas, CancellationToken cancellationToken)
