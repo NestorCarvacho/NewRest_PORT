@@ -39,7 +39,7 @@ Convenciones:
 
 ### Lote 2026-11-23
 
-Un solo archivo con los cambios del día (reserva anular/reversar movimiento, solicitud correo/reservas por pasajero, `sp_getapplock`):
+Un solo archivo con los cambios del día (reserva anular/reversar movimiento, solicitud correo/reservas por pasajero, censo QR catálogo/capacidad, `sp_getapplock`):
 
 - `Docs/datos/migracion/20261123_modificaciones.sql`
 
@@ -53,6 +53,7 @@ No re-ejecutar los `001` solo para aplicar estos cambios. Usar los archivos nume
 | B | `SGH.Infrastructure/Reserva/Persistence/002_sp_reserva_buscar_rango_top.sql` | `001_sp_reserva.sql` (sin `@MaxFilas` ni rango 30 días en búsqueda) |
 | C | `SGH.Infrastructure/Solicitud/Persistence/009_sp_solicitud_buscar_listado.sql` | `001_sp_solicitud.sql` y, si aplica, scripts **002–008** del módulo |
 | D | `005_hotldb_tipo_cama_inventario.sql` + `006_sp_tipo_cama_inventario.sql` | Bloque habitación **002** y **003** ya aplicado |
+| E | `SGH.Infrastructure/Censo/Persistence/005_sp_censo_qr.sql` | `001_sp_censo.sql` ya aplicado (catálogo de 3 result sets) |
 
 En **instalación nueva**, los `001` del repositorio actual ya incluyen el mismo contenido; los `002` / `009` anteriores son opcionales.
 

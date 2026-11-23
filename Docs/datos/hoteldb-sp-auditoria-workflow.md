@@ -8,6 +8,11 @@ En la base **HOTELDB** los procedimientos `he_sp_*` llevan un bloque de auditor�
 2. Quien despliega **adjunta o pega** el script actual del SP desde SSMS (como en `he_sp_solicitud_listar_pasajeros`, fecha 2026-11-20).
 3. Se aplica el cambio **conservando** el bloque de auditoría; si el cambio es nuevo, se actualiza `date` y `description` (y `author` si corresponde).
 4. El script resultante se ejecuta en HOTELDB y, si aplica, se incorpora al lote diario `Docs/datos/migracion/YYYYMMDD_modificaciones.sql`.
+5. En ese lote, cada bloque nuevo o modificado lleva una línea de trazabilidad del bundle, encima de la sección:
+
+   `-- YYYYMMDD ncarvacho: descripción breve del cambio (una o dos líneas).`
+
+   Además se mantiene el bloque `author` / `date` / `description` dentro del `BEGIN` del SP en HOTELDB.
 
 Los archivos en `SGH.Infrastructure/**/Persistence/*.sql` del repo son **plantilla / contrato** para la aplicación; pueden ir sin `USE [HOTELDB]` ni cabecera SSMS. Tras un cambio importante, conviene **sincronizar** la plantilla del repo con el cuerpo lógico acordado, pero el despliegue autoritativo es el script auditado de la base.
 
@@ -42,3 +47,10 @@ Para re-sincronizar desde HOTELDB, pedir script completo de cada uno si ya exist
 | `he_sp_solicitud_desasignar_habitacion` | `005_sp_habitaciones_solicitud.sql` |
 
 SP **no** incluidos en ese lote pero relacionados: `he_sp_solicitud_listar_pasajeros` (auditoría 2026-11-20 en base).
+
+## SP tocados en el lote 2026-11-23 (censo QR)
+
+| SP | Archivo plantilla en repo |
+|----|---------------------------|
+| `he_sp_censo_listar_catalogo` (ampliado) | `SGH.Infrastructure/Censo/Persistence/005_sp_censo_qr.sql` y `001_sp_censo.sql` |
+| `he_sp_censo_obtener_habitacion_qr` | `SGH.Infrastructure/Censo/Persistence/005_sp_censo_qr.sql` y `001_sp_censo.sql` |

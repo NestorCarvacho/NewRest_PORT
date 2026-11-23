@@ -1,4 +1,5 @@
-/* Censo QR: catálogo ampliado y detalle de habitación. */
+/* Censo QR: catálogo ampliado y detalle de habitación.
+   20261123 ncarvacho: Censo QR — catálogo con tipos, habitaciones con capacidad y he_sp_censo_obtener_habitacion_qr. */
 SET NOCOUNT ON;
 GO
 

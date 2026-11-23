@@ -16,6 +16,7 @@ INSERT INTO @catalogo (name) VALUES
     (N'he_sp_censo_filtro_pertenece'),
     (N'he_sp_censo_guardar'),
     (N'he_sp_censo_listar_catalogo'),
+    (N'he_sp_censo_obtener_habitacion_qr'),
     (N'he_sp_habitacion_catalogo'),
     (N'he_sp_habitacion_guardar'),
     (N'he_sp_habitacion_id_por_nombre'),
