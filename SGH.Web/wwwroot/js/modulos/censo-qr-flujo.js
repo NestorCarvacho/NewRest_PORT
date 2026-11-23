@@ -166,16 +166,19 @@ export function crearCensoQrFlujo(dependencias) {
             meta.camasOcupadasDia = camasDia;
             meta.camasOcupadasNoche = camasNoche;
         }
+        var mensajeExito = estado.turno === "A"
+            ? "Censo QR guardado: turno Día (" + camasDia + ") y turno Noche (" + camasNoche + ")."
+            : "Censo QR guardado correctamente.";
         return dependencias.enviar("/Censo/Mid/MidCenso.cs", payload).then(function () {
-            dependencias.mostrarAviso("Censo QR guardado correctamente.", "success");
+            dependencias.mostrarAviso(mensajeExito, "success");
             cerrar();
-            if (alTerminar) alTerminar();
+            if (alTerminar) alTerminar(estado.fecha);
         }).catch(function (error) {
             encolarCensoQr(payload, meta);
             actualizarBannerOffline();
             dependencias.mostrarAviso(error.message + " El censo quedó pendiente para sincronizar.", "warning");
             cerrar();
-            if (alTerminar) alTerminar();
+            if (alTerminar) alTerminar(estado.fecha);
         });
     }
 
@@ -450,6 +453,12 @@ export function crearCensoQrFlujo(dependencias) {
             lista.append(li);
         });
         cont.append(titulo, lista);
+        if (estado.turno === "A") {
+            var nota = document.createElement("p");
+            nota.className = "censo-qr-nota-ambos";
+            nota.textContent = "Al guardar se registran dos censos en el servidor: uno con turno Día y otro con turno Noche.";
+            cont.append(nota);
+        }
         var btnAtras = dependencias.boton("Regresar", "boton-secundario", function () { navegarInterno("censo"); });
         var btnGuardar = dependencias.boton("Guardar", "boton-primario", function () {
             guardar(estado, alTerminar);

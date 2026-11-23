@@ -55,12 +55,21 @@ export function instalarCenso(base) {
         cerrarPanel: base.cerrarPanel,
         obtenerCatalogo: function () { return base.catalogos.preparar("censo"); }
     });
-    function enlazarVistaMisCensosQr(nodo) {
+    function enlazarVistaMisCensosQr(nodo, extra) {
+        extra = extra || {};
         montarVistaMisCensosQr({
             enviar: base.enviar,
             fechaActual: base.fechaActual,
             sincronizar: function () { return sincronizarTodo(base.enviar); },
-            abrirFlujoCensoQr: function (opts) { censoQrFlujo.abrir(opts); }
+            recargarModulo: extra.recargarModulo,
+            abrirFlujoCensoQr: function (opts) {
+                var alCerrarUsuario = opts && opts.alCerrar;
+                censoQrFlujo.abrir(Object.assign({}, opts, {
+                    alCerrar: function (fechaGuardada) {
+                        if (typeof alCerrarUsuario === "function") alCerrarUsuario(fechaGuardada);
+                    }
+                }));
+            }
         }, nodo);
         var fecha = nodo.querySelector("[name='fechaCenso']");
         if (fecha && !fecha.value) fecha.value = base.fechaActual();
