@@ -337,6 +337,29 @@ export function crearCenso(dependencias) {
         };
     }
 
+    function filaResponsiveAbierta(tr) {
+        if (!tr || tr.classList.contains("child")) return false;
+        if (tr.classList.contains("dtr-expanded")) return true;
+        var siguiente = tr.nextElementSibling;
+        return !!(siguiente && siguiente.classList.contains("child"));
+    }
+
+    function enlazarTablaResponsiveCenso(nodo, api) {
+        if (!api || !nodo || nodo._censoResponsiveEnlazado) return;
+        nodo._censoResponsiveEnlazado = true;
+        api.on("responsive-display", function (_evento, dt, row, showHide) {
+            if (!showHide) return;
+            var filaAbierta = row.node();
+            if (!filaAbierta) return;
+            dt.rows({ page: "current", search: "applied" }).every(function () {
+                var tr = this.node();
+                if (!tr || tr === filaAbierta) return;
+                if (!filaResponsiveAbierta(tr)) return;
+                tr.click();
+            });
+        });
+    }
+
     function camasComoEntero(valor) {
         var convertido = parseInt(String(valor).trim(), 10);
         return Number.isFinite(convertido) ? convertido : NaN;
@@ -407,6 +430,7 @@ export function crearCenso(dependencias) {
         filaMisCensos: filaMisCensos,
         columnas: columnas,
         configurarOpcionesTabla: configurarOpcionesTabla,
+        enlazarTablaResponsiveCenso: enlazarTablaResponsiveCenso,
         guardar: guardar
     };
 }

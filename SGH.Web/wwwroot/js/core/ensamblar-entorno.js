@@ -150,6 +150,11 @@ export function ensamblarEntorno(idsPantalla) {
                 instancia.movimientosReserva.enlazarBotonMovimientoMasivo(nodo);
             }
         }
+        if (nodo && nodo.dataset
+            && (nodo.dataset.id === "censo" || nodo.dataset.id === "misCensos")
+            && instancia.censo && typeof instancia.censo.enlazarTablaResponsiveCenso === "function") {
+            instancia.censo.enlazarTablaResponsiveCenso(nodo, api);
+        }
         return api;
     }
 
