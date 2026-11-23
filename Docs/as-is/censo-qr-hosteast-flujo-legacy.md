@@ -11,7 +11,7 @@ Documentación del flujo observado en el legacy **HostEast / SGH móvil** para c
 | Aspecto legacy (imagen 1) | NewRest_PORT actual |
 |---|---|
 | Pantalla «Mis Censos» con dos listas fijas | Módulo escritorio `misCensos`: una tabla con filtro de período |
-| **Censos pendientes de guardar** (lista en memoria) | Cola en `localStorage` (`sgh.censos.pendientes` / cola offline); **sin listado visible** en la pantalla |
+| **Censos pendientes de guardar** (tarjetas ámbar + fecha/hora) | Cola en `localStorage` (`sgh.offline.cola` vía `encolarOperacion`); solo **banner** con contador y «Sincronizar datos», **sin lista** en Mis Censos |
 | **Censos Registrados** del día (fecha hoy) | Misma tabla `misCensos`; opción Mid `miscensos` / `miscensosrango`; no hay bloque «solo hoy» separado |
 | Botón flotante **+** → cámara QR al instante | Botón **Censo QR** en módulo Censo (escritorio); cámara tras **Usar cámara** dentro del panel (`censo-qr.js`) |
 | Wizard **3 pasos** (Escanear → Censo → Confirmación) | Un solo panel con formulario (QR, fecha, turno, camas); **sin stepper** |
@@ -36,7 +36,8 @@ Tras entrar al módulo de censo QR, el usuario ve la pantalla **Mis Censos** con
 
 - Lista los censos **retenidos en memoria** del dispositivo (sin persistir aún en servidor o pendientes de sincronizar).
 - Permite revisar qué registros faltan subir cuando hay conexión.
-- En la captura: estado vacío (**Sin resultados**).
+- Sin ítems: texto **Sin resultados** dentro del `<ul>`.
+- Con ítems: mismas tarjetas que abajo, con **badge ámbar** y **marca de tiempo** — ver **§ Vista móvil — censos pendientes**.
 
 ### 1.2 Censos registrados
 
@@ -120,16 +121,53 @@ Implementación: `ReglasCenso.ValidarOcupacionCamas`, `censo-camas-logica.js`, U
 
 ---
 
+## Vista móvil — censos pendientes («Censos pendientes de guardar»)
+
+Cuando hay cola local, el primer `<ul>` bajo el título muestra **tarjetas** en lugar de «Sin resultados».
+
+### Tarjeta pendiente (`li.jss1514`)
+
+Misma disposición que un registro sincronizado, con diferencias visuales y de texto:
+
+| Zona | Registrado (servidor) | Pendiente (local) |
+|---|---|---|
+| **Badge** | Verde `#4CAF50` (`rgb(76, 175, 80)`) | **Ámbar** `#FFC107` (`rgb(255, 193, 7)`) — indica *aún no subido* |
+| **Título** | `{HABITACIÓN} \| Turno: …` | **`{fecha} {hora}`** + `\|` + habitación + `\| Turno: …` (ej. `23/11/2026 14:02 \| EXTERIOR \| Turno: Día`) |
+| **Subtítulo** | `.MOD-01 \| MOD-1-PISO 1` | Igual patrón (ej. `.MOD-02 \| MOD-2-PISO 1`) |
+| **Badge numérico** | Camas ocupadas ya en servidor | Camas declaradas en el intento local (ej. **2**) |
+| **Contenedor extra** | — | `div.jss1691` (área auxiliar tras la tarjeta; posible acción/sync en legacy — confirmar en UI) |
+
+**Ejemplo DOM (un pendiente + dos registrados en la misma pantalla):**
+
+```
+div.jss1580
+├── h6 → Censos pendientes de guardar
+├── ul
+│   └── li → badge 2 (ámbar) | 23/11/2026 14:02 | EXTERIOR | Turno: Día
+│              .MOD-02 | MOD-2-PISO 1
+├── h6 → Censos Registrados
+├── div.censoqr-date → #fechaCenso = 23/11/2026
+└── ul → 2× tarjetas verdes PASILLO (Día / Noche), badge 4
+```
+
+### Equivalencia NewRest (hoy)
+
+- Persistencia: al fallar `guardarqr`, `censo-qr.js` → `encolarOperacion` en `localStorage` (`sgh.offline.cola`).
+- UI: **no** repite esta lista; `colaOffline.js` muestra banner «Pendientes de sincronizar: N» y botón **Sincronizar datos**.
+- Migración objetivo: tarjetas ámbar en la parte superior de **Mis Censos** móvil, reutilizando el mismo payload que ya encola el Mid (`opcion: guardarqr`).
+
+---
+
 ## Vista móvil — censos ya registrados (lista «Censos Registrados»)
 
-Tras guardar/sincronizar, la misma pantalla **Mis Censos** (móvil) muestra el bloque superior sin cambios y, debajo del date picker, una **lista de tarjetas** (`<ul>`).
+Tras guardar/sincronizar, la misma pantalla **Mis Censos** (móvil) muestra el bloque de pendientes arriba y, debajo del date picker, la **lista de tarjetas** sincronizadas (`<ul>`).
 
 ### Estructura del contenedor (DOM legacy)
 
 ```
-div.jss1261
+div.jss1580 (ejemplo con pendiente + registrados)
 ├── h6 → "Censos pendientes de guardar"
-├── ul → vacío: "Sin resultados"
+├── ul → li pendiente(s) ó "Sin resultados"
 ├── h6 → "Censos Registrados"
 ├── div.row.censoqr-date → DatePicker #fechaCenso (valor ej. 23/11/2026)
 └── ul
@@ -155,7 +193,7 @@ Cada censado del día se representa como **una fila de lista**, no como tabla.
 
 - **Un censo con turno Ambos** en legacy se **materializa como dos ítems visuales** (y dos persistencias), alineado con `GuardarQrAsync` en NewRest que arma filas `D` + `N`.
 - La **ocupación** se comunica con el **número en el badge**, no con una columna «Camas ocupadas» aparte.
-- **Pendientes de guardar** usa el mismo patrón de lista cuando hay cola local; vacío se muestra como texto plano dentro del `<ul>`.
+- **Pendientes** comparten patrón de tarjeta pero badge **ámbar** y título con **fecha/hora de captura** (ver sección anterior).
 
 ### Equivalencia NewRest (hoy)
 
@@ -168,4 +206,5 @@ Cada censado del día se representa como **una fila de lista**, no como tabla.
 
 - Paso **2 Censo** (camas, turno, fecha) tras confirmar habitación — UI con radios y regla «Ambos» arriba.
 - Paso **3 Confirmación** (resumen / guardar).
-- Comportamiento offline y sincronización desde «pendientes de guardar».
+- Detalle del `div.jss1691` en tarjetas pendientes (acción tap/swipe si aplica).
+- Paso **3 Confirmación** del wizard.
