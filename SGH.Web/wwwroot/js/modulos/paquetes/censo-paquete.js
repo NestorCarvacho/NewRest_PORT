@@ -51,6 +51,8 @@ export function instalarCenso(base) {
         mostrarAviso: base.mostrarAviso,
         boton: base.boton,
         etiquetaCampo: etiquetaCampoSimple,
+        abrirPanel: base.abrirPanel,
+        cerrarPanel: base.cerrarPanel,
         obtenerCatalogo: function () { return base.catalogos.preparar("censo"); }
     });
     function enlazarVistaMisCensosQr(nodo) {
