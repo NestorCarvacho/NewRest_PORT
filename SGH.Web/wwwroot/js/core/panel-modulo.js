@@ -114,6 +114,9 @@ export function crearPanelModulo(dependencias) {
         nodo.hidden = true;
         nodo._filtro = modulo.filtroInicial();
         enlazarBarra(nodo, id, modulo);
+        if (id === "misCensos" && typeof dependencias.enlazarVistaMisCensosQr === "function") {
+            dependencias.enlazarVistaMisCensosQr(nodo);
+        }
         return nodo;
     }
 

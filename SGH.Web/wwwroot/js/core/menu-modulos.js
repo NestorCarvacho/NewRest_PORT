@@ -15,6 +15,7 @@ export function inicializarMenuModulos(dependencias) {
         if (boton.tagName === "A" && (evento.ctrlKey || evento.metaKey || evento.shiftKey || evento.altKey)) return;
         if (modulo === "censoQr") {
             evento.preventDefault();
+            if (typeof dependencias.abrirModulo === "function") dependencias.abrirModulo("misCensos");
             dependencias.abrirCensoQr();
             return;
         }

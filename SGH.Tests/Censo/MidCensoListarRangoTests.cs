@@ -12,7 +12,7 @@ public class MidCensoListarRangoTests
     public async Task ListarRangoAgrupaDiasEnUnaRespuesta()
     {
         var buscar = new BuscarCensoContador();
-        var mid = new MidCenso(buscar, new BuscarMiosCensoNulo(), new CatalogoCensoNulo(), new GuardarCensoNulo());
+        var mid = new MidCenso(buscar, new BuscarMiosCensoNulo(), new CatalogoCensoNulo(), new HabitacionQrCensoNulo(), new GuardarCensoNulo());
         var filtro = new FiltroPeticion
         {
             Opcion = "listarrango",
@@ -51,6 +51,12 @@ public class MidCensoListarRangoTests
     private sealed class CatalogoCensoNulo : IObtenerCatalogoCenso
     {
         public Task<ResultadoCatalogoCenso> EjecutarAsync(int empresaMandanteId, int campamentoId, CancellationToken cancellationToken) =>
+            throw new NotImplementedException();
+    }
+
+    private sealed class HabitacionQrCensoNulo : IObtenerHabitacionCensoQr
+    {
+        public Task<ResultadoHabitacionCensoQr> EjecutarAsync(int campamentoId, int habitacionId, CancellationToken cancellationToken) =>
             throw new NotImplementedException();
     }
 

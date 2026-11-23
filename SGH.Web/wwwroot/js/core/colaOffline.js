@@ -53,9 +53,19 @@ export async function sincronizarCensoLegado(enviar) {
     actualizarBannerOffline();
 }
 
+function contarCensoQrEnCola() {
+    return leerJson(CLAVE_COLA).filter(function (item) {
+        return item && item.cuerpo && item.cuerpo.opcion === "guardarqr";
+    }).length;
+}
+
 export async function sincronizarTodo(enviar) {
+    var pendientesQrAntes = contarCensoQrEnCola();
     await sincronizarCola(enviar);
     await sincronizarCensoLegado(enviar);
+    if (pendientesQrAntes !== contarCensoQrEnCola()) {
+        window.dispatchEvent(new CustomEvent("sgh-censo-qr-pendientes"));
+    }
 }
 
 function dispararSincronizacion() {

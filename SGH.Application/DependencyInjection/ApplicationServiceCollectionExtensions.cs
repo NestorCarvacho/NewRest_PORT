@@ -36,6 +36,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IBuscarCensos, BuscarCensos>();
         services.AddScoped<IBuscarMisCensos, BuscarMisCensos>();
         services.AddScoped<IObtenerCatalogoCenso, ObtenerCatalogoCenso>();
+        services.AddScoped<IObtenerHabitacionCensoQr, ObtenerHabitacionCensoQr>();
         services.AddScoped<IGuardarCensos, GuardarCensos>();
         services.AddScoped<IConsultarGestionDiaria, ConsultarGestionDiaria>();
         services.AddScoped<IGenerarInformeGeneral, GenerarInformeGeneral>();

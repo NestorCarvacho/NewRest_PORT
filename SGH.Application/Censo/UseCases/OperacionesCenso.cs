@@ -82,11 +82,43 @@ public sealed class ObtenerCatalogoCenso : IObtenerCatalogoCenso
         return new ResultadoCatalogoCenso.Listo(new CatalogoCensoDto(
             ADto(catalogo.Modulos),
             ADto(catalogo.Pisos),
-            ADto(catalogo.Habitaciones)));
+            ADto(catalogo.Habitaciones),
+            ADto(catalogo.TiposInstalacion),
+            catalogo.HabitacionesQr.Select(h => new OpcionHabitacionCensoDto(
+                h.Id, h.Etiqueta, h.PadreId, h.TipoInstalacionId, h.Capacidad)).ToList()));
     }
 
     private static List<OpcionCensoDto> ADto(IReadOnlyList<OpcionCenso> opciones) =>
         opciones.Select(opcion => new OpcionCensoDto(opcion.Id, opcion.Etiqueta, opcion.PadreId)).ToList();
+}
+
+public sealed class ObtenerHabitacionCensoQr : IObtenerHabitacionCensoQr
+{
+    private readonly IConsultaCenso _consulta;
+
+    public ObtenerHabitacionCensoQr(IConsultaCenso consulta)
+    {
+        _consulta = consulta;
+    }
+
+    public async Task<ResultadoHabitacionCensoQr> EjecutarAsync(int campamentoId, int habitacionId, CancellationToken cancellationToken)
+    {
+        if (campamentoId <= 0)
+            return new ResultadoHabitacionCensoQr.Rechazado(AlcanceSesion.SinCampamento);
+        if (habitacionId <= 0)
+            return new ResultadoHabitacionCensoQr.Rechazado("El código QR no contiene una habitación válida.");
+
+        var detalle = await _consulta.ObtenerHabitacionQrAsync(campamentoId, habitacionId, cancellationToken);
+        if (detalle is null)
+            return new ResultadoHabitacionCensoQr.NoEncontrada();
+
+        return new ResultadoHabitacionCensoQr.Listo(new HabitacionCensoQrDto(
+            detalle.HabitacionId,
+            detalle.Habitacion,
+            detalle.Modulo,
+            detalle.Piso,
+            detalle.Capacidad));
+    }
 }
 
 public sealed class BuscarMisCensos : IBuscarMisCensos

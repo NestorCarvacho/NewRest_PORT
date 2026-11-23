@@ -28,10 +28,21 @@ public sealed record CensoUsuarioListado(
 
 public sealed record OpcionCenso(int Id, string Etiqueta, int PadreId);
 
+public sealed record OpcionHabitacionCenso(int Id, string Etiqueta, int PadreId, int TipoInstalacionId, int Capacidad);
+
+public sealed record HabitacionCensoQr(
+    int HabitacionId,
+    string Habitacion,
+    string Modulo,
+    string Piso,
+    int Capacidad);
+
 public sealed record CatalogoCenso(
     IReadOnlyList<OpcionCenso> Modulos,
     IReadOnlyList<OpcionCenso> Pisos,
-    IReadOnlyList<OpcionCenso> Habitaciones);
+    IReadOnlyList<OpcionCenso> Habitaciones,
+    IReadOnlyList<OpcionCenso> TiposInstalacion,
+    IReadOnlyList<OpcionHabitacionCenso> HabitacionesQr);
 
 public sealed record ResultadoFilaCenso(int Resultado, string? Mensaje);
 

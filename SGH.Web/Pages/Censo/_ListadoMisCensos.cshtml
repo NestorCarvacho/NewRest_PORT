@@ -1,8 +1,23 @@
 @{
     ViewData["ModuloId"] = "misCensos";
 }
-<section class="modulo modulo-anclado" data-id="misCensos" hidden>
+<section class="modulo modulo-anclado modulo-misCensos" data-id="misCensos" hidden>
     <p class="modulo-estado" hidden></p>
+    <div class="censo-qr-vista">
+        <h2 class="censo-qr-vista-titulo">Mis Censos</h2>
+        <h3 class="censo-qr-vista-seccion">Censos pendientes de guardar</h3>
+        <div class="censo-qr-pendientes-acciones">
+            <button type="button" class="boton-secundario" data-accion="sincronizar-censo-qr" hidden>Sincronizar</button>
+        </div>
+        <ul class="censo-qr-lista" data-lista="pendientes"></ul>
+        <h3 class="censo-qr-vista-seccion">Censos Registrados</h3>
+        <div class="censo-qr-fecha">
+            <label for="fechaCensoMis">Fecha</label>
+            <input type="date" id="fechaCensoMis" name="fechaCenso" />
+        </div>
+        <ul class="censo-qr-lista" data-lista="registrados"></ul>
+        <button type="button" class="censo-qr-fab" data-accion="nuevo-censo-qr" title="Nuevo censo QR" aria-label="Nuevo censo QR">+</button>
+    </div>
     <div class="modulo-barra">
         <button type="button" class="boton-secundario" data-accion="actualizar" data-etiqueta="Actualizar">Actualizar</button>
         <partial name="Modulos/_ExportarDesplegable" />
