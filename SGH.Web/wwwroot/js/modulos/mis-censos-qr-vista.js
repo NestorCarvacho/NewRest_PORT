@@ -48,6 +48,19 @@ function normalizarFilas(resp) {
     return [];
 }
 
+function ordenarFilasMisCensos(filas) {
+    return filas.slice().sort(function (a, b) {
+        var hab = String(a.habitacion || "").localeCompare(String(b.habitacion || ""), undefined, { sensitivity: "base" });
+        if (hab !== 0) return hab;
+        var fa = String(a.fecha || "");
+        var fb = String(b.fecha || "");
+        if (fa !== fb) return fa.localeCompare(fb);
+        var ta = a.turno === "N" ? 1 : 0;
+        var tb = b.turno === "N" ? 1 : 0;
+        return ta - tb;
+    });
+}
+
 export function montarVistaMisCensosQr(dependencias, nodo) {
     var raiz = nodo.querySelector(".censo-qr-vista");
     if (!raiz || raiz._enlazado) return;
@@ -125,7 +138,7 @@ export function montarVistaMisCensosQr(dependencias, nodo) {
             listaRegistrados.append(vacio);
             return;
         }
-        filas.forEach(function (fila) {
+        ordenarFilasMisCensos(filas).forEach(function (fila) {
             var titulo = (fila.habitacion || "") + " | Turno: " + turnoLegible(fila.turnoNombre || fila.turno);
             var subt = [fila.modulo, fila.piso].filter(Boolean).join(" | ");
             listaRegistrados.append(crearTarjeta({
@@ -151,9 +164,16 @@ export function montarVistaMisCensosQr(dependencias, nodo) {
             });
     }
 
-    function refrescar() {
+    function refrescar(fechaSincronizar) {
+        if (fechaSincronizar && inputFecha) inputFecha.value = fechaSincronizar;
         pintarPendientes();
-        return cargarRegistrados();
+        var promesaLista = cargarRegistrados();
+        if (dependencias.recargarModulo) {
+            return Promise.resolve(promesaLista).then(function () {
+                return dependencias.recargarModulo();
+            });
+        }
+        return promesaLista;
     }
 
     if (inputFecha) {

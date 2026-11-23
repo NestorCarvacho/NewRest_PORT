@@ -115,7 +115,19 @@ export function crearPanelModulo(dependencias) {
         nodo._filtro = modulo.filtroInicial();
         enlazarBarra(nodo, id, modulo);
         if (id === "misCensos" && typeof dependencias.enlazarVistaMisCensosQr === "function") {
-            dependencias.enlazarVistaMisCensosQr(nodo);
+            dependencias.enlazarVistaMisCensosQr(nodo, {
+                recargarModulo: function () {
+                    var fechaInp = nodo.querySelector("[name='fechaCenso']");
+                    if (fechaInp && fechaInp.value) {
+                        nodo._filtro = Object.assign({}, nodo._filtro || {}, {
+                            desde: fechaInp.value,
+                            hasta: fechaInp.value,
+                            periodoPorRango: false
+                        });
+                    }
+                    return dependencias.cargar(id, { bloquearPantalla: false, avisarConteo: false });
+                }
+            });
         }
         return nodo;
     }
