@@ -63,6 +63,10 @@ public sealed record SolicitudCrearReserva(
 public sealed record SolicitudMovimientoReserva(
     int ReservaId, DateTime Fecha, int UsuarioId, string Operacion, int EmpresaMandanteId, int CampamentoId);
 
+public sealed record SolicitudAnularReserva(int ReservaId, int EmpresaMandanteId, int CampamentoId, int UsuarioId);
+
+public sealed record SolicitudFinalizarReserva(int ReservaId, int EmpresaMandanteId, int CampamentoId, int UsuarioId);
+
 public sealed record SolicitudActualizarReserva(
     int ReservaId, int EmpresaMandanteId, int CampamentoId, int AreaId,
     DateTime FechaReserva, DateTime FechaLlegada, DateTime? FechaSalida,
@@ -122,4 +126,26 @@ public abstract record ResultadoActualizacionReserva
     public sealed record Actualizada : ResultadoActualizacionReserva;
 
     public sealed record Rechazada(string Mensaje) : ResultadoActualizacionReserva;
+}
+
+public abstract record ResultadoAnularReserva
+{
+    private ResultadoAnularReserva()
+    {
+    }
+
+    public sealed record Anulada : ResultadoAnularReserva;
+
+    public sealed record Rechazada(string Mensaje) : ResultadoAnularReserva;
+}
+
+public abstract record ResultadoFinalizarReserva
+{
+    private ResultadoFinalizarReserva()
+    {
+    }
+
+    public sealed record Finalizada : ResultadoFinalizarReserva;
+
+    public sealed record Rechazada(string Mensaje) : ResultadoFinalizarReserva;
 }

@@ -29,6 +29,8 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IImportarReservas, ImportarReservas>();
         services.AddScoped<IRegistrarMovimientoReserva, RegistrarMovimientoReserva>();
         services.AddScoped<IActualizarReserva, RegistrarMovimientoReserva.ActualizarReserva>();
+        services.AddScoped<IAnularReserva, AnularReserva>();
+        services.AddScoped<IFinalizarReserva, FinalizarReservaCheckout>();
         services.AddScoped<IGestionSolicitudes, GestionSolicitudes>();
         services.AddScoped<IBuscarCensos, BuscarCensos>();
         services.AddScoped<IBuscarMisCensos, BuscarMisCensos>();

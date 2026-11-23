@@ -20,4 +20,8 @@ public interface IComandoReserva
         DateTime fechaReserva, DateTime fechaLlegada, DateTime? fechaSalida, string? observacion,
         int turnoId, int? pasajeroId, int? habitacionId, string estado, bool tieneAgua,
         int usuarioId, CancellationToken cancellationToken);
+
+    Task AnularAsync(int reservaId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken);
+
+    Task FinalizarCheckoutAsync(int reservaId, int empresaMandanteId, int usuarioId, CancellationToken cancellationToken);
 }

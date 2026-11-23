@@ -15,8 +15,8 @@ Documento para revisión previa a ejecución. Cada requisito incluye estado en N
 | 7 Correo prefill | Hecho: `he_sp_solicitud_contacto_correo` + catálogo |
 | 8 Generar sin hab. | Hecho: UI + Mid + `GestionSolicitudes` |
 | 9 Nº reserva pasajero | Hecho: SP + columna en detalle |
-| 10 Anular reserva | Doc: `Docs/as-is/reserva-anular-legacy.md` |
-| 11 Finalizar | Doc: `Docs/as-is/reserva-finalizar-hosteast.md` |
+| 10 Anular reserva | Hecho: `he_sp_reserva_anular` + Mid/UI |
+| 11 Finalizar | Hecho: Mid `finalizar` + botón tras check-out |
 | 12 Check-in masivo | Hecho: columna Sel. + botón **Check-in masivo** + Mid `movimientosmasivo` |
 
 **Convención técnica del proyecto:** MVC + Mid + `he_sp_*` donde aplique.

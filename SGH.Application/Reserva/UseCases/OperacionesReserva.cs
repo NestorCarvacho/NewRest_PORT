@@ -2,6 +2,7 @@ using SGH.Application.Reserva.DTOs;
 using SGH.Application.Reserva.Interfaces;
 using SGH.Application.Sesion;
 using SGH.Domain.Reserva;
+using SGH.Domain.Reserva.Entities;
 using SGH.Domain.Reserva.Interfaces;
 
 namespace SGH.Application.Reserva.UseCases;
@@ -203,5 +204,90 @@ public sealed class RegistrarMovimientoReserva : IRegistrarMovimientoReserva
                 solicitud.Estado, solicitud.TieneAgua, solicitud.UsuarioId, cancellationToken);
             return new ResultadoActualizacionReserva.Actualizada();
         }
+    }
+}
+
+public sealed class AnularReserva : IAnularReserva
+{
+    private readonly IComandoReserva _comando;
+    private readonly IConsultaReserva _consulta;
+
+    public AnularReserva(IComandoReserva comando, IConsultaReserva consulta)
+    {
+        _comando = comando;
+        _consulta = consulta;
+    }
+
+    public async Task<ResultadoAnularReserva> EjecutarAsync(SolicitudAnularReserva solicitud, CancellationToken cancellationToken)
+    {
+        if (solicitud.UsuarioId <= 0)
+            return new ResultadoAnularReserva.Rechazada("La sesión no tiene un usuario.");
+
+        var alcance = AlcanceSesion.ValidarAlcance(solicitud.EmpresaMandanteId, solicitud.CampamentoId);
+        if (alcance is not null)
+            return new ResultadoAnularReserva.Rechazada(alcance);
+
+        var propia = await _consulta.ReservaEstaEnCampamentoAsync(solicitud.ReservaId, solicitud.CampamentoId, cancellationToken);
+        if (!propia)
+            return new ResultadoAnularReserva.Rechazada(ReglasReserva.ReservaAjena);
+
+        var fila = await ObtenerReservaAsync(solicitud.ReservaId, solicitud.CampamentoId, cancellationToken);
+        if (fila is null)
+            return new ResultadoAnularReserva.Rechazada(ReglasReserva.ReservaAjena);
+
+        var mensaje = ReglasReserva.ValidarAnular(solicitud.ReservaId, fila.EstadoNumero);
+        if (mensaje is not null)
+            return new ResultadoAnularReserva.Rechazada(mensaje);
+
+        await _comando.AnularAsync(
+            solicitud.ReservaId, solicitud.EmpresaMandanteId, solicitud.CampamentoId, solicitud.UsuarioId, cancellationToken);
+        return new ResultadoAnularReserva.Anulada();
+    }
+
+    private async Task<ReservaListada?> ObtenerReservaAsync(int reservaId, int campamentoId, CancellationToken cancellationToken)
+    {
+        var filas = await _consulta.BuscarAsync(new FiltroReserva(
+            campamentoId, reservaId, 0, "0", 0, "0", null, null, null, null, null, null, null, 0, 0, "0"), cancellationToken);
+        return filas.FirstOrDefault(f => f.Id == reservaId);
+    }
+}
+
+public sealed class FinalizarReservaCheckout : IFinalizarReserva
+{
+    private readonly IComandoReserva _comando;
+    private readonly IConsultaReserva _consulta;
+
+    public FinalizarReservaCheckout(IComandoReserva comando, IConsultaReserva consulta)
+    {
+        _comando = comando;
+        _consulta = consulta;
+    }
+
+    public async Task<ResultadoFinalizarReserva> EjecutarAsync(SolicitudFinalizarReserva solicitud, CancellationToken cancellationToken)
+    {
+        if (solicitud.UsuarioId <= 0)
+            return new ResultadoFinalizarReserva.Rechazada("La sesión no tiene un usuario.");
+
+        var alcance = AlcanceSesion.ValidarAlcance(solicitud.EmpresaMandanteId, solicitud.CampamentoId);
+        if (alcance is not null)
+            return new ResultadoFinalizarReserva.Rechazada(alcance);
+
+        var propia = await _consulta.ReservaEstaEnCampamentoAsync(solicitud.ReservaId, solicitud.CampamentoId, cancellationToken);
+        if (!propia)
+            return new ResultadoFinalizarReserva.Rechazada(ReglasReserva.ReservaAjena);
+
+        var filas = await _consulta.BuscarAsync(new FiltroReserva(
+            solicitud.CampamentoId, solicitud.ReservaId, 0, "0", 0, "0", null, null, null, null, null, null, null, 0, 0, "0"), cancellationToken);
+        var fila = filas.FirstOrDefault(f => f.Id == solicitud.ReservaId);
+        if (fila is null)
+            return new ResultadoFinalizarReserva.Rechazada(ReglasReserva.ReservaAjena);
+
+        var mensaje = ReglasReserva.ValidarFinalizar(solicitud.ReservaId, fila.EstadoNumero, fila.CheckOut);
+        if (mensaje is not null)
+            return new ResultadoFinalizarReserva.Rechazada(mensaje);
+
+        await _comando.FinalizarCheckoutAsync(
+            solicitud.ReservaId, solicitud.EmpresaMandanteId, solicitud.UsuarioId, cancellationToken);
+        return new ResultadoFinalizarReserva.Finalizada();
     }
 }

@@ -78,6 +78,26 @@ public class AlcanceReservaTests
     }
 
     [Fact]
+    public async Task AnularValidaAlcanceYEstado()
+    {
+        var comando = new ComandoReservaFalso();
+        var consulta = new ConsultaReservaFalsa
+        {
+            ReservasPropias = [8],
+            Filas = [new ReservaListada(8, 2, 3, 4, 5, "G", "P", "H", "Asignada", "A",
+                "01/01/2026", "02/01/2026", null, "", "")]
+        };
+        var caso = new AnularReserva(comando, consulta);
+
+        var ajena = await caso.EjecutarAsync(new SolicitudAnularReserva(4, 1, 20, 3), CancellationToken.None);
+        var propia = await caso.EjecutarAsync(new SolicitudAnularReserva(8, 1, 20, 3), CancellationToken.None);
+
+        Assert.IsType<ResultadoAnularReserva.Rechazada>(ajena);
+        Assert.IsType<ResultadoAnularReserva.Anulada>(propia);
+        Assert.Equal(1, comando.Anulaciones);
+    }
+
+    [Fact]
     public async Task ReservaDeOtroCampamentoNoSeActualiza()
     {
         var comando = new ComandoReservaFalso();
@@ -155,6 +175,22 @@ public class AlcanceReservaTests
             int usuarioId, CancellationToken cancellationToken)
         {
             Actualizaciones++;
+            return Task.CompletedTask;
+        }
+
+        public int Anulaciones { get; private set; }
+
+        public int Finalizaciones { get; private set; }
+
+        public Task AnularAsync(int reservaId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
+        {
+            Anulaciones++;
+            return Task.CompletedTask;
+        }
+
+        public Task FinalizarCheckoutAsync(int reservaId, int empresaMandanteId, int usuarioId, CancellationToken cancellationToken)
+        {
+            Finalizaciones++;
             return Task.CompletedTask;
         }
     }

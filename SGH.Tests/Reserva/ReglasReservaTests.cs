@@ -28,4 +28,21 @@ public class ReglasReservaTests
         Assert.NotNull(ReglasReserva.ValidarMovimiento(8, null, ReglasReserva.CheckOut));
         Assert.NotNull(ReglasReserva.ValidarMovimiento(8, fecha, "X"));
     }
+
+    [Fact]
+    public void AnularRechazaReservasCerradas()
+    {
+        Assert.Null(ReglasReserva.ValidarAnular(5, ReglasReserva.EstadoAsignada));
+        Assert.NotNull(ReglasReserva.ValidarAnular(0, "A"));
+        Assert.NotNull(ReglasReserva.ValidarAnular(5, ReglasReserva.EstadoAnulada));
+        Assert.NotNull(ReglasReserva.ValidarAnular(5, ReglasReserva.EstadoFinalizada));
+    }
+
+    [Fact]
+    public void FinalizarExigeAsignadaConCheckOut()
+    {
+        Assert.Null(ReglasReserva.ValidarFinalizar(9, ReglasReserva.EstadoAsignada, "11/11/2026 13:00"));
+        Assert.NotNull(ReglasReserva.ValidarFinalizar(9, "P", "11/11/2026 13:00"));
+        Assert.NotNull(ReglasReserva.ValidarFinalizar(9, ReglasReserva.EstadoAsignada, null));
+    }
 }

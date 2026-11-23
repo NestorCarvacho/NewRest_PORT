@@ -26,3 +26,13 @@ public interface IActualizarReserva
 {
     Task<ResultadoActualizacionReserva> EjecutarAsync(SolicitudActualizarReserva solicitud, CancellationToken cancellationToken);
 }
+
+public interface IAnularReserva
+{
+    Task<ResultadoAnularReserva> EjecutarAsync(SolicitudAnularReserva solicitud, CancellationToken cancellationToken);
+}
+
+public interface IFinalizarReserva
+{
+    Task<ResultadoFinalizarReserva> EjecutarAsync(SolicitudFinalizarReserva solicitud, CancellationToken cancellationToken);
+}

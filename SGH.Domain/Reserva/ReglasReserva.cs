@@ -11,6 +11,9 @@ public static class ReglasReserva
     public const string OrigenManual = "R";
     public const string CheckIn = "I";
     public const string CheckOut = "O";
+    public const string EstadoAnulada = "N";
+    public const string EstadoFinalizada = "F";
+    public const string EstadoAsignada = "A";
     public const string ReservaAjena = ReglasAlcance.RegistroAjenoCampamento;
 
     public static string? ValidarAlta(int areaId, int turnoId, DateTime llegada, DateTime? salida)
@@ -37,6 +40,31 @@ public static class ReglasReserva
 
         if (operacion is not (CheckIn or CheckOut))
             return "La operación no corresponde a un check-in ni a un check-out.";
+
+        return null;
+    }
+
+    public static string? ValidarAnular(int reservaId, string? estado)
+    {
+        if (reservaId <= 0)
+            return "Seleccione una reserva.";
+
+        if (estado is EstadoAnulada or EstadoFinalizada)
+            return "La reserva ya está anulada o finalizada.";
+
+        return null;
+    }
+
+    public static string? ValidarFinalizar(int reservaId, string? estado, string? checkOut)
+    {
+        if (reservaId <= 0)
+            return "Seleccione una reserva.";
+
+        if (estado != EstadoAsignada)
+            return "Solo se puede finalizar una reserva asignada.";
+
+        if (string.IsNullOrWhiteSpace(checkOut))
+            return "Registre el check-out antes de finalizar la reserva.";
 
         return null;
     }

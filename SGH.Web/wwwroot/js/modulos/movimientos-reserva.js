@@ -11,7 +11,34 @@ export function crearMovimientosReserva(dependencias) {
         }
         if (fila.estadoNumero === "A" && !fila.checkIn) acciones.append(crearBotonMovimiento(fila.id, "I", "Check In"));
         if (fila.estadoNumero === "A" && fila.checkIn && !fila.checkOut) acciones.append(crearBotonMovimiento(fila.id, "O", "Check Out"));
+        if (fila.estadoNumero === "A" && fila.checkOut) {
+            acciones.append(crearBotonAccion(fila.id, "finalizar", "Finalizar", function (id) {
+                return dependencias.enviar("/Reserva/Mid/MidReservas.cs", { opcion: "finalizar", reservaId: id });
+            }, "Reserva finalizada y habitación liberada.", "¿Finalizar la reserva y liberar la habitación?"));
+        }
+        if (fila.estadoNumero === "A" || fila.estadoNumero === "P") {
+            acciones.append(crearBotonAccion(fila.id, "anular", "Anular", function (id) {
+                return dependencias.enviar("/Reserva/Mid/MidReservas.cs", { opcion: "anular", reservaId: id });
+            }, "Reserva anulada.", "¿Anular esta reserva?"));
+        }
         return acciones;
+    }
+
+    function crearBotonAccion(reservaId, clase, texto, enviarAccion, mensajeExito, confirmacion) {
+        var boton = dependencias.boton(texto, "accion-fila accion-" + clase, function () {
+            if (!window.confirm(confirmacion)) return;
+            enviarAccion(reservaId).then(function () {
+                var actualizar = dependencias.refrescarFilaReserva
+                    ? dependencias.refrescarFilaReserva(reservaId)
+                    : (dependencias.cargar
+                        ? dependencias.cargar("reserva", { bloquearPantalla: false, avisarConteoFilas: false })
+                        : Promise.resolve());
+                return actualizar.then(function () { dependencias.mostrarAviso(mensajeExito, "success"); });
+            }).catch(function (error) { dependencias.mostrarAviso(error.message, "error"); });
+        });
+        boton.setAttribute("aria-label", texto);
+        boton.setAttribute("title", texto);
+        return boton;
     }
 
     function crearBotonMovimiento(reservaId, operacion, texto) {

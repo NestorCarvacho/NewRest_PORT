@@ -12,7 +12,9 @@ public sealed class MidReservas(
     IImportarReservas importar,
     IPlanillaReservaExcel planilla,
     IRegistrarMovimientoReserva movimiento,
-    IActualizarReserva actualizar)
+    IActualizarReserva actualizar,
+    IAnularReserva anular,
+    IFinalizarReserva finalizar)
 {
     public const string Ruta = "Mid/MidReservas.cs";
 
@@ -24,6 +26,8 @@ public sealed class MidReservas(
         Accion("editar", "Editar", "dbo.he_sp_reserva_actualizar", "Actualiza una reserva."),
         Accion("movimiento", "Movimiento", "dbo.he_sp_reserva_registrar_movimiento", "Registra check-in o check-out."),
         Accion("movimientosmasivo", "Movimiento masivo", "dbo.he_sp_reserva_registrar_movimiento", "Registra check-in masivo."),
+        Accion("anular", "Anular", "dbo.he_sp_reserva_anular", "Anula una reserva."),
+        Accion("finalizar", "Finalizar", "dbo.he_sp_reserva_finalizar_checkout", "Finaliza la reserva tras check-out."),
         Accion("importar", "Importar", "dbo.he_sp_reserva_crear", "Crea reservas desde una planilla."),
         Accion("plantilla", "Plantilla", "planilla", "Devuelve la planilla de importación.")
     ];
@@ -48,6 +52,10 @@ public sealed class MidReservas(
                 return await MovimientoAsync(filtro, sesion, cancellationToken);
             case "movimientosmasivo":
                 return await MovimientosMasivoAsync(filtro, sesion, cancellationToken);
+            case "anular":
+                return await AnularAsync(filtro, sesion, cancellationToken);
+            case "finalizar":
+                return await FinalizarAsync(filtro, sesion, cancellationToken);
             case "plantilla":
                 return EjecucionMid.Descarga(
                     planilla.CrearPlantilla(),
@@ -212,6 +220,32 @@ public sealed class MidReservas(
         }
 
         return EjecucionMid.Ok(new { exitos, fallos });
+    }
+
+    private async Task<EjecucionMid> AnularAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var resultado = await anular.EjecutarAsync(new SolicitudAnularReserva(
+            LecturaPeticion.Entero(filtro, "reservaId"),
+            sesion.EmpresaMandanteId, sesion.CampamentoId, sesion.UsuarioId), cancellationToken);
+        return resultado switch
+        {
+            ResultadoAnularReserva.Anulada => EjecucionMid.Ok(new { listo = true }),
+            ResultadoAnularReserva.Rechazada rechazada => EjecucionMid.Fallo(400, rechazada.Mensaje),
+            _ => EjecucionMid.Fallo(400, "No se pudo anular la reserva.")
+        };
+    }
+
+    private async Task<EjecucionMid> FinalizarAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var resultado = await finalizar.EjecutarAsync(new SolicitudFinalizarReserva(
+            LecturaPeticion.Entero(filtro, "reservaId"),
+            sesion.EmpresaMandanteId, sesion.CampamentoId, sesion.UsuarioId), cancellationToken);
+        return resultado switch
+        {
+            ResultadoFinalizarReserva.Finalizada => EjecucionMid.Ok(new { listo = true }),
+            ResultadoFinalizarReserva.Rechazada rechazada => EjecucionMid.Fallo(400, rechazada.Mensaje),
+            _ => EjecucionMid.Fallo(400, "No se pudo finalizar la reserva.")
+        };
     }
 
     private async Task<EjecucionMid> MovimientoAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
