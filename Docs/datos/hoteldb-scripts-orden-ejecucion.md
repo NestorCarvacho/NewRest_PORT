@@ -36,6 +36,12 @@ Convenciones:
 | 19 | `SGH.Infrastructure/Navegacion/Persistence/002_menu_config_habitacion_bano.sql` | Navegación | Entradas de menú Configuración; después de CU-HAB operativo. |
 | 20 | `SGH.Infrastructure/Navegacion/Persistence/003_menusperfil_habitacion_bano_por_perfil.sql` | Navegación | `MenusPerfil` por perfil (p. ej. 68); después del **002**. |
 
+### Lote 2026-11-23
+
+Un solo archivo con los cambios del día (reserva anular/reversar movimiento, solicitud correo/reservas por pasajero, `sp_getapplock`):
+
+- `Docs/datos/migracion/20261123_modificaciones.sql`
+
 ### Parches incrementales (QA que ya ejecutó los `001_*` antiguos)
 
 No re-ejecutar los `001` solo para aplicar estos cambios. Usar los archivos numerados siguientes (idempotentes con `CREATE OR ALTER`):
