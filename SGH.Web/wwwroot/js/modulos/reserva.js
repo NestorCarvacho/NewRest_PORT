@@ -216,10 +216,11 @@ export function crearReserva(dependencias) {
     }
 
     function prioridadColumnaReserva(clave) {
-        if (clave === "seleccionMasiva" || clave === "acciones" || clave === "detalle") return 1;
+        if (clave === "seleccionMasiva" || clave === "detalle" || clave === "acciones") return 1;
         if (clave === "pasajero") return 2;
-        if (clave === "llegada" || clave === "salida") return 3;
-        if (clave === "checkIn" || clave === "checkOut") return 4;
+        if (clave === "numero" || clave === "estado") return 3;
+        if (clave === "llegada" || clave === "salida") return 4;
+        if (clave === "checkIn" || clave === "checkOut") return 5;
         return 10000;
     }
 
@@ -237,11 +238,9 @@ export function crearReserva(dependencias) {
     function htmlDetalleReserva(mapeada) {
         if (!mapeada) return "";
         var items = [
-            itemDetalleReserva("N°", mapeada.numero),
             itemDetalleReserva("Fecha Reserva", mapeada.fechaReserva),
             itemDetalleReserva("Grupo Empresa", mapeada.grupo),
-            itemDetalleReserva("Habitación", mapeada.habitacion),
-            itemDetalleReserva("Estado", mapeada.estado)
+            itemDetalleReserva("Habitación", mapeada.habitacion)
         ].join("");
         if (!items) return "";
         return '<ul class="dtr-details reserva-dtr-details">' + items + "</ul>";
@@ -414,8 +413,9 @@ export function crearReserva(dependencias) {
     function columnas(modo, crearAcciones) {
         var renderTruncada = renderizadorCeldaTruncada();
         var claves = [
-            "seleccionMasiva", "acciones", "pasajero", "llegada", "salida", "checkIn", "checkOut", "detalle",
-            "numero", "fechaReserva", "grupo", "habitacion", "estado"
+            "seleccionMasiva", "detalle", "acciones", "pasajero", "numero", "estado",
+            "llegada", "salida", "checkIn", "checkOut",
+            "fechaReserva", "grupo", "habitacion"
         ];
         return claves.map(function (clave) {
             if (clave === "seleccionMasiva") return columnaSeleccionMasiva();
@@ -440,6 +440,21 @@ export function crearReserva(dependencias) {
                 return {
                     data: clave,
                     className: "col-pasajero-reserva",
+                    responsivePriority: prioridadColumnaReserva(clave),
+                    render: renderTruncada
+                };
+            }
+            if (clave === "numero") {
+                return {
+                    data: clave,
+                    className: "col-numero-reserva",
+                    responsivePriority: prioridadColumnaReserva(clave)
+                };
+            }
+            if (clave === "estado") {
+                return {
+                    data: clave,
+                    className: "col-estado-reserva",
                     responsivePriority: prioridadColumnaReserva(clave),
                     render: renderTruncada
                 };

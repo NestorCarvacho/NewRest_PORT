@@ -975,6 +975,23 @@ div.dt-container table.dataTable tbody > tr > td {
   text-overflow: ellipsis;
 }
 
+.modulo-reserva div.dt-container table.dataTable th.col-numero-reserva,
+.modulo-reserva div.dt-container table.dataTable td.col-numero-reserva {
+  width: 5.5rem;
+  min-width: 5.5rem;
+  max-width: 5.5rem;
+  white-space: nowrap;
+}
+
+.modulo-reserva div.dt-container table.dataTable th.col-estado-reserva,
+.modulo-reserva div.dt-container table.dataTable td.col-estado-reserva {
+  min-width: 5.5rem;
+  max-width: 7.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .modulo-reserva div.dt-container table.dataTable th.col-fecha-movimiento,
 .modulo-reserva div.dt-container table.dataTable td.col-fecha-movimiento {
   width: 9.5rem;

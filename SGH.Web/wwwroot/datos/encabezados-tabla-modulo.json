@@ -2,7 +2,7 @@
   "habitaciones": ["Acciones", "Código", "Sexo", "Baño", "Pabellón", "Módulo", "Camas", "Hab./total", "Por turnos", "Exclusivo", "Estado"],
   "banos": ["Acciones", "Código", "Ubicación", "Sexo", "Estado", "Habitaciones"],
   "tiposcama": ["Acciones", "Nombre", "Medidas", "Camas", "Estado"],
-  "reserva": ["Sel.", "Acciones", "Pasajero", "Llegada", "Salida", "Check In", "Check Out", "Det.", "N°", "Fecha Reserva", "Grupo Empresa", "Habitación", "Estado"],
+  "reserva": ["Sel.", "Det.", "Acciones", "Pasajero", "N°", "Estado", "Llegada", "Salida", "Check In", "Check Out", "Fecha Reserva", "Grupo Empresa", "Habitación"],
   "solicitud": ["Acciones", "N°", "Fecha", "Grupo empresa", "Solicitante", "Estado"],
   "censo": ["Nº", "Fecha", "Módulo", "Piso", "Habitación", "Est. censo", "Est. hab.", "Camas", "Ocupadas", "Ocup. check-in"],
   "misCensos": ["N°", "Fecha", "Campamento", "Módulo", "Piso", "Habitación", "N° Camas", "Camas ocupadas", "Turno"]
