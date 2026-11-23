@@ -162,6 +162,7 @@ export function crearMovimientosReserva(dependencias) {
         nodo._modoSeleccionMasiva = null;
         actualizarBotonMovimientoMasivo(nodo);
         if (typeof nodo._repintarSeleccionMasiva === "function") nodo._repintarSeleccionMasiva();
+        if (typeof nodo._actualizarEncabezadoSeleccionMasiva === "function") nodo._actualizarEncabezadoSeleccionMasiva();
     }
 
     function movimientoMasivo(nodo) {

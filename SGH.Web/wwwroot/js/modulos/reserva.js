@@ -358,6 +358,93 @@ export function crearReserva(dependencias) {
         refrescarModoSeleccionMasiva(modulo);
         if (typeof modulo._repintarSeleccionMasiva === "function") modulo._repintarSeleccionMasiva();
         if (typeof modulo._actualizarBotonMovimientoMasivo === "function") modulo._actualizarBotonMovimientoMasivo();
+        if (typeof modulo._actualizarEncabezadoSeleccionMasiva === "function") modulo._actualizarEncabezadoSeleccionMasiva();
+    }
+
+    function filasElegiblesMasivo(api, modo) {
+        var filas = [];
+        if (!api) return filas;
+        api.rows({ search: "applied" }).every(function () {
+            var registro = registroDesdeMapeada(this.data());
+            if (!registro) return;
+            var tipo = tipoSeleccionFila(registro);
+            if (!tipo) return;
+            if (modo && tipo !== modo) return;
+            filas.push(registro);
+        });
+        return filas;
+    }
+
+    function modoMasivoPorDefecto(api) {
+        var hayCheckIn = false;
+        var hayCheckOut = false;
+        api.rows({ search: "applied" }).every(function () {
+            var registro = registroDesdeMapeada(this.data());
+            var tipo = tipoSeleccionFila(registro);
+            if (tipo === "I") hayCheckIn = true;
+            if (tipo === "O") hayCheckOut = true;
+        });
+        if (hayCheckIn) return "I";
+        if (hayCheckOut) return "O";
+        return null;
+    }
+
+    function pintarEncabezadoSeleccionMasiva(nodo, api) {
+        var thead = api.table().header();
+        if (!thead) return;
+        var th = thead.querySelector("th.col-seleccion-masiva") || thead.querySelector("th:first-child");
+        if (!th) return;
+        th.classList.add("col-seleccion-masiva");
+        if (th._seleccionMasivaEncabezadoListo) {
+            if (typeof nodo._actualizarEncabezadoSeleccionMasiva === "function") nodo._actualizarEncabezadoSeleccionMasiva();
+            return;
+        }
+        th.replaceChildren();
+        th.setAttribute("aria-label", "Seleccionar todas las reservas elegibles para check masivo");
+        var checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "seleccion-reserva seleccion-reserva-todo";
+        checkbox.setAttribute("aria-label", "Seleccionar todas las reservas elegibles para check masivo");
+        checkbox.title = "Seleccionar todas las elegibles (check-in o check-out masivo)";
+        checkbox.addEventListener("change", function () {
+            if (!nodo._seleccionReserva) nodo._seleccionReserva = new Set();
+            if (checkbox.checked) {
+                var modo = nodo._modoSeleccionMasiva || modoMasivoPorDefecto(api);
+                if (!modo) {
+                    checkbox.checked = false;
+                    return;
+                }
+                nodo._modoSeleccionMasiva = modo;
+                filasElegiblesMasivo(api, modo).forEach(function (registro) {
+                    nodo._seleccionReserva.add(registro.id);
+                });
+            } else {
+                nodo._seleccionReserva.clear();
+                nodo._modoSeleccionMasiva = null;
+            }
+            notificarCambioSeleccionMasiva(nodo);
+        });
+        th.append(checkbox);
+        th._seleccionMasivaEncabezadoListo = true;
+        nodo._checkboxSeleccionMasivaTodo = checkbox;
+        nodo._actualizarEncabezadoSeleccionMasiva = function () {
+            var cb = nodo._checkboxSeleccionMasivaTodo;
+            if (!cb || !api) return;
+            var modo = nodo._modoSeleccionMasiva || modoMasivoPorDefecto(api);
+            var elegibles = filasElegiblesMasivo(api, modo);
+            if (!elegibles.length) {
+                cb.checked = false;
+                cb.indeterminate = false;
+                cb.disabled = true;
+                return;
+            }
+            cb.disabled = false;
+            var seleccion = nodo._seleccionReserva || new Set();
+            var marcadas = elegibles.filter(function (registro) { return seleccion.has(registro.id); }).length;
+            cb.checked = marcadas > 0 && marcadas === elegibles.length;
+            cb.indeterminate = marcadas > 0 && marcadas < elegibles.length;
+        };
+        nodo._actualizarEncabezadoSeleccionMasiva();
     }
 
     function pintarSeleccionMasiva(td, mapeada, celda) {
@@ -433,14 +520,17 @@ export function crearReserva(dependencias) {
             });
         };
         api.on("draw", function () {
+            pintarEncabezadoSeleccionMasiva(nodo, api);
             repintarCeldasReserva();
         });
+        pintarEncabezadoSeleccionMasiva(nodo, api);
         repintarCeldasReserva();
     }
 
     function columnaSeleccionMasiva() {
         return {
             data: "seleccionMasiva",
+            title: "",
             orderable: false,
             className: "col-seleccion-masiva",
             responsivePriority: 1,
