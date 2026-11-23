@@ -143,6 +143,9 @@ export function ensamblarEntorno(idsPantalla) {
                 nodoCeldaDatos: base.tablas.nodoCeldaDatos,
                 crearAcciones: instancia.movimientosReserva.crearAcciones
             });
+            if (instancia.movimientosReserva.enlazarBotonMovimientoMasivo) {
+                instancia.movimientosReserva.enlazarBotonMovimientoMasivo(nodo);
+            }
         }
         return api;
     }

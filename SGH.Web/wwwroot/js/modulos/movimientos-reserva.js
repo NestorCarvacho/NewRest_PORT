@@ -110,6 +110,56 @@ export function crearMovimientosReserva(dependencias) {
         });
     }
 
+    function botonMovimientoMasivo(nodo) {
+        if (!nodo) return null;
+        return nodo.querySelector(".modulo-barra [data-accion='movimiento-masivo']");
+    }
+
+    function actualizarBotonMovimientoMasivo(nodo) {
+        var boton = botonMovimientoMasivo(nodo);
+        if (!boton) return;
+        var ids = seleccionReserva(nodo);
+        var modo = nodo._modoSeleccionMasiva;
+        if (!ids.length || !modo) {
+            boton.disabled = true;
+            boton.textContent = "Check-in masivo";
+            boton.dataset.operacionMasiva = "";
+            boton.setAttribute("aria-disabled", "true");
+            return;
+        }
+        if (modo === "O") {
+            boton.textContent = "Check-out masivo";
+            boton.dataset.operacionMasiva = "O";
+        } else {
+            boton.textContent = "Check-in masivo";
+            boton.dataset.operacionMasiva = "I";
+        }
+        boton.disabled = false;
+        boton.removeAttribute("aria-disabled");
+    }
+
+    function enlazarBotonMovimientoMasivo(nodo) {
+        if (!nodo || nodo._movimientoMasivoEnlazado) return;
+        nodo._movimientoMasivoEnlazado = true;
+        nodo._actualizarBotonMovimientoMasivo = function () {
+            actualizarBotonMovimientoMasivo(nodo);
+        };
+        actualizarBotonMovimientoMasivo(nodo);
+    }
+
+    function limpiarSeleccionMasiva(nodo) {
+        if (nodo._seleccionReserva) nodo._seleccionReserva.clear();
+        nodo._modoSeleccionMasiva = null;
+        actualizarBotonMovimientoMasivo(nodo);
+        if (typeof nodo._repintarSeleccionMasiva === "function") nodo._repintarSeleccionMasiva();
+    }
+
+    function movimientoMasivo(nodo) {
+        var modo = nodo._modoSeleccionMasiva;
+        if (modo === "O") checkOutMasivo(nodo);
+        else checkInMasivo(nodo);
+    }
+
     function checkInMasivo(nodo) {
         var esElegible = dependencias.elegibleCheckInMasivo || function (fila) {
             return fila && fila.estadoNumero === "A" && !fila.checkIn;
@@ -140,7 +190,7 @@ export function crearMovimientosReserva(dependencias) {
                 if (fallos) texto += " Sin cambio en " + fallos + ".";
                 dependencias.mostrarAviso(texto, fallos ? "warning" : "success");
                 if (dependencias.cerrarPanel) dependencias.cerrarPanel();
-                if (nodo._seleccionReserva) ids.forEach(function (id) { nodo._seleccionReserva.delete(id); });
+                limpiarSeleccionMasiva(nodo);
                 if (dependencias.cargar) return dependencias.cargar("reserva", { bloquearPantalla: false, avisarConteoFilas: false });
             });
         }));
@@ -159,6 +209,7 @@ export function crearMovimientosReserva(dependencias) {
             dependencias.seccion("", [
                 dependencias.campo("fecha", "Fecha check-out", "datetime-local", [], {
                     requerido: true,
+                    soloLectura: true,
                     valor: dependencias.momentoLocal(true)
                 })
             ])
@@ -175,11 +226,18 @@ export function crearMovimientosReserva(dependencias) {
                 if (fallos) texto += " Sin cambio en " + fallos + ".";
                 dependencias.mostrarAviso(texto, fallos ? "warning" : "success");
                 if (dependencias.cerrarPanel) dependencias.cerrarPanel();
-                if (nodo._seleccionReserva) ids.forEach(function (id) { nodo._seleccionReserva.delete(id); });
+                limpiarSeleccionMasiva(nodo);
                 if (dependencias.cargar) return dependencias.cargar("reserva", { bloquearPantalla: false, avisarConteoFilas: false });
             });
         }));
     }
 
-    return { crearAcciones: crearAcciones, checkInMasivo: checkInMasivo, checkOutMasivo: checkOutMasivo };
+    return {
+        crearAcciones: crearAcciones,
+        checkInMasivo: checkInMasivo,
+        checkOutMasivo: checkOutMasivo,
+        movimientoMasivo: movimientoMasivo,
+        enlazarBotonMovimientoMasivo: enlazarBotonMovimientoMasivo,
+        actualizarBotonMovimientoMasivo: actualizarBotonMovimientoMasivo
+    };
 }

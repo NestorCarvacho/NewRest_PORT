@@ -325,29 +325,76 @@ export function crearReserva(dependencias) {
         return !!(fila && fila.estadoNumero === "A" && textoMovimiento(fila.checkIn) && !textoMovimiento(fila.checkOut));
     }
 
-    function elegibleSeleccionMasiva(fila) {
-        return elegibleCheckInMasivo(fila) || elegibleCheckOutMasivo(fila);
+    function tipoSeleccionFila(fila) {
+        if (elegibleCheckInMasivo(fila)) return "I";
+        if (elegibleCheckOutMasivo(fila)) return "O";
+        return null;
     }
 
     function moduloReservaDesde(td) {
         return td.closest('.modulo[data-id="reserva"]') || td.closest(".modulo-reserva");
     }
 
+    function refrescarModoSeleccionMasiva(modulo) {
+        if (!modulo._seleccionReserva || modulo._seleccionReserva.size === 0) {
+            modulo._modoSeleccionMasiva = null;
+            return;
+        }
+        if (modulo._modoSeleccionMasiva) return;
+        var elegido = null;
+        modulo._seleccionReserva.forEach(function (id) {
+            if (elegido) return;
+            var filas = modulo._filas || [];
+            for (var i = 0; i < filas.length; i++) {
+                if (Number(filas[i].id) !== Number(id)) continue;
+                elegido = tipoSeleccionFila(filas[i]);
+                break;
+            }
+        });
+        modulo._modoSeleccionMasiva = elegido;
+    }
+
+    function notificarCambioSeleccionMasiva(modulo) {
+        refrescarModoSeleccionMasiva(modulo);
+        if (typeof modulo._repintarSeleccionMasiva === "function") modulo._repintarSeleccionMasiva();
+        if (typeof modulo._actualizarBotonMovimientoMasivo === "function") modulo._actualizarBotonMovimientoMasivo();
+    }
+
     function pintarSeleccionMasiva(td, mapeada, celda) {
         td.replaceChildren();
         var fila = registroDesdeMapeada(mapeada, celda);
-        if (!elegibleSeleccionMasiva(fila)) return;
+        var tipo = tipoSeleccionFila(fila);
+        if (!tipo) return;
         var modulo = moduloReservaDesde(td);
         if (!modulo) return;
         if (!modulo._seleccionReserva) modulo._seleccionReserva = new Set();
+        var modo = modulo._modoSeleccionMasiva;
+        if (modo && tipo !== modo) {
+            var bloqueado = document.createElement("input");
+            bloqueado.type = "checkbox";
+            bloqueado.className = "seleccion-reserva seleccion-reserva-inactiva";
+            bloqueado.disabled = true;
+            bloqueado.setAttribute("tabindex", "-1");
+            bloqueado.setAttribute("aria-hidden", "true");
+            bloqueado.title = modo === "I"
+                ? "Solo se pueden seleccionar reservas sin check-in."
+                : "Solo se pueden seleccionar reservas con check-in y sin check-out.";
+            td.append(bloqueado);
+            return;
+        }
         var checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.className = "seleccion-reserva";
         checkbox.setAttribute("aria-label", "Seleccionar reserva " + fila.id);
         checkbox.checked = modulo._seleccionReserva.has(fila.id);
         checkbox.addEventListener("change", function () {
-            if (checkbox.checked) modulo._seleccionReserva.add(fila.id);
-            else modulo._seleccionReserva.delete(fila.id);
+            if (checkbox.checked) {
+                if (!modulo._modoSeleccionMasiva) modulo._modoSeleccionMasiva = tipo;
+                modulo._seleccionReserva.add(fila.id);
+            } else {
+                modulo._seleccionReserva.delete(fila.id);
+            }
+            notificarCambioSeleccionMasiva(modulo);
         });
         td.append(checkbox);
     }
@@ -378,6 +425,13 @@ export function crearReserva(dependencias) {
                 if (celdaDetalle) pintarControlDetalle(celdaDetalle, mapeada);
             });
         }
+        nodo._repintarSeleccionMasiva = function () {
+            api.rows({ page: "current" }).every(function () {
+                var mapeada = this.data();
+                var celdaSel = herramientas.nodoCeldaDatos(api, this.index(), "seleccionMasiva");
+                if (celdaSel) pintarSeleccionMasiva(celdaSel, mapeada);
+            });
+        };
         api.on("draw", repintarCeldasReserva);
         repintarCeldasReserva();
     }

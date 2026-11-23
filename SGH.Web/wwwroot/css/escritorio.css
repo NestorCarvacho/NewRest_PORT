@@ -1630,6 +1630,16 @@ html:not([data-tema="claro"]) .tabla-vacia {
   vertical-align: middle;
 }
 
+.modulo-reserva table.dataTable td.col-seleccion-masiva .seleccion-reserva-inactiva {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.modulo-reserva .modulo-barra [data-accion="movimiento-masivo"]:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .modulo-reserva table.dataTable th:first-child,
 .modulo-reserva table.dataTable td:first-child {
   width: 2.75rem;

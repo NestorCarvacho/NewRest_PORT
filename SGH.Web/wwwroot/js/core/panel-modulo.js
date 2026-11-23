@@ -76,13 +76,9 @@ export function crearPanelModulo(dependencias) {
             "nuevo-bano": function () { dependencias.habitacion.abrirNuevoBano(); },
             "nuevo-tipo-cama": function () { dependencias.habitacion.abrirNuevoTipoCama(); },
             "cargar-camas": function () { dependencias.habitacion.abrirImportacionCamas(); },
-            "checkin-masivo": function () {
-                if (!dependencias.movimientosReserva || !dependencias.movimientosReserva.checkInMasivo) return;
-                dependencias.movimientosReserva.checkInMasivo(nodo);
-            },
-            "checkout-masivo": function () {
-                if (!dependencias.movimientosReserva || !dependencias.movimientosReserva.checkOutMasivo) return;
-                dependencias.movimientosReserva.checkOutMasivo(nodo);
+            "movimiento-masivo": function () {
+                if (!dependencias.movimientosReserva || !dependencias.movimientosReserva.movimientoMasivo) return;
+                dependencias.movimientosReserva.movimientoMasivo(nodo);
             }
         };
         Object.keys(acciones).forEach(function (clave) {
@@ -92,6 +88,10 @@ export function crearPanelModulo(dependencias) {
 
         var guardarCenso = barra.querySelector("[data-rol='guardar-censo']");
         if (guardarCenso) nodo._guardar = guardarCenso;
+
+        if (id === "reserva" && dependencias.movimientosReserva && dependencias.movimientosReserva.enlazarBotonMovimientoMasivo) {
+            dependencias.movimientosReserva.enlazarBotonMovimientoMasivo(nodo);
+        }
     }
 
     function obtenerPanel(id) {

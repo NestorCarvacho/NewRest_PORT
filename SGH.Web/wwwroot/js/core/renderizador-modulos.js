@@ -19,7 +19,13 @@ export function crearRenderizadorModulos(dependencias) {
     }
 
     function pintar(nodo, filas, modo) {
-        if (modo === "reserva") nodo._seleccionReserva = new Set();
+        if (modo === "reserva") {
+            nodo._seleccionReserva = new Set();
+            nodo._modoSeleccionMasiva = null;
+            if (dependencias.movimientosReserva && dependencias.movimientosReserva.actualizarBotonMovimientoMasivo) {
+                dependencias.movimientosReserva.actualizarBotonMovimientoMasivo(nodo);
+            }
+        }
         dependencias.tablas.pintar(nodo, filas, function (filaOrigen) {
             return fila(filaOrigen, modo);
         });
