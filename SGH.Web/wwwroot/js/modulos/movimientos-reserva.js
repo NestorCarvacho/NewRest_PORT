@@ -123,6 +123,7 @@ export function crearMovimientosReserva(dependencias) {
             dependencias.seccion("", [
                 dependencias.campo("fecha", "Fecha check-in", "datetime-local", [], {
                     requerido: true,
+                    soloLectura: true,
                     valor: dependencias.momentoLocal(true)
                 })
             ])

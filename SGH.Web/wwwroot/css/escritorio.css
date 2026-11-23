@@ -937,12 +937,13 @@ div.dt-container table.dataTable tbody > tr > td {
 }
 
 .modulo-reserva .acciones-fila {
-  display: inline-flex;
+  display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.35rem;
-  max-width: 100%;
+  width: max-content;
+  max-width: none;
 }
 
 .modulo-reserva .acciones-fila > .accion-fila {
@@ -955,11 +956,21 @@ div.dt-container table.dataTable tbody > tr > td {
 
 .modulo-reserva div.dt-container table.dataTable th.col-acciones-reserva,
 .modulo-reserva div.dt-container table.dataTable td.col-acciones-reserva {
-  min-width: 11rem;
-  width: 12rem;
-  max-width: 20rem;
+  min-width: 14.5rem;
+  width: auto;
+  max-width: none;
   white-space: normal;
   vertical-align: middle;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.modulo-reserva div.dt-container table.dataTable td.col-seleccion-masiva {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+  padding-left: 0.4rem !important;
+  padding-right: 0.4rem !important;
 }
 
 .modulo-reserva div.dt-container table.dataTable th.col-fecha-prevista,
@@ -1122,8 +1133,6 @@ div.dt-container table.dataTable tbody > tr > td:has(.celda-truncada[data-toolti
   outline: none;
 }
 
-.modulo-reserva table.dataTable th:nth-child(2),
-.modulo-reserva table.dataTable td:nth-child(2),
 .modulo-checkin table.dataTable th:nth-child(2),
 .modulo-checkin table.dataTable td:nth-child(2),
 .modulo-checkout table.dataTable th:nth-child(2),
@@ -1132,12 +1141,16 @@ div.dt-container table.dataTable tbody > tr > td:has(.celda-truncada[data-toolti
   width: 6rem;
 }
 
-.modulo-reserva table.dataTable th:nth-child(3),
-.modulo-reserva table.dataTable td:nth-child(3),
 .modulo-checkin table.dataTable th:nth-child(3),
 .modulo-checkin table.dataTable td:nth-child(3),
 .modulo-checkout table.dataTable th:nth-child(3),
 .modulo-checkout table.dataTable td:nth-child(3) {
+  max-width: 7rem;
+  width: 7rem;
+}
+
+.modulo-reserva table.dataTable th:nth-child(3),
+.modulo-reserva table.dataTable td:nth-child(3) {
   max-width: 7rem;
   width: 7rem;
 }
@@ -1153,6 +1166,8 @@ div.dt-container table.dataTable tbody > tr > td:has(.celda-truncada[data-toolti
 
 .modulo-reserva table.dataTable th:nth-child(5),
 .modulo-reserva table.dataTable td:nth-child(5),
+.modulo-reserva table.dataTable th:nth-child(6),
+.modulo-reserva table.dataTable td:nth-child(6),
 .modulo-checkin table.dataTable th:nth-child(5),
 .modulo-checkin table.dataTable td:nth-child(5),
 .modulo-checkout table.dataTable th:nth-child(5),
@@ -2273,6 +2288,27 @@ html:not([data-tema="claro"]) .campo.campo-interruptor input[type="checkbox"]:ch
     font-size: 0.8rem;
     white-space: normal;
     overflow-wrap: anywhere;
+  }
+
+  .modulo-reserva table.dataTable td.col-seleccion-masiva,
+  .modulo-reserva table.dataTable th.col-seleccion-masiva {
+    min-width: 2.75rem !important;
+    max-width: 2.75rem !important;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .modulo-reserva table.dataTable td.col-acciones-reserva,
+  .modulo-reserva table.dataTable th.col-acciones-reserva {
+    min-width: 12rem !important;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .modulo-reserva .acciones-fila {
+    flex-wrap: wrap;
+    width: auto;
+    max-width: 100%;
   }
 
   .celda-truncada {
