@@ -13,22 +13,23 @@ export function crearMovimientosReserva(dependencias) {
         if (fila.estadoNumero === "A" && fila.checkIn && !fila.checkOut) acciones.append(crearBotonMovimiento(fila.id, "O", "Check Out"));
         if (fila.estadoNumero === "A" && (fila.checkIn || fila.checkOut)) {
             var quitaCheckOut = !!fila.checkOut;
-            acciones.append(crearBotonAccion(fila.id, "reversar", "Reversar", function (id) {
+            acciones.append(crearBotonAccion(fila.id, "reversar", "Anular", function (id) {
                 return dependencias.enviar("/Reserva/Mid/MidReservas.cs", { opcion: "reversar", reservaId: id });
-            }, quitaCheckOut ? "Check-out revertido." : "Check-in revertido.",
+            }, quitaCheckOut ? "Check-out anulado." : "Check-in anulado.",
                 quitaCheckOut
-                    ? "¿Quitar el check-out y volver a estado con check-in?"
-                    : "¿Quitar el check-in y dejar la reserva sin ingreso?"));
+                    ? "¿Anular el check-out y volver a estado con check-in?"
+                    : "¿Anular el check-in y dejar la reserva sin ingreso?"));
         }
         if (fila.estadoNumero === "A" && fila.checkOut) {
             acciones.append(crearBotonAccion(fila.id, "finalizar", "Finalizar", function (id) {
                 return dependencias.enviar("/Reserva/Mid/MidReservas.cs", { opcion: "finalizar", reservaId: id });
             }, "Reserva finalizada y habitación liberada.", "¿Finalizar la reserva y liberar la habitación?"));
         }
-        if (fila.estadoNumero === "A" || fila.estadoNumero === "P") {
-            acciones.append(crearBotonAccion(fila.id, "anular", "Anular", function (id) {
+        var sinMovimiento = !fila.checkIn && !fila.checkOut;
+        if (sinMovimiento && (fila.estadoNumero === "A" || fila.estadoNumero === "P")) {
+            acciones.append(crearBotonAccion(fila.id, "anular-reserva", "Anular", function (id) {
                 return dependencias.enviar("/Reserva/Mid/MidReservas.cs", { opcion: "anular", reservaId: id });
-            }, "Reserva anulada.", "¿Anular esta reserva?"));
+            }, "Reserva anulada.", "¿Anular esta reserva por completo?"));
         }
         return acciones;
     }

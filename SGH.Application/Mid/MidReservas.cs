@@ -29,7 +29,7 @@ public sealed class MidReservas(
         Accion("movimientosmasivo", "Movimiento masivo", "dbo.he_sp_reserva_registrar_movimiento", "Registra check-in masivo."),
         Accion("anular", "Anular", "dbo.he_sp_reserva_anular", "Anula una reserva."),
         Accion("finalizar", "Finalizar", "dbo.he_sp_reserva_finalizar_checkout", "Finaliza la reserva tras check-out."),
-        Accion("reversar", "Reversar", "dbo.he_sp_reserva_reversar_movimiento", "Quita check-out o check-in según el último movimiento."),
+        Accion("reversar", "Anular movimiento", "dbo.he_sp_reserva_reversar_movimiento", "Anula (revierte) check-out o check-in según el último movimiento."),
         Accion("importar", "Importar", "dbo.he_sp_reserva_crear", "Crea reservas desde una planilla."),
         Accion("plantilla", "Plantilla", "planilla", "Devuelve la planilla de importación.")
     ];
