@@ -4,6 +4,7 @@ Base de partida: una **HOTELDB legado** ya existente (procedimientos `SOL_*`, `H
 
 Convenciones:
 
+- **Cambios en HOTELDB con auditoría:** los SP en base llevan bloque `author` / `date` / `description`. El agente indica **qué SP modificar**; el despliegue parte del script SSMS actual adjunto por el equipo. Ver `Docs/datos/hoteldb-sp-auditoria-workflow.md`.
 - **Nombres de SP propios del repo:** `dbo.he_sp_{tabla}_{accion}` (prefijo proyecto `he_`). Ver `Docs/datos/he-sp-nomenclatura-procedimientos.md`.
 - **Copias locales en un solo lugar:** carpeta raíz `scripts-ejecutar/` (gitignored). Poblarla con `./tools/sincronizar-scripts-ejecutar.sh`; los archivos se llaman `{Modulo}_{nombre}.sql`.
 - Ejecutar cada archivo en **SSMS / sqlcmd** contra la misma base que usa `ConnectionStrings:Hoteldb`.
