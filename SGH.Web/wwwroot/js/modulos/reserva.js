@@ -229,28 +229,34 @@ export function crearReserva(dependencias) {
         return partes[1] + "/" + partes[2] + "/" + partes[3];
     }
 
+    function pintarSeleccionMasiva(td, mapeada) {
+        td.replaceChildren();
+        var fila = mapeada && mapeada._fila ? mapeada._fila : mapeada;
+        if (!fila || fila.estadoNumero !== "A" || fila.checkIn) return;
+        var modulo = td.closest(".modulo-reserva");
+        if (!modulo) return;
+        if (!modulo._seleccionReserva) modulo._seleccionReserva = new Set();
+        var checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.setAttribute("aria-label", "Seleccionar reserva " + fila.id);
+        checkbox.checked = modulo._seleccionReserva.has(fila.id);
+        checkbox.addEventListener("change", function () {
+            if (checkbox.checked) modulo._seleccionReserva.add(fila.id);
+            else modulo._seleccionReserva.delete(fila.id);
+        });
+        td.append(checkbox);
+    }
+
     function columnaSeleccionMasiva() {
         return {
             data: "seleccionMasiva",
             orderable: false,
             className: "col-seleccion-masiva",
             responsivePriority: 1,
+            defaultContent: "",
+            render: function () { return ""; },
             createdCell: function (td, _celda, filaMapeada) {
-                td.replaceChildren();
-                var fila = filaMapeada && filaMapeada._fila ? filaMapeada._fila : filaMapeada;
-                if (!fila || fila.estadoNumero !== "A" || fila.checkIn) return;
-                var modulo = td.closest(".modulo-reserva");
-                if (!modulo) return;
-                if (!modulo._seleccionReserva) modulo._seleccionReserva = new Set();
-                var checkbox = document.createElement("input");
-                checkbox.type = "checkbox";
-                checkbox.setAttribute("aria-label", "Seleccionar reserva " + fila.id);
-                checkbox.checked = modulo._seleccionReserva.has(fila.id);
-                checkbox.addEventListener("change", function () {
-                    if (checkbox.checked) modulo._seleccionReserva.add(fila.id);
-                    else modulo._seleccionReserva.delete(fila.id);
-                });
-                td.append(checkbox);
+                pintarSeleccionMasiva(td, filaMapeada);
             }
         };
     }
@@ -292,6 +298,7 @@ export function crearReserva(dependencias) {
         refrescarFilaEnListado: refrescarFilaEnListado,
         enlazarSincronizacionListado: enlazarSincronizacionListado,
         fila: fila,
-        columnas: columnas
+        columnas: columnas,
+        pintarSeleccionMasiva: pintarSeleccionMasiva
     };
 }

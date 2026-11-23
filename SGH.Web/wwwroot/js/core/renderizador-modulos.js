@@ -43,8 +43,13 @@ export function crearRenderizadorModulos(dependencias) {
     function sincronizarFila(nodo, id, filaOrigen, modo) {
         dependencias.tablas.sincronizarFila(nodo, id, filaOrigen, function (origen) {
             return fila(origen, modo);
-        }, function (mapeada) {
-            return widgetAcciones(mapeada, modo);
+        }, function (api, indice, mapeada) {
+            var celdaAcciones = dependencias.tablas.nodoCeldaDatos(api, indice, "acciones");
+            if (celdaAcciones) celdaAcciones.replaceChildren(widgetAcciones(mapeada, modo));
+            if (modo === "reserva" && dependencias.reserva.pintarSeleccionMasiva) {
+                var celdaSel = dependencias.tablas.nodoCeldaDatos(api, indice, "seleccionMasiva");
+                if (celdaSel) dependencias.reserva.pintarSeleccionMasiva(celdaSel, mapeada);
+            }
         });
     }
 

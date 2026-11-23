@@ -128,6 +128,12 @@ export function crearTablas() {
         api.draw();
     }
 
+    function nodoCeldaDatos(api, indiceFila, nombreDato) {
+        var columna = indiceColumnaDatos(api, nombreDato);
+        if (columna < 0) return null;
+        return api.cell(indiceFila, columna).node();
+    }
+
     function quitarFila(nodo, id) {
         if (id == null) return;
         var numeroId = Number(id);
@@ -160,13 +166,7 @@ export function crearTablas() {
             fila.invalidate();
             api.draw(false);
             var indice = fila.index();
-            if (repintarAcciones) {
-                var columnaAcciones = indiceColumnaDatos(api, "acciones");
-                if (columnaAcciones >= 0) {
-                    var celdaAcciones = api.cell(indice, columnaAcciones).node();
-                    if (celdaAcciones) celdaAcciones.replaceChildren(repintarAcciones(mapeada));
-                }
-            }
+            if (repintarAcciones) repintarAcciones(api, indice, mapeada);
             return;
         }
         api.row.add(mapeada).draw(false);
@@ -214,6 +214,7 @@ export function crearTablas() {
         inicializar: inicializar,
         pintar: pintar,
         sincronizarFila: sincronizarFila,
+        nodoCeldaDatos: nodoCeldaDatos,
         quitarFila: quitarFila,
         destruir: destruir
     };
