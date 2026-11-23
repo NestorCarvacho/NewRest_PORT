@@ -132,9 +132,12 @@ export function ensamblarEntorno(idsPantalla) {
     }
 
     function inicializarTablaModulo(nodo, columnas, ordenInicial) {
-        var ajustarOpciones = nodo.dataset.id === "reserva" && instancia.reserva
-            ? instancia.reserva.configurarOpcionesTabla
-            : null;
+        var ajustarOpciones = null;
+        if (nodo.dataset.id === "reserva" && instancia.reserva) {
+            ajustarOpciones = instancia.reserva.configurarOpcionesTabla;
+        } else if ((nodo.dataset.id === "censo" || nodo.dataset.id === "misCensos") && instancia.censo) {
+            ajustarOpciones = instancia.censo.configurarOpcionesTabla;
+        }
         var api = base.tablas.inicializar(nodo, columnas, ordenInicial, ajustarOpciones);
         if (nodo && nodo.dataset && nodo.dataset.id === "reserva"
             && instancia.reserva && typeof instancia.reserva.enlazarTablaDraw === "function"

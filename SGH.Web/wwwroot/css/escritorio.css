@@ -2404,6 +2404,38 @@ html:not([data-tema="claro"]) .campo.campo-interruptor input[type="checkbox"]:ch
     overflow-wrap: anywhere;
   }
 
+  .modulo-censo div.dt-container table.dataTable thead > tr > th,
+  .modulo-misCensos div.dt-container table.dataTable thead > tr > th {
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+    word-break: keep-all !important;
+    hyphens: none;
+    vertical-align: middle;
+    line-height: 1.2;
+  }
+
+  .modulo-censo div.dt-container table.dataTable,
+  .modulo-misCensos div.dt-container table.dataTable {
+    min-width: 32rem;
+  }
+
+  .modulo-censo div.dt-container table.dataTable thead > tr > th.col-fecha-censo,
+  .modulo-censo div.dt-container table.dataTable tbody > tr:not(.child) > td.col-fecha-censo,
+  .modulo-misCensos div.dt-container table.dataTable thead > tr > th.col-fecha-censo,
+  .modulo-misCensos div.dt-container table.dataTable tbody > tr:not(.child) > td.col-fecha-censo {
+    min-width: 4.25rem;
+    width: 4.5rem;
+    max-width: 5.25rem;
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+  }
+
+  .modulo-censo div.dt-container table.dataTable thead > tr > th.col-habitacion-censo,
+  .modulo-misCensos div.dt-container table.dataTable thead > tr > th.col-habitacion-censo {
+    min-width: 6.5rem;
+    white-space: nowrap !important;
+  }
+
   .modulo-reserva table.dataTable td.col-seleccion-masiva,
   .modulo-reserva table.dataTable th.col-seleccion-masiva {
     min-width: 2.75rem !important;

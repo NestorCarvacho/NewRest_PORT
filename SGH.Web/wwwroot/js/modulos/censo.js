@@ -265,7 +265,7 @@ export function crearCenso(dependencias) {
         if (clave === "ocupadas") return 2;
         if (clave === "camas") return 3;
         if (clave === "ocupadasCheckIn") return 4;
-        if (clave === "fecha") return 10007;
+        if (clave === "fecha") return 10099;
         if (clave === "turno") return 10008;
         if (clave === "numero") return 10001;
         if (clave === "modulo" || clave === "campamento") return 10002;
@@ -304,7 +304,8 @@ export function crearCenso(dependencias) {
                     responsivePriority: prioridadColumnaCenso(clave)
                 };
                 if (celdaTextoAncho[clave]) columna.render = renderTruncada;
-                if (clave === "habitacion") columna.className = "col-habitacion-censo";
+                if (clave === "fecha") columna.className = "col-fecha-censo";
+                else if (clave === "habitacion") columna.className = "col-habitacion-censo";
                 else if (celdaCompacta[clave]) columna.className = "col-compacta-censo";
                 return columna;
             });
@@ -317,7 +318,8 @@ export function crearCenso(dependencias) {
                         responsivePriority: prioridadColumnaCenso(clave)
                     };
                     if (celdaTextoAncho[clave]) columna.render = renderTruncada;
-                    if (clave === "habitacion") columna.className = "col-habitacion-censo";
+                    if (clave === "fecha") columna.className = "col-fecha-censo";
+                    else if (clave === "habitacion") columna.className = "col-habitacion-censo";
                     else if (clave === "camas" || clave === "ocupadas" || clave === "turno") {
                         columna.className = "col-compacta-censo";
                     }
@@ -325,6 +327,14 @@ export function crearCenso(dependencias) {
                 });
         }
         return null;
+    }
+
+    function configurarOpcionesTabla(opciones) {
+        if (!opciones || !opciones.responsive) return;
+        opciones.responsive.details = {
+            type: "column",
+            target: "tr"
+        };
     }
 
     function camasComoEntero(valor) {
@@ -396,6 +406,7 @@ export function crearCenso(dependencias) {
         filaCenso: filaCenso,
         filaMisCensos: filaMisCensos,
         columnas: columnas,
+        configurarOpcionesTabla: configurarOpcionesTabla,
         guardar: guardar
     };
 }
