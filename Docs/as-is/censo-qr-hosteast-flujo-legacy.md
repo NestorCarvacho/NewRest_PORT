@@ -14,6 +14,9 @@ Documentación del flujo observado en el legacy **HostEast / SGH móvil** para c
 | **Censos pendientes de guardar** (lista en memoria) | Cola en `localStorage` (`sgh.censos.pendientes` / cola offline); **sin listado visible** en la pantalla |
 | **Censos Registrados** del día (fecha hoy) | Misma tabla `misCensos`; opción Mid `miscensos` / `miscensosrango`; no hay bloque «solo hoy» separado |
 | Botón flotante **+** → cámara QR al instante | Botón **Censo QR** en módulo Censo (escritorio); cámara tras **Usar cámara** dentro del panel (`censo-qr.js`) |
+| Wizard **3 pasos** (Escanear → Censo → Confirmación) | Un solo panel con formulario (QR, fecha, turno, camas); **sin stepper** |
+| Vista cámara a pantalla completa + marco de escaneo | Video embebido en el formulario, sin marco guía ni título «Seleccione Habitación» |
+| Botón **puerta abierta** → listado de habitaciones (censo manual) | **No existe**; habitación solo vía JSON del QR o pegado manual en textarea |
 
 Referencias de código actual: `SGH.Web/wwwroot/js/modulos/censo-qr.js`, `SGH.Web/wwwroot/js/core/colaOffline.js`, `SGH.Web/Pages/Censo/_ListadoMisCensos.cshtml`.
 
@@ -44,6 +47,38 @@ Tras entrar al módulo de censo QR, el usuario ve la pantalla **Mis Censos** con
 
 ---
 
+## Paso 2 — Escanear habitación (paso 1 del wizard)
+
+![Paso Escanear — Seleccione Habitación](img/censo-qr-02-escanear-habitacion.png)
+
+Al pulsar **+** en la pantalla inicial, el legacy abre un flujo guiado con **indicador de pasos** en la parte superior:
+
+| Paso | Etiqueta | Estado en captura |
+|---:|---|---|
+| 1 | **Escanear** | Activo (círculo resaltado) |
+| 2 | **Censo** | Pendiente |
+| 3 | **Confirmación** | Pendiente |
+
+### 2.1 Título e intención
+
+- Texto central: **«Seleccione Habitación»**.
+- El área principal es el **visor de cámara** para leer el QR de la habitación (marco/rojo como zona de enfoque en la captura).
+
+### 2.2 Escaneo por QR (camino principal)
+
+- El usuario apunta la cámara al código QR asociado a la habitación.
+- Al leer correctamente, el flujo avanza al paso **Censo** (detalle en capturas siguientes).
+
+### 2.3 Censo manual — botón «puerta abriendo»
+
+- Sobre el visor, botón circular con icono de **puerta abriendo** (flecha roja en la captura).
+- **Acción:** abandona el modo escáner y **redirige a un listado de habitaciones disponibles** para elegir una y cargar el censo **sin QR** (ruta alternativa manual).
+
+---
+
 ## Pasos siguientes (pendientes de capturas)
 
-- _(Imagen 2 en adelante: escaneo QR, formulario de camas/turno, confirmación, error offline, sincronización, etc.)_
+- Paso **2 Censo** (camas, turno, fecha).
+- Paso **3 Confirmación** (resumen / guardar).
+- Listado de habitaciones al usar el botón de puerta.
+- Comportamiento offline y sincronización desde «pendientes de guardar».
