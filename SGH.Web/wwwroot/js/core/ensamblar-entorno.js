@@ -132,7 +132,10 @@ export function ensamblarEntorno(idsPantalla) {
     }
 
     function inicializarTablaModulo(nodo, columnas, ordenInicial) {
-        var api = base.tablas.inicializar(nodo, columnas, ordenInicial);
+        var ajustarOpciones = nodo.dataset.id === "reserva" && instancia.reserva
+            ? instancia.reserva.configurarOpcionesTabla
+            : null;
+        var api = base.tablas.inicializar(nodo, columnas, ordenInicial, ajustarOpciones);
         if (nodo && nodo.dataset && nodo.dataset.id === "reserva"
             && instancia.reserva && typeof instancia.reserva.enlazarTablaDraw === "function"
             && instancia.movimientosReserva) {

@@ -25,7 +25,7 @@ export function crearTablas() {
         return envoltorio;
     }
 
-    function inicializar(nodo, columnas, ordenInicial) {
+    function inicializar(nodo, columnas, ordenInicial, ajustarOpciones) {
         function t(texto) {
             return window.SGHI18n ? window.SGHI18n.traducir(texto) : texto;
         }
@@ -63,6 +63,7 @@ export function crearTablas() {
             });
         }
         if (ordenInicial) opciones.order = ordenInicial;
+        if (typeof ajustarOpciones === "function") ajustarOpciones(opciones, columnas, nodo);
         var elementoTabla = nodo.querySelector("table.modulo-tabla, table.tabla");
         if (!elementoTabla) {
             throw new Error("No hay tabla en el panel del módulo.");

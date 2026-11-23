@@ -17,7 +17,7 @@ export function crearExportadorTabla() {
         var indices = [];
         api.columns().every(function (idx) {
             var origen = api.column(idx).dataSrc();
-            if (origen !== "acciones") indices.push(idx);
+            if (origen !== "acciones" && origen !== "seleccionMasiva" && origen !== "detalle") indices.push(idx);
         });
         return indices;
     }

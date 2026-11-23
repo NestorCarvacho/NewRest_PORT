@@ -933,17 +933,18 @@ div.dt-container table.dataTable tbody > tr > td {
 }
 
 .modulo-reserva div.dt-container table.dataTable {
-  min-width: 70rem;
+  min-width: 52rem;
+  table-layout: auto;
 }
 
 .modulo-reserva .acciones-fila {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem;
-  width: max-content;
-  max-width: none;
+  width: auto;
+  max-width: 100%;
 }
 
 .modulo-reserva .acciones-fila > .accion-fila {
@@ -956,13 +957,50 @@ div.dt-container table.dataTable tbody > tr > td {
 
 .modulo-reserva div.dt-container table.dataTable th.col-acciones-reserva,
 .modulo-reserva div.dt-container table.dataTable td.col-acciones-reserva {
-  min-width: 14.5rem;
-  width: auto;
-  max-width: none;
+  min-width: 10.5rem;
+  width: 11.5rem;
+  max-width: 13rem;
   white-space: normal;
   vertical-align: middle;
   overflow: visible;
   text-overflow: clip;
+}
+
+.modulo-reserva div.dt-container table.dataTable th.col-pasajero-reserva,
+.modulo-reserva div.dt-container table.dataTable td.col-pasajero-reserva {
+  min-width: 7.5rem;
+  max-width: 12rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.modulo-reserva div.dt-container table.dataTable th.col-fecha-movimiento,
+.modulo-reserva div.dt-container table.dataTable td.col-fecha-movimiento {
+  width: 6.75rem;
+  min-width: 6.75rem;
+  max-width: 6.75rem;
+  padding-left: 0.35rem !important;
+  padding-right: 0.35rem !important;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.modulo-reserva table.dataTable th.col-detalle-reserva,
+.modulo-reserva table.dataTable td.col-detalle-reserva {
+  width: 2.35rem;
+  min-width: 2.35rem;
+  max-width: 2.35rem;
+  padding-left: 0.25rem !important;
+  padding-right: 0.25rem !important;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.modulo-reserva table.dataTable td.col-detalle-reserva::before {
+  color: var(--burgundy);
+  font-weight: 700;
 }
 
 .modulo-reserva div.dt-container table.dataTable td.col-seleccion-masiva {
@@ -1149,14 +1187,6 @@ div.dt-container table.dataTable tbody > tr > td:has(.celda-truncada[data-toolti
   width: 7rem;
 }
 
-.modulo-reserva table.dataTable th:nth-child(3),
-.modulo-reserva table.dataTable td:nth-child(3) {
-  max-width: 7rem;
-  width: 7rem;
-}
-
-.modulo-reserva table.dataTable th:nth-child(4),
-.modulo-reserva table.dataTable td:nth-child(4),
 .modulo-checkin table.dataTable th:nth-child(4),
 .modulo-checkin table.dataTable td:nth-child(4),
 .modulo-checkout table.dataTable th:nth-child(4),
@@ -1164,10 +1194,6 @@ div.dt-container table.dataTable tbody > tr > td:has(.celda-truncada[data-toolti
   max-width: 16rem;
 }
 
-.modulo-reserva table.dataTable th:nth-child(5),
-.modulo-reserva table.dataTable td:nth-child(5),
-.modulo-reserva table.dataTable th:nth-child(6),
-.modulo-reserva table.dataTable td:nth-child(6),
 .modulo-checkin table.dataTable th:nth-child(5),
 .modulo-checkin table.dataTable td:nth-child(5),
 .modulo-checkout table.dataTable th:nth-child(5),

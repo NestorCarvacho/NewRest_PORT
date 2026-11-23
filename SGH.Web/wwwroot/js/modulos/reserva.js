@@ -1,3 +1,5 @@
+import { renderizadorCeldaTruncada } from "../core/celda-truncada.js";
+
 export function crearReserva(dependencias) {
   var sincronizacionListado = null;
 
@@ -208,7 +210,30 @@ export function crearReserva(dependencias) {
             salida: fila.salida,
             checkIn: fila.checkIn || "",
             checkOut: fila.checkOut || "",
+            detalle: fila.id,
             _fila: fila
+        };
+    }
+
+    function prioridadColumnaReserva(clave) {
+        if (clave === "seleccionMasiva" || clave === "acciones" || clave === "detalle") return 1;
+        if (clave === "pasajero") return 2;
+        if (clave === "llegada" || clave === "salida") return 3;
+        if (clave === "checkIn" || clave === "checkOut") return 4;
+        return 10000;
+    }
+
+    function configurarOpcionesTabla(opciones, columnas) {
+        if (!opciones || !columnas || !opciones.responsive) return;
+        var indiceDetalle = -1;
+        columnas.forEach(function (columna, indice) {
+            if (columna && columna.className && String(columna.className).indexOf("col-detalle-reserva") >= 0) {
+                indiceDetalle = indice;
+            }
+        });
+        opciones.responsive.details = {
+            type: "column",
+            target: indiceDetalle >= 0 ? indiceDetalle : "tr"
         };
     }
 
@@ -309,30 +334,72 @@ export function crearReserva(dependencias) {
         };
     }
 
+    function columnaDetalleReserva() {
+        return {
+            data: "detalle",
+            orderable: false,
+            searchable: false,
+            className: "dtr-control col-detalle-reserva",
+            responsivePriority: 1,
+            defaultContent: "",
+            render: function () { return ""; }
+        };
+    }
+
     function columnas(modo, crearAcciones) {
-        var claves = ["seleccionMasiva", "acciones", "numero", "fechaReserva", "grupo", "pasajero", "habitacion", "estado", "llegada", "salida", "checkIn", "checkOut"];
+        var renderTruncada = renderizadorCeldaTruncada();
+        var claves = [
+            "seleccionMasiva", "acciones", "pasajero", "llegada", "salida", "checkIn", "checkOut", "detalle",
+            "numero", "fechaReserva", "grupo", "habitacion", "estado"
+        ];
         return claves.map(function (clave) {
             if (clave === "seleccionMasiva") return columnaSeleccionMasiva();
-            if (clave === "checkIn" || clave === "checkOut") return { data: clave, render: renderizarMovimiento };
+            if (clave === "detalle") return columnaDetalleReserva();
+            if (clave === "checkIn" || clave === "checkOut") {
+                return {
+                    data: clave,
+                    className: "col-fecha-movimiento",
+                    responsivePriority: prioridadColumnaReserva(clave),
+                    render: renderizarMovimiento
+                };
+            }
             if (clave === "llegada" || clave === "salida") {
                 return {
                     data: clave,
                     className: "col-fecha-prevista",
+                    responsivePriority: prioridadColumnaReserva(clave),
                     render: renderizarFechaPrevista
                 };
             }
-            if (clave !== "acciones") return { data: clave };
-            return {
+            if (clave === "pasajero") {
+                return {
+                    data: clave,
+                    className: "col-pasajero-reserva",
+                    responsivePriority: prioridadColumnaReserva(clave),
+                    render: renderTruncada
+                };
+            }
+            if (clave === "acciones") {
+                return {
+                    data: clave,
+                    orderable: false,
+                    className: "col-acciones-reserva",
+                    responsivePriority: prioridadColumnaReserva(clave),
+                    defaultContent: "",
+                    render: function () { return ""; },
+                    createdCell: function (td, celda) {
+                        var fila = celda && celda.estadoNumero !== undefined ? celda : (celda && celda._fila) || celda;
+                        td.replaceChildren(crearAcciones(fila, modo));
+                    }
+                };
+            }
+            var oculta = {
                 data: clave,
-                orderable: false,
-                className: "col-acciones-reserva",
-                defaultContent: "",
-                render: function () { return ""; },
-                createdCell: function (td, celda) {
-                    var fila = celda && celda.estadoNumero !== undefined ? celda : (celda && celda._fila) || celda;
-                    td.replaceChildren(crearAcciones(fila, modo));
-                }
+                visible: false,
+                responsivePriority: prioridadColumnaReserva(clave)
             };
+            if (clave === "grupo" || clave === "habitacion") oculta.render = renderTruncada;
+            return oculta;
         });
     }
 
@@ -349,6 +416,7 @@ export function crearReserva(dependencias) {
         columnas: columnas,
         pintarSeleccionMasiva: pintarSeleccionMasiva,
         enlazarTablaDraw: enlazarTablaDraw,
+        configurarOpcionesTabla: configurarOpcionesTabla,
         elegibleCheckInMasivo: elegibleCheckInMasivo,
         elegibleCheckOutMasivo: elegibleCheckOutMasivo
     };
