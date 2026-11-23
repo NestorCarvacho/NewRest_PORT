@@ -8,6 +8,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_reversar_movimiento
     @UsuarioId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Reversa el último movimiento operativo de una reserva.
+    --======================================================
     SET NOCOUNT ON;
 
     IF NOT EXISTS (

@@ -24,6 +24,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_anular
     @UsuarioId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Anula una reserva.
+    --======================================================
     SET NOCOUNT ON;
 
     IF NOT EXISTS (
@@ -43,20 +48,22 @@ BEGIN
     WHERE Id = @ReservaId AND CampamentoId = @CampamentoId;
 END
 GO
+
 -- ============================================================================
 -- Reserva: 004_sp_reserva_reversar_movimiento.sql
 -- ============================================================================
 
-/*
-    Anula el último movimiento operativo: si hay check-out lo quita (vuelve a check-in);
-    si solo hay check-in, lo quita (vuelve a asignada sin ingreso).
-*/
 CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_reversar_movimiento
     @ReservaId int,
     @CampamentoId int,
     @UsuarioId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Reversa el último movimiento operativo de una reserva.
+    --======================================================
     SET NOCOUNT ON;
 
     IF NOT EXISTS (
@@ -105,6 +112,7 @@ BEGIN
     RAISERROR('La reserva no tiene check-in ni check-out para anular.', 16, 1);
 END
 GO
+
 -- ============================================================================
 -- Solicitud: 001_sp_solicitud.sql (he_sp_solicitud_contacto_correo, he_sp_solicitud_guardar)
 -- ============================================================================
@@ -114,6 +122,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_contacto_correo
     @CampamentoId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Obtiene los correos de contacto de la empresa y el campamento.
+    --======================================================
     SET NOCOUNT ON;
     SELECT NULLIF(LTRIM(RTRIM(e.Email)), '') AS EmailEmpresa
     FROM dbo.Empresas AS e
@@ -122,6 +135,7 @@ BEGIN
     FROM dbo.Campamentos AS c
     WHERE c.Id = @CampamentoId;
 END
+GO
 GO
 
 CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_guardar
@@ -149,6 +163,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_guardar
     @Ret int OUTPUT
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Guarda o actualiza una solicitud de alojamiento.
+    --======================================================
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
@@ -233,6 +252,8 @@ BEGIN
     END CATCH
 END
 GO
+GO
+
 
 -- ============================================================================
 -- Solicitud: 002_sp_pasajeros_solicitud.sql (he_sp_solicitud_reservas_por_pasajero)
@@ -242,6 +263,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_reservas_por_pasajero
     @SolicitudId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Obtiene las reservas asociadas a un pasajero en una solicitud.
+    --======================================================
     SET NOCOUNT ON;
     SELECT p.Id AS PasajeroSolicitudId, MIN(r.Id) AS NumeroReserva
     FROM dbo.PasajerosSolicitudAlojamiento AS p
@@ -251,6 +277,8 @@ BEGIN
     GROUP BY p.Id;
 END
 GO
+GO
+
 
 -- ============================================================================
 -- Solicitud: 004_sp_generar_reservas.sql
@@ -264,6 +292,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_generar_reservas
     @PrimeraReservaId int OUTPUT
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Genera las reservas para una solicitud de alojamiento.
+    --======================================================
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
     BEGIN TRY
@@ -365,6 +398,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_habitaciones_disponibles
     @CampamentoId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Lista habitaciones disponibles para una solicitud de alojamiento.
+    --======================================================
     SET NOCOUNT ON;
     DECLARE @Grupo int, @Empresa int, @Desde datetime, @Hasta datetime;
     SELECT @Grupo = s.AreaEmpresaSolicitanteId, @Empresa = a.EmpresaId,
@@ -390,6 +428,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_asignar_habitacion
     @UsuarioId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Asigna una habitación a un pasajero en una solicitud de alojamiento.
+    --======================================================
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
     BEGIN TRY
@@ -454,6 +497,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_desasignar_habitacion
     @UsuarioId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Desasigna la habitación de un pasajero en una solicitud de alojamiento.
+    --======================================================
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
     BEGIN TRY

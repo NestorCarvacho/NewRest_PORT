@@ -4,6 +4,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_habitaciones_disponibles
     @CampamentoId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Lista habitaciones disponibles para una solicitud de alojamiento.
+    --======================================================
     SET NOCOUNT ON;
     DECLARE @Grupo int, @Empresa int, @Desde datetime, @Hasta datetime;
     SELECT @Grupo = s.AreaEmpresaSolicitanteId, @Empresa = a.EmpresaId,
@@ -29,6 +34,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_asignar_habitacion
     @UsuarioId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Asigna una habitación a un pasajero en una solicitud de alojamiento.
+    --======================================================
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
     BEGIN TRY
@@ -93,6 +103,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_desasignar_habitacion
     @UsuarioId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Desasigna la habitación de un pasajero en una solicitud de alojamiento.
+    --======================================================
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
     BEGIN TRY

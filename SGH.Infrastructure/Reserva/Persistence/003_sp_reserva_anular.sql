@@ -5,6 +5,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_reserva_anular
     @UsuarioId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Anula una reserva.
+    --======================================================
     SET NOCOUNT ON;
 
     IF NOT EXISTS (

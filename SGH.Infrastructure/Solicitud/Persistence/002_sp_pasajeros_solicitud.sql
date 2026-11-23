@@ -19,6 +19,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_reservas_por_pasajero
     @SolicitudId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Obtiene las reservas asociadas a un pasajero en una solicitud.
+    --======================================================
     SET NOCOUNT ON;
     SELECT p.Id AS PasajeroSolicitudId, MIN(r.Id) AS NumeroReserva
     FROM dbo.PasajerosSolicitudAlojamiento AS p

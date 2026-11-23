@@ -98,6 +98,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_contacto_correo
     @CampamentoId int
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Obtiene los correos de contacto de la empresa y el campamento.
+    --======================================================
     SET NOCOUNT ON;
     SELECT NULLIF(LTRIM(RTRIM(e.Email)), '') AS EmailEmpresa
     FROM dbo.Empresas AS e
@@ -157,6 +162,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_guardar
     @Ret int OUTPUT
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Guarda o actualiza una solicitud de alojamiento.
+    --======================================================
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 

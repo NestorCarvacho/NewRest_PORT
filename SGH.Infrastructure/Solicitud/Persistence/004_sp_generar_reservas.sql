@@ -6,6 +6,11 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_generar_reservas
     @PrimeraReservaId int OUTPUT
 AS
 BEGIN
+    --======================================================
+    --  author: Nestor Carvacho
+    --  date: 2026-11-23
+    --  description: Genera las reservas para una solicitud de alojamiento.
+    --======================================================
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
     BEGIN TRY
