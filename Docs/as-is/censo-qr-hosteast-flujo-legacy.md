@@ -18,6 +18,9 @@ Documentación del flujo observado en el legacy **HostEast / SGH móvil** para c
 | Vista cámara a pantalla completa + marco de escaneo | Video embebido en el formulario, sin marco guía ni título «Seleccione Habitación» |
 | Botón **puerta abierta** → selector manual de habitación | **No existe** en `censo-qr.js`; habitación solo vía JSON del QR (`qr.h`) o pegado en textarea |
 | Formulario **Módulo → Piso → Tipo instalación → Habitación** (React Select) | Filtros del módulo **Censo** escritorio tienen Módulo/Piso/Habitación vía catálogo; **sin** «Tipo de instalación» ni mismo wizard |
+| Listado móvil **tarjetas** (badge verde + habitación/turno + módulo/piso) | `misCensos`: **DataTable** con columnas (N°, Fecha, Campamento, Módulo, Piso, Habitación, N° Camas, Camas ocupadas, Turno) |
+| Turno **Ambos** → **dos filas** en lista (Día y Noche separados) | `guardarqr` con `A` persiste dos filas en servidor; en UI escritorio aparecen como **dos registros** en tabla, no como tarjeta unificada |
+| Filtro fecha único `fechaCenso` sobre registrados | `misCensos` usa filtro **período** (desde/hasta), no un solo date picker «día de hoy» |
 
 Referencias de código actual: `SGH.Web/wwwroot/js/modulos/censo-qr.js`, `SGH.Web/wwwroot/js/core/colaOffline.js`, `SGH.Web/Pages/Censo/_ListadoMisCensos.cshtml`.
 
@@ -38,8 +41,8 @@ Tras entrar al módulo de censo QR, el usuario ve la pantalla **Mis Censos** con
 ### 1.2 Censos registrados
 
 - Lista los censos **ya guardados en servidor** para el usuario/sesión.
-- Incluye selector de **fecha** (en la captura: 23/11/2026).
-- En la captura: sin filas para esa fecha (**Sin resultados**).
+- Incluye selector de **fecha** (`input#fechaCenso`, clase `censoqr-date`; en la captura: 23/11/2026).
+- En la captura inicial: sin filas (**Sin resultados**). Tras censar, ver **§ Vista móvil tras guardar**.
 
 ### 1.3 Acción principal — botón «+»
 
@@ -114,6 +117,50 @@ Formulario legacy (React, contenedor `col-md-10 col-lg-8`). Cuatro combos **en c
 | **Ambos** | `camasDia + camasNoche ≤ capacidadTotal`. Radios de noche: deshabilitar `i` si `i > capacidadTotal - camasDia`. Si sube día y deja noche inválida, **reajustar noche** al máximo restante (típicamente 0). |
 
 Implementación: `ReglasCenso.ValidarOcupacionCamas`, `censo-camas-logica.js`, UI `censo-camas-selector.js` y referencia React `Docs/actividades/censo-qr-ui/CensoCamasSelector.tsx`.
+
+---
+
+## Vista móvil — censos ya registrados (lista «Censos Registrados»)
+
+Tras guardar/sincronizar, la misma pantalla **Mis Censos** (móvil) muestra el bloque superior sin cambios y, debajo del date picker, una **lista de tarjetas** (`<ul>`).
+
+### Estructura del contenedor (DOM legacy)
+
+```
+div.jss1261
+├── h6 → "Censos pendientes de guardar"
+├── ul → vacío: "Sin resultados"
+├── h6 → "Censos Registrados"
+├── div.row.censoqr-date → DatePicker #fechaCenso (valor ej. 23/11/2026)
+└── ul
+    └── li (una tarjeta por registro de censo del usuario en esa fecha)
+```
+
+### Tarjeta por ítem (`li`)
+
+Cada censado del día se representa como **una fila de lista**, no como tabla.
+
+| Zona | Contenido observado | Significado |
+|---|---|---|
+| **Badge circular** (`div`, fondo verde `#4CAF50`) | Número grande (ej. **4**) | **Camas ocupadas** declaradas en ese registro |
+| **Título** (`span`) | `{HABITACIÓN} \| Turno: Día` o `… Noche` | Nombre/código de habitación (ej. **PASILLO**) y turno legible |
+| **Subtítulo** (`p`) | `{módulo} \| {módulo-piso}` | Ubicación (ej. **.MOD-01 \| MOD-1-PISO 1**) |
+
+**Ejemplo del DOM aportado** (misma habitación censada en modo que genera día y noche por separado):
+
+1. Badge **4** — `PASILLO | Turno: Día` — `.MOD-01 | MOD-1-PISO 1`
+2. Badge **4** — `PASILLO | Turno: Noche` — `.MOD-01 | MOD-1-PISO 1`
+
+### Implicaciones para migración
+
+- **Un censo con turno Ambos** en legacy se **materializa como dos ítems visuales** (y dos persistencias), alineado con `GuardarQrAsync` en NewRest que arma filas `D` + `N`.
+- La **ocupación** se comunica con el **número en el badge**, no con una columna «Camas ocupadas» aparte.
+- **Pendientes de guardar** usa el mismo patrón de lista cuando hay cola local; vacío se muestra como texto plano dentro del `<ul>`.
+
+### Equivalencia NewRest (hoy)
+
+- Datos: `opcion: "miscensos"` + `fecha` → filas mapeadas en `filaMisCensos` (habitación, `camasOcupadas`, `turno`, módulo, piso).
+- Presentación: tabla responsive, **no** tarjetas con badge verde ni date picker único `fechaCenso`.
 
 ---
 
