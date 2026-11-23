@@ -1,4 +1,4 @@
-import { renderizadorCeldaTruncada } from "../core/celda-truncada.js";
+import { escaparHtml, renderizadorCeldaTruncada } from "../core/celda-truncada.js";
 
 export function crearReserva(dependencias) {
   var sincronizacionListado = null;
@@ -223,18 +223,71 @@ export function crearReserva(dependencias) {
         return 10000;
     }
 
-    function configurarOpcionesTabla(opciones, columnas) {
-        if (!opciones || !columnas || !opciones.responsive) return;
-        var indiceDetalle = -1;
-        columnas.forEach(function (columna, indice) {
-            if (columna && columna.className && String(columna.className).indexOf("col-detalle-reserva") >= 0) {
-                indiceDetalle = indice;
+    function configurarOpcionesTabla(opciones) {
+        if (!opciones || !opciones.responsive) return;
+        opciones.responsive.details = false;
+    }
+
+    function itemDetalleReserva(etiqueta, valor) {
+        if (valor == null || String(valor).trim() === "") return "";
+        return '<li><span class="dtr-title">' + escaparHtml(etiqueta)
+            + '</span><span class="dtr-data">' + escaparHtml(String(valor)) + "</span></li>";
+    }
+
+    function htmlDetalleReserva(mapeada) {
+        if (!mapeada) return "";
+        var items = [
+            itemDetalleReserva("N°", mapeada.numero),
+            itemDetalleReserva("Fecha Reserva", mapeada.fechaReserva),
+            itemDetalleReserva("Grupo Empresa", mapeada.grupo),
+            itemDetalleReserva("Habitación", mapeada.habitacion),
+            itemDetalleReserva("Estado", mapeada.estado)
+        ].join("");
+        if (!items) return "";
+        return '<ul class="dtr-details reserva-dtr-details">' + items + "</ul>";
+    }
+
+    function pintarControlDetalle(td, mapeada) {
+        td.replaceChildren();
+        var contenido = htmlDetalleReserva(mapeada);
+        if (!contenido) return;
+        var boton = document.createElement("button");
+        boton.type = "button";
+        boton.className = "boton-detalle-reserva";
+        boton.setAttribute("aria-expanded", "false");
+        boton.setAttribute("aria-label", "Ver detalles de la reserva");
+        var icono = document.createElement("span");
+        icono.className = "chevron-detalle-reserva";
+        icono.setAttribute("aria-hidden", "true");
+        icono.textContent = "\u25B8";
+        boton.append(icono);
+        boton.addEventListener("click", function (evento) {
+            evento.stopPropagation();
+            var filaTr = td.closest("tr");
+            if (!filaTr) return;
+            var siguiente = filaTr.nextElementSibling;
+            var abierto = filaTr._detalleReservaAbierto === true
+                && siguiente && siguiente.classList.contains("fila-detalle-reserva-expandida");
+            if (abierto) {
+                siguiente.remove();
+                filaTr._detalleReservaAbierto = false;
+                boton.setAttribute("aria-expanded", "false");
+                icono.textContent = "\u25B8";
+                return;
             }
+            if (siguiente && siguiente.classList.contains("fila-detalle-reserva-expandida")) siguiente.remove();
+            var expandida = document.createElement("tr");
+            expandida.className = "fila-detalle-reserva-expandida child";
+            var celda = document.createElement("td");
+            celda.colSpan = filaTr.children.length;
+            celda.innerHTML = contenido;
+            expandida.append(celda);
+            filaTr.after(expandida);
+            filaTr._detalleReservaAbierto = true;
+            boton.setAttribute("aria-expanded", "true");
+            icono.textContent = "\u25BE";
         });
-        opciones.responsive.details = {
-            type: "column",
-            target: indiceDetalle >= 0 ? indiceDetalle : "tr"
-        };
+        td.append(boton);
     }
 
     function renderizarMovimiento(valor, tipo) {
@@ -304,16 +357,26 @@ export function crearReserva(dependencias) {
         if (!api || !herramientas || nodo._reservaTablaDraw) return;
         nodo._reservaTablaDraw = true;
         function repintarCeldasReserva() {
+            var cuerpo = api.table().body();
+            if (cuerpo) {
+                cuerpo.querySelectorAll(".fila-detalle-reserva-expandida").forEach(function (fila) { fila.remove(); });
+            }
             api.rows({ page: "current" }).every(function () {
                 var mapeada = this.data();
                 var indice = this.index();
+                var filaTr = this.node();
+                if (filaTr) filaTr._detalleReservaAbierto = false;
                 var celdaSel = herramientas.nodoCeldaDatos(api, indice, "seleccionMasiva");
                 if (celdaSel) pintarSeleccionMasiva(celdaSel, mapeada);
-                if (!herramientas.crearAcciones) return;
-                var celdaAcciones = herramientas.nodoCeldaDatos(api, indice, "acciones");
-                if (!celdaAcciones) return;
-                var fila = registroDesdeMapeada(mapeada);
-                celdaAcciones.replaceChildren(herramientas.crearAcciones(fila, "reserva"));
+                if (herramientas.crearAcciones) {
+                    var celdaAcciones = herramientas.nodoCeldaDatos(api, indice, "acciones");
+                    if (celdaAcciones) {
+                        var fila = registroDesdeMapeada(mapeada);
+                        celdaAcciones.replaceChildren(herramientas.crearAcciones(fila, "reserva"));
+                    }
+                }
+                var celdaDetalle = herramientas.nodoCeldaDatos(api, indice, "detalle");
+                if (celdaDetalle) pintarControlDetalle(celdaDetalle, mapeada);
             });
         }
         api.on("draw", repintarCeldasReserva);
@@ -339,10 +402,12 @@ export function crearReserva(dependencias) {
             data: "detalle",
             orderable: false,
             searchable: false,
-            className: "dtr-control col-detalle-reserva",
+            className: "col-detalle-reserva",
             responsivePriority: 1,
             defaultContent: "",
-            render: function () { return ""; }
+            createdCell: function (td, _celda, mapeada) {
+                pintarControlDetalle(td, mapeada);
+            }
         };
     }
 

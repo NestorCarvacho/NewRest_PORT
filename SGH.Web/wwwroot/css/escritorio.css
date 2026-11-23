@@ -977,30 +977,84 @@ div.dt-container table.dataTable tbody > tr > td {
 
 .modulo-reserva div.dt-container table.dataTable th.col-fecha-movimiento,
 .modulo-reserva div.dt-container table.dataTable td.col-fecha-movimiento {
-  width: 6.75rem;
-  min-width: 6.75rem;
-  max-width: 6.75rem;
+  width: 9.5rem;
+  min-width: 9.5rem;
+  max-width: 9.5rem;
   padding-left: 0.35rem !important;
   padding-right: 0.35rem !important;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .modulo-reserva table.dataTable th.col-detalle-reserva,
 .modulo-reserva table.dataTable td.col-detalle-reserva {
-  width: 2.35rem;
-  min-width: 2.35rem;
-  max-width: 2.35rem;
-  padding-left: 0.25rem !important;
-  padding-right: 0.25rem !important;
+  width: 2.65rem;
+  min-width: 2.65rem;
+  max-width: 2.65rem;
+  padding-left: 0.2rem !important;
+  padding-right: 0.2rem !important;
   text-align: center;
   vertical-align: middle;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.modulo-reserva .boton-detalle-reserva {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--burgundy) 35%, transparent);
+  border-radius: 0.45rem;
+  background: var(--white);
+  color: var(--burgundy);
   cursor: pointer;
 }
 
-.modulo-reserva table.dataTable td.col-detalle-reserva::before {
+.modulo-reserva .boton-detalle-reserva:hover,
+.modulo-reserva .boton-detalle-reserva:focus-visible {
+  background: color-mix(in srgb, var(--burgundy) 8%, var(--white));
+  outline: 2px solid color-mix(in srgb, var(--burgundy) 40%, transparent);
+  outline-offset: 1px;
+}
+
+.modulo-reserva .chevron-detalle-reserva {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.modulo-reserva .fila-detalle-reserva-expandida > td {
+  padding: 0.65rem 1rem 0.85rem !important;
+  background: color-mix(in srgb, var(--eggshell) 55%, var(--white)) !important;
+  border-bottom: 1px solid #efeae6 !important;
+}
+
+.modulo-reserva .reserva-dtr-details {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+}
+
+.modulo-reserva .reserva-dtr-details .dtr-title {
+  display: inline-block;
+  min-width: 7.5rem;
+  margin-right: 0.35rem;
   color: var(--burgundy);
-  font-weight: 700;
+  font-weight: 650;
+  font-size: 0.82rem;
+}
+
+.modulo-reserva .reserva-dtr-details .dtr-data {
+  font-size: 0.86rem;
+  color: var(--deep);
 }
 
 .modulo-reserva div.dt-container table.dataTable td.col-seleccion-masiva {
