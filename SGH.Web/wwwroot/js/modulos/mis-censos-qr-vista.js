@@ -181,7 +181,8 @@ export function montarVistaMisCensosQr(dependencias, nodo) {
     }
     if (fab && dependencias.abrirFlujoCensoQr) {
         fab.addEventListener("click", function () {
-            dependencias.abrirFlujoCensoQr({ alCerrar: refrescar });
+            var fecha = inputFecha && inputFecha.value ? inputFecha.value : dependencias.fechaActual();
+            dependencias.abrirFlujoCensoQr({ fechaCenso: fecha, alCerrar: refrescar });
         });
     }
     if (btnSync && dependencias.sincronizar) {

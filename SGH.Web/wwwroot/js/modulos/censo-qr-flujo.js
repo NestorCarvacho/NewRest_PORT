@@ -354,7 +354,9 @@ export function crearCensoQrFlujo(dependencias) {
         inputFecha.type = "date";
         inputFecha.name = "fecha";
         inputFecha.required = true;
+        inputFecha.readOnly = true;
         inputFecha.value = estado.fecha || dependencias.fechaActual();
+        estado.fecha = inputFecha.value;
         var selectTurno = document.createElement("select");
         selectTurno.name = "turno";
         selectTurno.required = true;
@@ -413,7 +415,6 @@ export function crearCensoQrFlujo(dependencias) {
             return true;
         }
 
-        inputFecha.addEventListener("change", function () { marcarRequerido(inputFecha, valorCompleto(inputFecha)); });
         selectTurno.addEventListener("change", function () { marcarRequerido(selectTurno, valorCompleto(selectTurno)); });
 
         var btnAtras = dependencias.boton("Regresar", "boton-secundario", function () { navegar("escanear"); });
@@ -475,8 +476,11 @@ export function crearCensoQrFlujo(dependencias) {
         }
         opciones = opciones || {};
         enlazarCierrePanel();
+        var fechaCenso = (opciones.fechaCenso && String(opciones.fechaCenso).trim())
+            ? String(opciones.fechaCenso).slice(0, 10)
+            : dependencias.fechaActual();
         var estado = {
-            fecha: dependencias.fechaActual(),
+            fecha: fechaCenso,
             turno: "D",
             camasDia: 0,
             camasNoche: 0,
