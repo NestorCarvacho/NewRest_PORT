@@ -124,15 +124,6 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_listar_organizacion
-    @EmpresaMandanteId int,
-    @UnidadId int,
-    @DivisionId int
-AS
-BEGIN
-    SET NOCOUNT ON;
-    DECLARE @MineraId int;
-
 CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_guardar
     @Id int,
     @EmpresaMandanteId int,
