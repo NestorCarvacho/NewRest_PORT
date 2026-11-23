@@ -12,37 +12,61 @@ function turnoLegible(codigo) {
 }
 
 export function crearCensoQrFlujo(dependencias) {
-    var overlay = null;
+    var raiz = null;
+    var panelCierraEnlazado = false;
 
-    function cerrar() {
-        if (!overlay) return;
-        var visor = overlay.querySelector(".lector-qr-envoltorio");
+    function detenerEscanerEnRaiz() {
+        if (!raiz) return;
+        var visor = raiz.querySelector(".lector-qr-envoltorio");
         if (visor) detenerEscaner(visor);
-        overlay.remove();
-        overlay = null;
-        document.body.classList.remove("censo-qr-wizard-abierto");
     }
 
-    function crearOverlay() {
-        cerrar();
-        overlay = document.createElement("div");
-        overlay.className = "censo-qr-wizard";
-        overlay.setAttribute("role", "dialog");
-        overlay.setAttribute("aria-modal", "true");
-        overlay.innerHTML =
+    function enlazarCierrePanel() {
+        if (panelCierraEnlazado) return;
+        panelCierraEnlazado = true;
+        ["panel-cerrar", "velo"].forEach(function (id) {
+            var nodo = document.getElementById(id);
+            if (nodo) nodo.addEventListener("click", detenerEscanerEnRaiz);
+        });
+    }
+
+    function cerrar() {
+        detenerEscanerEnRaiz();
+        raiz = null;
+        if (dependencias.cerrarPanel) dependencias.cerrarPanel();
+    }
+
+    function tituloPanel(paso) {
+        var titulos = {
+            escanear: "Censo QR — Escanear habitación",
+            manual: "Censo QR — Seleccionar habitación",
+            censo: "Censo QR — Datos del censo",
+            confirmar: "Censo QR — Confirmación"
+        };
+        var el = document.getElementById("panel-titulo");
+        if (el) el.textContent = titulos[paso] || "Censo QR";
+    }
+
+    function marcarRequerido(control, completo) {
+        if (!control) return;
+        var campo = control.closest(".campo");
+        if (campo) campo.classList.toggle("campo-error", !completo);
+        control.setAttribute("aria-invalid", completo ? "false" : "true");
+    }
+
+    function valorCompleto(control) {
+        return control && String(control.value || "").trim() !== "";
+    }
+
+    function prepararRaiz() {
+        detenerEscanerEnRaiz();
+        raiz = document.createElement("div");
+        raiz.className = "censo-qr-wizard";
+        raiz.innerHTML =
             '<div class="censo-qr-wizard-paso" data-pasos></div>' +
             '<div class="censo-qr-wizard-contenido" data-contenido></div>' +
             '<div class="censo-qr-wizard-pie" data-pie></div>';
-        var btnCerrar = document.createElement("button");
-        btnCerrar.type = "button";
-        btnCerrar.className = "censo-qr-wizard-cerrar";
-        btnCerrar.setAttribute("aria-label", "Cerrar");
-        btnCerrar.textContent = "×";
-        btnCerrar.addEventListener("click", cerrar);
-        overlay.append(btnCerrar);
-        document.body.append(overlay);
-        document.body.classList.add("censo-qr-wizard-abierto");
-        return overlay;
+        return raiz;
     }
 
     function pintarPasos(contenedor, activo) {
@@ -103,6 +127,18 @@ export function crearCensoQrFlujo(dependencias) {
     }
 
     function guardar(estado, alTerminar) {
+        if (!estado.habitacionId) {
+            dependencias.mostrarAviso("Seleccione una habitación.", "error");
+            return Promise.resolve();
+        }
+        if (!estado.fecha) {
+            dependencias.mostrarAviso("Debe ingresar la fecha de censo.", "error");
+            return Promise.resolve();
+        }
+        if (!estado.turno) {
+            dependencias.mostrarAviso("Seleccione un turno válido.", "error");
+            return Promise.resolve();
+        }
         var camasDia = estado.turno === "N" ? 0 : estado.camasDia;
         var camasNoche = estado.turno === "D" ? 0 : (estado.turno === "N" ? estado.camasNoche : estado.camasNoche);
         var errorCamas = validarOcupacionCamas(estado.capacidad, estado.turno, camasDia, camasNoche);
@@ -144,13 +180,13 @@ export function crearCensoQrFlujo(dependencias) {
     }
 
     function pasoEscanear(estado, navegar) {
-        var cont = overlay.querySelector("[data-contenido]");
-        var pie = overlay.querySelector("[data-pie]");
+        var cont = raiz.querySelector("[data-contenido]");
+        var pie = raiz.querySelector("[data-pie]");
         cont.replaceChildren();
         pie.replaceChildren();
-        var titulo = document.createElement("h2");
+        var titulo = document.createElement("h3");
         titulo.className = "censo-qr-wizard-titulo";
-        titulo.textContent = "Seleccione Habitación";
+        titulo.textContent = "Escanee o elija la habitación";
         var visorAncla = document.createElement("div");
         visorAncla.className = "censo-qr-wizard-visor-ancla";
         var btnManual = document.createElement("button");
@@ -162,6 +198,8 @@ export function crearCensoQrFlujo(dependencias) {
         btnManual.addEventListener("click", function () { navegar("manual"); });
         visorAncla.append(btnManual);
         cont.append(titulo, visorAncla);
+        var btnCerrar = dependencias.boton("Cancelar", "boton-secundario", cerrar);
+        pie.append(btnCerrar);
         iniciarEscaner(visorAncla, function (texto) {
             aplicarHabitacionDesdeQr(estado, texto).then(function (ok) {
                 if (ok) navegar("censo");
@@ -185,25 +223,31 @@ export function crearCensoQrFlujo(dependencias) {
     }
 
     function pasoManual(estado, navegar) {
-        var cont = overlay.querySelector("[data-contenido]");
-        var pie = overlay.querySelector("[data-pie]");
+        var cont = raiz.querySelector("[data-contenido]");
+        var pie = raiz.querySelector("[data-pie]");
         cont.replaceChildren();
         pie.replaceChildren();
-        var titulo = document.createElement("h2");
+        detenerEscanerEnRaiz();
+        var titulo = document.createElement("h3");
         titulo.className = "censo-qr-wizard-titulo";
-        titulo.textContent = "Seleccione Habitación";
+        titulo.textContent = "Seleccione habitación";
         var form = document.createElement("form");
-        form.className = "censo-qr-habitacion-selector";
+        form.className = "censo-qr-habitacion-selector formulario";
         form.id = "habitacionSelector";
+        form.noValidate = true;
         var selModulo = document.createElement("select");
         selModulo.name = "modulo";
         selModulo.className = "selector-buscable";
+        selModulo.required = true;
         var selPiso = document.createElement("select");
         selPiso.name = "piso";
+        selPiso.required = true;
         var selTipo = document.createElement("select");
         selTipo.name = "tipoInstalacion";
+        selTipo.required = true;
         var selHab = document.createElement("select");
         selHab.name = "habitacion";
+        selHab.required = true;
         form.append(
             dependencias.etiquetaCampo("Módulo", selModulo),
             dependencias.etiquetaCampo("Piso", selPiso),
@@ -229,6 +273,26 @@ export function crearCensoQrFlujo(dependencias) {
             });
         }
 
+        function limpiarErroresManual() {
+            [selModulo, selPiso, selTipo, selHab].forEach(function (sel) { marcarRequerido(sel, true); });
+        }
+
+        function validarManual() {
+            form.classList.add("validar");
+            var ok = true;
+            [selModulo, selPiso, selTipo, selHab].forEach(function (sel) {
+                var completo = valorCompleto(sel);
+                marcarRequerido(sel, completo);
+                if (!completo) ok = false;
+            });
+            if (!ok) dependencias.mostrarAviso("Complete módulo, piso, tipo y habitación.", "error");
+            return ok;
+        }
+
+        [selModulo, selPiso, selTipo, selHab].forEach(function (sel) {
+            sel.addEventListener("change", limpiarErroresManual);
+        });
+
         selModulo.addEventListener("change", function () {
             llenarSelect(selPiso, pisosFiltrados(selModulo.value), "Seleccione Piso");
             llenarSelect(selHab, [], "Seleccione Habitación");
@@ -242,10 +306,7 @@ export function crearCensoQrFlujo(dependencias) {
 
         var btnAtras = dependencias.boton("Regresar", "boton-secundario", function () { navegar("escanear"); });
         var btnOk = dependencias.boton("Seleccionar Habitación", "boton-primario", function () {
-            if (!selHab.value) {
-                dependencias.mostrarAviso("Seleccione una habitación.", "error");
-                return;
-            }
+            if (!validarManual()) return;
             var hab = (catalogo.habitacionesQr || []).find(function (h) { return String(h.id) === selHab.value; });
             var mod = (catalogo.modulos || []).find(function (m) { return String(m.id) === selModulo.value; });
             var piso = (catalogo.pisos || []).find(function (p) { return String(p.id) === selPiso.value; });
@@ -268,24 +329,32 @@ export function crearCensoQrFlujo(dependencias) {
     }
 
     function pasoCenso(estado, navegar) {
-        var cont = overlay.querySelector("[data-contenido]");
-        var pie = overlay.querySelector("[data-pie]");
+        var cont = raiz.querySelector("[data-contenido]");
+        var pie = raiz.querySelector("[data-pie]");
         cont.replaceChildren();
         pie.replaceChildren();
-        var titulo = document.createElement("h2");
+        if (!estado.habitacionId) {
+            dependencias.mostrarAviso("Seleccione una habitación antes de continuar.", "error");
+            navegar("escanear");
+            return;
+        }
+        var titulo = document.createElement("h3");
         titulo.className = "censo-qr-wizard-titulo";
         titulo.textContent = estado.habitacion || "Censo";
         var detalle = document.createElement("p");
         detalle.className = "censo-qr-wizard-detalle";
         detalle.textContent = [estado.moduloEtiqueta, estado.pisoEtiqueta].filter(Boolean).join(" | ");
-        var form = document.createElement("div");
-        form.className = "censo-qr-form-censo";
+        var form = document.createElement("form");
+        form.className = "censo-qr-form-censo formulario";
+        form.noValidate = true;
         var inputFecha = document.createElement("input");
         inputFecha.type = "date";
         inputFecha.name = "fecha";
+        inputFecha.required = true;
         inputFecha.value = estado.fecha || dependencias.fechaActual();
         var selectTurno = document.createElement("select");
         selectTurno.name = "turno";
+        selectTurno.required = true;
         [["D", "Día"], ["N", "Noche"], ["A", "Ambos"]].forEach(function (par) {
             var op = document.createElement("option");
             op.value = par[0];
@@ -320,12 +389,33 @@ export function crearCensoQrFlujo(dependencias) {
             inputCantidadNoche: hiddenNoche
         });
 
-        var btnAtras = dependencias.boton("Regresar", "boton-secundario", function () { navegar("escanear"); });
-        var btnSig = dependencias.boton("Continuar", "boton-primario", function () {
+        function validarCenso() {
+            form.classList.add("validar");
+            var okFecha = valorCompleto(inputFecha);
+            marcarRequerido(inputFecha, okFecha);
+            var okTurno = valorCompleto(selectTurno);
+            marcarRequerido(selectTurno, okTurno);
+            if (!okFecha) {
+                dependencias.mostrarAviso("Debe ingresar la fecha de censo.", "error");
+                return false;
+            }
+            if (!okTurno) {
+                dependencias.mostrarAviso("Seleccione un turno válido.", "error");
+                return false;
+            }
             if (!selector.esValido()) {
                 dependencias.mostrarAviso("Revise la ocupación de camas.", "error");
-                return;
+                return false;
             }
+            return true;
+        }
+
+        inputFecha.addEventListener("change", function () { marcarRequerido(inputFecha, valorCompleto(inputFecha)); });
+        selectTurno.addEventListener("change", function () { marcarRequerido(selectTurno, valorCompleto(selectTurno)); });
+
+        var btnAtras = dependencias.boton("Regresar", "boton-secundario", function () { navegar("escanear"); });
+        var btnSig = dependencias.boton("Continuar", "boton-primario", function () {
+            if (!validarCenso()) return;
             var vals = selector.obtenerValores();
             estado.fecha = inputFecha.value;
             estado.turno = selectTurno.value;
@@ -337,11 +427,11 @@ export function crearCensoQrFlujo(dependencias) {
     }
 
     function pasoConfirmar(estado, alTerminar) {
-        var cont = overlay.querySelector("[data-contenido]");
-        var pie = overlay.querySelector("[data-pie]");
+        var cont = raiz.querySelector("[data-contenido]");
+        var pie = raiz.querySelector("[data-pie]");
         cont.replaceChildren();
         pie.replaceChildren();
-        var titulo = document.createElement("h2");
+        var titulo = document.createElement("h3");
         titulo.className = "censo-qr-wizard-titulo";
         titulo.textContent = "Confirmación";
         var lista = document.createElement("ul");
@@ -370,7 +460,12 @@ export function crearCensoQrFlujo(dependencias) {
     var navegarInterno = null;
 
     function abrir(opciones) {
+        if (!dependencias.abrirPanel) {
+            dependencias.mostrarAviso("No se pudo abrir el panel lateral.", "error");
+            return;
+        }
         opciones = opciones || {};
+        enlazarCierrePanel();
         var estado = {
             fecha: dependencias.fechaActual(),
             turno: "D",
@@ -378,11 +473,13 @@ export function crearCensoQrFlujo(dependencias) {
             camasNoche: 0,
             capacidad: 4
         };
-        crearOverlay();
-        var pasosEl = overlay.querySelector("[data-pasos]");
+        prepararRaiz();
+        dependencias.abrirPanel("Censo QR", raiz);
+        var pasosEl = raiz.querySelector("[data-pasos]");
         var indicePaso = { escanear: 1, manual: 1, censo: 2, confirmar: 3 };
 
         function navegar(destino) {
+            tituloPanel(destino);
             pintarPasos(pasosEl, indicePaso[destino] || 1);
             if (destino === "escanear") pasoEscanear(estado, navegar);
             else if (destino === "manual") pasoManual(estado, navegar);

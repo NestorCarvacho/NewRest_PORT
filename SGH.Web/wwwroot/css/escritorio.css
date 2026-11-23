@@ -2430,29 +2430,19 @@ html:not([data-tema="claro"]) .campo.campo-interruptor input[type="checkbox"]:ch
 }
 
 .censo-qr-wizard {
-  position: fixed;
-  inset: 0;
-  z-index: 2000;
-  background: var(--fondo-panel, #f5f5f0);
   display: flex;
   flex-direction: column;
-  padding: 1rem 1rem 1.25rem;
-  overflow: auto;
+  gap: 0.75rem;
+  min-height: 0;
 }
 
-body.censo-qr-wizard-abierto {
-  overflow: hidden;
+.panel-lateral:has(.censo-qr-wizard) {
+  width: min(32rem, 100%);
 }
 
-.censo-qr-wizard-cerrar {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.75rem;
-  border: none;
-  background: transparent;
-  font-size: 1.75rem;
-  line-height: 1;
-  cursor: pointer;
+.panel-lateral:has(.censo-qr-wizard) .panel-cuerpo {
+  display: flex;
+  flex-direction: column;
 }
 
 .censo-qr-wizard-paso {
@@ -2492,16 +2482,18 @@ body.censo-qr-wizard-abierto {
 
 .censo-qr-wizard-contenido {
   flex: 1;
+  min-height: 0;
 }
 
 .censo-qr-wizard-titulo {
-  text-align: center;
-  font-size: 1.1rem;
-  margin: 0 0 1rem;
+  font-size: 1rem;
+  margin: 0 0 0.75rem;
+  color: var(--burgundy);
 }
 
 .censo-qr-wizard-visor-ancla {
   position: relative;
+  width: 100%;
   max-width: 22rem;
   margin: 0 auto;
 }
@@ -2530,9 +2522,18 @@ body.censo-qr-wizard-abierto {
 
 .censo-qr-wizard-pie {
   display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-  padding-top: 1rem;
+  flex-wrap: wrap;
+  justify-content: stretch;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  margin-top: auto;
+  border-top: 1px solid var(--blizzard);
+}
+
+.censo-qr-wizard-pie .boton-primario,
+.censo-qr-wizard-pie .boton-secundario {
+  flex: 1 1 auto;
+  min-width: min(100%, 8rem);
 }
 
 .censo-qr-resumen {
