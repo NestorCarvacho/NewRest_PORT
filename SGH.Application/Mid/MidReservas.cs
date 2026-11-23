@@ -263,7 +263,7 @@ public sealed class MidReservas(
         {
             ResultadoReversarMovimientoReserva.Reversado => EjecucionMid.Ok(new { listo = true }),
             ResultadoReversarMovimientoReserva.Rechazado rechazado => EjecucionMid.Fallo(400, rechazado.Mensaje),
-            _ => EjecucionMid.Fallo(400, "No se pudo reversar el movimiento.")
+            _ => EjecucionMid.Fallo(400, "No se pudo anular el movimiento.")
         };
     }
 

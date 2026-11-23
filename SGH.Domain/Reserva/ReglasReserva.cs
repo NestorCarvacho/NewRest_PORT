@@ -75,10 +75,10 @@ public static class ReglasReserva
             return "Seleccione una reserva.";
 
         if (estado != EstadoAsignada)
-            return "Solo se puede reversar movimientos en reservas asignadas.";
+            return "Solo se puede anular movimientos en reservas asignadas.";
 
         if (string.IsNullOrWhiteSpace(checkIn) && string.IsNullOrWhiteSpace(checkOut))
-            return "La reserva no tiene check-in ni check-out para reversar.";
+            return "La reserva no tiene check-in ni check-out para anular.";
 
         return null;
     }

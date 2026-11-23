@@ -80,6 +80,8 @@ Orden fijo — ver `Docs/SGH-CU-HAB-01-implementacion.md`:
 ### Reserva
 
 1. `001_sp_reserva.sql`
+2. `003_sp_reserva_anular.sql`
+3. `004_sp_reserva_reversar_movimiento.sql` (anular check-in / check-out desde el listado)
 
 ### Censo
 
