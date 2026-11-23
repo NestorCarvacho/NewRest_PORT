@@ -87,6 +87,7 @@ export function ensamblarEntorno(idsPantalla) {
         censo: instancia.censo,
         censoQr: instancia.censoQr,
         habitacion: instancia.habitacion,
+        movimientosReserva: instancia.movimientosReserva,
         abrirFiltrosModulo: abrirFiltrosModulo
     });
 

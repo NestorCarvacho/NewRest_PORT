@@ -936,12 +936,7 @@ div.dt-container table.dataTable tbody > tr > td {
   min-width: 70rem;
 }
 
-.modulo-reserva table.dataTable th:first-child,
-.modulo-reserva table.dataTable td:first-child {
-  width: 11rem;
-}
-
-.modulo-reserva div.dt-container table.dataTable tbody > tr > td:first-child {
+.modulo-reserva div.dt-container table.dataTable tbody > tr > td:nth-child(2) {
   white-space: normal;
   text-overflow: clip;
 }
@@ -1468,7 +1463,38 @@ html:not([data-tema="claro"]) .tabla-vacia {
   background: #4a3b00;
   color: #fff8e6;
   font-size: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+}
+
+.banner-offline .banner-offline-sync {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.82rem;
+}
+
+.modulo-reserva table.dataTable th.col-seleccion-masiva,
+.modulo-reserva table.dataTable td.col-seleccion-masiva {
+  width: 2.75rem;
+  min-width: 2.75rem;
+  max-width: 2.75rem;
   text-align: center;
+  vertical-align: middle;
+}
+
+.modulo-reserva table.dataTable th:first-child,
+.modulo-reserva table.dataTable td:first-child {
+  width: 2.75rem;
+  min-width: 2.75rem;
+  max-width: 2.75rem;
+}
+
+.modulo-reserva div.dt-container table.dataTable tbody > tr > td:nth-child(2) {
+  white-space: normal;
+  text-overflow: clip;
+  width: 11rem;
 }
 
 .boton-generar-reservas:not(:disabled) {

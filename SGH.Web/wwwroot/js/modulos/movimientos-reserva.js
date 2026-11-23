@@ -64,5 +64,40 @@ export function crearMovimientosReserva(dependencias) {
         return boton;
     }
 
-    return { crearAcciones: crearAcciones };
+    function seleccionReserva(nodo) {
+        return nodo && nodo._seleccionReserva ? Array.from(nodo._seleccionReserva) : [];
+    }
+
+    function checkInMasivo(nodo) {
+        var ids = seleccionReserva(nodo);
+        if (!ids.length) {
+            dependencias.mostrarAviso("Seleccione reservas asignadas sin check-in.", "warning");
+            return;
+        }
+        dependencias.abrirPanel("Check-in masivo", dependencias.formulario([
+            dependencias.seccion("", [
+                dependencias.campo("fecha", "Fecha check-in", "datetime-local", [], {
+                    requerido: true,
+                    valor: dependencias.momentoLocal(true)
+                })
+            ])
+        ], "Registrar", true, function (datos) {
+            return dependencias.enviar("/Reserva/Mid/MidReservas.cs", {
+                opcion: "movimientosmasivo",
+                reservaIds: ids,
+                operacion: "I",
+                fecha: datos.fecha
+            }).then(function (resultado) {
+                var exitos = (resultado && resultado.exitos) ? resultado.exitos.length : 0;
+                var fallos = (resultado && resultado.fallos) ? resultado.fallos.length : 0;
+                var texto = "Check-in registrado en " + exitos + " reserva(s).";
+                if (fallos) texto += " Sin cambio en " + fallos + ".";
+                dependencias.mostrarAviso(texto, fallos ? "warning" : "success");
+                if (dependencias.cerrarPanel) dependencias.cerrarPanel();
+                if (dependencias.cargar) return dependencias.cargar("reserva", { bloquearPantalla: false, avisarConteoFilas: false });
+            });
+        }));
+    }
+
+    return { crearAcciones: crearAcciones, checkInMasivo: checkInMasivo };
 }

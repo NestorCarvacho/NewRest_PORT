@@ -19,6 +19,7 @@ export function crearRenderizadorModulos(dependencias) {
     }
 
     function pintar(nodo, filas, modo) {
+        if (modo === "reserva") nodo._seleccionReserva = new Set();
         dependencias.tablas.pintar(nodo, filas, function (filaOrigen) {
             return fila(filaOrigen, modo);
         });

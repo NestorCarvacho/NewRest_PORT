@@ -6,7 +6,7 @@ Documento para revisión previa a ejecución. Cada requisito incluye estado en N
 
 | # | Estado |
 |---|--------|
-| 1 Offline | Parcial: `colaOffline.js`, banner escritorio, sync genérica |
+| 1 Offline | Hecho: cola unificada, censo QR en cola, banner con **Sincronizar datos**, sync con antiforgery |
 | 2 Camas | Hecho: campo **Estado** 1/0 en UI |
 | 3 Sesión 4 h | Hecho: 240 min, cookie persistente, `ExpireTimeSpan` |
 | 4 Fechas solicitud | Hecho: UI + validación servidor; SQL check-in opcional |
@@ -17,7 +17,7 @@ Documento para revisión previa a ejecución. Cada requisito incluye estado en N
 | 9 Nº reserva pasajero | Hecho: SP + columna en detalle |
 | 10 Anular reserva | Doc: `Docs/as-is/reserva-anular-legacy.md` |
 | 11 Finalizar | Doc: `Docs/as-is/reserva-finalizar-hosteast.md` |
-| 12 Check-in masivo | Parcial: Mid `movimientosmasivo`; falta UI listado |
+| 12 Check-in masivo | Hecho: columna Sel. + botón **Check-in masivo** + Mid `movimientosmasivo` |
 
 **Convención técnica del proyecto:** MVC + Mid + `he_sp_*` donde aplique.
 

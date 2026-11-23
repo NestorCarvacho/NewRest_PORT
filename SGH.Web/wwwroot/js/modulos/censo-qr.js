@@ -1,31 +1,15 @@
+import { encolarOperacion, sincronizarTodo, actualizarBannerOffline } from "../core/colaOffline.js";
+
 export function crearCensoQr(dependencias) {
-    var clavePendientes = "sgh.censos.pendientes";
-
-    function leerPendientes() {
-        try {
-            return JSON.parse(localStorage.getItem(clavePendientes) || "[]");
-        } catch (_) {
-            return [];
-        }
-    }
-
     function guardarPendiente(payload) {
-        var pendientes = leerPendientes();
-        pendientes.push({ id: Date.now() + "-" + Math.random().toString(16).slice(2), payload: payload });
-        localStorage.setItem(clavePendientes, JSON.stringify(pendientes));
+        encolarOperacion({
+            url: "/Censo/Mid/MidCenso.cs",
+            cuerpo: Object.assign({ opcion: "guardarqr" }, payload)
+        });
     }
 
     function sincronizarPendientes() {
-        var pendientes = leerPendientes();
-        if (!pendientes.length) return Promise.resolve();
-        return pendientes.reduce(function (promesa, pendiente) {
-            return promesa.then(function () {
-                return dependencias.enviar("/Censo/Mid/MidCenso.cs", Object.assign({ opcion: "guardarqr" }, pendiente.payload)).then(function () {
-                    var actuales = leerPendientes().filter(function (item) { return item.id !== pendiente.id; });
-                    localStorage.setItem(clavePendientes, JSON.stringify(actuales));
-                });
-            });
-        }, Promise.resolve()).catch(function () { });
+        return sincronizarTodo(dependencias.enviar);
     }
 
     function detenerEscaner(envoltorio) {
@@ -121,6 +105,7 @@ export function crearCensoQr(dependencias) {
                 dependencias.mostrarAviso("Censo QR guardado correctamente.", "success");
             }).catch(function (error) {
                 guardarPendiente(payload);
+                actualizarBannerOffline();
                 throw new Error(error.message + " El censo quedó pendiente para sincronizar.");
             });
         });

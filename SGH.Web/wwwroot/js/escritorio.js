@@ -3,19 +3,11 @@ import { crearNavegacion } from "./core/navegacion.js";
 import { inicializarMenuModulos } from "./core/menu-modulos.js";
 import { crearEntornoEscritorio } from "./core/fabrica-escritorio.js";
 import { instalarColaOffline } from "./core/colaOffline.js";
+import { crearApi } from "./core/api.js";
 
 (function () {
-    function enviarColaOffline(url, cuerpo) {
-        return fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(cuerpo)
-        }).then(function (respuesta) {
-            if (!respuesta.ok) throw new Error("Error de sincronización");
-            return respuesta.json();
-        });
-    }
-    instalarColaOffline(enviarColaOffline);
+    var api = crearApi();
+    var offline = instalarColaOffline(api.enviar.bind(api));
     inicializarCuenta();
     var entorno = crearEntornoEscritorio();
     var solapas = document.getElementById("solapas");
@@ -70,8 +62,8 @@ import { instalarColaOffline } from "./core/colaOffline.js";
 
     entorno.enlazarPanelesLaterales();
     if (entorno.censoQr) {
-        window.addEventListener("online", entorno.censoQr.sincronizarPendientes);
-        entorno.censoQr.sincronizarPendientes();
+        window.addEventListener("online", function () { offline.sincronizar().catch(function () { }); });
+        offline.sincronizar().catch(function () { });
     }
 
     var inicial = document.getElementById("modulo-inicial");

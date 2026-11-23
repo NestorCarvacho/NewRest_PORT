@@ -75,7 +75,11 @@ export function crearPanelModulo(dependencias) {
             "nueva-habitacion": function () { dependencias.habitacion.abrirNuevaHabitacion(); },
             "nuevo-bano": function () { dependencias.habitacion.abrirNuevoBano(); },
             "nuevo-tipo-cama": function () { dependencias.habitacion.abrirNuevoTipoCama(); },
-            "cargar-camas": function () { dependencias.habitacion.abrirImportacionCamas(); }
+            "cargar-camas": function () { dependencias.habitacion.abrirImportacionCamas(); },
+            "checkin-masivo": function () {
+                if (!dependencias.movimientosReserva || !dependencias.movimientosReserva.checkInMasivo) return;
+                dependencias.movimientosReserva.checkInMasivo(nodo);
+            }
         };
         Object.keys(acciones).forEach(function (clave) {
             var boton = barra.querySelector("[data-accion='" + clave + "']");

@@ -196,6 +196,7 @@ export function crearReserva(dependencias) {
 
     function fila(fila) {
         return {
+            seleccionMasiva: fila,
             acciones: fila,
             numero: fila.id,
             fechaReserva: fila.fechaReserva,
@@ -228,8 +229,36 @@ export function crearReserva(dependencias) {
         return partes[1] + "/" + partes[2] + "/" + partes[3];
     }
 
+    function columnaSeleccionMasiva() {
+        return {
+            data: "seleccionMasiva",
+            orderable: false,
+            className: "col-seleccion-masiva",
+            responsivePriority: 1,
+            createdCell: function (td, _celda, filaMapeada) {
+                td.replaceChildren();
+                var fila = filaMapeada && filaMapeada._fila ? filaMapeada._fila : filaMapeada;
+                if (!fila || fila.estadoNumero !== "A" || fila.checkIn) return;
+                var modulo = td.closest(".modulo-reserva");
+                if (!modulo) return;
+                if (!modulo._seleccionReserva) modulo._seleccionReserva = new Set();
+                var checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.setAttribute("aria-label", "Seleccionar reserva " + fila.id);
+                checkbox.checked = modulo._seleccionReserva.has(fila.id);
+                checkbox.addEventListener("change", function () {
+                    if (checkbox.checked) modulo._seleccionReserva.add(fila.id);
+                    else modulo._seleccionReserva.delete(fila.id);
+                });
+                td.append(checkbox);
+            }
+        };
+    }
+
     function columnas(modo, crearAcciones) {
-        return ["acciones", "numero", "fechaReserva", "grupo", "pasajero", "habitacion", "estado", "llegada", "salida", "checkIn", "checkOut"].map(function (clave) {
+        var claves = ["seleccionMasiva", "acciones", "numero", "fechaReserva", "grupo", "pasajero", "habitacion", "estado", "llegada", "salida", "checkIn", "checkOut"];
+        return claves.map(function (clave) {
+            if (clave === "seleccionMasiva") return columnaSeleccionMasiva();
             if (clave === "checkIn" || clave === "checkOut") return { data: clave, render: renderizarMovimiento };
             if (clave === "llegada" || clave === "salida") return { data: clave, render: renderizarFechaPrevista };
             if (clave !== "acciones") return { data: clave };
