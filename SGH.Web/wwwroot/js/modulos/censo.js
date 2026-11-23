@@ -337,26 +337,40 @@ export function crearCenso(dependencias) {
         };
     }
 
-    function filaResponsiveAbierta(tr) {
-        if (!tr || tr.classList.contains("child")) return false;
-        if (tr.classList.contains("dtr-expanded")) return true;
-        var siguiente = tr.nextElementSibling;
-        return !!(siguiente && siguiente.classList.contains("child"));
+    function colapsarDetalleResponsiveFila(filaApi, exceptoTr) {
+        var tr = filaApi.node();
+        if (!tr || tr === exceptoTr || tr.classList.contains("child")) return;
+        if (!tr.classList.contains("dtr-expanded")) return;
+        filaApi.child(false);
+        tr.classList.remove("dtr-expanded");
+    }
+
+    function colapsarOtrosDetallesCenso(api, filaActivaTr) {
+        api.rows({ page: "current", search: "applied" }).every(function () {
+            colapsarDetalleResponsiveFila(this, filaActivaTr);
+        });
     }
 
     function enlazarTablaResponsiveCenso(nodo, api) {
         if (!api || !nodo || nodo._censoResponsiveEnlazado) return;
         nodo._censoResponsiveEnlazado = true;
+        var tabla = api.table().node();
+        if (tabla && !tabla._censoAccordionClick) {
+            tabla._censoAccordionClick = true;
+            tabla.addEventListener("click", function (evento) {
+                if (!tabla.classList.contains("collapsed")) return;
+                var destino = evento.target;
+                if (!destino || typeof destino.closest !== "function") return;
+                var tr = destino.closest("tbody tr");
+                if (!tr || tr.classList.contains("child") || !tabla.contains(tr)) return;
+                colapsarOtrosDetallesCenso(api, tr);
+            }, true);
+        }
         api.on("responsive-display", function (_evento, dt, row, showHide) {
             if (!showHide) return;
             var filaAbierta = row.node();
             if (!filaAbierta) return;
-            dt.rows({ page: "current", search: "applied" }).every(function () {
-                var tr = this.node();
-                if (!tr || tr === filaAbierta) return;
-                if (!filaResponsiveAbierta(tr)) return;
-                tr.click();
-            });
+            colapsarOtrosDetallesCenso(dt, filaAbierta);
         });
     }
 
