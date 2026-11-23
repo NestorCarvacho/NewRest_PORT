@@ -65,3 +65,6 @@ appsettings.*.local.json
 
 # Copias locales de scripts HOTELDB (raíz del repo; uso personal)
 /scripts-ejecutar/
+
+.slqs/
+slqs/
