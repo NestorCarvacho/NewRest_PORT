@@ -407,7 +407,7 @@ export function crearReserva(dependencias) {
             if (cuerpo) {
                 cuerpo.querySelectorAll(".fila-detalle-reserva-expandida").forEach(function (fila) { fila.remove(); });
             }
-            api.rows({ page: "current" }).every(function () {
+            api.rows({ page: "current", search: "applied" }).every(function () {
                 var mapeada = this.data();
                 var indice = this.index();
                 var filaTr = this.node();
@@ -426,13 +426,15 @@ export function crearReserva(dependencias) {
             });
         }
         nodo._repintarSeleccionMasiva = function () {
-            api.rows({ page: "current" }).every(function () {
+            api.rows({ page: "current", search: "applied" }).every(function () {
                 var mapeada = this.data();
                 var celdaSel = herramientas.nodoCeldaDatos(api, this.index(), "seleccionMasiva");
                 if (celdaSel) pintarSeleccionMasiva(celdaSel, mapeada);
             });
         };
-        api.on("draw", repintarCeldasReserva);
+        api.on("draw", function () {
+            repintarCeldasReserva();
+        });
         repintarCeldasReserva();
     }
 

@@ -94,9 +94,9 @@ export function crearTablas() {
         if (columnas && columnas.length) prepararEncabezadosTabla(elementoTabla, columnas);
         var tabla = new DataTable(elementoTabla, opciones);
         tabla.on("draw", function () {
-            completarFilas(tabla);
             enlazarTooltipsCelda(nodo);
             ocultarTooltipCelda();
+            completarFilas(tabla);
         });
         completarFilas(tabla);
         enlazarTooltipsCelda(nodo);
@@ -205,23 +205,24 @@ export function crearTablas() {
         cuerpo.querySelectorAll("tr").forEach(function (fila) {
             if (fila.querySelector(".dt-empty") || fila.classList.contains("fila-vacia")) fila.remove();
         });
-        cuerpo.querySelectorAll(".fila-relleno").forEach(function (fila) { fila.remove(); });
-        var columnas = api.columns().count();
-        if (cuerpo.rows.length === 0) {
+        cuerpo.querySelectorAll(".fila-relleno, .fila-detalle-reserva-expandida").forEach(function (fila) { fila.remove(); });
+        var columnasVisibles = api.columns(":visible").count();
+        var filasDatos = api.rows({ page: "current", search: "applied" }).count();
+        if (filasDatos === 0) {
             var vacia = document.createElement("tr");
             vacia.className = "fila-vacia";
             var celda = document.createElement("td");
-            celda.colSpan = columnas;
+            celda.colSpan = columnasVisibles;
             celda.innerHTML = '<div class="tabla-vacia" style="--filas:' + cantidad + '"><img src="/img/estado/tabla-vacia.svg" alt="" /><p>No hay registros para mostrar</p></div>';
             vacia.append(celda);
             cuerpo.append(vacia);
             return;
         }
-        var faltan = cantidad - cuerpo.rows.length;
+        var faltan = cantidad - filasDatos;
         for (var i = 0; i < faltan; i++) {
             var filaRelleno = document.createElement("tr");
             filaRelleno.className = "fila-relleno";
-            for (var columna = 0; columna < columnas; columna++) {
+            for (var columna = 0; columna < columnasVisibles; columna++) {
                 var celdaRelleno = document.createElement("td");
                 celdaRelleno.textContent = "\u00a0";
                 filaRelleno.append(celdaRelleno);
