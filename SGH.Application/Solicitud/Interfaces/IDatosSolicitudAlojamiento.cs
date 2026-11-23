@@ -8,7 +8,7 @@ public interface IConsultaSolicitudAlojamiento
     Task<SolicitudDetalleDto?> ObtenerAsync(int id, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken);
     Task<IReadOnlyList<PasajeroSolicitudDto>> ListarPasajerosAsync(int id, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken);
     Task<IReadOnlyList<HabitacionDisponibleSolicitudDto>> HabitacionesDisponiblesAsync(int id, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken);
-    Task<CatalogoSolicitudDto> CatalogoAsync(int empresaMandanteId, int grupoId, CancellationToken cancellationToken);
+    Task<CatalogoSolicitudDto> CatalogoAsync(int empresaMandanteId, int campamentoId, int grupoId, CancellationToken cancellationToken);
     Task<CatalogoOrganizacionSolicitudDto> OrganizacionAsync(int empresaMandanteId, int unidadId, int divisionId, CancellationToken cancellationToken);
 }
 

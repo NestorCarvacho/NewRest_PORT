@@ -276,6 +276,12 @@ public sealed class MidSolicitudes(IGestionSolicitudes gestion, INotificadorSoli
         if (id <= 0)
             return EjecucionMid.Fallo(400, "Seleccione una solicitud válida.");
 
+        var pasajeros = await gestion.ListarPasajerosAsync(id, sesion.EmpresaMandanteId, sesion.CampamentoId, cancellationToken);
+        if (pasajeros.Count == 0)
+            return EjecucionMid.Fallo(400, "La solicitud no tiene pasajeros.");
+        if (pasajeros.Any(p => p.HabitacionId is null or <= 0))
+            return EjecucionMid.Fallo(400, "Asigne una habitación a todos los pasajeros antes de generar reservas.");
+
         var primera = await gestion.GenerarReservasAsync(id, sesion.EmpresaMandanteId, sesion.CampamentoId, sesion.UsuarioId, cancellationToken);
         var advertencia = await NotificarAsync(id, sesion, cancellationToken);
         return EjecucionMid.Ok(new { primeraReservaId = primera, advertenciaCorreo = advertencia });

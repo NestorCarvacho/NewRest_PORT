@@ -27,9 +27,21 @@ public sealed class ConsultaSolicitudAlojamiento(IFabricaConexionSql fabrica) : 
             "dbo.he_sp_solicitud_listar_pasajeros",
             new { SolicitudId = id, empresaMandanteId, campamentoId },
             commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
+        var reservas = await conexion.QueryAsync<ReservaPasajeroFila>(new CommandDefinition(
+            "dbo.he_sp_solicitud_reservas_por_pasajero",
+            new { SolicitudId = id },
+            commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
+        var reservasPorPasajero = reservas.ToDictionary(r => r.PasajeroSolicitudId, r => r.NumeroReserva);
         return filas.Select(p => new PasajeroSolicitudDto(
             p.Id, p.UsuarioPasajeroId, p.NombrePasajero, p.Rut, p.TipoIdentificador,
-            p.Empresa, p.Cargo, p.CheckIn, p.CheckOut, p.HabitacionId, p.Habitacion)).ToList();
+            p.Empresa, p.Cargo, p.CheckIn, p.CheckOut, p.HabitacionId, p.Habitacion,
+            reservasPorPasajero.GetValueOrDefault(p.Id))).ToList();
+    }
+
+    private sealed class ReservaPasajeroFila
+    {
+        public int PasajeroSolicitudId { get; set; }
+        public int? NumeroReserva { get; set; }
     }
 
     private sealed class PasajeroFila
@@ -111,7 +123,8 @@ public sealed class ConsultaSolicitudAlojamiento(IFabricaConexionSql fabrica) : 
             detalle.DivisionNombre, detalle.DepartamentoId, detalle.DepartamentoNombre, detalle.NumeroContrato, detalle.ReservaVisita);
     }
 
-    public async Task<CatalogoSolicitudDto> CatalogoAsync(int empresaMandanteId, int grupoId, CancellationToken cancellationToken)
+    public async Task<CatalogoSolicitudDto> CatalogoAsync(
+        int empresaMandanteId, int campamentoId, int grupoId, CancellationToken cancellationToken)
     {
         using var conexion = fabrica.Crear();
         using var multi = await conexion.QueryMultipleAsync(new CommandDefinition(
@@ -128,8 +141,25 @@ public sealed class ConsultaSolicitudAlojamiento(IFabricaConexionSql fabrica) : 
             new { perfil = 2, empresaMandante = empresaMandanteId, empresaContratista = grupoId,
                 rut = "", nombre = "", apellidos = "", cargo = "", activo = 1, origen = "standard" },
             commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
+        using var correos = await conexion.QueryMultipleAsync(new CommandDefinition(
+            "dbo.he_sp_solicitud_contacto_correo",
+            new { EmpresaMandanteId = empresaMandanteId, CampamentoId = campamentoId },
+            commandType: CommandType.StoredProcedure, cancellationToken: cancellationToken));
+        var emailEmpresa = (await correos.ReadAsync<EmailEmpresaFila>()).FirstOrDefault()?.EmailEmpresa;
+        var emailCampamento = (await correos.ReadAsync<EmailCampamentoFila>()).FirstOrDefault()?.EmailCampamento;
         return new CatalogoSolicitudDto(grupos, estados,
-            usuarios.Select(u => new OpcionSolicitudDto(u.Id, $"{u.Nombre} {u.Apellidos}".Trim())).ToList(), turnos);
+            usuarios.Select(u => new OpcionSolicitudDto(u.Id, $"{u.Nombre} {u.Apellidos}".Trim())).ToList(), turnos,
+            emailEmpresa, emailCampamento);
+    }
+
+    private sealed class EmailEmpresaFila
+    {
+        public string? EmailEmpresa { get; set; }
+    }
+
+    private sealed class EmailCampamentoFila
+    {
+        public string? EmailCampamento { get; set; }
     }
 
     private sealed class UsuarioSolicitante

@@ -51,12 +51,14 @@ builder.Services.AddSingleton<EmisorCookieSesion>();
 builder.Services.AddSingleton<ClavePendienteAlmacen>();
 builder.Services.AddSingleton<RegistroVentanaIngreso>();
 builder.Services.AddScoped<FiltroPilaAvisos>();
+var minutosSesionOperaciones = builder.Configuration.GetValue("Sesion:MinutosOperaciones", 240);
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(opciones =>
     {
         opciones.LoginPath = "/Cuenta/Login";
         opciones.AccessDeniedPath = "/AccesoDenegado";
         opciones.SlidingExpiration = true;
+        opciones.ExpireTimeSpan = TimeSpan.FromMinutes(minutosSesionOperaciones);
         opciones.Cookie.HttpOnly = true;
         opciones.Cookie.SameSite = SameSiteMode.Lax;
         opciones.Cookie.SecurePolicy = builder.Environment.IsDevelopment()

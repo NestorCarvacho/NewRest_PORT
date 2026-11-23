@@ -12,7 +12,7 @@ BEGIN
         BEGIN TRANSACTION;
         DECLARE @Bloqueo int;
         DECLARE @Recurso nvarchar(255) = CONCAT('SGH_Solicitud_Habitacion_', @CampamentoId);
-        EXEC @Bloqueo = sys.he_sp_getapplock @Resource = @Recurso, @LockMode = 'Exclusive',
+        EXEC @Bloqueo = sys.sp_getapplock @Resource = @Recurso, @LockMode = 'Exclusive',
             @LockOwner = 'Transaction', @LockTimeout = 10000;
         IF @Bloqueo < 0
             THROW 51055, 'No se pudo bloquear la generación de reservas. Intente nuevamente.', 1;

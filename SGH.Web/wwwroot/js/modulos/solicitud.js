@@ -82,9 +82,10 @@ export function crearSolicitud(d) {
         var solicitante = campo(form, "Solicitante", "solicitanteId", "select");
         llenar(solicitante, catalogo.solicitantes, detalle && detalle.usuarioSolicitanteId);
         solicitante.disabled = edicion;
-        var fechaSolicitud = campo(form, "Fecha solicitud", "fechaSolicitud", "date", edicion ? fecha(detalle.fechaSolicitud) : d.fechaActual(), true);
-        var checkIn = campo(form, "Check-in", "fechaCheckIn", "date", edicion ? fecha(detalle.fechaCheckIn) : d.fechaActual(), true);
-        var checkOut = campo(form, "Check-out", "fechaCheckOut", "date", edicion ? fecha(detalle.fechaCheckOut) : d.fechaActual());
+        var fechaSolicitud = campo(form, "Fecha solicitud", "fechaSolicitud", "date", edicion ? fecha(detalle.fechaSolicitud) : "", true);
+        if (!edicion) fechaSolicitud.min = d.fechaActual();
+        var checkIn = campo(form, "Check-in", "fechaCheckIn", "date", edicion ? fecha(detalle.fechaCheckIn) : "");
+        var checkOut = campo(form, "Check-out", "fechaCheckOut", "date", edicion ? fecha(detalle.fechaCheckOut) : "");
         var conTurno = campo(form, "Sistema de turno", "conSistemaTurno", "checkbox", edicion && detalle.conSistemaTurno);
         var turno = campo(form, "Turno", "turnoId", "select", null, true);
         var rotacion = campo(form, "Turno rotación", "turnoRotacionId", "select");
@@ -97,7 +98,14 @@ export function crearSolicitud(d) {
         }
         conTurno.addEventListener("change", actualizarTurnos);
         actualizarTurnos();
-        var email = campo(form, "Correo de contacto", "emailContactoCampamento", "email", edicion ? detalle.emailContactoCampamento : "", true);
+        function correoSugerido(cat) {
+            if (!cat) return "";
+            if (cat.emailEmpresa) return cat.emailEmpresa;
+            if (cat.emailCampamento) return cat.emailCampamento;
+            return "";
+        }
+        var email = campo(form, "Correo de contacto", "emailContactoCampamento", "email",
+            edicion ? (detalle.emailContactoCampamento || "") : correoSugerido(catalogo));
         var telefono = campo(form, "Teléfono", "numeroContactoCampamento", "text", detalle && detalle.numeroContactoCampamento);
         var adc = campo(form, "ADC", "adc", "text", detalle && detalle.adc);
         var unidad = campo(form, "Unidad de negocio", "unidadNegocioId", "select");
@@ -258,6 +266,7 @@ export function crearSolicitud(d) {
                     abrirDetalle(detalle.id);
                 });
             });
+            generar.className = "boton-primario boton-generar-reservas";
             generar.disabled = true;
         }
         var seleccion = new Set();
@@ -273,6 +282,7 @@ export function crearSolicitud(d) {
             encabezado.append(celdaSeleccion);
         }
         var columnasPasajeros = ["Habitación", "Identificador", "Tipo identificador", "Nombre"];
+        if (detalle.estado === "R" || detalle.estado === "A") columnasPasajeros.splice(1, 0, "Nº reserva");
         if (detalle.estado === "P") columnasPasajeros.push("Acciones");
         columnasPasajeros.forEach(function (texto) {
             var th = document.createElement("th");
@@ -293,7 +303,10 @@ export function crearSolicitud(d) {
         }
         function actualizarSeleccion() {
             if (detalle.estado !== "P") return;
-            generar.disabled = seleccion.size === 0;
+            var todosConHabitacion = pasajeros.length > 0 && pasajeros.every(function (p) {
+                return Number(p.habitacionId) > 0;
+            });
+            if (generar) generar.disabled = !todosConHabitacion;
             eliminarSeleccionados.disabled = seleccion.size === 0;
             asignarSeleccionados.disabled = seleccion.size === 0;
             desasignarSeleccionados.disabled = pasajerosSeleccionadosConHabitacion().length === 0;
@@ -374,8 +387,12 @@ export function crearSolicitud(d) {
                 tdSeleccion.append(checkbox);
                 fila.append(tdSeleccion);
             }
-            [pasajero.habitacion || "", pasajero.rut || "", pasajero.tipoIdentificador || "",
-                pasajero.nombrePasajero || "Cupo sin identificar"].forEach(function (valor) {
+            var celdas = [pasajero.habitacion || ""];
+            if (detalle.estado === "R" || detalle.estado === "A")
+                celdas.push(pasajero.numeroReserva ? String(pasajero.numeroReserva) : "—");
+            celdas.push(pasajero.rut || "", pasajero.tipoIdentificador || "",
+                pasajero.nombrePasajero || "Cupo sin identificar");
+            celdas.forEach(function (valor) {
                 var td = document.createElement("td");
                 td.textContent = valor;
                 fila.append(td);
@@ -684,8 +701,19 @@ export function crearSolicitud(d) {
             var acciones = document.createElement("div");
             acciones.className = "solicitud-acciones";
             acciones.append(boton("Cancelar", function () { abrirDetalle(detalle.id); }), asignar, automatico);
+            var tituloAsignados = document.createElement("h3");
+            tituloAsignados.textContent = "Pasajeros asignados";
+            var cuerpoAsignacion = document.createElement("div");
+            cuerpoAsignacion.className = "solicitud-asignacion-cuerpo";
+            var columnaHabitaciones = document.createElement("div");
+            columnaHabitaciones.className = "solicitud-asignacion-habitaciones";
+            var columnaAsignados = document.createElement("div");
+            columnaAsignados.className = "solicitud-asignacion-asignados";
+            columnaHabitaciones.append(avisoVacio, lista);
+            columnaAsignados.append(tituloAsignados, resumenSeleccion);
+            cuerpoAsignacion.append(columnaHabitaciones, columnaAsignados);
             form.prepend(acciones);
-            form.append(contador, instruccion, siguientePasajero, avisoVacio, lista, resumenSeleccion);
+            form.append(contador, instruccion, siguientePasajero, cuerpoAsignacion);
             mostrarHabitaciones();
             async function guardarAsignaciones() {
                 if (seleccionadas.length !== pasajeros.length) {

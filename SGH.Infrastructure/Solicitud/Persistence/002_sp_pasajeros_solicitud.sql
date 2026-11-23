@@ -15,6 +15,20 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_reservas_por_pasajero
+    @SolicitudId int
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT p.Id AS PasajeroSolicitudId, MIN(r.Id) AS NumeroReserva
+    FROM dbo.PasajerosSolicitudAlojamiento AS p
+    LEFT JOIN dbo.Reservas AS r
+        ON r.SolicitudAlojamientoId = p.SolicitudAlojamientoId AND r.PasajeroId = p.UsuarioPasajeroId
+    WHERE p.SolicitudAlojamientoId = @SolicitudId
+    GROUP BY p.Id;
+END
+GO
+
 CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_agregar_cupos
     @SolicitudId int,
     @EmpresaMandanteId int,

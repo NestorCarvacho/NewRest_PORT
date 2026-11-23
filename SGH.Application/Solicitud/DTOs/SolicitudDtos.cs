@@ -35,7 +35,7 @@ public sealed record SolicitudListadaDto(
 public sealed record PasajeroSolicitudDto(
     int Id, int? UsuarioPasajeroId, string? NombrePasajero, string? Rut,
     string? TipoIdentificador, string? Empresa, string? Cargo, string? CheckIn,
-    string? CheckOut, int? HabitacionId, string? Habitacion);
+    string? CheckOut, int? HabitacionId, string? Habitacion, int? NumeroReserva);
 
 public sealed record GuardarPasajeroSolicitudDto(
     int SolicitudId, int PasajeroId, int UsuarioPasajeroId, int EmpresaMandanteId,
@@ -58,7 +58,8 @@ public sealed record EstadoSolicitudDto(string Id, string Nombre);
 public sealed record TurnoSolicitudDto(int Id, string Nombre, int DiasTrabajados, int DiasLibres, string? TipoTurno);
 public sealed record CatalogoSolicitudDto(
     IReadOnlyList<GrupoSolicitudDto> Grupos, IReadOnlyList<EstadoSolicitudDto> Estados,
-    IReadOnlyList<OpcionSolicitudDto> Solicitantes, IReadOnlyList<TurnoSolicitudDto> Turnos);
+    IReadOnlyList<OpcionSolicitudDto> Solicitantes, IReadOnlyList<TurnoSolicitudDto> Turnos,
+    string? EmailEmpresa, string? EmailCampamento);
 public sealed record CatalogoOrganizacionSolicitudDto(
     IReadOnlyList<OpcionSolicitudDto> UnidadesNegocio, IReadOnlyList<OpcionSolicitudDto> Divisiones,
     IReadOnlyList<OpcionSolicitudDto> Departamentos);

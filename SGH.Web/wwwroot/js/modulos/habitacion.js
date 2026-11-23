@@ -614,14 +614,12 @@ export function crearHabitacion(dependencias) {
                 dependencias.campo("tipoCamaId", "Tipo de cama", "select", tiposOpts, {
                     valor: cama.tipoCamaId ? String(cama.tipoCamaId) : ""
                 }),
-                dependencias.campo("habilitada", "Habilitada (operativa)", "select", [
-                    { value: "1", text: "Sí" },
-                    { value: "0", text: "No" }
-                ], { valor: cama.habilitada ? "1" : "0" }),
-                dependencias.campo("plazaActiva", "Plaza activa (IsActive)", "select", [
-                    { value: "1", text: "Sí — en inventario de la habitación" },
-                    { value: "0", text: "No — baja lógica" }
-                ], { valor: cama.isActive === false || cama.isActive === 0 ? "0" : "1" })
+                dependencias.campo("estado", "Estado", "select", [
+                    { value: "1", text: "1 — Activa" },
+                    { value: "0", text: "0 — Inactiva" }
+                ], {
+                    valor: (cama.habilitada && cama.isActive !== false && cama.isActive !== 0) ? "1" : "0"
+                })
             ]),
             dependencias.seccion("Colchón", [
                 dependencias.campo("fechaColchon", "Fecha cambio colchón", "date", [], {
@@ -645,8 +643,8 @@ export function crearHabitacion(dependencias) {
                 habitacionId: habitacion.id,
                 codigoCama: (datos.codigoCama || "").trim(),
                 tipoCamaId: dependencias.numero(datos.tipoCamaId) || null,
-                habilitada: datos.habilitada === "1",
-                inactivo: datos.plazaActiva === "0",
+                habilitada: datos.estado === "1",
+                inactivo: datos.estado !== "1",
                 orden: cama.orden || 0,
                 fechaColchon: datos.fechaColchon || null,
                 colchonObservacion: (datos.colchonObservacion || "").trim() || null,

@@ -84,6 +84,11 @@ public sealed class GestionSolicitudes(IConsultaSolicitudAlojamiento consulta, I
         await ExigirSolicitudDelCampamentoAsync(id, empresaMandanteId, campamentoId, cancellationToken);
         if (usuarioId <= 0)
             throw new ArgumentException("Indique un usuario válido.");
+        var pasajeros = await consulta.ListarPasajerosAsync(id, empresaMandanteId, campamentoId, cancellationToken);
+        if (pasajeros.Count == 0)
+            throw new ArgumentException("La solicitud no tiene pasajeros.");
+        if (pasajeros.Any(p => p.HabitacionId is null or <= 0))
+            throw new ArgumentException("Asigne una habitación a todos los pasajeros antes de generar reservas.");
         return await comando.GenerarReservasAsync(id, empresaMandanteId, campamentoId, usuarioId, cancellationToken);
     }
 
@@ -168,7 +173,7 @@ public sealed class GestionSolicitudes(IConsultaSolicitudAlojamiento consulta, I
         ValidarSesion(empresaMandanteId, campamentoId);
         if (grupoId < 0)
             throw new ArgumentException("Seleccione un grupo válido.");
-        return await consulta.CatalogoAsync(empresaMandanteId, grupoId, cancellationToken);
+        return await consulta.CatalogoAsync(empresaMandanteId, campamentoId, grupoId, cancellationToken);
     }
 
     public async Task<CatalogoOrganizacionSolicitudDto> OrganizacionAsync(
@@ -196,17 +201,20 @@ public sealed class GestionSolicitudes(IConsultaSolicitudAlojamiento consulta, I
                 throw new ArgumentException("Seleccione el grupo de la empresa solicitante.");
             if (solicitud.TurnoId is null or <= 0)
                 throw new ArgumentException("Seleccione el turno principal del grupo.");
-            if (!solicitud.FechaSolicitud.HasValue || !solicitud.FechaCheckIn.HasValue)
-                throw new ArgumentException("Ingrese la fecha de solicitud y de check-in.");
-            if (solicitud.FechaCheckOut.HasValue && solicitud.FechaCheckOut.Value.Date < solicitud.FechaCheckIn.Value.Date)
+            if (!solicitud.FechaSolicitud.HasValue)
+                throw new ArgumentException("Ingrese la fecha de solicitud.");
+            if (solicitud.FechaSolicitud.Value.Date < DateTime.Today)
+                throw new ArgumentException("La fecha de solicitud no puede ser anterior a hoy.");
+            if (solicitud.FechaCheckIn.HasValue && solicitud.FechaCheckOut.HasValue
+                && solicitud.FechaCheckOut.Value.Date < solicitud.FechaCheckIn.Value.Date)
                 throw new ArgumentException("La fecha de check-out no puede ser anterior a la de check-in.");
-            if (solicitud.ConSistemaTurno && !solicitud.FechaCheckOut.HasValue)
+            if (solicitud.ConSistemaTurno && solicitud.FechaCheckIn.HasValue && !solicitud.FechaCheckOut.HasValue)
                 throw new ArgumentException("Para generar reservas con turnos debe indicar fecha de check-out.");
         }
-        if (string.IsNullOrWhiteSpace(solicitud.EmailContactoCampamento)
-            || !MailAddress.TryCreate(solicitud.EmailContactoCampamento, out _))
+        var correo = solicitud.EmailContactoCampamento?.Trim() ?? "";
+        if (correo.Length > 0 && !MailAddress.TryCreate(correo, out _))
             throw new ArgumentException("Ingrese un correo de contacto válido.");
-        if (solicitud.EmailContactoCampamento.Length > 100 || solicitud.Adc?.Length > 100
+        if (correo.Length > 100 || solicitud.Adc?.Length > 100
             || solicitud.NumeroContactoCampamento?.Length > 20 || solicitud.NumeroContrato?.Length > 100
             || solicitud.Observacion?.Length > 200)
             throw new ArgumentException("Un campo supera la longitud permitida.");
@@ -217,6 +225,7 @@ public sealed class GestionSolicitudes(IConsultaSolicitudAlojamiento consulta, I
 
         return await comando.GuardarAsync(solicitud with
         {
+            EmailContactoCampamento = correo,
             FechaCheckOut = fechaCheckOut,
             SolicitanteId = solicitud.SolicitanteId == 0 ? null : solicitud.SolicitanteId,
             TurnoRotacionId = solicitud.TurnoRotacionId == 0 ? null : solicitud.TurnoRotacionId,

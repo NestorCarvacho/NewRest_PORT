@@ -31,9 +31,11 @@ public class GestionSolicitudesTests
         var datos = Crear();
         await Assert.ThrowsAsync<ArgumentException>(() => Caso.GuardarAsync(datos with { GrupoId = 0 }, CancellationToken.None));
         await Assert.ThrowsAsync<ArgumentException>(() => Caso.GuardarAsync(datos with { TurnoId = null }, CancellationToken.None));
-        await Assert.ThrowsAsync<ArgumentException>(() => Caso.GuardarAsync(datos with { FechaCheckIn = null }, CancellationToken.None));
+        await Assert.ThrowsAsync<ArgumentException>(() => Caso.GuardarAsync(
+            datos with { FechaSolicitud = new DateTime(2020, 1, 1) }, CancellationToken.None));
         await Assert.ThrowsAsync<ArgumentException>(() => Caso.GuardarAsync(datos with { FechaCheckOut = datos.FechaCheckIn!.Value.AddDays(-1) }, CancellationToken.None));
-        await Assert.ThrowsAsync<ArgumentException>(() => Caso.GuardarAsync(datos with { ConSistemaTurno = true, FechaCheckOut = null }, CancellationToken.None));
+        await Assert.ThrowsAsync<ArgumentException>(() => Caso.GuardarAsync(
+            datos with { ConSistemaTurno = true, FechaCheckIn = new DateTime(2026, 11, 11), FechaCheckOut = null }, CancellationToken.None));
         await Assert.ThrowsAsync<ArgumentException>(() => Caso.GuardarAsync(datos with { EmailContactoCampamento = "incorrecto" }, CancellationToken.None));
         Assert.Equal(0, _falso.Guardados);
         Assert.Equal(42, await Caso.GuardarAsync(datos, CancellationToken.None));
@@ -113,6 +115,11 @@ public class GestionSolicitudesTests
     {
         await Assert.ThrowsAsync<ArgumentException>(() => Caso.GenerarReservasAsync(42, 2, 0, 7, CancellationToken.None));
         await Assert.ThrowsAsync<ArgumentException>(() => Caso.GenerarReservasAsync(0, 2, 3, 7, CancellationToken.None));
+        var falsoSinHabitacion = new Falso();
+        falsoSinHabitacion.Pasajeros = [new PasajeroSolicitudDto(1, 2, "A", null, null, null, null, null, null, null, null, null)];
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            new GestionSolicitudes(falsoSinHabitacion, falsoSinHabitacion).GenerarReservasAsync(42, 2, 3, 7, CancellationToken.None));
+        _falso.Pasajeros = [new PasajeroSolicitudDto(1, 2, "A", null, null, null, null, null, null, 10, "101", null)];
         Assert.Equal(99, await Caso.GenerarReservasAsync(42, 2, 3, 7, CancellationToken.None));
         Assert.Equal((42, 2, 3, 7), _falso.Generacion);
     }
@@ -155,7 +162,7 @@ public class GestionSolicitudesTests
     }
 
     private static DatosSolicitudDto Crear() => new(
-        0, 2, 3, 7, new DateTime(2026, 11, 10), new DateTime(2026, 11, 11),
+        0, 2, 3, 7, DateTime.Today, new DateTime(2026, 11, 11),
         null, 4, null, false, 8, null, null, null, "contacto@example.com",
         null, null, null, null, null, false);
 
@@ -168,6 +175,7 @@ public class GestionSolicitudesTests
         public int Anulaciones { get; private set; }
         public (int, int, int, int) Anulacion { get; private set; }
         public (int, int, int) ListadoPasajeros { get; private set; }
+        public IReadOnlyList<PasajeroSolicitudDto> Pasajeros { get; set; } = [];
         public (int, int, int, int, int) Cupos { get; private set; }
         public (int, int, int, int) PasajeroEliminado { get; private set; }
         public GuardarPasajeroSolicitudDto? PasajeroGuardado { get; private set; }
@@ -201,15 +209,16 @@ public class GestionSolicitudesTests
             int id, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken)
         {
             ListadoPasajeros = (id, empresaMandanteId, campamentoId);
-            return Task.FromResult<IReadOnlyList<PasajeroSolicitudDto>>([]);
+            return Task.FromResult(Pasajeros);
         }
 
         public Task<IReadOnlyList<HabitacionDisponibleSolicitudDto>> HabitacionesDisponiblesAsync(
             int id, int empresaMandanteId, int campamentoId, CancellationToken cancellationToken) =>
             Task.FromResult<IReadOnlyList<HabitacionDisponibleSolicitudDto>>([]);
 
-        public Task<CatalogoSolicitudDto> CatalogoAsync(int empresaMandanteId, int grupoId, CancellationToken cancellationToken) =>
-            Task.FromResult(new CatalogoSolicitudDto([], [], [], []));
+        public Task<CatalogoSolicitudDto> CatalogoAsync(
+            int empresaMandanteId, int campamentoId, int grupoId, CancellationToken cancellationToken) =>
+            Task.FromResult(new CatalogoSolicitudDto([], [], [], [], null, null));
 
         public Task<CatalogoOrganizacionSolicitudDto> OrganizacionAsync(int empresaMandanteId, int unidadId, int divisionId, CancellationToken cancellationToken) =>
             Task.FromResult(new CatalogoOrganizacionSolicitudDto([], [], []));

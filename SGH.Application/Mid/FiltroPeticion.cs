@@ -89,4 +89,22 @@ public static class LecturaPeticion
         var campo = Campo(filtro, nombre);
         return campo?.ValueKind == JsonValueKind.Array ? campo : null;
     }
+
+    public static IReadOnlyList<int> Enteros(FiltroPeticion filtro, string nombre)
+    {
+        var lista = Lista(filtro, nombre);
+        if (lista is null)
+            return [];
+
+        var ids = new List<int>();
+        foreach (var elemento in lista.Value.EnumerateArray())
+        {
+            if (elemento.ValueKind == JsonValueKind.Number && elemento.TryGetInt32(out var numero) && numero > 0)
+                ids.Add(numero);
+            else if (elemento.ValueKind == JsonValueKind.String && int.TryParse(elemento.GetString(), out numero) && numero > 0)
+                ids.Add(numero);
+        }
+
+        return ids;
+    }
 }

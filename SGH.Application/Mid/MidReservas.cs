@@ -23,6 +23,7 @@ public sealed class MidReservas(
         Accion("crear", "Crear", "dbo.he_sp_reserva_crear", "Inserta una reserva."),
         Accion("editar", "Editar", "dbo.he_sp_reserva_actualizar", "Actualiza una reserva."),
         Accion("movimiento", "Movimiento", "dbo.he_sp_reserva_registrar_movimiento", "Registra check-in o check-out."),
+        Accion("movimientosmasivo", "Movimiento masivo", "dbo.he_sp_reserva_registrar_movimiento", "Registra check-in masivo."),
         Accion("importar", "Importar", "dbo.he_sp_reserva_crear", "Crea reservas desde una planilla."),
         Accion("plantilla", "Plantilla", "planilla", "Devuelve la planilla de importación.")
     ];
@@ -45,6 +46,8 @@ public sealed class MidReservas(
                 return await EditarAsync(filtro, sesion, cancellationToken);
             case "movimiento":
                 return await MovimientoAsync(filtro, sesion, cancellationToken);
+            case "movimientosmasivo":
+                return await MovimientosMasivoAsync(filtro, sesion, cancellationToken);
             case "plantilla":
                 return EjecucionMid.Descarga(
                     planilla.CrearPlantilla(),
@@ -181,6 +184,34 @@ public sealed class MidReservas(
             ResultadoActualizacionReserva.Rechazada rechazada => EjecucionMid.Fallo(400, rechazada.Mensaje),
             _ => EjecucionMid.Fallo(400, "No se pudo actualizar la reserva.")
         };
+    }
+
+    private async Task<EjecucionMid> MovimientosMasivoAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var fecha = LecturaPeticion.Fecha(LecturaPeticion.Texto(filtro, "fecha"));
+        if (fecha is null)
+            return EjecucionMid.Fallo(400, "Seleccione la fecha.");
+        var operacion = LecturaPeticion.Texto(filtro, "operacion") ?? "I";
+        var ids = LecturaPeticion.Enteros(filtro, "reservaIds");
+        if (ids.Count == 0)
+            return EjecucionMid.Fallo(400, "Seleccione al menos una reserva.");
+
+        var exitos = new List<int>();
+        var fallos = new List<object>();
+        foreach (var reservaId in ids.Distinct())
+        {
+            var resultado = await movimiento.EjecutarAsync(new SolicitudMovimientoReserva(
+                reservaId, fecha.Value, sesion.UsuarioId, operacion,
+                sesion.EmpresaMandanteId, sesion.CampamentoId), cancellationToken);
+            if (resultado is ResultadoMovimientoReserva.Registrado)
+                exitos.Add(reservaId);
+            else if (resultado is ResultadoMovimientoReserva.Rechazado rechazado)
+                fallos.Add(new { reservaId, mensaje = rechazado.Mensaje });
+            else
+                fallos.Add(new { reservaId, mensaje = "No se pudo registrar el movimiento." });
+        }
+
+        return EjecucionMid.Ok(new { exitos, fallos });
     }
 
     private async Task<EjecucionMid> MovimientoAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)

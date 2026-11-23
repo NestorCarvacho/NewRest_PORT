@@ -51,7 +51,7 @@ public sealed class EmisorCookieSesion
         http.User = principal;
         var propiedades = new AuthenticationProperties
         {
-            IsPersistent = false,
+            IsPersistent = true,
             ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(sesion.MinutosVigencia)
         };
 

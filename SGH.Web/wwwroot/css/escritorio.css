@@ -1459,6 +1459,49 @@ html:not([data-tema="claro"]) .tabla-vacia {
   overflow-wrap: anywhere;
 }
 
+.banner-offline {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  margin: 0;
+  padding: 0.55rem 1rem;
+  background: #4a3b00;
+  color: #fff8e6;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.boton-generar-reservas:not(:disabled) {
+  background: linear-gradient(180deg, #1b6b3a 0%, #14502b 100%);
+  border-color: #0f3d20;
+}
+
+.boton-generar-reservas:not(:disabled):hover {
+  filter: brightness(1.05);
+}
+
+@media (min-width: 900px) {
+  .solicitud-asignacion-cuerpo {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(14rem, 0.8fr);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .solicitud-asignacion-asignados {
+    position: sticky;
+    top: 0;
+    max-height: min(32rem, 70vh);
+    overflow: auto;
+    padding: 0.5rem 0;
+  }
+
+  .solicitud-asignacion-asignados h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+  }
+}
+
 .habitaciones-lista {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));

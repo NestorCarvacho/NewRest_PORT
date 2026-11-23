@@ -93,6 +93,21 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_contacto_correo
+    @EmpresaMandanteId int,
+    @CampamentoId int
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT NULLIF(LTRIM(RTRIM(e.Email)), '') AS EmailEmpresa
+    FROM dbo.Empresas AS e
+    WHERE e.Id = @EmpresaMandanteId;
+    SELECT NULLIF(LTRIM(RTRIM(c.Email)), '') AS EmailCampamento
+    FROM dbo.Campamentos AS c
+    WHERE c.Id = @CampamentoId;
+END
+GO
+
 CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_listar_organizacion
     @EmpresaMandanteId int,
     @UnidadId int,
@@ -123,7 +138,7 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_guardar
     @CampamentoId int,
     @UsuarioId int,
     @FechaSolicitud datetime,
-    @FechaCheckIn datetime,
+    @FechaCheckIn datetime = NULL,
     @FechaCheckOut datetime = NULL,
     @GrupoId int,
     @SolicitanteId int = NULL,
@@ -132,7 +147,7 @@ CREATE OR ALTER PROCEDURE dbo.he_sp_solicitud_guardar
     @TurnoRotacionId int = NULL,
     @Observacion varchar(200) = NULL,
     @Adc varchar(100) = NULL,
-    @Email varchar(100),
+    @Email varchar(100) = NULL,
     @Telefono varchar(20) = NULL,
     @UnidadNegocioId int = NULL,
     @DivisionId int = NULL,

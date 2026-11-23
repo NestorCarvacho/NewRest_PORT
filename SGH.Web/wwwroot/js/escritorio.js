@@ -2,8 +2,20 @@ import { inicializarCuenta } from "./modulos/cuenta.js";
 import { crearNavegacion } from "./core/navegacion.js";
 import { inicializarMenuModulos } from "./core/menu-modulos.js";
 import { crearEntornoEscritorio } from "./core/fabrica-escritorio.js";
+import { instalarColaOffline } from "./core/colaOffline.js";
 
 (function () {
+    function enviarColaOffline(url, cuerpo) {
+        return fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(cuerpo)
+        }).then(function (respuesta) {
+            if (!respuesta.ok) throw new Error("Error de sincronización");
+            return respuesta.json();
+        });
+    }
+    instalarColaOffline(enviarColaOffline);
     inicializarCuenta();
     var entorno = crearEntornoEscritorio();
     var solapas = document.getElementById("solapas");
