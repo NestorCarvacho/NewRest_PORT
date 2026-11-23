@@ -1,7 +1,18 @@
 import { numero } from "../../core/numeros.js";
 import { crearCenso } from "../censo.js";
 import { crearCensoQr } from "../censo-qr.js";
+import { crearCensoQrFlujo } from "../censo-qr-flujo.js";
+import { montarVistaMisCensosQr } from "../mis-censos-qr-vista.js";
 import { definirPantallasCenso } from "../definicion-pantallas.js";
+
+function etiquetaCampoSimple(etiqueta, control) {
+    var label = document.createElement("label");
+    label.className = "campo";
+    var texto = document.createElement("span");
+    texto.textContent = etiqueta;
+    label.append(texto, control);
+    return label;
+}
 
 export function instalarCenso(base) {
     var censo = crearCenso({
@@ -33,9 +44,28 @@ export function instalarCenso(base) {
         abrirPanel: base.abrirPanel,
         boton: base.boton
     });
+    var censoQrFlujo = crearCensoQrFlujo({
+        fechaActual: base.fechaActual,
+        enviar: base.enviar,
+        mostrarAviso: base.mostrarAviso,
+        boton: base.boton,
+        etiquetaCampo: etiquetaCampoSimple,
+        obtenerCatalogo: function () { return base.catalogos.preparar("censo"); }
+    });
+    function enlazarVistaMisCensosQr(nodo) {
+        montarVistaMisCensosQr({
+            enviar: base.enviar,
+            fechaActual: base.fechaActual,
+            abrirFlujoCensoQr: function (opts) { censoQrFlujo.abrir(opts); }
+        }, nodo);
+        var fecha = nodo.querySelector("[name='fechaCenso']");
+        if (fecha && !fecha.value) fecha.value = base.fechaActual();
+    }
     return {
         censo: censo,
         censoQr: censoQr,
+        censoQrFlujo: censoQrFlujo,
+        enlazarVistaMisCensosQr: enlazarVistaMisCensosQr,
         definiciones: definirPantallasCenso(censo)
     };
 }

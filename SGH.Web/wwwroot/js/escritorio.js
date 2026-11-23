@@ -22,7 +22,14 @@ import { crearApi } from "./core/api.js";
                 if (!modulo) return;
                 window.location.assign("/Index?modulo=" + encodeURIComponent(modulo));
             },
-            abrirCensoQr: entorno.censoQr ? entorno.censoQr.abrir : function () { },
+            abrirCensoQr: entorno.censoQrFlujo ? function () {
+                entorno.censoQrFlujo.abrir({
+                    alCerrar: function () {
+                        var nodo = document.querySelector('.modulo-anclado[data-id="misCensos"]');
+                        if (nodo && nodo._refrescarVistaCensoQr) nodo._refrescarVistaCensoQr();
+                    }
+                });
+            } : (entorno.censoQr ? entorno.censoQr.abrir : function () { }),
             esModuloSolapa: function (id) { return !!entorno.modulos[id]; }
         });
         entorno.enlazarPanelesLaterales();
@@ -56,7 +63,16 @@ import { crearApi } from "./core/api.js";
 
     menuModulos = inicializarMenuModulos({
         abrirModulo: navegacion.abrir,
-        abrirCensoQr: entorno.censoQr ? entorno.censoQr.abrir : function () { },
+        abrirCensoQr: entorno.censoQrFlujo ? function () {
+            navegacion.abrir("misCensos");
+            entorno.censoQrFlujo.abrir({
+                alCerrar: function () {
+                    var nodo = navegacion.paneles.querySelector('[data-id="misCensos"]');
+                    if (nodo && nodo._refrescarVistaCensoQr) nodo._refrescarVistaCensoQr();
+                    entorno.cargar("misCensos", { bloquearPantalla: false }).catch(function () { });
+                }
+            });
+        } : (entorno.censoQr ? entorno.censoQr.abrir : function () { }),
         esModuloSolapa: function (id) { return !!entorno.modulos[id]; }
     });
 

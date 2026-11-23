@@ -28,7 +28,7 @@ export var INSTALADORES = {
     habitacion: instalarHabitacion
 };
 
-export var PROPIEDADES_PAQUETE = ["reserva", "movimientosReserva", "censo", "censoQr", "solicitud", "habitacion", "movimientosHabitacion"];
+export var PROPIEDADES_PAQUETE = ["reserva", "movimientosReserva", "censo", "censoQr", "censoQrFlujo", "enlazarVistaMisCensosQr", "solicitud", "habitacion", "movimientosHabitacion"];
 
 export function paquetesParaPantallas(idsPantalla) {
     var paquetes = new Set();

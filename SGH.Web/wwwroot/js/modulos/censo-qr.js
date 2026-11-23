@@ -1,78 +1,25 @@
-import { encolarOperacion, sincronizarTodo, actualizarBannerOffline } from "../core/colaOffline.js";
+import { sincronizarTodo, actualizarBannerOffline } from "../core/colaOffline.js";
+import { encolarCensoQr } from "../core/colaCensoQr.js";
+import { iniciarEscaner, detenerEscaner } from "./censo-qr-escaner.js";
 import { capacidadEfectiva, validarOcupacionCamas } from "./censo-camas-logica.js";
 import { montarSelectorCamasCenso } from "./censo-camas-selector.js";
 
 export function crearCensoQr(dependencias) {
-    function guardarPendiente(payload) {
-        encolarOperacion({
-            url: "/Censo/Mid/MidCenso.cs",
-            cuerpo: Object.assign({ opcion: "guardarqr" }, payload)
-        });
+    function guardarPendiente(payload, meta) {
+        encolarCensoQr(Object.assign({ opcion: "guardarqr" }, payload), meta);
     }
 
     function sincronizarPendientes() {
         return sincronizarTodo(dependencias.enviar);
     }
 
-    function detenerEscaner(envoltorio) {
-        if (!envoltorio) return;
-        var video = envoltorio.querySelector("video");
-        if (video && video.srcObject) {
-            video.srcObject.getTracks().forEach(function (track) { track.stop(); });
-        }
-        envoltorio.remove();
-    }
-
-    function iniciarEscaner(campoQr, formulario) {
-        if (!("BarcodeDetector" in window) || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            dependencias.mostrarAviso("Este navegador no soporta lectura QR por cámara. Use un lector físico.", "error");
-            return;
-        }
-        var previo = formulario.querySelector(".lector-qr-envoltorio");
-        if (previo) detenerEscaner(previo);
-
-        var envoltorio = document.createElement("div");
-        envoltorio.className = "lector-qr-envoltorio";
-        var video = document.createElement("video");
-        video.autoplay = true;
-        video.playsInline = true;
-        video.muted = true;
-        video.className = "lector-qr";
-        video.setAttribute("aria-label", "Vista previa de cámara para leer código QR");
-        envoltorio.append(video);
+    function usarEscanerEnFormulario(campoQr, formulario) {
         var ancla = formulario.querySelector(".lector-qr-ancla");
-        if (ancla) ancla.after(envoltorio);
-        else formulario.insertBefore(envoltorio, formulario.firstChild);
-
-        var esMovil = window.matchMedia("(max-width: 768px)").matches;
-        var restricciones = {
-            video: {
-                facingMode: { ideal: "environment" },
-                width: { ideal: esMovil ? 640 : 1280 },
-                height: { ideal: esMovil ? 480 : 720 }
-            }
-        };
-
-        navigator.mediaDevices.getUserMedia(restricciones).then(function (stream) {
-            video.srcObject = stream;
-            var detector = new BarcodeDetector({ formats: ["qr_code"] });
-            var leer = function () {
-                if (!envoltorio.isConnected) return;
-                if (video.readyState < 2) return requestAnimationFrame(leer);
-                detector.detect(video).then(function (codigos) {
-                    if (codigos.length) {
-                        campoQr.value = codigos[0].rawValue;
-                        detenerEscaner(envoltorio);
-                        return;
-                    }
-                    requestAnimationFrame(leer);
-                }).catch(function () { requestAnimationFrame(leer); });
-            };
-            leer();
-        }).catch(function () {
-            detenerEscaner(envoltorio);
-            dependencias.mostrarAviso("No fue posible acceder a la cámara.", "error");
-        });
+        if (!ancla) return;
+        iniciarEscaner(ancla, function (texto) {
+            campoQr.value = texto;
+            campoQr.dispatchEvent(new Event("input", { bubbles: true }));
+        }, dependencias.mostrarAviso);
     }
 
     function abrir() {
@@ -117,7 +64,11 @@ export function crearCensoQr(dependencias) {
             return dependencias.enviar("/Censo/Mid/MidCenso.cs", Object.assign({ opcion: "guardarqr" }, payload)).then(function () {
                 dependencias.mostrarAviso("Censo QR guardado correctamente.", "success");
             }).catch(function (error) {
-                guardarPendiente(payload);
+                guardarPendiente(payload, {
+                    habitacion: qr.n || qr.habitacion || ("Habitación " + qr.h),
+                    camasOcupadas: camasDia || camasNoche,
+                    turnoNombre: datos.turno
+                });
                 actualizarBannerOffline();
                 throw new Error(error.message + " El censo quedó pendiente para sincronizar.");
             });
@@ -128,7 +79,7 @@ export function crearCensoQr(dependencias) {
         ancla.className = "lector-qr-ancla";
         contenidoQr.insertBefore(ancla, contenidoQr.firstChild);
         var botonEscanear = dependencias.boton("Usar cámara", "boton-secundario", function () {
-            iniciarEscaner(campoQr, contenidoQr);
+            usarEscanerEnFormulario(campoQr, contenidoQr);
         });
         ancla.append(botonEscanear);
 
