@@ -57,6 +57,13 @@ export function crearFormularios(dependencias) {
     }
 
     function campoVisual(definicion, vacio) {
+        if (definicion.tipo === "hidden") {
+            var oculto = document.createElement("input");
+            oculto.type = "hidden";
+            if (definicion.nombre) oculto.name = definicion.nombre;
+            if (definicion.valor !== undefined && definicion.valor !== null) oculto.value = definicion.valor;
+            return oculto;
+        }
         var etiqueta = document.createElement("label");
         var claseCampo = "campo" + (definicion.ancho ? " campo-ancho" : "");
         if (definicion.tipo === "checkbox" && definicion.interruptor) claseCampo += " campo-interruptor";

@@ -73,13 +73,52 @@ Al pulsar **+** en la pantalla inicial, el legacy abre un flujo guiado con **ind
 ### 2.3 Censo manual — botón «puerta abriendo»
 
 - Sobre el visor, botón circular con icono de **puerta abriendo** (flecha roja en la captura).
-- **Acción:** abandona el modo escáner y **redirige a un listado de habitaciones disponibles** para elegir una y cargar el censo **sin QR** (ruta alternativa manual).
+- **Acción:** abandona el modo escáner y muestra el **formulario de selección de habitación** (paso 2.4).
+
+### 2.4 Formulario manual `habitacionSelector` (seleccionar habitación)
+
+Formulario legacy (React, contenedor `col-md-10 col-lg-8`). Cuatro combos **en cascada** (react-select, buscables):
+
+| Orden | Placeholder / etiqueta | Rol |
+|---:|---|---|
+| 1 | **Seleccione Módulo** | Acota pisos e instalaciones del campamento |
+| 2 | **Seleccione Piso** | Depende del módulo elegido |
+| 3 | **Seleccione Tipo de Instalación** | Depende de módulo/piso; filtra habitaciones por tipo |
+| 4 | **Seleccione Habitación** | Habitación final a censar |
+
+**Pie de formulario** (botones centrados):
+
+| Control | `title` / icono | Acción |
+|---|---|---|
+| **Regresar** | Flecha «atrás» | Vuelve al paso **Escanear** (cámara / QR) |
+| **Seleccionar Habitación** | Check / confirmar | Confirma la habitación elegida y continúa el wizard (paso **Censo**) |
+
+**Comportamiento esperado (cadena):**
+
+- Cada selector habilita o recarga el siguiente; sin módulo no hay piso; sin piso/tipo no hay habitación coherente.
+- Solo al confirmar con **Seleccionar Habitación** se fija `habitacionId` (equivalente a leer `h` del JSON QR en NewRest).
+
+**Fragmento de referencia (DOM legacy):** `form#habitacionSelector` con clases `Select is-searchable Select--single` y placeholders anteriores.
+
+---
+
+## Regla de negocio — camas y turno «Ambos»
+
+**Problema legacy:** con turno **Ambos**, día y noche permitían hasta 4 camas cada uno (hasta 8 en una habitación de 2 camas).
+
+**Regla objetivo (NewRest / migración):** `capacidadTotal` de la habitación (máximo absoluto del sistema: **4**).
+
+| Modo | Regla |
+|---|---|
+| **Día** o **Noche** solo | Valor entre **0** y `capacidadTotal`. |
+| **Ambos** | `camasDia + camasNoche ≤ capacidadTotal`. Radios de noche: deshabilitar `i` si `i > capacidadTotal - camasDia`. Si sube día y deja noche inválida, **reajustar noche** al máximo restante (típicamente 0). |
+
+Implementación: `ReglasCenso.ValidarOcupacionCamas`, `censo-camas-logica.js`, UI `censo-camas-selector.js` y referencia React `Docs/actividades/censo-qr-ui/CensoCamasSelector.tsx`.
 
 ---
 
 ## Pasos siguientes (pendientes de capturas)
 
-- Paso **2 Censo** (camas, turno, fecha).
+- Paso **2 Censo** (camas, turno, fecha) tras confirmar habitación — UI con radios y regla «Ambos» arriba.
 - Paso **3 Confirmación** (resumen / guardar).
-- Listado de habitaciones al usar el botón de puerta.
 - Comportamiento offline y sincronización desde «pendientes de guardar».

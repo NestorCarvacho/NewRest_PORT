@@ -208,15 +208,26 @@ public sealed class MidCenso(
             return Task.FromResult(EjecucionMid.Fallo(400, "Seleccione un turno válido."));
 
         var noche = LecturaPeticion.Texto(filtro, "cantidadNoche");
-        if (turno == "A" && (!int.TryParse(noche, out var cantidadNoche) || cantidadNoche < 0))
+        var cantidadNoche = 0;
+        if (turno == "A" && (!int.TryParse(noche, out cantidadNoche) || cantidadNoche < 0))
             return Task.FromResult(EjecucionMid.Fallo(400, "La cantidad de camas nocturnas no es válida."));
+
+        var capacidadHabitacion = LecturaPeticion.Entero(filtro, "capacidadHabitacion");
+        if (capacidadHabitacion <= 0)
+            capacidadHabitacion = ReglasCenso.MaxCamasAbsoluto;
+
+        var camasDia = turno == "N" ? 0 : camas;
+        var camasNoche = turno == "D" ? 0 : (turno == "N" ? camas : cantidadNoche);
+        var mensajeCapacidad = ReglasCenso.ValidarOcupacionCamas(capacidadHabitacion, turno, camasDia, camasNoche);
+        if (mensajeCapacidad is not null)
+            return Task.FromResult(EjecucionMid.Fallo(400, mensajeCapacidad));
 
         var filas = new List<FilaGuardarCensoDto>
         {
             new(string.Empty, habitacionId, camas.ToString(), turno == "A" ? "D" : turno)
         };
         if (turno == "A")
-            filas.Add(new FilaGuardarCensoDto(string.Empty, habitacionId, noche ?? "0", "N"));
+            filas.Add(new FilaGuardarCensoDto(string.Empty, habitacionId, cantidadNoche.ToString(), "N"));
 
         var fecha = LecturaPeticion.Fecha(LecturaPeticion.Texto(filtro, "fecha"));
         if (fecha is null)
