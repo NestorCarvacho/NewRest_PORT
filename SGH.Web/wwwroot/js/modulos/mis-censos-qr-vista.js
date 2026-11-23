@@ -69,7 +69,11 @@ export function montarVistaMisCensosQr(dependencias, nodo) {
     var listaPendientes = raiz.querySelector("[data-lista='pendientes']");
     var listaRegistrados = raiz.querySelector("[data-lista='registrados']");
     var inputFecha = raiz.querySelector("[name='fechaCenso']");
-    var fab = raiz.querySelector("[data-accion='nuevo-censo-qr']");
+    function abrirNuevoCensoQr() {
+        if (!dependencias.abrirFlujoCensoQr) return;
+        var fecha = inputFecha && inputFecha.value ? inputFecha.value : dependencias.fechaActual();
+        dependencias.abrirFlujoCensoQr({ fechaCenso: fecha, alCerrar: refrescar });
+    }
     var btnSync = raiz.querySelector("[data-accion='sincronizar-censo-qr']");
 
     function tituloBase(meta, cuerpo) {
@@ -179,12 +183,11 @@ export function montarVistaMisCensosQr(dependencias, nodo) {
     if (inputFecha) {
         inputFecha.addEventListener("change", function () { cargarRegistrados(); });
     }
-    if (fab && dependencias.abrirFlujoCensoQr) {
-        fab.addEventListener("click", function () {
-            var fecha = inputFecha && inputFecha.value ? inputFecha.value : dependencias.fechaActual();
-            dependencias.abrirFlujoCensoQr({ fechaCenso: fecha, alCerrar: refrescar });
-        });
-    }
+    nodo.querySelectorAll("[data-accion='nuevo-censo-qr']").forEach(function (boton) {
+        if (boton._censoQrNuevoEnlazado) return;
+        boton._censoQrNuevoEnlazado = true;
+        boton.addEventListener("click", abrirNuevoCensoQr);
+    });
     if (btnSync && dependencias.sincronizar) {
         btnSync.addEventListener("click", function () {
             btnSync.disabled = true;

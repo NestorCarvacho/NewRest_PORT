@@ -2412,6 +2412,34 @@ html:not([data-tema="claro"]) .campo.campo-interruptor input[type="checkbox"]:ch
   margin: 0.5rem 0 1rem;
 }
 
+.censo-qr-btn-nuevo,
+.censo-qr-fab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  background: var(--azul-marca, #1e3a5f);
+  font: inherit;
+  font-weight: 650;
+  box-shadow: 0 2px 8px rgb(30 58 95 / 28%);
+}
+
+.censo-qr-btn-nuevo {
+  height: 2.3rem;
+  padding: 0 0.95rem;
+  border-radius: 0.7rem;
+  font-size: 0.88rem;
+}
+
+.censo-qr-btn-mas {
+  font-size: 1.35rem;
+  line-height: 1;
+  font-weight: 600;
+}
+
 .censo-qr-fab {
   position: fixed;
   right: 1.25rem;
@@ -2419,14 +2447,20 @@ html:not([data-tema="claro"]) .campo.campo-interruptor input[type="checkbox"]:ch
   z-index: 120;
   width: 3.25rem;
   height: 3.25rem;
+  padding: 0;
   border-radius: 50%;
-  border: none;
   font-size: 1.75rem;
   line-height: 1;
-  cursor: pointer;
-  background: var(--acento-dorado, #c9a86c);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.censo-qr-fab .censo-qr-btn-etiqueta {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .modulo-misCensos .modulo-barra .censo-qr-btn-nuevo {
+    display: none;
+  }
 }
 
 .censo-qr-wizard {
