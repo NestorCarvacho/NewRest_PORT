@@ -23,9 +23,12 @@ import { crearApi } from "./core/api.js";
                 window.location.assign("/Index?modulo=" + encodeURIComponent(modulo));
             },
             abrirCensoQr: entorno.censoQrFlujo ? function () {
+                var nodo = document.querySelector('.modulo-anclado[data-id="misCensos"]');
+                var fechaInp = nodo && nodo.querySelector("[name='fechaCenso']");
+                var fechaCenso = (fechaInp && fechaInp.value) || (entorno.fechaActual && entorno.fechaActual());
                 entorno.censoQrFlujo.abrir({
+                    fechaCenso: fechaCenso,
                     alCerrar: function () {
-                        var nodo = document.querySelector('.modulo-anclado[data-id="misCensos"]');
                         if (nodo && nodo._refrescarVistaCensoQr) nodo._refrescarVistaCensoQr();
                     }
                 });
@@ -65,9 +68,12 @@ import { crearApi } from "./core/api.js";
         abrirModulo: navegacion.abrir,
         abrirCensoQr: entorno.censoQrFlujo ? function () {
             navegacion.abrir("misCensos");
+            var nodo = navegacion.paneles.querySelector('[data-id="misCensos"]');
+            var fechaInp = nodo && nodo.querySelector("[name='fechaCenso']");
+            var fechaCenso = (fechaInp && fechaInp.value) || (entorno.fechaActual && entorno.fechaActual());
             entorno.censoQrFlujo.abrir({
+                fechaCenso: fechaCenso,
                 alCerrar: function () {
-                    var nodo = navegacion.paneles.querySelector('[data-id="misCensos"]');
                     if (nodo && nodo._refrescarVistaCensoQr) nodo._refrescarVistaCensoQr();
                     entorno.cargar("misCensos", { bloquearPantalla: false }).catch(function () { });
                 }
