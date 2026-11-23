@@ -98,6 +98,16 @@ export function crearTablas() {
         return -1;
     }
 
+    function indiceColumnaDatos(api, nombreDato) {
+        var ajustes = api.settings()[0];
+        var columnas = ajustes.aoColumns || [];
+        for (var indice = 0; indice < columnas.length; indice++) {
+            var dato = columnas[indice].mData;
+            if (typeof dato === "string" && dato === nombreDato) return indice;
+        }
+        return -1;
+    }
+
     function filaApiPorId(api, id) {
         var numeroId = Number(id);
         var encontrada = null;
@@ -151,8 +161,11 @@ export function crearTablas() {
             api.draw(false);
             var indice = fila.index();
             if (repintarAcciones) {
-                var celdaAcciones = api.cell(indice, 0).node();
-                if (celdaAcciones) celdaAcciones.replaceChildren(repintarAcciones(mapeada));
+                var columnaAcciones = indiceColumnaDatos(api, "acciones");
+                if (columnaAcciones >= 0) {
+                    var celdaAcciones = api.cell(indice, columnaAcciones).node();
+                    if (celdaAcciones) celdaAcciones.replaceChildren(repintarAcciones(mapeada));
+                }
             }
             return;
         }

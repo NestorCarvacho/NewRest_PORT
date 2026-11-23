@@ -936,15 +936,41 @@ div.dt-container table.dataTable tbody > tr > td {
   min-width: 70rem;
 }
 
-.modulo-reserva div.dt-container table.dataTable tbody > tr > td:nth-child(2) {
-  white-space: normal;
-  text-overflow: clip;
+.modulo-reserva .acciones-fila {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
 }
 
-.modulo-reserva .acciones-fila {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
+.modulo-reserva .acciones-fila > .accion-fila {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.modulo-reserva div.dt-container table.dataTable th.col-acciones-reserva,
+.modulo-reserva div.dt-container table.dataTable td.col-acciones-reserva {
+  min-width: 11rem;
+  width: 12rem;
+  max-width: 20rem;
+  white-space: normal;
+  vertical-align: middle;
+}
+
+.modulo-reserva div.dt-container table.dataTable th.col-fecha-prevista,
+.modulo-reserva div.dt-container table.dataTable td.col-fecha-prevista {
+  width: 5.25rem;
+  min-width: 5.25rem;
+  max-width: 5.25rem;
+  padding-left: 0.35rem !important;
+  padding-right: 0.35rem !important;
+  font-size: 0.82rem;
+  white-space: nowrap;
 }
 
 .modulo-habitaciones div.dt-container table.dataTable {
@@ -1491,11 +1517,6 @@ html:not([data-tema="claro"]) .tabla-vacia {
   max-width: 2.75rem;
 }
 
-.modulo-reserva div.dt-container table.dataTable tbody > tr > td:nth-child(2) {
-  white-space: normal;
-  text-overflow: clip;
-  width: 11rem;
-}
 
 .boton-generar-reservas:not(:disabled) {
   background: linear-gradient(180deg, #1b6b3a 0%, #14502b 100%);

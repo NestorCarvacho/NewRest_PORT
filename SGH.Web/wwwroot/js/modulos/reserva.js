@@ -260,12 +260,22 @@ export function crearReserva(dependencias) {
         return claves.map(function (clave) {
             if (clave === "seleccionMasiva") return columnaSeleccionMasiva();
             if (clave === "checkIn" || clave === "checkOut") return { data: clave, render: renderizarMovimiento };
-            if (clave === "llegada" || clave === "salida") return { data: clave, render: renderizarFechaPrevista };
+            if (clave === "llegada" || clave === "salida") {
+                return {
+                    data: clave,
+                    className: "col-fecha-prevista",
+                    render: renderizarFechaPrevista
+                };
+            }
             if (clave !== "acciones") return { data: clave };
             return {
                 data: clave,
                 orderable: false,
-                createdCell: function (td, fila) {
+                className: "col-acciones-reserva",
+                defaultContent: "",
+                render: function () { return ""; },
+                createdCell: function (td, celda) {
+                    var fila = celda && celda.estadoNumero !== undefined ? celda : (celda && celda._fila) || celda;
                     td.replaceChildren(crearAcciones(fila, modo));
                 }
             };
