@@ -958,8 +958,8 @@ div.dt-container table.dataTable tbody > tr > td {
 .modulo-reserva div.dt-container table.dataTable th.col-acciones-reserva,
 .modulo-reserva div.dt-container table.dataTable td.col-acciones-reserva {
   min-width: 10.5rem;
-  width: 13.5rem;
-  max-width: 13rem;
+  width: 16.5rem;
+  max-width: 16.5rem;
   white-space: normal;
   vertical-align: middle;
   overflow: visible;
@@ -2413,7 +2413,9 @@ html:not([data-tema="claro"]) .campo.campo-interruptor input[type="checkbox"]:ch
 
   .modulo-reserva table.dataTable td.col-acciones-reserva,
   .modulo-reserva table.dataTable th.col-acciones-reserva {
-    min-width: 12rem !important;
+    min-width: 10.5rem !important;
+    width: 16.5rem;
+    max-width: 16.5rem;
     overflow: visible;
     text-overflow: clip;
   }
