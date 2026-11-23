@@ -229,15 +229,43 @@ export function crearReserva(dependencias) {
         return partes[1] + "/" + partes[2] + "/" + partes[3];
     }
 
-    function pintarSeleccionMasiva(td, mapeada) {
+    function textoMovimiento(valor) {
+        return valor != null && String(valor).trim() !== "";
+    }
+
+    function registroDesdeMapeada(mapeada, celda) {
+        if (mapeada && mapeada._fila) return mapeada._fila;
+        if (mapeada && mapeada.estadoNumero !== undefined) return mapeada;
+        if (celda && celda.estadoNumero !== undefined) return celda;
+        return null;
+    }
+
+    function elegibleCheckInMasivo(fila) {
+        return !!(fila && fila.estadoNumero === "A" && !textoMovimiento(fila.checkIn));
+    }
+
+    function elegibleCheckOutMasivo(fila) {
+        return !!(fila && fila.estadoNumero === "A" && textoMovimiento(fila.checkIn) && !textoMovimiento(fila.checkOut));
+    }
+
+    function elegibleSeleccionMasiva(fila) {
+        return elegibleCheckInMasivo(fila) || elegibleCheckOutMasivo(fila);
+    }
+
+    function moduloReservaDesde(td) {
+        return td.closest('.modulo[data-id="reserva"]') || td.closest(".modulo-reserva");
+    }
+
+    function pintarSeleccionMasiva(td, mapeada, celda) {
         td.replaceChildren();
-        var fila = mapeada && mapeada._fila ? mapeada._fila : mapeada;
-        if (!fila || fila.estadoNumero !== "A" || fila.checkIn) return;
-        var modulo = td.closest(".modulo-reserva");
+        var fila = registroDesdeMapeada(mapeada, celda);
+        if (!elegibleSeleccionMasiva(fila)) return;
+        var modulo = moduloReservaDesde(td);
         if (!modulo) return;
         if (!modulo._seleccionReserva) modulo._seleccionReserva = new Set();
         var checkbox = document.createElement("input");
         checkbox.type = "checkbox";
+        checkbox.className = "seleccion-reserva";
         checkbox.setAttribute("aria-label", "Seleccionar reserva " + fila.id);
         checkbox.checked = modulo._seleccionReserva.has(fila.id);
         checkbox.addEventListener("change", function () {
@@ -245,6 +273,26 @@ export function crearReserva(dependencias) {
             else modulo._seleccionReserva.delete(fila.id);
         });
         td.append(checkbox);
+    }
+
+    function enlazarTablaDraw(nodo, api, herramientas) {
+        if (!api || !herramientas || nodo._reservaTablaDraw) return;
+        nodo._reservaTablaDraw = true;
+        function repintarCeldasReserva() {
+            api.rows({ page: "current" }).every(function () {
+                var mapeada = this.data();
+                var indice = this.index();
+                var celdaSel = herramientas.nodoCeldaDatos(api, indice, "seleccionMasiva");
+                if (celdaSel) pintarSeleccionMasiva(celdaSel, mapeada);
+                if (!herramientas.crearAcciones) return;
+                var celdaAcciones = herramientas.nodoCeldaDatos(api, indice, "acciones");
+                if (!celdaAcciones) return;
+                var fila = registroDesdeMapeada(mapeada);
+                celdaAcciones.replaceChildren(herramientas.crearAcciones(fila, "reserva"));
+            });
+        }
+        api.on("draw", repintarCeldasReserva);
+        repintarCeldasReserva();
     }
 
     function columnaSeleccionMasiva() {
@@ -255,8 +303,8 @@ export function crearReserva(dependencias) {
             responsivePriority: 1,
             defaultContent: "",
             render: function () { return ""; },
-            createdCell: function (td, _celda, filaMapeada) {
-                pintarSeleccionMasiva(td, filaMapeada);
+            createdCell: function (td, celda, filaMapeada) {
+                pintarSeleccionMasiva(td, filaMapeada, celda);
             }
         };
     }
@@ -299,6 +347,9 @@ export function crearReserva(dependencias) {
         enlazarSincronizacionListado: enlazarSincronizacionListado,
         fila: fila,
         columnas: columnas,
-        pintarSeleccionMasiva: pintarSeleccionMasiva
+        pintarSeleccionMasiva: pintarSeleccionMasiva,
+        enlazarTablaDraw: enlazarTablaDraw,
+        elegibleCheckInMasivo: elegibleCheckInMasivo,
+        elegibleCheckOutMasivo: elegibleCheckOutMasivo
     };
 }

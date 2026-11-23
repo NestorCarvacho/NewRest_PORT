@@ -131,11 +131,28 @@ export function ensamblarEntorno(idsPantalla) {
         instancia.reserva.enlazarSincronizacionListado(enlazarSincronizacion);
     }
 
+    function inicializarTablaModulo(nodo, columnas, ordenInicial) {
+        var api = base.tablas.inicializar(nodo, columnas, ordenInicial);
+        if (nodo && nodo.dataset && nodo.dataset.id === "reserva"
+            && instancia.reserva && typeof instancia.reserva.enlazarTablaDraw === "function"
+            && instancia.movimientosReserva) {
+            instancia.reserva.enlazarTablaDraw(nodo, api, {
+                nodoCeldaDatos: base.tablas.nodoCeldaDatos,
+                crearAcciones: instancia.movimientosReserva.crearAcciones
+            });
+        }
+        return api;
+    }
+
+    var tablas = Object.assign({}, base.tablas, {
+        inicializar: inicializarTablaModulo
+    });
+
     return Object.assign(instancia, {
         modulos: modulos,
         renderizador: renderizador,
         crearPanel: crearPanel,
-        tablas: base.tablas,
+        tablas: tablas,
         prepararCatalogo: base.prepararCatalogo,
         cargar: base.cargar,
         enlazarCargador: function (obtenerNodo) {

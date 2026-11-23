@@ -95,8 +95,26 @@ export function crearMovimientosReserva(dependencias) {
         return nodo && nodo._seleccionReserva ? Array.from(nodo._seleccionReserva) : [];
     }
 
+    function filaPorId(nodo, reservaId) {
+        var filas = (nodo && nodo._filas) || [];
+        for (var i = 0; i < filas.length; i++) {
+            if (Number(filas[i].id) === Number(reservaId)) return filas[i];
+        }
+        return null;
+    }
+
+    function idsSeleccionElegibles(nodo, esElegible) {
+        return seleccionReserva(nodo).filter(function (id) {
+            var fila = filaPorId(nodo, id);
+            return fila && esElegible(fila);
+        });
+    }
+
     function checkInMasivo(nodo) {
-        var ids = seleccionReserva(nodo);
+        var esElegible = dependencias.elegibleCheckInMasivo || function (fila) {
+            return fila && fila.estadoNumero === "A" && !fila.checkIn;
+        };
+        var ids = idsSeleccionElegibles(nodo, esElegible);
         if (!ids.length) {
             dependencias.mostrarAviso("Seleccione reservas asignadas sin check-in.", "warning");
             return;
@@ -121,10 +139,46 @@ export function crearMovimientosReserva(dependencias) {
                 if (fallos) texto += " Sin cambio en " + fallos + ".";
                 dependencias.mostrarAviso(texto, fallos ? "warning" : "success");
                 if (dependencias.cerrarPanel) dependencias.cerrarPanel();
+                if (nodo._seleccionReserva) ids.forEach(function (id) { nodo._seleccionReserva.delete(id); });
                 if (dependencias.cargar) return dependencias.cargar("reserva", { bloquearPantalla: false, avisarConteoFilas: false });
             });
         }));
     }
 
-    return { crearAcciones: crearAcciones, checkInMasivo: checkInMasivo };
+    function checkOutMasivo(nodo) {
+        var esElegible = dependencias.elegibleCheckOutMasivo || function (fila) {
+            return fila && fila.estadoNumero === "A" && fila.checkIn && !fila.checkOut;
+        };
+        var ids = idsSeleccionElegibles(nodo, esElegible);
+        if (!ids.length) {
+            dependencias.mostrarAviso("Seleccione reservas con check-in y sin check-out.", "warning");
+            return;
+        }
+        dependencias.abrirPanel("Check-out masivo", dependencias.formulario([
+            dependencias.seccion("", [
+                dependencias.campo("fecha", "Fecha check-out", "datetime-local", [], {
+                    requerido: true,
+                    valor: dependencias.momentoLocal(true)
+                })
+            ])
+        ], "Registrar", true, function (datos) {
+            return dependencias.enviar("/Reserva/Mid/MidReservas.cs", {
+                opcion: "movimientosmasivo",
+                reservaIds: ids,
+                operacion: "O",
+                fecha: datos.fecha
+            }).then(function (resultado) {
+                var exitos = (resultado && resultado.exitos) ? resultado.exitos.length : 0;
+                var fallos = (resultado && resultado.fallos) ? resultado.fallos.length : 0;
+                var texto = "Check-out registrado en " + exitos + " reserva(s).";
+                if (fallos) texto += " Sin cambio en " + fallos + ".";
+                dependencias.mostrarAviso(texto, fallos ? "warning" : "success");
+                if (dependencias.cerrarPanel) dependencias.cerrarPanel();
+                if (nodo._seleccionReserva) ids.forEach(function (id) { nodo._seleccionReserva.delete(id); });
+                if (dependencias.cargar) return dependencias.cargar("reserva", { bloquearPantalla: false, avisarConteoFilas: false });
+            });
+        }));
+    }
+
+    return { crearAcciones: crearAcciones, checkInMasivo: checkInMasivo, checkOutMasivo: checkOutMasivo };
 }

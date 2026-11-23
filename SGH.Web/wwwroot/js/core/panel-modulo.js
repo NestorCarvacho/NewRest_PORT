@@ -79,6 +79,10 @@ export function crearPanelModulo(dependencias) {
             "checkin-masivo": function () {
                 if (!dependencias.movimientosReserva || !dependencias.movimientosReserva.checkInMasivo) return;
                 dependencias.movimientosReserva.checkInMasivo(nodo);
+            },
+            "checkout-masivo": function () {
+                if (!dependencias.movimientosReserva || !dependencias.movimientosReserva.checkOutMasivo) return;
+                dependencias.movimientosReserva.checkOutMasivo(nodo);
             }
         };
         Object.keys(acciones).forEach(function (clave) {

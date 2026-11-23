@@ -26,6 +26,8 @@ export function instalarReserva(base) {
         consulta: base.consulta
     });
     var movimientosReserva = crearMovimientosReserva({
+        elegibleCheckInMasivo: reserva.elegibleCheckInMasivo,
+        elegibleCheckOutMasivo: reserva.elegibleCheckOutMasivo,
         refrescarFilaReserva: reserva.refrescarFilaEnListado.bind(reserva),
         cerrarPanel: base.cerrarPanel,
         boton: base.boton,
