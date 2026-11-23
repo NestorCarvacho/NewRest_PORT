@@ -25,6 +25,29 @@ export function crearTablas() {
         return envoltorio;
     }
 
+    /** Alinea &lt;thead&gt; con la definición de columnas (evita desfase con HTML en caché). */
+    function prepararEncabezadosTabla(elementoTabla, columnas) {
+        var modo = elementoTabla.dataset.modulo;
+        var titulos = modo ? encabezadosModulo(modo) : [];
+        var thead = elementoTabla.querySelector("thead");
+        if (!thead) {
+            thead = document.createElement("thead");
+            elementoTabla.prepend(thead);
+        }
+        var fila = thead.querySelector("tr");
+        if (!fila) {
+            fila = document.createElement("tr");
+            thead.append(fila);
+        }
+        fila.replaceChildren();
+        (columnas || []).forEach(function (_columna, indice) {
+            var th = document.createElement("th");
+            th.scope = "col";
+            th.textContent = titulos[indice] != null ? titulos[indice] : "";
+            fila.append(th);
+        });
+    }
+
     function inicializar(nodo, columnas, ordenInicial, ajustarOpciones) {
         function t(texto) {
             return window.SGHI18n ? window.SGHI18n.traducir(texto) : texto;
@@ -68,6 +91,7 @@ export function crearTablas() {
         if (!elementoTabla) {
             throw new Error("No hay tabla en el panel del módulo.");
         }
+        if (columnas && columnas.length) prepararEncabezadosTabla(elementoTabla, columnas);
         var tabla = new DataTable(elementoTabla, opciones);
         tabla.on("draw", function () {
             completarFilas(tabla);
