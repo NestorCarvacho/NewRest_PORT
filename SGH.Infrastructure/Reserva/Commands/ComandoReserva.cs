@@ -144,4 +144,24 @@ public sealed class ComandoReserva : IComandoReserva
         if (!oCRB.Resultado)
             throw new InvalidOperationException(oCRB.Mensaje);
     }
+
+    public async Task ReversarMovimientoAsync(int reservaId, int campamentoId, int usuarioId, CancellationToken cancellationToken)
+    {
+        var oDB = new AD_Global();
+        var oCRB = await oDB.DBOpenAsync(300, cancellationToken);
+        if (oCRB.Resultado)
+        {
+            oDB.NameProcedure = "dbo.he_sp_reserva_reversar_movimiento";
+            oCRB = oDB.AddParameter("@ReservaId", reservaId);
+            oCRB = oDB.AddParameter("@CampamentoId", campamentoId);
+            oCRB = oDB.AddParameter("@UsuarioId", usuarioId);
+        }
+
+        if (oCRB.Resultado)
+            oCRB = await oDB.ExecuteNonQueryAsync(cancellationToken);
+
+        oDB.DBClose();
+        if (!oCRB.Resultado)
+            throw new InvalidOperationException(oCRB.Mensaje);
+    }
 }

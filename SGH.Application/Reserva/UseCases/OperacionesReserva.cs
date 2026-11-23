@@ -291,3 +291,45 @@ public sealed class FinalizarReservaCheckout : IFinalizarReserva
         return new ResultadoFinalizarReserva.Finalizada();
     }
 }
+
+public sealed class ReversarMovimientoReserva : IReversarMovimientoReserva
+{
+    private readonly IComandoReserva _comando;
+    private readonly IConsultaReserva _consulta;
+
+    public ReversarMovimientoReserva(IComandoReserva comando, IConsultaReserva consulta)
+    {
+        _comando = comando;
+        _consulta = consulta;
+    }
+
+    public async Task<ResultadoReversarMovimientoReserva> EjecutarAsync(
+        SolicitudReversarMovimientoReserva solicitud, CancellationToken cancellationToken)
+    {
+        if (solicitud.UsuarioId <= 0)
+            return new ResultadoReversarMovimientoReserva.Rechazado("La sesión no tiene un usuario.");
+
+        var alcance = AlcanceSesion.ValidarAlcance(solicitud.EmpresaMandanteId, solicitud.CampamentoId);
+        if (alcance is not null)
+            return new ResultadoReversarMovimientoReserva.Rechazado(alcance);
+
+        var propia = await _consulta.ReservaEstaEnCampamentoAsync(solicitud.ReservaId, solicitud.CampamentoId, cancellationToken);
+        if (!propia)
+            return new ResultadoReversarMovimientoReserva.Rechazado(ReglasReserva.ReservaAjena);
+
+        var filas = await _consulta.BuscarAsync(new FiltroReserva(
+            solicitud.CampamentoId, solicitud.ReservaId, 0, "0", 0, "0", null, null, null, null, null, null, null, 0, 0, "0"), cancellationToken);
+        var fila = filas.FirstOrDefault(f => f.Id == solicitud.ReservaId);
+        if (fila is null)
+            return new ResultadoReversarMovimientoReserva.Rechazado(ReglasReserva.ReservaAjena);
+
+        var mensaje = ReglasReserva.ValidarReversarMovimiento(
+            solicitud.ReservaId, fila.EstadoNumero, fila.CheckIn, fila.CheckOut);
+        if (mensaje is not null)
+            return new ResultadoReversarMovimientoReserva.Rechazado(mensaje);
+
+        await _comando.ReversarMovimientoAsync(
+            solicitud.ReservaId, solicitud.CampamentoId, solicitud.UsuarioId, cancellationToken);
+        return new ResultadoReversarMovimientoReserva.Reversado();
+    }
+}

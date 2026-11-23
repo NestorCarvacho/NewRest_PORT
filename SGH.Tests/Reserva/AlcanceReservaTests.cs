@@ -193,5 +193,8 @@ public class AlcanceReservaTests
             Finalizaciones++;
             return Task.CompletedTask;
         }
+
+        public Task ReversarMovimientoAsync(int reservaId, int campamentoId, int usuarioId, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
     }
 }

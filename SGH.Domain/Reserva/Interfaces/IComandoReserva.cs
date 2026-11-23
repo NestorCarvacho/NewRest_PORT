@@ -24,4 +24,6 @@ public interface IComandoReserva
     Task AnularAsync(int reservaId, int empresaMandanteId, int campamentoId, int usuarioId, CancellationToken cancellationToken);
 
     Task FinalizarCheckoutAsync(int reservaId, int empresaMandanteId, int usuarioId, CancellationToken cancellationToken);
+
+    Task ReversarMovimientoAsync(int reservaId, int campamentoId, int usuarioId, CancellationToken cancellationToken);
 }

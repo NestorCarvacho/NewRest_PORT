@@ -11,6 +11,15 @@ export function crearMovimientosReserva(dependencias) {
         }
         if (fila.estadoNumero === "A" && !fila.checkIn) acciones.append(crearBotonMovimiento(fila.id, "I", "Check In"));
         if (fila.estadoNumero === "A" && fila.checkIn && !fila.checkOut) acciones.append(crearBotonMovimiento(fila.id, "O", "Check Out"));
+        if (fila.estadoNumero === "A" && (fila.checkIn || fila.checkOut)) {
+            var quitaCheckOut = !!fila.checkOut;
+            acciones.append(crearBotonAccion(fila.id, "reversar", "Reversar", function (id) {
+                return dependencias.enviar("/Reserva/Mid/MidReservas.cs", { opcion: "reversar", reservaId: id });
+            }, quitaCheckOut ? "Check-out revertido." : "Check-in revertido.",
+                quitaCheckOut
+                    ? "¿Quitar el check-out y volver a estado con check-in?"
+                    : "¿Quitar el check-in y dejar la reserva sin ingreso?"));
+        }
         if (fila.estadoNumero === "A" && fila.checkOut) {
             acciones.append(crearBotonAccion(fila.id, "finalizar", "Finalizar", function (id) {
                 return dependencias.enviar("/Reserva/Mid/MidReservas.cs", { opcion: "finalizar", reservaId: id });

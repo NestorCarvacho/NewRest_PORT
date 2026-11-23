@@ -45,4 +45,14 @@ public class ReglasReservaTests
         Assert.NotNull(ReglasReserva.ValidarFinalizar(9, "P", "11/11/2026 13:00"));
         Assert.NotNull(ReglasReserva.ValidarFinalizar(9, ReglasReserva.EstadoAsignada, null));
     }
+
+    [Fact]
+    public void ReversarExigeAsignadaConCheckInOCheckOut()
+    {
+        Assert.Null(ReglasReserva.ValidarReversarMovimiento(9, ReglasReserva.EstadoAsignada, "10/11/2026 08:00", null));
+        Assert.Null(ReglasReserva.ValidarReversarMovimiento(9, ReglasReserva.EstadoAsignada, "10/11/2026 08:00", "11/11/2026 13:00"));
+        Assert.NotNull(ReglasReserva.ValidarReversarMovimiento(0, ReglasReserva.EstadoAsignada, "10/11/2026 08:00", null));
+        Assert.NotNull(ReglasReserva.ValidarReversarMovimiento(9, ReglasReserva.EstadoFinalizada, "10/11/2026 08:00", null));
+        Assert.NotNull(ReglasReserva.ValidarReversarMovimiento(9, ReglasReserva.EstadoAsignada, null, null));
+    }
 }

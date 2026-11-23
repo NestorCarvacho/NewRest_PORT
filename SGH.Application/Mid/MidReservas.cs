@@ -14,7 +14,8 @@ public sealed class MidReservas(
     IRegistrarMovimientoReserva movimiento,
     IActualizarReserva actualizar,
     IAnularReserva anular,
-    IFinalizarReserva finalizar)
+    IFinalizarReserva finalizar,
+    IReversarMovimientoReserva reversar)
 {
     public const string Ruta = "Mid/MidReservas.cs";
 
@@ -28,6 +29,7 @@ public sealed class MidReservas(
         Accion("movimientosmasivo", "Movimiento masivo", "dbo.he_sp_reserva_registrar_movimiento", "Registra check-in masivo."),
         Accion("anular", "Anular", "dbo.he_sp_reserva_anular", "Anula una reserva."),
         Accion("finalizar", "Finalizar", "dbo.he_sp_reserva_finalizar_checkout", "Finaliza la reserva tras check-out."),
+        Accion("reversar", "Reversar", "dbo.he_sp_reserva_reversar_movimiento", "Quita check-out o check-in según el último movimiento."),
         Accion("importar", "Importar", "dbo.he_sp_reserva_crear", "Crea reservas desde una planilla."),
         Accion("plantilla", "Plantilla", "planilla", "Devuelve la planilla de importación.")
     ];
@@ -56,6 +58,8 @@ public sealed class MidReservas(
                 return await AnularAsync(filtro, sesion, cancellationToken);
             case "finalizar":
                 return await FinalizarAsync(filtro, sesion, cancellationToken);
+            case "reversar":
+                return await ReversarAsync(filtro, sesion, cancellationToken);
             case "plantilla":
                 return EjecucionMid.Descarga(
                     planilla.CrearPlantilla(),
@@ -245,6 +249,21 @@ public sealed class MidReservas(
             ResultadoFinalizarReserva.Finalizada => EjecucionMid.Ok(new { listo = true }),
             ResultadoFinalizarReserva.Rechazada rechazada => EjecucionMid.Fallo(400, rechazada.Mensaje),
             _ => EjecucionMid.Fallo(400, "No se pudo finalizar la reserva.")
+        };
+    }
+
+    private async Task<EjecucionMid> ReversarAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var resultado = await reversar.EjecutarAsync(new SolicitudReversarMovimientoReserva(
+            LecturaPeticion.Entero(filtro, "reservaId"),
+            sesion.EmpresaMandanteId,
+            sesion.CampamentoId,
+            sesion.UsuarioId), cancellationToken);
+        return resultado switch
+        {
+            ResultadoReversarMovimientoReserva.Reversado => EjecucionMid.Ok(new { listo = true }),
+            ResultadoReversarMovimientoReserva.Rechazado rechazado => EjecucionMid.Fallo(400, rechazado.Mensaje),
+            _ => EjecucionMid.Fallo(400, "No se pudo reversar el movimiento.")
         };
     }
 

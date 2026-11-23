@@ -68,4 +68,18 @@ public static class ReglasReserva
 
         return null;
     }
+
+    public static string? ValidarReversarMovimiento(int reservaId, string? estado, string? checkIn, string? checkOut)
+    {
+        if (reservaId <= 0)
+            return "Seleccione una reserva.";
+
+        if (estado != EstadoAsignada)
+            return "Solo se puede reversar movimientos en reservas asignadas.";
+
+        if (string.IsNullOrWhiteSpace(checkIn) && string.IsNullOrWhiteSpace(checkOut))
+            return "La reserva no tiene check-in ni check-out para reversar.";
+
+        return null;
+    }
 }
