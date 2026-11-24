@@ -61,7 +61,7 @@ Para ver la solapa **Tipos de cama** (`modo: tiposcama`):
 | # | Archivo |
 |---|---------|
 | 1 | `SGH.Infrastructure/Navegacion/Persistence/002_menu_config_habitacion_bano.sql` (si no está aplicado) |
-| 2 | Entrada `tiposcama` en `Menus` / `MenusPerfil` según perfil (p. ej. script `003_menusperfil_habitacion_bano_por_perfil.sql` o alta manual documentada en CU-HAB). |
+| 2 | Entrada `/app/config/tiposcama` en `Menus` / `MenusPerfil` (`004_menu_config_tipos_cama.sql` y `005_menusperfil_tipos_cama_por_perfil.sql`). |
 
 ---
 

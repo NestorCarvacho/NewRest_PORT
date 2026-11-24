@@ -64,6 +64,11 @@ public sealed class ConstruirMenuEscritorioTests
         Assert.True(banos.Disponible);
         Assert.Equal(MenuClaves.Banos, banos.ClaveModulo);
         Assert.Equal("/Habitacion/Banos", banos.RutaPagina);
+
+        var tipos = config.Single(i => i.Nombre == "Tipos de cama");
+        Assert.True(tipos.Disponible);
+        Assert.Equal(MenuClaves.TiposCama, tipos.ClaveModulo);
+        Assert.Equal("/Habitacion/TiposCama", tipos.RutaPagina);
     }
 
     [Fact]
@@ -88,6 +93,7 @@ public sealed class ConstruirMenuEscritorioTests
         new(18, "Usuarios", "/app/config/usuario", 4, "side", 6, null),
         new(901, "Habitaciones", "/app/config/habitaciones", 4, "side", 7, null),
         new(902, "Baños", "/app/config/banos", 4, "side", 8, null),
+        new(903, "Tipos de cama", "/app/config/tiposcama", 4, "side", 9, null),
     ];
 
     private static List<MenuPerfilItem> DatosPerfil137() =>

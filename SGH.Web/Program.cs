@@ -145,6 +145,7 @@ builder.Services.AddRazorPages(opciones =>
     opciones.Conventions.AuthorizePage("/Cuenta/Usuarios", PoliticasAplicacion.AdministrarUsuarios);
     opciones.Conventions.AuthorizePage("/Habitacion/Datos", PoliticasAplicacion.GestionarHabitaciones);
     opciones.Conventions.AuthorizePage("/Habitacion/Banos", PoliticasAplicacion.GestionarHabitaciones);
+    opciones.Conventions.AuthorizePage("/Habitacion/TiposCama", PoliticasAplicacion.GestionarHabitaciones);
     opciones.Conventions.AllowAnonymousToPage("/Cuenta/Login");
     opciones.Conventions.AllowAnonymousToPage("/Cuenta/CambiarClave");
     opciones.Conventions.AllowAnonymousToPage("/Cuenta/Salir");

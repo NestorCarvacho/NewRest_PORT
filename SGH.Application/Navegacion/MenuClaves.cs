@@ -9,4 +9,5 @@ public static class MenuClaves
     public const string Usuarios = "usuarios";
     public const string Habitaciones = "habitaciones";
     public const string Banos = "banos";
+    public const string TiposCama = "tiposcama";
 }

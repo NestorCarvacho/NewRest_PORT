@@ -141,7 +141,7 @@ Misma jerarquía `nav` / `side`. En **Gestión** (`PadreId = 2`) aparecen los m�
 | Solicitud Empresa | `/app/gestion/solicitudempresa` | No migrado |
 | Gestión OT, etc. | … | No migrado |
 
-En **Configuración** (`PadreId = 4`): **Usuarios** → `/app/config/usuario` → `/Cuenta/Usuarios`; **Habitaciones** → `/app/config/habitaciones` → `/Habitacion/Datos`; **Baños** → `/app/config/banos` → `/Habitacion/Banos` (script `SGH.Infrastructure/Navegacion/Persistence/002_menu_config_habitacion_bano.sql`).
+En **Configuración** (`PadreId = 4`): **Usuarios** → `/app/config/usuario` → `/Cuenta/Usuarios`; **Habitaciones** → `/app/config/habitaciones` → `/Habitacion/Datos`; **Baños** → `/app/config/banos` → `/Habitacion/Banos` (script `002_menu_config_habitacion_bano.sql`); **Tipos de cama** → `/app/config/tiposcama` → `/Habitacion/TiposCama` (`004_menu_config_tipos_cama.sql`).
 
 Para que un perfil operativo (p. ej. **68**) vea solo Habitaciones y Baños: tras el `002`, ejecutar `003_menusperfil_habitacion_bano_por_perfil.sql` (ajustar `@PerfilId`) o insertar manualmente en `MenusPerfil` el **nav** de Configuración más los dos `MenuId` de esos enlaces. El menú y la autorización HTTP (`GestionarHabitaciones`) leen el mismo `he_sp_menu_obtener_por_perfil`.
 
