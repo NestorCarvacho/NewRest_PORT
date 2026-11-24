@@ -13,8 +13,10 @@ public sealed class ConstruirMenuEscritorioTests
 
         Assert.Equal(4, menu.Grupos.Count);
         Assert.Equal("Gestión", menu.Grupos[0].Titulo);
+        Assert.Equal("fas fa-bed", menu.Grupos[0].Icono);
         Assert.True(menu.Grupos[0].Columnas[0].Items.Count > 0);
         Assert.Equal("Configuración", menu.Grupos.Single(g => g.EsConfiguracion).Titulo);
+        Assert.Equal("fas fa-cog", menu.Grupos.Single(g => g.EsConfiguracion).Icono);
     }
 
     [Fact]

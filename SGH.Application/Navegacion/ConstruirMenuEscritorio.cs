@@ -38,7 +38,7 @@ public static class ConstruirMenuEscritorio
 
             var esConfig = EsGrupoConfiguracionRaiz(raiz);
             var columna = new MenuColumnaVm(raiz.Nombre, hijos);
-            grupos.Add(new MenuGrupoVm(raiz.Nombre, esConfig, new[] { columna }));
+            grupos.Add(new MenuGrupoVm(raiz.Nombre, esConfig, new[] { columna }, MenuIcono.NormalizarClase(raiz.Icono)));
         }
 
         return new MenuEscritorioVm(grupos, desdeBaseDeDatos);
