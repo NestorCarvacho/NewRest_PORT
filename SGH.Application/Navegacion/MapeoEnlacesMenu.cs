@@ -22,6 +22,8 @@ public static class MapeoEnlacesMenu
         ("/app/config/habitacion", new(MenuClaves.Habitaciones, "/Habitacion/Datos", "GestionarHabitaciones", false)),
         ("/app/config/banos", new(MenuClaves.Banos, "/Habitacion/Banos", "GestionarHabitaciones", false)),
         ("/app/config/bano", new(MenuClaves.Banos, "/Habitacion/Banos", "GestionarHabitaciones", false)),
+        ("/app/config/tiposcama", new(MenuClaves.TiposCama, "/Habitacion/TiposCama", "GestionarHabitaciones", false)),
+        ("/app/config/tipocama", new(MenuClaves.TiposCama, "/Habitacion/TiposCama", "GestionarHabitaciones", false)),
         ("/app/config/usuario", new(MenuClaves.Usuarios, "/Cuenta/Usuarios", "AdministrarUsuarios", false)),
         ("/app/config/usuarios", new(MenuClaves.Usuarios, "/Cuenta/Usuarios", "AdministrarUsuarios", false)),
         ("/app/gestion/usuarios", new(MenuClaves.Usuarios, "/Cuenta/Usuarios", "AdministrarUsuarios", false)),

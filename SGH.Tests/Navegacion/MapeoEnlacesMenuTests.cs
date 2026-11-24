@@ -41,6 +41,7 @@ public sealed class MapeoEnlacesMenuTests
     [Theory]
     [InlineData("/app/config/habitaciones", MenuClaves.Habitaciones, "/Habitacion/Datos")]
     [InlineData("/app/config/banos", MenuClaves.Banos, "/Habitacion/Banos")]
+    [InlineData("/app/config/tiposcama", MenuClaves.TiposCama, "/Habitacion/TiposCama")]
     public void TryMapear_config_habitacion_y_banos(string link, string clave, string ruta)
     {
         Assert.True(MapeoEnlacesMenu.TryMapear(link, out var mapeo));

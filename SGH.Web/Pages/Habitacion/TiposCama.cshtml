@@ -1,0 +1,11 @@
+@page
+@model SGH.Web.Pages.Habitacion.TiposCamaModel
+@{
+    ViewData["Title"] = "Tipos de cama";
+    ViewData["ModuloId"] = "tiposcama";
+}
+<partial name="_ModuloPagina" />
+<partial name="_ListadoTiposCama" />
+@section Scripts {
+    <script type="module" src="~/js/escritorio.js" asp-append-version="true"></script>
+}

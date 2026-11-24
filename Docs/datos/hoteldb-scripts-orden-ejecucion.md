@@ -36,6 +36,8 @@ Convenciones:
 | 18 | `SGH.Infrastructure/Solicitud/Persistence/006_sp_cargar_pasajero.sql` | Solicitud | Carga masiva; después de **007** y **008**. |
 | 19 | `SGH.Infrastructure/Navegacion/Persistence/002_menu_config_habitacion_bano.sql` | Navegación | Entradas de menú Configuración; después de CU-HAB operativo. |
 | 20 | `SGH.Infrastructure/Navegacion/Persistence/003_menusperfil_habitacion_bano_por_perfil.sql` | Navegación | `MenusPerfil` por perfil (p. ej. 68); después del **002**. |
+| 21 | `SGH.Infrastructure/Navegacion/Persistence/004_menu_config_tipos_cama.sql` | Navegación | Menú Configuración → Tipos de cama (CU-HAB-02). |
+| 22 | `SGH.Infrastructure/Navegacion/Persistence/005_menusperfil_tipos_cama_por_perfil.sql` | Navegación | `MenusPerfil` tipos de cama por perfil; después del **004**. |
 
 ### Lote 2026-11-23
 
@@ -75,6 +77,8 @@ No ejecutar: `001_sp_login_borrador.sql` (borrador / checklist en `Docs/login-pe
 
 1. `001_sp_menu.sql`
 2. `002_menu_config_habitacion_bano.sql` (solo si usás pantallas Config habitaciones/baños)
+3. `004_menu_config_tipos_cama.sql` (menú Tipos de cama; tras **002** si compartís el mismo grupo Config)
+4. `005_menusperfil_tipos_cama_por_perfil.sql` (opcional: asignar a otros `PerfilId`, p. ej. 68)
 
 ### Habitación (CU-HAB-01)
 
