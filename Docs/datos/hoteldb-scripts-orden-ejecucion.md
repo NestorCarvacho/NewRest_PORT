@@ -45,6 +45,14 @@ Un solo archivo con los cambios del día (reserva anular/reversar movimiento, so
 
 - `Docs/datos/migracion/20261123_modificaciones.sql`
 
+### Lote 2026-11-24
+
+Tipos de cama (menú `Tipos de cama`, catálogo habitación con octavo result set, `he_sp_tipo_cama_listar` con `CampamentoId`):
+
+- `Docs/datos/migracion/20261124_modificaciones.sql`
+
+Requiere tabla `dbo.TipoCama` (**005_hotldb_tipo_cama_inventario.sql**) si CU-HAB-02 aún no está en la base. Ajustar `@PerfilId` en el bloque MenusPerfil (por defecto 68).
+
 ### Parches incrementales (QA que ya ejecutó los `001_*` antiguos)
 
 No re-ejecutar los `001` solo para aplicar estos cambios. Usar los archivos numerados siguientes (idempotentes con `CREATE OR ALTER`):
