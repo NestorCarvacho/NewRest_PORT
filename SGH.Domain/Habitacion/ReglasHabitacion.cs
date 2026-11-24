@@ -10,6 +10,7 @@ public static class ReglasHabitacion
     public const string ModuloRequerido = "Seleccione el módulo (ubicación física) de la habitación.";
     public const string CantidadCamasInvalida = "La habitación debe tener al menos 1 cama (capacidad física).";
     public const string SexoInvalido = "Seleccione un sexo válido (M, F, O o MIXTO).";
+    public const string TipoInstalacionRequerido = "Seleccione el tipo de alojamiento.";
     public const string CapacidadPersonasInvalida = "La capacidad máxima de personas no puede ser menor que la mínima.";
     public const string UsoExclusivoCapacidad = "Para uso exclusivo, la capacidad máxima de personas debe cubrir todas las camas habilitadas.";
     public const string MinutosHigienizacion = "Los minutos de higienización entre turnos no pueden ser negativos.";
@@ -22,6 +23,7 @@ public static class ReglasHabitacion
         int moduloId,
         int cantidadCamas,
         string? sexo,
+        int tipoInstalacionId,
         int personasMin,
         int personasMax,
         bool usoExclusivo,
@@ -31,6 +33,8 @@ public static class ReglasHabitacion
             return NombreRequerido;
         if (moduloId <= 0)
             return ModuloRequerido;
+        if (tipoInstalacionId <= 0)
+            return TipoInstalacionRequerido;
         if (cantidadCamas < 1)
             return CantidadCamasInvalida;
         if (string.IsNullOrWhiteSpace(sexo) || !SexosPermitidos.Contains(sexo.Trim()))

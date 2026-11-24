@@ -39,6 +39,7 @@ public sealed class GestionHabitaciones(
             datos.ModuloId,
             datos.CantidadCamas,
             datos.Sexo,
+            datos.TipoInstalacionId,
             datos.UsoExclusivo ? datos.CantidadCamas : datos.PersonasCantidadMin,
             datos.UsoExclusivo ? datos.CantidadCamas : datos.PersonasCantidadMax,
             datos.UsoExclusivo,
