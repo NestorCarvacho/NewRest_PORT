@@ -7,22 +7,29 @@ public sealed class ReglasHabitacionTests
     [Fact]
     public void ValidaAltaCorrecta()
     {
-        var err = ReglasHabitacion.ValidarAlta("101", 5, 2, "M", 1, 2, false, 0);
+        var err = ReglasHabitacion.ValidarAlta("101", 5, 2, "M", 3, 1, 2, false, 0);
         Assert.Null(err);
     }
 
     [Fact]
     public void RechazaSinModulo()
     {
-        var err = ReglasHabitacion.ValidarAlta("101", 0, 2, "M", 1, 2, false, 0);
+        var err = ReglasHabitacion.ValidarAlta("101", 0, 2, "M", 3, 1, 2, false, 0);
         Assert.Equal(ReglasHabitacion.ModuloRequerido, err);
     }
 
     [Fact]
     public void UsoExclusivoRequiereCapacidadCubreCamas()
     {
-        var err = ReglasHabitacion.ValidarAlta("Suite", 1, 4, "M", 1, 2, true, 0);
+        var err = ReglasHabitacion.ValidarAlta("Suite", 1, 4, "M", 2, 1, 2, true, 0);
         Assert.Equal(ReglasHabitacion.UsoExclusivoCapacidad, err);
+    }
+
+    [Fact]
+    public void RechazaSinTipoInstalacion()
+    {
+        var err = ReglasHabitacion.ValidarAlta("101", 5, 2, "M", 0, 1, 2, false, 0);
+        Assert.Equal(ReglasHabitacion.TipoInstalacionRequerido, err);
     }
 
     [Theory]
