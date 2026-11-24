@@ -159,8 +159,43 @@ export function crearHabitacion(dependencias) {
         return s.length >= 10 ? s.substring(0, 10) : s;
     }
 
+    function etiquetaTipoCama(fila) {
+        return (fila.nombre || "") + " (" + (fila.anchoCm || 0) + " × " + (fila.largoCm || 0) + " cm)";
+    }
+
+    function opcionesTiposCamaDesdeFilas(filas) {
+        return (filas || []).map(function (fila) {
+            return { value: String(fila.id), text: etiquetaTipoCama(fila) };
+        });
+    }
+
     function opcionesTiposCama(catalogo) {
         return dependencias.aOpcion(catalogo.tiposCama || []);
+    }
+
+    function opcionesTiposCamaParaFormulario(catalogo, cama) {
+        var desdeCatalogo = opcionesTiposCama(catalogo);
+        var promesa = desdeCatalogo.length
+            ? Promise.resolve({ opciones: desdeCatalogo, filas: null })
+            : mid("listartiposcama", { soloActivos: 1 }).then(function (resultado) {
+                var filas = filasDeRespuesta(resultado);
+                if (catalogo && filas.length) {
+                    catalogo.tiposCama = filas.map(function (fila) {
+                        return { id: fila.id, etiqueta: etiquetaTipoCama(fila), padreId: 0 };
+                    });
+                }
+                return { opciones: opcionesTiposCamaDesdeFilas(filas), filas: filas };
+            });
+        return promesa.then(function (paquete) {
+            var lista = paquete.opciones.slice();
+            if (cama && cama.tipoCamaId && !lista.some(function (o) { return o.value === String(cama.tipoCamaId); })) {
+                var texto = cama.tipoCamaNombre
+                    ? cama.tipoCamaNombre + " (" + (cama.tipoCamaAnchoCm || "?") + " × " + (cama.tipoCamaLargoCm || "?") + " cm)"
+                    : ("Tipo " + cama.tipoCamaId);
+                lista.push({ value: String(cama.tipoCamaId), text: texto + " (inactivo)" });
+            }
+            return lista;
+        });
     }
 
     function opcionesTiposInstalacion(catalogo) {
@@ -620,38 +655,41 @@ export function crearHabitacion(dependencias) {
     }
 
     function abrirFormularioCama(habitacion, cama, catalogo) {
-        var tiposOpts = opcionesTiposCama(catalogo);
-        var form = dependencias.formulario([
-            dependencias.seccion("Plaza", [
-                dependencias.campo("codigoCama", "Código", "text", [], {
-                    requerido: true,
-                    valor: cama.codigoCama || ""
-                }),
-                dependencias.campo("tipoCamaId", "Tipo de cama", "select", tiposOpts, {
-                    valor: cama.tipoCamaId ? String(cama.tipoCamaId) : ""
-                }),
-                dependencias.campo("estado", "Estado", "select", [
-                    { value: "1", text: "1 — Activa" },
-                    { value: "0", text: "0 — Inactiva" }
-                ], {
-                    valor: (cama.habilitada && cama.isActive !== false && cama.isActive !== 0) ? "1" : "0"
-                })
-            ])
-        ], "Guardar", true, function (datos) {
-            return mid("guardarcama", {
-                id: cama.id,
-                habitacionId: habitacion.id,
-                codigoCama: (datos.codigoCama || "").trim(),
-                tipoCamaId: dependencias.numero(datos.tipoCamaId) || null,
-                habilitada: datos.estado === "1",
-                inactivo: datos.estado !== "1",
-                orden: cama.orden || 0
-            }).then(function () {
-                dependencias.mostrarAviso("Cama guardada.", "success");
-                return abrirCamasHabitacion(habitacion);
+        opcionesTiposCamaParaFormulario(catalogo, cama).then(function (tiposOpts) {
+            var form = dependencias.formulario([
+                dependencias.seccion("Plaza", [
+                    dependencias.campo("codigoCama", "Código", "text", [], {
+                        requerido: true,
+                        valor: cama.codigoCama || ""
+                    }),
+                    dependencias.campo("tipoCamaId", "Tipo de cama", "select", tiposOpts, {
+                        valor: cama.tipoCamaId ? String(cama.tipoCamaId) : ""
+                    }),
+                    dependencias.campo("estado", "Estado", "select", [
+                        { value: "1", text: "1 — Activa" },
+                        { value: "0", text: "0 — Inactiva" }
+                    ], {
+                        valor: (cama.habilitada && cama.isActive !== false && cama.isActive !== 0) ? "1" : "0"
+                    })
+                ])
+            ], "Guardar", true, function (datos) {
+                return mid("guardarcama", {
+                    id: cama.id,
+                    habitacionId: habitacion.id,
+                    codigoCama: (datos.codigoCama || "").trim(),
+                    tipoCamaId: dependencias.numero(datos.tipoCamaId) || null,
+                    habilitada: datos.estado === "1",
+                    inactivo: datos.estado !== "1",
+                    orden: cama.orden || 0
+                }).then(function () {
+                    dependencias.mostrarAviso("Cama guardada.", "success");
+                    return abrirCamasHabitacion(habitacion);
+                });
             });
+            dependencias.abrirPanel("Editar cama — " + (habitacion.nombre || ""), form);
+        }).catch(function (error) {
+            dependencias.mostrarAviso(error.message, "error");
         });
-        dependencias.abrirPanel("Editar cama — " + (habitacion.nombre || ""), form);
     }
 
   function pintarResultadoImportacion(contenedor, datos) {

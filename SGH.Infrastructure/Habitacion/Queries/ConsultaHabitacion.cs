@@ -5,7 +5,7 @@ using SGH.Infrastructure.Persistence;
 
 namespace SGH.Infrastructure.Habitacion.Queries;
 
-public sealed class ConsultaHabitacion(IFabricaConexionSql fabrica) : IConsultaHabitacion
+public sealed class ConsultaHabitacion(IFabricaConexionSql fabrica, IConsultaTipoCama consultaTipoCama) : IConsultaHabitacion
 {
     public async Task<IReadOnlyList<HabitacionListada>> ListarAsync(
         FiltroListadoHabitacion filtro, int usuarioId, CancellationToken cancellationToken)
@@ -93,7 +93,20 @@ public sealed class ConsultaHabitacion(IFabricaConexionSql fabrica) : IConsultaH
                 /* catálogo sin 8.º result set (pre CU-HAB-02) */
             }
         }
+
+        if (tiposCama.Count == 0)
+            tiposCama = await OpcionesTiposCamaAsync(campamentoId, cancellationToken);
+
         return new CatalogoHabitacion(pabellones, modulos, sexos, estados, tipos, standards, banos, tiposCama);
+    }
+
+    private async Task<IReadOnlyList<OpcionCatalogo>> OpcionesTiposCamaAsync(
+        int campamentoId, CancellationToken cancellationToken)
+    {
+        var filas = await consultaTipoCama.ListarAsync(campamentoId, soloActivos: 1, tipoCamaId: 0, cancellationToken);
+        return filas
+            .Select(t => new OpcionCatalogo(t.Id, $"{t.Nombre} ({t.AnchoCm}×{t.LargoCm} cm)", 0))
+            .ToList();
     }
 
     private sealed class OpcionListaFila
