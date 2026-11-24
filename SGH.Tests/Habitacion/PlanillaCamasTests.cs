@@ -10,7 +10,7 @@ public class PlanillaCamasTests
     public void PlantillaIncluyeHojaCamasTiposEInstrucciones()
     {
         var planilla = new PlanillaCamasExcel();
-        var bytes = planilla.CrearPlantilla(42, [new TipoCamaListado(3, "1 plaza", 90, 190, true, 0)]);
+        var bytes = planilla.CrearPlantilla(42, [new TipoCamaListado(3, 42, "1 plaza", 90, 190, true, 0)]);
         using var libro = new XLWorkbook(new MemoryStream(bytes));
         Assert.NotNull(libro.Worksheet("camas"));
         Assert.NotNull(libro.Worksheet("TiposCama"));
