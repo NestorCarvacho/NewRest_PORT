@@ -445,6 +445,7 @@ export function crearCenso(dependencias) {
         columnas: columnas,
         configurarOpcionesTabla: configurarOpcionesTabla,
         enlazarTablaResponsiveCenso: enlazarTablaResponsiveCenso,
-        guardar: guardar
+        guardar: guardar,
+        fechaUnicaCenso: fechaUnicaCenso
     };
 }
