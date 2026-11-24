@@ -588,11 +588,11 @@ export function crearHabitacion(dependencias) {
                         + (cama.habilitada ? " — Habilitada" : " — No habilitada")
                         + estadoPlaza;
                     tarjeta.appendChild(resumen);
-                    var editar = dependencias.boton ? dependencias.boton("Editar inventario", "accion-fila", function () {
+                    var editar = dependencias.boton ? dependencias.boton("Editar", "accion-fila", function () {
                         abrirFormularioCama(fila, cama, catalogo);
                     }) : document.createElement("button");
                     if (!dependencias.boton) {
-                        editar.textContent = "Editar inventario";
+                        editar.textContent = "Editar";
                         editar.addEventListener("click", function () { abrirFormularioCama(fila, cama, catalogo); });
                     }
                     tarjeta.appendChild(editar);
@@ -620,22 +620,6 @@ export function crearHabitacion(dependencias) {
                 ], {
                     valor: (cama.habilitada && cama.isActive !== false && cama.isActive !== 0) ? "1" : "0"
                 })
-            ]),
-            dependencias.seccion("Colchón", [
-                dependencias.campo("fechaColchon", "Fecha cambio colchón", "date", [], {
-                    valor: fechaCampo(cama.fechaColchon)
-                }),
-                dependencias.campo("colchonObservacion", "Observación colchón", "textarea", [], {
-                    valor: cama.colchonObservacion || ""
-                })
-            ]),
-            dependencias.seccion("Ropa de cama", [
-                dependencias.campo("fechaCambioRopa", "Fecha cambio ropa", "date", [], {
-                    valor: fechaCampo(cama.fechaCambioRopa)
-                }),
-                dependencias.campo("ropaCamaObservacion", "Observación ropa", "textarea", [], {
-                    valor: cama.ropaCamaObservacion || ""
-                })
             ])
         ], "Guardar", true, function (datos) {
             return mid("guardarcama", {
@@ -645,11 +629,7 @@ export function crearHabitacion(dependencias) {
                 tipoCamaId: dependencias.numero(datos.tipoCamaId) || null,
                 habilitada: datos.estado === "1",
                 inactivo: datos.estado !== "1",
-                orden: cama.orden || 0,
-                fechaColchon: datos.fechaColchon || null,
-                colchonObservacion: (datos.colchonObservacion || "").trim() || null,
-                fechaCambioRopa: datos.fechaCambioRopa || null,
-                ropaCamaObservacion: (datos.ropaCamaObservacion || "").trim() || null
+                orden: cama.orden || 0
             }).then(function () {
                 dependencias.mostrarAviso("Cama guardada.", "success");
                 return abrirCamasHabitacion(habitacion);
