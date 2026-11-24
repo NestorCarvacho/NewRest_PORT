@@ -152,7 +152,8 @@ body.app-body {
 }
 
 .usuario-boton svg,
-.menu-boton svg {
+.menu-boton svg,
+.menu-boton-icono-svg {
   width: 1.15rem;
   height: 1.15rem;
   fill: none;
@@ -160,6 +161,14 @@ body.app-body {
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.menu-boton-icono-fa {
+  width: 1.15rem;
+  font-size: 1rem;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
 .usuario-menu {
@@ -415,6 +424,12 @@ body.app-body {
   margin-top: 1.1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--blizzard);
+}
+
+.menu-modulos-seccion-icono {
+  margin-right: 0.35rem;
+  width: 1.1em;
+  text-align: center;
 }
 
 .menu-modulos-seccion-titulo {

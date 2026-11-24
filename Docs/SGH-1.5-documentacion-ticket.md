@@ -89,7 +89,8 @@ Configuración: `SGH.Web/Program.cs`.
 - `_Layout.cshtml` invoca `@await Component.InvokeAsync("MenuPerfil")`.
 - Ítems con página migrada: enlace con `data-modulo` (buscador y solapas siguen funcionando).
 - Ítems sin mapeo: botón **deshabilitado** («No disponible»).
-- Grupos de configuración: `Ubicacion` contiene «config», «campamento» o «administr» → icono engranaje (`menu-config`).
+- Iconos de barra: **Font Awesome 5.15.4** (`_FontAwesome5.cshtml`, CDN). Raíces `nav` usan `Menus.Icono` (`fas fa-*`).
+- Grupos de configuración: clase CSS `menu-config`; si hay `Icono` en BD se muestra en lugar del SVG de engranaje por defecto.
 
 ### 6. Respaldo (fallback)
 

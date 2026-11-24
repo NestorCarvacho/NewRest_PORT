@@ -14,16 +14,19 @@ public sealed class MenuEscritorioVm
 
 public sealed class MenuGrupoVm
 {
-    public MenuGrupoVm(string titulo, bool esConfiguracion, IReadOnlyList<MenuColumnaVm> columnas)
+    public MenuGrupoVm(string titulo, bool esConfiguracion, IReadOnlyList<MenuColumnaVm> columnas, string? icono = null)
     {
         Titulo = titulo;
         EsConfiguracion = esConfiguracion;
         Columnas = columnas;
+        Icono = icono;
     }
 
     public string Titulo { get; }
     public bool EsConfiguracion { get; }
     public IReadOnlyList<MenuColumnaVm> Columnas { get; }
+    /// <summary>Clase Font Awesome 5 (ej. <c>fas fa-bed</c>) de la raíz <c>nav</c>.</summary>
+    public string? Icono { get; }
 }
 
 public sealed class MenuColumnaVm

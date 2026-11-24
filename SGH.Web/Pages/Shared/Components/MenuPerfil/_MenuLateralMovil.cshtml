@@ -9,7 +9,13 @@
         @foreach (var grupo in Model.Grupos)
         {
             <section class="menu-modulos-seccion">
-                <h3 class="menu-modulos-seccion-titulo">@grupo.Titulo</h3>
+                <h3 class="menu-modulos-seccion-titulo">
+                    @if (!string.IsNullOrEmpty(grupo.Icono))
+                    {
+                        <i class="@grupo.Icono menu-modulos-seccion-icono" aria-hidden="true"></i>
+                    }
+                    @grupo.Titulo
+                </h3>
                 @foreach (var columna in grupo.Columnas)
                 {
                     <div class="menu-modulos-bloque">
