@@ -129,6 +129,14 @@ BEGIN
       AND (b.IsActive = 1 OR b.Estado = N'ACTIVO')
       AND b.Estado <> N'INACTIVO'
     ORDER BY b.Ubicacion, b.CodigoNombre;
+
+    IF OBJECT_ID(N'dbo.TipoCama', N'U') IS NOT NULL
+        SELECT tc.Id,
+               tc.Nombre + N' (' + CAST(tc.AnchoCm AS nvarchar(10)) + N'×' + CAST(tc.LargoCm AS nvarchar(10)) + N' cm)' AS Etiqueta,
+               0 AS PadreId
+        FROM dbo.TipoCama AS tc WITH (NOLOCK)
+        WHERE tc.CampamentoId = @CampamentoId AND tc.IsActive = 1
+        ORDER BY tc.Nombre;
 END
 GO
 
