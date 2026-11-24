@@ -377,6 +377,8 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas
         if (tipoCamaId is 0)
             tipoCamaId = null;
 
+        var incluyeInventarioMandante = PeticionIncluyeInventarioMandante(filtro);
+
         return new DatosGuardarCama(
             LecturaPeticion.Entero(filtro, "id"),
             habitacionId,
@@ -389,8 +391,15 @@ public sealed class MidHabitaciones(IGestionHabitaciones gestion, IPlanillaCamas
             LecturaPeticion.Texto(filtro, "colchonObservacion"),
             LecturaPeticion.FechaOpcional(filtro, "fechaCambioRopa"),
             LecturaPeticion.Texto(filtro, "ropaCamaObservacion"),
+            incluyeInventarioMandante,
             usuarioId);
     }
+
+    private static bool PeticionIncluyeInventarioMandante(FiltroPeticion filtro) =>
+        LecturaPeticion.Campo(filtro, "fechaColchon") is not null
+        || LecturaPeticion.Campo(filtro, "colchonObservacion") is not null
+        || LecturaPeticion.Campo(filtro, "fechaCambioRopa") is not null
+        || LecturaPeticion.Campo(filtro, "ropaCamaObservacion") is not null;
 
     private static DatosGuardarTipoCama? LeerCuerpoTipoCama(FiltroPeticion filtro, int usuarioId, bool esAlta)
     {

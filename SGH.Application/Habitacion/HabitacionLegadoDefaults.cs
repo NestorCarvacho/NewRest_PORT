@@ -23,11 +23,9 @@ public static class HabitacionLegadoDefaults
         var standard = datos.StandardHabitacionId;
         var estado = datos.Estado;
 
-        if (tipo <= 0 || standard <= 0 || EsEstadoNoLegado(estado))
+        if (standard <= 0 || EsEstadoNoLegado(estado))
         {
             var catalogo = await consulta.CatalogoAsync(campamentoId, empresaMandanteId, cancellationToken);
-            if (tipo <= 0 && catalogo.TiposInstalacion.Count > 0)
-                tipo = catalogo.TiposInstalacion[0].Id;
             if (standard <= 0 && catalogo.Standards.Count > 0)
                 standard = catalogo.Standards[0].Id;
             if (EsEstadoNoLegado(estado))

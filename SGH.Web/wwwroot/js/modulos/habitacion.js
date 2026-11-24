@@ -163,6 +163,10 @@ export function crearHabitacion(dependencias) {
         return dependencias.aOpcion(catalogo.tiposCama || []);
     }
 
+    function opcionesTiposInstalacion(catalogo) {
+        return dependencias.aOpcion(catalogo.tiposInstalacion || []);
+    }
+
     function filaHabitacion(fila) {
         return {
             acciones: fila,
@@ -278,7 +282,7 @@ export function crearHabitacion(dependencias) {
     }
 
     function abrirFormularioHabitacion(opcion, fila) {
-        var catalogo = obtenerCatalogo() || { pabellones: [], modulos: [], sexos: [], estadosHabitacion: [], banos: [] };
+        var catalogo = obtenerCatalogo() || { pabellones: [], modulos: [], sexos: [], estadosHabitacion: [], tiposInstalacion: [], banos: [] };
         var banosOpts = dependencias.aOpcion(catalogo.banos || []);
         var esAlta = opcion === "crear";
         var titulo = esAlta ? "Nueva habitación" : "Editar habitación";
@@ -297,6 +301,10 @@ export function crearHabitacion(dependencias) {
             ]),
             dependencias.seccion("Características", [
                 dependencias.campo("sexo", "Sexo", "select", opcionesSexo(catalogo), { requerido: true, valor: fila ? fila.sexo : "" }),
+                dependencias.campo("tipoInstalacionId", "Tipo de alojamiento", "select", opcionesTiposInstalacion(catalogo), {
+                    requerido: true,
+                    valor: fila && fila.tipoInstalacionId ? fila.tipoInstalacionId : ""
+                }),
                 dependencias.campo("banoId", "Baño", "select", banosOpts, { valor: fila && fila.banoId ? fila.banoId : "" }),
                 dependencias.campo("cantidadCamas", "N° camas", "number", [], { requerido: true, valor: fila ? fila.cantidadCamas : 1 }),
                 dependencias.campo("estado", "Estado", "select", estados, {
@@ -326,6 +334,7 @@ export function crearHabitacion(dependencias) {
                 moduloId: dependencias.numero(datos.moduloId),
                 nombre: (datos.nombre || "").trim(),
                 sexo: datos.sexo,
+                tipoInstalacionId: dependencias.numero(datos.tipoInstalacionId),
                 banoId: dependencias.numero(datos.banoId) || null,
                 cantidadCamas: dependencias.numero(datos.cantidadCamas) || 1,
                 estado: datos.estado,
@@ -353,6 +362,13 @@ export function crearHabitacion(dependencias) {
                     if (bano) {
                         bano.value = String(det.banoId);
                         dependencias.actualizarSelector(bano);
+                    }
+                }
+                if (det.tipoInstalacionId) {
+                    var tipoAloj = form.querySelector("[name='tipoInstalacionId']");
+                    if (tipoAloj) {
+                        tipoAloj.value = String(det.tipoInstalacionId);
+                        dependencias.actualizarSelector(tipoAloj);
                     }
                 }
             }).catch(function () { });
@@ -588,11 +604,11 @@ export function crearHabitacion(dependencias) {
                         + (cama.habilitada ? " — Habilitada" : " — No habilitada")
                         + estadoPlaza;
                     tarjeta.appendChild(resumen);
-                    var editar = dependencias.boton ? dependencias.boton("Editar inventario", "accion-fila", function () {
+                    var editar = dependencias.boton ? dependencias.boton("Editar", "accion-fila", function () {
                         abrirFormularioCama(fila, cama, catalogo);
                     }) : document.createElement("button");
                     if (!dependencias.boton) {
-                        editar.textContent = "Editar inventario";
+                        editar.textContent = "Editar";
                         editar.addEventListener("click", function () { abrirFormularioCama(fila, cama, catalogo); });
                     }
                     tarjeta.appendChild(editar);
@@ -620,22 +636,6 @@ export function crearHabitacion(dependencias) {
                 ], {
                     valor: (cama.habilitada && cama.isActive !== false && cama.isActive !== 0) ? "1" : "0"
                 })
-            ]),
-            dependencias.seccion("Colchón", [
-                dependencias.campo("fechaColchon", "Fecha cambio colchón", "date", [], {
-                    valor: fechaCampo(cama.fechaColchon)
-                }),
-                dependencias.campo("colchonObservacion", "Observación colchón", "textarea", [], {
-                    valor: cama.colchonObservacion || ""
-                })
-            ]),
-            dependencias.seccion("Ropa de cama", [
-                dependencias.campo("fechaCambioRopa", "Fecha cambio ropa", "date", [], {
-                    valor: fechaCampo(cama.fechaCambioRopa)
-                }),
-                dependencias.campo("ropaCamaObservacion", "Observación ropa", "textarea", [], {
-                    valor: cama.ropaCamaObservacion || ""
-                })
             ])
         ], "Guardar", true, function (datos) {
             return mid("guardarcama", {
@@ -645,11 +645,7 @@ export function crearHabitacion(dependencias) {
                 tipoCamaId: dependencias.numero(datos.tipoCamaId) || null,
                 habilitada: datos.estado === "1",
                 inactivo: datos.estado !== "1",
-                orden: cama.orden || 0,
-                fechaColchon: datos.fechaColchon || null,
-                colchonObservacion: (datos.colchonObservacion || "").trim() || null,
-                fechaCambioRopa: datos.fechaCambioRopa || null,
-                ropaCamaObservacion: (datos.ropaCamaObservacion || "").trim() || null
+                orden: cama.orden || 0
             }).then(function () {
                 dependencias.mostrarAviso("Cama guardada.", "success");
                 return abrirCamasHabitacion(habitacion);
