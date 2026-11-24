@@ -115,6 +115,23 @@ public sealed class GestionHabitaciones(
                 datos.Id, habitacionCama ?? 0, datos.HabitacionId);
             if (mensajeAlcance is not null)
                 return new ResultadoGuardarCama(false, mensajeAlcance, datos.Id);
+
+            if (!datos.IncluyeInventarioMandante)
+            {
+                var camas = await consultaCama.ListarPorHabitacionAsync(
+                    datos.HabitacionId, campamentoId, 0, cancellationToken);
+                var actual = camas.FirstOrDefault(c => c.Id == datos.Id);
+                if (actual is not null)
+                {
+                    datos = datos with
+                    {
+                        FechaColchon = actual.FechaColchon,
+                        ColchonObservacion = actual.ColchonObservacion,
+                        FechaCambioRopa = actual.FechaCambioRopa,
+                        RopaCamaObservacion = actual.RopaCamaObservacion
+                    };
+                }
+            }
         }
 
         return await comandoCama.GuardarAsync(datos, campamentoId, cancellationToken);
@@ -194,6 +211,7 @@ public sealed class GestionHabitaciones(
                 fila.ColchonObservacion,
                 fila.FechaCambioRopa,
                 fila.RopaCamaObservacion,
+                true,
                 usuarioId);
 
             var guardado = await GuardarCamaAsync(datos, campamentoId, cancellationToken);

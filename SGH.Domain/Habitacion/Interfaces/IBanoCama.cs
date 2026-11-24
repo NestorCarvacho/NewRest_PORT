@@ -68,6 +68,7 @@ public sealed record DatosGuardarCama(
     string? ColchonObservacion,
     DateTime? FechaCambioRopa,
     string? RopaCamaObservacion,
+    bool IncluyeInventarioMandante,
     int UsuarioId);
 
 public sealed record ResultadoGuardarCama(bool Exito, string Mensaje, int Id);
