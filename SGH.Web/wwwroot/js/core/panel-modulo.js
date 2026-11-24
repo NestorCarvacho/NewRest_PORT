@@ -70,7 +70,13 @@ export function crearPanelModulo(dependencias) {
 
         var acciones = {
             "nueva-solicitud": function () { dependencias.solicitud.abrirNueva(); },
-            "censo-qr": function () { dependencias.censoQr.abrir(); },
+            "censo-qr": function () {
+                if (dependencias.abrirFlujoCensoQrDesdeNodo) {
+                    dependencias.abrirFlujoCensoQrDesdeNodo(nodo);
+                    return;
+                }
+                if (dependencias.censoQrFlujo) dependencias.censoQrFlujo.abrir({ fechaCenso: dependencias.fechaActual && dependencias.fechaActual() });
+            },
             "guardar-censo": function () { dependencias.censo.guardar(nodo); },
             "nueva-habitacion": function () { dependencias.habitacion.abrirNuevaHabitacion(); },
             "nuevo-bano": function () { dependencias.habitacion.abrirNuevoBano(); },

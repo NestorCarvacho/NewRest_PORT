@@ -27,7 +27,6 @@ export function ensamblarEntorno(idsPantalla) {
         censo: null,
         solicitud: null,
         movimientosReserva: null,
-        censoQr: null,
         habitacion: null,
         movimientosHabitacion: null
     };
@@ -85,7 +84,9 @@ export function ensamblarEntorno(idsPantalla) {
         exportarTabla: base.exportarTabla,
         solicitud: instancia.solicitud,
         censo: instancia.censo,
-        censoQr: instancia.censoQr,
+        censoQrFlujo: instancia.censoQrFlujo,
+        abrirFlujoCensoQrDesdeNodo: instancia.abrirFlujoCensoQrDesdeNodo,
+        fechaActual: base.fechaActual,
         enlazarVistaMisCensosQr: instancia.enlazarVistaMisCensosQr,
         habitacion: instancia.habitacion,
         movimientosReserva: instancia.movimientosReserva,
