@@ -1,0 +1,139 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{88639F3D-7EDF-4EC7-86EB-6A106EBF8234}|SGH.Application\\SGH.Application.csproj|c:\\users\\nestor.carvacho\\source\\repos\\newrest_port\\sgh.application\\reserva\\usecases\\operacionesreserva.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{88639F3D-7EDF-4EC7-86EB-6A106EBF8234}|SGH.Application\\SGH.Application.csproj|solutionrelative:sgh.application\\reserva\\usecases\\operacionesreserva.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{88639F3D-7EDF-4EC7-86EB-6A106EBF8234}|SGH.Application\\SGH.Application.csproj|c:\\users\\nestor.carvacho\\source\\repos\\newrest_port\\sgh.application\\reserva\\dtos\\reservadtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{88639F3D-7EDF-4EC7-86EB-6A106EBF8234}|SGH.Application\\SGH.Application.csproj|solutionrelative:sgh.application\\reserva\\dtos\\reservadtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA26BBE7-EDB3-4134-8969-6E7A35938AF9}|SGH.Domain\\SGH.Domain.csproj|c:\\users\\nestor.carvacho\\source\\repos\\newrest_port\\sgh.domain\\reserva\\reglasreserva.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BA26BBE7-EDB3-4134-8969-6E7A35938AF9}|SGH.Domain\\SGH.Domain.csproj|solutionrelative:sgh.domain\\reserva\\reglasreserva.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{88639F3D-7EDF-4EC7-86EB-6A106EBF8234}|SGH.Application\\SGH.Application.csproj|c:\\users\\nestor.carvacho\\source\\repos\\newrest_port\\sgh.application\\mid\\midreservas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{88639F3D-7EDF-4EC7-86EB-6A106EBF8234}|SGH.Application\\SGH.Application.csproj|solutionrelative:sgh.application\\mid\\midreservas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A52B7089-43BB-41B6-8681-60CFEF24AD4D}|SGH.Infrastructure\\SGH.Infrastructure.csproj|c:\\users\\nestor.carvacho\\source\\repos\\newrest_port\\sgh.infrastructure\\reserva\\queries\\consultareserva.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A52B7089-43BB-41B6-8681-60CFEF24AD4D}|SGH.Infrastructure\\SGH.Infrastructure.csproj|solutionrelative:sgh.infrastructure\\reserva\\queries\\consultareserva.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA26BBE7-EDB3-4134-8969-6E7A35938AF9}|SGH.Domain\\SGH.Domain.csproj|c:\\users\\nestor.carvacho\\source\\repos\\newrest_port\\sgh.domain\\reserva\\interfaces\\iconsultareserva.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BA26BBE7-EDB3-4134-8969-6E7A35938AF9}|SGH.Domain\\SGH.Domain.csproj|solutionrelative:sgh.domain\\reserva\\interfaces\\iconsultareserva.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{88639F3D-7EDF-4EC7-86EB-6A106EBF8234}|SGH.Application\\SGH.Application.csproj|c:\\users\\nestor.carvacho\\source\\repos\\newrest_port\\sgh.application\\dependencyinjection\\applicationservicecollectionextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{88639F3D-7EDF-4EC7-86EB-6A106EBF8234}|SGH.Application\\SGH.Application.csproj|solutionrelative:sgh.application\\dependencyinjection\\applicationservicecollectionextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ReglasReserva.cs",
+              "DocumentMoniker": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\SGH.Domain\\Reserva\\ReglasReserva.cs",
+              "RelativeDocumentMoniker": "SGH.Domain\\Reserva\\ReglasReserva.cs",
+              "ToolTip": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\SGH.Domain\\Reserva\\ReglasReserva.cs",
+              "RelativeToolTip": "SGH.Domain\\Reserva\\ReglasReserva.cs",
+              "ViewState": "AgIAAD8AAAAAAAAAAAAuwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-26T19:01:46.653Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MidReservas.cs",
+              "DocumentMoniker": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\SGH.Application\\Mid\\MidReservas.cs",
+              "RelativeDocumentMoniker": "SGH.Application\\Mid\\MidReservas.cs",
+              "ToolTip": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\SGH.Application\\Mid\\MidReservas.cs",
+              "RelativeToolTip": "SGH.Application\\Mid\\MidReservas.cs",
+              "ViewState": "AgIAABEAAAAAAAAAAAAlwCQAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-26T18:18:01.779Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "IConsultaReserva.cs",
+              "DocumentMoniker": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\SGH.Domain\\Reserva\\Interfaces\\IConsultaReserva.cs",
+              "RelativeDocumentMoniker": "SGH.Domain\\Reserva\\Interfaces\\IConsultaReserva.cs",
+              "ToolTip": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\SGH.Domain\\Reserva\\Interfaces\\IConsultaReserva.cs",
+              "RelativeToolTip": "SGH.Domain\\Reserva\\Interfaces\\IConsultaReserva.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-26T18:14:23.76Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ConsultaReserva.cs",
+              "DocumentMoniker": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\SGH.Infrastructure\\Reserva\\Queries\\ConsultaReserva.cs",
+              "RelativeDocumentMoniker": "SGH.Infrastructure\\Reserva\\Queries\\ConsultaReserva.cs",
+              "ToolTip": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\SGH.Infrastructure\\Reserva\\Queries\\ConsultaReserva.cs",
+              "RelativeToolTip": "SGH.Infrastructure\\Reserva\\Queries\\ConsultaReserva.cs",
+              "ViewState": "AgIAAHQAAAAAAAAAAAAswFcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-26T18:13:35.094Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ReservaDtos.cs",
+              "DocumentMoniker": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\SGH.Application\\Reserva\\DTOs\\ReservaDtos.cs",
+              "RelativeDocumentMoniker": "SGH.Application\\Reserva\\DTOs\\ReservaDtos.cs",
+              "ToolTip": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\SGH.Application\\Reserva\\DTOs\\ReservaDtos.cs",
+              "RelativeToolTip": "SGH.Application\\Reserva\\DTOs\\ReservaDtos.cs",
+              "ViewState": "AgIAAD8AAAAAAAAAAAAcwEkAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-26T16:58:35.155Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "OperacionesReserva.cs",
+              "DocumentMoniker": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\SGH.Application\\Reserva\\UseCases\\OperacionesReserva.cs",
+              "RelativeDocumentMoniker": "SGH.Application\\Reserva\\UseCases\\OperacionesReserva.cs",
+              "ToolTip": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\SGH.Application\\Reserva\\UseCases\\OperacionesReserva.cs*",
+              "RelativeToolTip": "SGH.Application\\Reserva\\UseCases\\OperacionesReserva.cs*",
+              "ViewState": "AgIAAFQBAAAAAAAAAAAAwGUBAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-26T15:59:09.822Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ApplicationServiceCollectionExtensions.cs",
+              "DocumentMoniker": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\SGH.Application\\DependencyInjection\\ApplicationServiceCollectionExtensions.cs",
+              "RelativeDocumentMoniker": "SGH.Application\\DependencyInjection\\ApplicationServiceCollectionExtensions.cs",
+              "ToolTip": "C:\\Users\\nestor.carvacho\\source\\repos\\NewRest_PORT\\SGH.Application\\DependencyInjection\\ApplicationServiceCollectionExtensions.cs",
+              "RelativeToolTip": "SGH.Application\\DependencyInjection\\ApplicationServiceCollectionExtensions.cs",
+              "ViewState": "AgIAADQAAAAAAAAAAAAQwDYAAABKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-26T15:55:48.244Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

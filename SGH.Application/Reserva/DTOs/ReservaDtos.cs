@@ -69,6 +69,11 @@ public sealed record SolicitudFinalizarReserva(int ReservaId, int EmpresaMandant
 
 public sealed record SolicitudReversarMovimientoReserva(int ReservaId, int EmpresaMandanteId, int CampamentoId, int UsuarioId);
 
+public sealed record SolicitudFinalizarMasivoReserva(int EmpresaMandanteId, int CampamentoId, int UsuarioId)
+{
+    public int ReservaId { get; internal set; }
+}
+
 public sealed record SolicitudActualizarReserva(
     int ReservaId, int EmpresaMandanteId, int CampamentoId, int AreaId,
     DateTime FechaReserva, DateTime FechaLlegada, DateTime? FechaSalida,
@@ -161,4 +166,19 @@ public abstract record ResultadoReversarMovimientoReserva
     public sealed record Reversado : ResultadoReversarMovimientoReserva;
 
     public sealed record Rechazado(string Mensaje) : ResultadoReversarMovimientoReserva;
+}
+
+public abstract record ResultadoFinalizarMasivoReserva
+{
+    private ResultadoFinalizarMasivoReserva()
+    {
+    }
+
+    //solucionar error de herencia, no se puede instanciar la clase abstracta
+    public sealed record Finalizada : ResultadoFinalizarMasivoReserva
+    { 
+    }
+
+    public sealed record Finalizado : ResultadoFinalizarMasivoReserva;
+    public sealed record Rechazado(string Mensaje) : ResultadoFinalizarMasivoReserva;
 }

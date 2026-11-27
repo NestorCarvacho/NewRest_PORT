@@ -10,11 +10,10 @@ namespace SGH.Infrastructure.Reserva.Queries;
 public sealed class ConsultaReserva : IConsultaReserva
 {
     private readonly IFabricaConexionSql _fabrica;
-
+    
     public ConsultaReserva(IFabricaConexionSql fabrica)
     {
-        _fabrica = fabrica;
-    }
+        _fabrica = fabrica;    }
 
     public async Task<IReadOnlyList<ReservaListada>> BuscarAsync(FiltroReserva filtro, CancellationToken cancellationToken)
     {
@@ -88,6 +87,24 @@ public sealed class ConsultaReserva : IConsultaReserva
     }
 
     public async Task<bool> ReservaEstaEnCampamentoAsync(int reservaId, int campamentoId, CancellationToken cancellationToken)
+    {
+        using var conexion = _fabrica.Crear();
+        var marca = await conexion.QuerySingleAsync<MarcaPertenece>(
+            new CommandDefinition(
+                "he_sp_reserva_esta_en_campamento",
+                new { ReservaId = reservaId, CampamentoId = campamentoId },
+                commandType: CommandType.StoredProcedure,
+                cancellationToken: cancellationToken));
+        return marca.Pertenece;
+    }
+
+// para el error de "El registro no pertenece al campamento de su sesión. No puede consultarlo ni modificarlo."
+// el cual se da ahora porque se está verificando si la reserva pertenece al campamento de la sesión antes de permitir cualquier operación sobre ella.
+// Para evitar este error, se debe verificar si la reserva pertenece al campamento de la sesión antes de realizar cualquier operación sobre ella.
+// ya se revisa mediante los métodos ReservaEstaEnCampamentoAsync y ReservaEstaEnCampamentoMasivoAsync
+
+
+    public async Task<bool> ReservaEstaEnCampamentoMasivoAsync(object reservaId, int campamentoId, CancellationToken cancellationToken)
     {
         using var conexion = _fabrica.Crear();
         var marca = await conexion.QuerySingleAsync<MarcaPertenece>(

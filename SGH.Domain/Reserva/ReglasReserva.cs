@@ -82,4 +82,18 @@ public static class ReglasReserva
 
         return null;
     }
+
+    public static string? ValidarFinalizarMasivo(object reservaId, string estadoNumero, string? checkIn, string? checkOut)
+    {
+        if (reservaId is null)
+            return "Seleccione una reserva.";
+
+        if (string.IsNullOrWhiteSpace(estadoNumero))
+            return "El estado de la reserva es requerido.";
+        
+        if (string.IsNullOrWhiteSpace(checkIn) && string.IsNullOrWhiteSpace(checkOut))
+            return "La reserva no tiene check-in ni check-out para finalizar.";
+        
+        return null;
+    }
 }

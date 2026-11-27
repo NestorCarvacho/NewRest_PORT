@@ -2,7 +2,6 @@ using SGH.Application.Reserva.DTOs;
 using SGH.Application.Reserva.Interfaces;
 using SGH.Application.Sesion;
 using SGH.Domain.Consulta;
-
 namespace SGH.Application.Mid;
 
 public sealed class MidReservas(
@@ -15,9 +14,12 @@ public sealed class MidReservas(
     IActualizarReserva actualizar,
     IAnularReserva anular,
     IFinalizarReserva finalizar,
-    IReversarMovimientoReserva reversar)
+    IReversarMovimientoReserva reversar,
+    IFinalizarMasivoReserva finalizarMasivo)
 {
     public const string Ruta = "Mid/MidReservas.cs";
+
+    //C:\Users\nestor.carvacho\source\repos\NewRest_PORT\SGH.Application\Mid\MidReservas.cs(19,5): error CS0246: El nombre del tipo o del espacio de nombres 'IFinalizarMasivoReserva' no se encontró (¿falta una directiva using o una referencia de ensamblado?)
 
     public static readonly IReadOnlyList<AccionApi> Opciones =
     [
@@ -31,7 +33,9 @@ public sealed class MidReservas(
         Accion("finalizar", "Finalizar", "dbo.he_sp_reserva_finalizar_checkout", "Finaliza la reserva tras check-out."),
         Accion("reversar", "Anular movimiento", "dbo.he_sp_reserva_reversar_movimiento", "Anula (revierte) check-out o check-in según el último movimiento."),
         Accion("importar", "Importar", "dbo.he_sp_reserva_crear", "Crea reservas desde una planilla."),
-        Accion("plantilla", "Plantilla", "planilla", "Devuelve la planilla de importación.")
+        Accion("plantilla", "Plantilla", "planilla", "Devuelve la planilla de importación."),
+        Accion("finalizarmasivo", "Finalizar masivo", "dbo.he_sp_reserva_finalizar_checkout", "Finaliza reservas seleccionadas masivamente.")
+    
     ];
 
     public async Task<EjecucionMid> EjecutarAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
@@ -60,6 +64,8 @@ public sealed class MidReservas(
                 return await FinalizarAsync(filtro, sesion, cancellationToken);
             case "reversar":
                 return await ReversarAsync(filtro, sesion, cancellationToken);
+            case "finalizarmasivo":
+                return await FinalizarMasivoAsync(filtro, sesion, cancellationToken);
             case "plantilla":
                 return EjecucionMid.Descarga(
                     planilla.CrearPlantilla(),
@@ -286,6 +292,20 @@ public sealed class MidReservas(
             ResultadoMovimientoReserva.Registrado => EjecucionMid.Ok(new { listo = true }),
             ResultadoMovimientoReserva.Rechazado rechazado => EjecucionMid.Fallo(400, rechazado.Mensaje),
             _ => EjecucionMid.Fallo(400, "No se pudo registrar el movimiento.")
+        };
+    }
+
+    private async Task<EjecucionMid> FinalizarMasivoAsync(FiltroPeticion filtro, DatosSesion sesion, CancellationToken cancellationToken)
+    {
+        var resultado = await finalizarMasivo.EjecutarAsync(new SolicitudFinalizarMasivoReserva(
+            sesion.EmpresaMandanteId,
+            sesion.CampamentoId,
+            sesion.UsuarioId), cancellationToken);
+        return resultado switch
+        {
+            ResultadoFinalizarMasivoReserva.Finalizado => EjecucionMid.Ok(new { listo = true }),
+            ResultadoFinalizarMasivoReserva.Rechazado rechazado => EjecucionMid.Fallo(400, rechazado.Mensaje),
+            _ => EjecucionMid.Fallo(400, "No se pudo finalizar el movimiento masivo.")
         };
     }
 

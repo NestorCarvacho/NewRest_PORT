@@ -915,6 +915,7 @@ div.dt-container .dt-layout-table {
 }
 
 div.dt-container table.dataTable thead > tr > th {
+  text-align: left;
   padding: 0.8rem 0.9rem !important;
   background: #fff7f2 !important;
   color: var(--burgundy) !important;
@@ -1080,7 +1081,7 @@ div.dt-container table.dataTable tbody > tr > td {
   display: inline-block;
   min-width: 7.5rem;
   margin-right: 0.35rem;
-  color: var(--burgundy);
+  color: var(--caramel);
   font-weight: 650;
   font-size: 0.82rem;
 }

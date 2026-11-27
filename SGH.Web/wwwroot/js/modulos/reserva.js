@@ -1,7 +1,11 @@
 import { escaparHtml, renderizadorCeldaTruncada } from "../core/celda-truncada.js";
 
+
+
 export function crearReserva(dependencias) {
   var sincronizacionListado = null;
+
+    // instrucción: agregar finalizar masivo 
 
   function enlazarSincronizacionListado(deps) {
         sincronizacionListado = deps;
@@ -221,6 +225,7 @@ export function crearReserva(dependencias) {
         if (clave === "numero" || clave === "estado") return 3;
         if (clave === "llegada" || clave === "salida") return 4;
         if (clave === "checkIn" || clave === "checkOut") return 5;
+        if (clave === "finalizar") return 6;
         return 10000;
     }
 
@@ -325,9 +330,14 @@ export function crearReserva(dependencias) {
         return !!(fila && fila.estadoNumero === "A" && textoMovimiento(fila.checkIn) && !textoMovimiento(fila.checkOut));
     }
 
+    function elegibleFinalizarMasivo(fila) {
+        return !!(fila && fila.estadoNumero === "A" && textoMovimiento(fila.checkIn) && textoMovimiento(fila.checkOut));
+    }
+
     function tipoSeleccionFila(fila) {
         if (elegibleCheckInMasivo(fila)) return "I";
         if (elegibleCheckOutMasivo(fila)) return "O";
+        if (elegibleFinalizarMasivo(fila)) return "F";
         return null;
     }
 
@@ -378,17 +388,21 @@ export function crearReserva(dependencias) {
     function modoMasivoPorDefecto(api) {
         var hayCheckIn = false;
         var hayCheckOut = false;
+        var hayFinalizar = false;
         api.rows({ search: "applied" }).every(function () {
             var registro = registroDesdeMapeada(this.data());
             var tipo = tipoSeleccionFila(registro);
             if (tipo === "I") hayCheckIn = true;
             if (tipo === "O") hayCheckOut = true;
+            if (tipo === "F") hayFinalizar = true;
         });
-        if (hayCheckIn) return "I";
-        if (hayCheckOut) return "O";
+        if (hayCheckIn && !hayCheckOut) return "I";
+        if (!hayCheckIn && hayCheckOut) return "O";
+        if (hayFinalizar) return "F";
         return null;
     }
 
+    // agregar soporte para finalizar masivo en la selección masiva
     function pintarEncabezadoSeleccionMasiva(nodo, api) {
         var thead = api.table().header();
         if (!thead) return;
@@ -405,7 +419,7 @@ export function crearReserva(dependencias) {
         checkbox.type = "checkbox";
         checkbox.className = "seleccion-reserva seleccion-reserva-todo";
         checkbox.setAttribute("aria-label", "Seleccionar todas las reservas elegibles para check masivo");
-        checkbox.title = "Seleccionar todas las elegibles (check-in o check-out masivo)";
+        checkbox.title = "Seleccionar todas las elegibles (check-in, check-out o finalizar masivo)";
         checkbox.addEventListener("change", function () {
             if (!nodo._seleccionReserva) nodo._seleccionReserva = new Set();
             if (checkbox.checked) {
@@ -446,7 +460,6 @@ export function crearReserva(dependencias) {
         };
         nodo._actualizarEncabezadoSeleccionMasiva();
     }
-
     function pintarSeleccionMasiva(td, mapeada, celda) {
         td.replaceChildren();
         var fila = registroDesdeMapeada(mapeada, celda);

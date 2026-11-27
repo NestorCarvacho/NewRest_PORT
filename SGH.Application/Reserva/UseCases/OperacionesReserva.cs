@@ -333,3 +333,45 @@ public sealed class ReversarMovimientoReserva : IReversarMovimientoReserva
         return new ResultadoReversarMovimientoReserva.Reversado();
     }
 }
+
+//operacion finalizar reserva
+public sealed class FinalizarMasivoReserva : IFinalizarMasivoReserva
+{
+    private readonly IComandoReserva _comando;
+    private readonly IConsultaReserva _consulta;
+
+    public FinalizarMasivoReserva(IComandoReserva comando, IConsultaReserva consulta)
+    {
+        _comando = comando;
+        _consulta = consulta;
+    }
+
+    public async Task<ResultadoFinalizarMasivoReserva> EjecutarAsync(SolicitudFinalizarMasivoReserva solicitud, CancellationToken cancellationToken)
+    {
+        if (solicitud.UsuarioId <= 0)
+            return new ResultadoFinalizarMasivoReserva.Rechazado("La sesión no tiene un usuario.");
+
+        var alcance = AlcanceSesion.ValidarAlcance(solicitud.EmpresaMandanteId, solicitud.CampamentoId);
+        if (alcance is not null)
+            return new ResultadoFinalizarMasivoReserva.Rechazado(alcance);
+
+        var propia = await _consulta.ReservaEstaEnCampamentoAsync(solicitud.ReservaId, solicitud.CampamentoId, cancellationToken);
+        if (!propia)
+            return new ResultadoFinalizarMasivoReserva.Rechazado(ReglasReserva.ReservaAjena);
+
+        var filas = await _consulta.BuscarAsync(new FiltroReserva(
+            solicitud.CampamentoId, solicitud.ReservaId, 0, "0", 0, "0", null, null, null, null, null, null, null, 0, 0, "0"), cancellationToken);
+        var fila = filas.FirstOrDefault(f => f.Id == solicitud.ReservaId);
+        if (fila is null)
+            return new ResultadoFinalizarMasivoReserva.Rechazado(ReglasReserva.ReservaAjena);
+
+        var mensaje = ReglasReserva.ValidarFinalizarMasivo(
+            solicitud.ReservaId, fila.EstadoNumero, fila.CheckIn, fila.CheckOut);
+        if (mensaje is not null)
+            return new ResultadoFinalizarMasivoReserva.Rechazado(mensaje);
+
+        await _comando.FinalizarMasivoAsync(
+            solicitud.ReservaId, solicitud.CampamentoId, solicitud.UsuarioId, cancellationToken);
+        return new ResultadoFinalizarMasivoReserva.Finalizada();
+    }
+}

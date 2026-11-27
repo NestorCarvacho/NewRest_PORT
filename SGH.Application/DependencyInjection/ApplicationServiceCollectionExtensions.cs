@@ -52,6 +52,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddScoped<IGestionHabitaciones, GestionHabitaciones>();
         services.AddScoped<MidHabitaciones>();
         services.AddScoped<IServicioMenuPerfil, ServicioMenuPerfil>();
+        services.AddScoped<IFinalizarMasivoReserva, FinalizarMasivoReserva>();
         return services;
     }
 }

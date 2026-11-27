@@ -9,4 +9,6 @@ public interface IConsultaReserva
     Task<CatalogoReserva> ObtenerCatalogoAsync(int empresaMandanteId, int campamentoId, CancellationToken cancellationToken);
 
     Task<bool> ReservaEstaEnCampamentoAsync(int reservaId, int campamentoId, CancellationToken cancellationToken);
+
+    Task<bool> ReservaEstaEnCampamentoMasivoAsync(object reservaId, int campamentoId, CancellationToken cancellationToken);
 }

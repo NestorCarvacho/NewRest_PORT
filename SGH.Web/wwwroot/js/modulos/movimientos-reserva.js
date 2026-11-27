@@ -52,7 +52,14 @@ export function crearMovimientosReserva(dependencias) {
     }
 
     function crearBotonMovimiento(reservaId, operacion, texto) {
-        var boton = dependencias.boton(texto, "accion-fila accion-" + (operacion === "I" ? "checkin" : "checkout"), function () {
+        var boton = dependencias.boton(texto, "accion-fila accion-" + (
+            (operacion === "I")
+                ? "checkin"
+                : (operacion === "O")
+                    ? "checkout"
+                    : (operacion === "F")
+                        ? "finalizar"
+                        : "checkout"), function () {
             dependencias.abrirPanel(texto, dependencias.formulario([
                 dependencias.seccion("", [
                     dependencias.campo("fecha", "Fecha", "datetime-local", [], { requerido: true, valor: dependencias.momentoLocal(true) })
@@ -73,7 +80,9 @@ export function crearMovimientosReserva(dependencias) {
                         if (dependencias.cerrarPanel) dependencias.cerrarPanel();
                         dependencias.mostrarAviso(operacion === "I"
                             ? "Check In registrado correctamente."
-                            : "Check Out registrado correctamente.", "success");
+                            : (operacion === "O")
+                                ? "Check Out registrado correctamente."
+                                : "Finalizado correctamente.", "success");
                     });
                 });
             }));
@@ -89,7 +98,9 @@ export function crearMovimientosReserva(dependencias) {
         svg.setAttribute("focusable", "false");
         var partes = operacion === "I"
             ? [["path", "d", "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"], ["polyline", "points", "10 17 15 12 10 7"], ["path", "d", "M15 12H3"]]
-            : [["path", "d", "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"], ["polyline", "points", "16 17 21 12 16 7"], ["path", "d", "M21 12H9"]];
+            : (operacion === "O")
+                ? [["path", "d", "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"], ["polyline", "points", "16 17 21 12 16 7"], ["path", "d", "M21 12H9"]]
+                : [["path", "d", "M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"], ["polyline", "points", "8 12 12 16 16 12"], ["path", "d", "M12 8v8"]];
         partes.forEach(function (parte) {
             var elemento = document.createElementNS("http://www.w3.org/2000/svg", parte[0]);
             elemento.setAttribute(parte[1], parte[2]);
@@ -140,7 +151,12 @@ export function crearMovimientosReserva(dependencias) {
         if (modo === "O") {
             boton.textContent = "Check-out masivo";
             boton.dataset.operacionMasiva = "O";
-        } else {
+        } 
+        else if (modo === "F") {
+            boton.textContent = "Finalizar masivo";
+            boton.dataset.operacionMasiva = "F";
+        }
+        else {
             boton.textContent = "Check-in masivo";
             boton.dataset.operacionMasiva = "I";
         }
@@ -165,9 +181,11 @@ export function crearMovimientosReserva(dependencias) {
         if (typeof nodo._actualizarEncabezadoSeleccionMasiva === "function") nodo._actualizarEncabezadoSeleccionMasiva();
     }
 
+    // Función para manejar el movimiento masivo según el modo seleccionado
     function movimientoMasivo(nodo) {
         var modo = nodo._modoSeleccionMasiva;
         if (modo === "O") checkOutMasivo(nodo);
+        else if (modo === "F") finalizarMasivo(nodo);
         else checkInMasivo(nodo);
     }
 
@@ -243,12 +261,49 @@ export function crearMovimientosReserva(dependencias) {
         }));
     }
 
+    function finalizarMasivo(nodo) {
+        var esElegible = dependencias.elegibleFinalizarMasivo || function (fila) {
+            return fila && fila.estadoNumero === "A" && fila.checkIn && fila.checkOut;
+        };
+        var ids = idsSeleccionElegibles(nodo, esElegible);
+        if (!ids.length) {
+            dependencias.mostrarAviso("Seleccione reservas con check-in y check-out hechos", "warning");
+            return;
+        }
+        dependencias.abrirPanel("Finalizar masivo", dependencias.formulario([
+            dependencias.seccion("", [
+                dependencias.campo("fecha", "Fecha finalización", "datetime-local", [], {
+                    requerido: true,
+                    soloLectura: true,
+                    valor: dependencias.momentoLocal(true)
+                })
+            ])
+        ], "Registrar", true, function (datos) {
+            return dependencias.enviar("/Reserva/Mid/MidReservas.cs", {
+                opcion: "finalizarmasivo",
+                reservaIds: ids,
+                operacion: "F",
+                fecha: datos.fecha
+            }).then(function (resultado) {
+                var exitos = (resultado && resultado.exitos) ? resultado.exitos.length : 0;
+                var fallos = (resultado && resultado.fallos) ? resultado.fallos.length : 0;
+                var texto = "Finalización registrada en " + exitos + " reserva(s).";
+                if (fallos) texto += " Sin cambio en " + fallos + ".";
+                dependencias.mostrarAviso(texto, fallos ? "warning" : "success");
+                if (dependencias.cerrarPanel) dependencias.cerrarPanel();
+                limpiarSeleccionMasiva(nodo);
+                if (dependencias.cargar) return dependencias.cargar("reserva", { bloquearPantalla: false, avisarConteoFilas: false });
+            });
+        }));
+    }
+
     return {
         crearAcciones: crearAcciones,
         checkInMasivo: checkInMasivo,
         checkOutMasivo: checkOutMasivo,
         movimientoMasivo: movimientoMasivo,
         enlazarBotonMovimientoMasivo: enlazarBotonMovimientoMasivo,
-        actualizarBotonMovimientoMasivo: actualizarBotonMovimientoMasivo
+        actualizarBotonMovimientoMasivo: actualizarBotonMovimientoMasivo,
+        finalizarMasivo: finalizarMasivo
     };
 }

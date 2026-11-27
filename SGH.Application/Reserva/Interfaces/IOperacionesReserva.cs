@@ -41,3 +41,8 @@ public interface IReversarMovimientoReserva
 {
     Task<ResultadoReversarMovimientoReserva> EjecutarAsync(SolicitudReversarMovimientoReserva solicitud, CancellationToken cancellationToken);
 }
+
+public interface IFinalizarMasivoReserva
+{
+    Task<ResultadoFinalizarMasivoReserva> EjecutarAsync(SolicitudFinalizarMasivoReserva solicitud, CancellationToken cancellationToken);
+}
